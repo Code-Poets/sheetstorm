@@ -20,7 +20,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ix*6a2(5g7vd+6gsh=)csxlhm$qmplb%8%9lv=4ksbcjn1+lva'
+# Secret key is used for generating hashes, such as authentication tokens and secured cookies.
+# It should be located in your local_settings.py.
+#SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -78,6 +80,10 @@ DATABASES = {
         'ENGINE':           'django.db.backends.postgresql',
         'NAME':             'time_monkey',
         'ATOMIC_REQUESTS':  True,
+        # 'USER':     'postgres',
+        # 'PASSWORD': '',
+        # 'HOST':     '',
+        # 'PORT':     '',
     }
 }
 
