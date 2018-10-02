@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_countries',
     'users',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
