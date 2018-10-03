@@ -1,6 +1,18 @@
-Django>=2.1,<2.2
+certifi
+chardet
+defusedxml
+Django => 2.1, < 2.2
 django-countries
+django-allauth
+django-rest-auth
 djangorestframework
+idna
+oauthlib
 psycopg2
+python3-openid
 pytz
 PyYAML
+requests
+requests-oauthlib
+six
+urllib3
