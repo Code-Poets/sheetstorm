@@ -28,6 +28,8 @@ class CustomUserModelText:
 class CustomValidationErrorText:
     VALIDATION_ERROR_EMAIL_MESSAGE = 'The given email must be set'
     VALIDATION_ERROR_PASSWORD_MESSAGE = 'The given password must be set'
+    VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = ugettext_lazy("A user is already registered with this e-mail address.")
+    VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE = ugettext_lazy("The two password fields didn't match.")
 
 
 class CustomUserCountryText:
