@@ -1,0 +1,4 @@
+Django => 2.1, < 2.2
+djangorestframework
+psycopg2
+pytz
