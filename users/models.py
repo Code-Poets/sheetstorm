@@ -74,48 +74,46 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
 
     class UserType(ChoiceEnum):
-        EMPLOYEE = 'Employee'
-        MANAGER = 'Manager'
-        ADMIN = 'Admin'
+        EMPLOYEE = CustomUserUserTypeText.EMPLOYEE
+        MANAGER = CustomUserUserTypeText.MANAGER
+        ADMIN = CustomUserUserTypeText.ADMIN
 
     email = models.EmailField(
-        _('email address'),
+        CustomUserModelText.EMAIL_ADDRESS,
         max_length=constants.EMAIL_MAX_LENGTH,
         unique=True,
     )
     first_name = models.CharField(
-        _('first name'),
+        CustomUserModelText.FIRST_NAME,
         max_length=constants.FIRST_NAME_MAX_LENGTH,
         blank=True,
     )
     last_name = models.CharField(
-        _('last name'),
+        CustomUserModelText.LAST_NAME,
         max_length=constants.LAST_NAME_MAX_LENGTH,
         blank=True,
     )
     is_staff = models.BooleanField(
-        _('staff status'),
+        CustomUserModelText.IS_STAFF,
         default=False,
-        help_text=_('Designates whether the user can log into this admin '
-                    'site.'),
+        help_text=CustomUserModelText.STAFF_HELP_TEXT,
     )
     is_active = models.BooleanField(
-        _('active'),
+        CustomUserModelText.IS_ACTIVE,
         default=True,
-        help_text=_('Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.'),
+        help_text=CustomUserModelText.ACTIVE_HELP_TEXT,
     )
     date_joined = models.DateTimeField(
-        _('date joined'),
+        CustomUserModelText.DATE_JOINED,
         auto_now_add=True,
     )
     date_of_birth = models.DateField(
-        _('date of birth'),
+        CustomUserModelText.DATE_OF_BIRTH,
         blank=True,
         null=True,
     )
     updated_at = models.DateTimeField(
-        _('updated at'),
+        CustomUserModelText.UPDATED_AT,
         auto_now=True,
     )
     phone_number = models.CharField(
@@ -136,8 +134,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
 
     class Meta:
-        verbose_name = _('user')
-        verbose_name_plural = _('users')
+        verbose_name = CustomUserModelText.VERBOSE_NAME_USER
+        verbose_name_plural = CustomUserModelText.VERBOSE_NAME_PLURAL_USERS
         ordering = ('id',)
 
     def get_absolute_url(self):

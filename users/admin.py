@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import ugettext_lazy as _
-
+from users.common.strings import CustomUserAdminText
 from users.models import CustomUser
 from users.forms import CustomUserChangeForm
 from users.forms import CustomUserCreationForm
@@ -11,14 +10,11 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (
             None, {
-                'fields': (
-                    'email',
-                    'password',
-                )
+                'fields': ('email','password')
             }
         ),
         (
-            _('Personal info'), {
+            CustomUserAdminText.PERSONAL_INFO, {
                 'fields': (
                     'first_name',
                     'last_name',
@@ -29,14 +25,12 @@ class CustomUserAdmin(UserAdmin):
             }
         ),
         (
-            _('Status'), {
-                'fields': (
-                    'user_type',
-                )
+            CustomUserAdminText.STATUS, {
+                'fields': ('user_type',)
             }
         ),
         (
-            _('Permissions'), {
+            CustomUserAdminText.PERMISSIONS, {
                 'fields': (
                     'is_active',
                     'is_staff',
@@ -47,23 +41,19 @@ class CustomUserAdmin(UserAdmin):
             }
         ),
         (
-            _('Important dates'), {
-                'fields': (
-                    'last_login',
-                )
+            CustomUserAdminText.IMPORTANT_DATES, {
+                'fields': ('last_login',)
             }
         ),
     )
     add_fieldsets = (
         (
             None, {
-                'classes': (
-                    'wide',
-                ),
+                'classes': ('wide'),
                 'fields': (
                     'email',
                     'password1',
-                    'password2'
+                    'password2',
                 )
             }
         ),
