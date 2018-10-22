@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^managers/', include('managers.urls')),
     path('rest-auth/', include('rest_framework.urls')),
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
+    url(r'^', include('employees.urls')),
 ]
