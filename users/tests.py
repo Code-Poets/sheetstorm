@@ -1,15 +1,17 @@
-from django.test import TestCase
-from users.models import CustomUser
-from django.urls import reverse
-from rest_framework.test import APITestCase
-from rest_framework.test import APIClient
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from django.core.validators import MaxLengthValidator
+from django.test import TestCase
+from django.urls import reverse
+
+from rest_framework.test import APITestCase
+from rest_framework.test import APIClient
+
 from users.common.exceptions import CustomValidationError
-from users.common.strings import CustomValidationErrorText
 from users.common.strings import CustomUserModelText
+from users.common.strings import CustomValidationErrorText
 from users.common import constants
+from users.models import CustomUser
 
 
 class TestCustomUserLogin(TestCase):
@@ -19,6 +21,7 @@ class TestCustomUserLogin(TestCase):
             "testuserpasswd",
             False,
             False,
+            CustomUser.UserType.EMPLOYEE.name,
         )
 
     def test_user_should_login_correctly(self):
@@ -63,14 +66,26 @@ class TestCustomUserModel(TestCase):
             CustomValidationError,
             CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE,
         ):
-            CustomUser.objects._create_user(None,"testuserpasswd",False,False)
+            CustomUser.objects._create_user(
+                None,
+                "testuserpasswd",
+                False,
+                False,
+                CustomUser.UserType.EMPLOYEE.name,
+            )
 
     def test_user_should_hold_password(self):
         with self.assertRaisesRegexp(
             CustomValidationError,
             CustomValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE,
         ):
-            CustomUser.objects._create_user("testuser@example.com",None,False,False)
+            CustomUser.objects._create_user(
+                "testuser@example.com",
+                None,
+                False,
+                False,
+                CustomUser.UserType.EMPLOYEE.name,
+            )
 
     def test_user_should_not_hold_same_email_as_another_user(self):
         old_user = CustomUser.objects.create(
