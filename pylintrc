@@ -139,7 +139,27 @@ disable=print-statement,
         xreadlines-attribute,
         deprecated-sys-function,
         exception-escape,
-        comprehension-escape
+        comprehension-escape,
+        apply-builtin,
+        missing-docstring,
+        invalid-name,
+        bad-whitespace,
+        multiple-statements,
+        protected-access,
+        bad-continuation,
+        redefined-variable-type,
+        locally-disabled,
+        locally-enabled,
+        similarities,
+        design,
+        elif,
+        logging,
+        no-else-return,
+        len-as-condition,
+        unused-wildcard-import,
+        wildcard-import,
+        missing-final-newline,
+        parse-error
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -310,7 +330,7 @@ indent-after-paren=4
 indent-string='    '
 
 # Maximum number of characters on a single line.
-max-line-length=100
+max-line-length=120
 
 # Maximum number of lines in a module.
 max-module-lines=1000
