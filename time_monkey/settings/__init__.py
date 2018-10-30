@@ -7,7 +7,7 @@ try:
 except ImportError as exception:
     # This condition is not foolproof but should reduce the number of cases where we catch unrelated ImportErrors
     if 'local_settings' in str(exception):
-        raise ImportError("Failed to import 'local_settings' module. Use a production or development template to create one.")
+        raise ImportError("Failed to import 'local_settings' module. Use a production or development template to create one.")  # pylint: disable=line-too-long
     else:
         raise
 
