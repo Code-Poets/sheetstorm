@@ -1,0 +1,60 @@
+- model: users.customuser
+  pk: 1
+  fields:
+    #password: superuser
+    password: pbkdf2_sha256$120000$NIveKSKy7jH9$WOSXy2U+jkcBq002qTVJ16iLDsIo3tEaP7bI/0ENTK0=
+    last_login: 2018-11-08 10:39:29.156254+00:00
+    is_superuser: true
+    email: admin@example.com
+    first_name: ''
+    last_name: ''
+    is_staff: true
+    is_active: true
+    date_joined: 2018-10-25 12:15:14.341875+00:00
+    date_of_birth: null
+    updated_at: 2018-10-25 12:15:14.341903+00:00
+    phone_number: null
+    country: PL
+    user_type: ADMIN
+    groups: []
+    user_permissions: []
+- model: users.customuser
+  pk: 2
+  fields:
+    #password: passwduser
+    password: pbkdf2_sha256$120000$dEooFYtxPOlq$SJanEIVWkMpPptvId7e0fQjcUpQ9qXgj2RiJm7042d4=
+    last_login: 2018-11-08 10:40:25.453502+00:00
+    is_superuser: false
+    email: user1@example.com
+    first_name: "Mieczys\u0142aw"
+    last_name: Mietkowiak
+    is_staff: false
+    is_active: true
+    date_joined: 2018-10-25 12:15:44.751769+00:00
+    date_of_birth: 1962-10-10
+    updated_at: 2018-11-05 13:33:02.368463+00:00
+    phone_number: '123456789012345'
+    country: PL
+    user_type: EMPLOYEE
+    groups: []
+    user_permissions: []
+- model: users.customuser
+  pk: 3
+  fields:
+    #password: passwduser
+    password: pbkdf2_sha256$120000$E8IqYRSb0S9h$K72bVsHB7rhY+tXZq5bYBo2jbTHvtDrIr1FDd4i9YOk=
+    last_login: null
+    is_superuser: false
+    email: user2@example.com
+    first_name: Andromeda
+    last_name: Adamiak
+    is_staff: false
+    is_active: true
+    date_joined: 2018-10-25 12:16:11.765768+00:00
+    date_of_birth: null
+    updated_at: 2018-10-25 12:16:21.848048+00:00
+    phone_number: null
+    country: PL
+    user_type: EMPLOYEE
+    groups: []
+    user_permissions: []
