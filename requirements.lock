@@ -3,3 +3,4 @@ django-countries==5.3.2
 djangorestframework==3.8.2
 psycopg2==2.7.5
 pytz==2018.5
+PyYAML==3.13 

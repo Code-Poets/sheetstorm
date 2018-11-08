@@ -3,3 +3,4 @@ django-countries
 djangorestframework
 psycopg2
 pytz
+PyYAML
