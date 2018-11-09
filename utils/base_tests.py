@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.db.models.base import Model
+from rest_framework.serializers import BaseSerializer
 
 
 class BaseModelTestCase(TestCase):
@@ -145,3 +146,67 @@ class BaseModelTestCase(TestCase):
                     ValueError,
             ):
                 self.initiate_model(field, value)
+
+
+class BaseSerializerTestCase(TestCase):
+
+    serializer_class = None
+    required_input = {}             # dict containing fields and values for successful validation
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert issubclass(self.serializer_class, BaseSerializer)
+        assert isinstance(self.required_input, dict)
+
+    """
+    Create serializer with one field altered from required_input.
+    """
+    def initiate_serializer(self, field, value):
+        values = self.required_input.copy()
+        values[field] = value
+        return self.serializer_class(data=values)
+
+    """
+    Create serializer from required_input.
+    """
+    def default_serializer(self):
+        return self.serializer_class(data=self.required_input)
+
+    """
+    Private method containing base code for running serializer validation tests.
+    """
+    def _field_input_acceptance_test(self, field, value, is_valid):
+        serializer = self.initiate_serializer(field, value)
+        self.assertEqual(serializer.is_valid(), is_valid)
+
+    """
+    Test that putting specified value in specified field should result in successful serializer validation.
+    """
+    def field_should_accept_input(self, field, value):
+        self._field_input_acceptance_test(
+            field=field,
+            value=value,
+            is_valid=True
+        )
+
+    """
+    Test that putting value in specified field should not result in successful serializer validation.
+    """
+    def field_should_not_accept_input(self, field, value):
+        self._field_input_acceptance_test(
+            field=field,
+            value=value,
+            is_valid=False
+        )
+
+    """
+    Test that leaving specified field empty should result in successful serializer validation.
+    """
+    def field_should_accept_null(self, field):
+        self.field_should_accept_input(field, None)
+
+    """
+    Test that leaving specified field empty should not result in successful serializer validation.
+    """
+    def field_should_not_accept_null(self, field):
+        self.field_should_not_accept_input(field, None)
