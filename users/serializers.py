@@ -1,5 +1,5 @@
 from allauth.account import app_settings as allauth_settings
-from allauth.account.adapter import allauth_get_adapter
+from allauth.account.adapter import get_adapter as allauth_get_adapter
 from allauth.account.utils import setup_user_email
 from allauth.utils import email_address_exists
 
