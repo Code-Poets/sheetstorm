@@ -1,11 +1,9 @@
 from allauth.account import app_settings as allauth_settings
-from allauth.account.adapter import get_adapter
+from allauth.account.adapter import allauth_get_adapter
 from allauth.account.utils import setup_user_email
 from allauth.utils import email_address_exists
 
 from django_countries.serializers import CountryFieldMixin
-from django_countries.serializer_fields import CountryField
-from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
 from users.common.strings import CustomValidationErrorText
