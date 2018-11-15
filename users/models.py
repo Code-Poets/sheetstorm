@@ -25,6 +25,7 @@ class CustomUserManager(BaseUserManager):
         password,
         is_staff,
         is_superuser,
+        user_type,
     ):
         """
         Creates and saves a user with the given email and password.
@@ -46,6 +47,7 @@ class CustomUserManager(BaseUserManager):
             is_staff=is_staff,
             is_active=True,
             is_superuser=is_superuser,
+            user_type=user_type,
         )
         user.set_password(password)
         user.save()
@@ -62,6 +64,7 @@ class CustomUserManager(BaseUserManager):
             password,
             is_staff=True,
             is_superuser=True,
+            user_type=CustomUser.UserType.ADMIN.name,
         )
 
 
