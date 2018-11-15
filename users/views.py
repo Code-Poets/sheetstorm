@@ -42,6 +42,11 @@ def api_root(request, format=None):
             })
     else:
         return Response({
+                'registration': reverse(
+                    'rest_register',
+                    request=request,
+                    format=format,
+                ),
             })
 
 
