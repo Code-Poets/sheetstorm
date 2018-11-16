@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'allauth.socialaccount',
     'managers.apps.ManagersConfig',
+    'employees.apps.EmployeesConfig',
 ]
 
 MIDDLEWARE = [
