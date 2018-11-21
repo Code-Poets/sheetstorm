@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+</head>
+
+
+<h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
+</br>
+<div class="modal-dialog">
+    <form action="{% url 'admin-report-detail' pk=report.pk %}" method="POST">
+        {% csrf_token %}
+        {% render_form serializer template_pack='rest_framework/vertical' %}
+        <input type="submit" value="{{ UI_text.UPDATE_REPORT_BUTTON.value }}">
+        <input type="submit" name="discard" value="{{ UI_text.DISCARD_CHANGES_BUTTON.value }}">
+    </form>
+</div>
+{% endblock %}
