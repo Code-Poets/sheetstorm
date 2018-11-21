@@ -97,8 +97,9 @@ class ReportViewSetTests(TestCase):
             }
         )
         request.user = self.user
-        response = ReportViewSet.as_view({'post': 'create'})(request, pk=self.report.pk)
+        response = ReportViewSet.as_view({'post': 'create'})(request)
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(Report.objects.all().count(), 2)
 
     """
     -------------
@@ -125,21 +126,25 @@ class ReportViewSetTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_report_detail_view_should_update_report_on_put(self):
+        new_description = 'Some other description'
         request = APIRequestFactory().put(
             path=reverse('report-detail', args=(self.report.pk,)),
             data={
                 'date': datetime.datetime.now().date(),
-                'description': 'Some other description',
+                'description': new_description,
                 'project': self.project,
                 'work_hours': Decimal('8.00'),
             }
         )
         request.user = self.user
         response = ReportViewSet.as_view({'put': 'update'})(request, pk=self.report.pk)
+        current_description = Report.objects.get(pk=self.report.pk).description
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(current_description, new_description)
 
     def test_report_detail_view_should_delete_report_on_delete(self):
         request = APIRequestFactory().delete(path=reverse('report-detail', args=(self.report.pk,)))
         request.user = self.user
         response = ReportViewSet.as_view({'delete': 'destroy'})(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 204)
+        self.assertEqual(Report.objects.all().count(), 0)
