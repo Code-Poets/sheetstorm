@@ -14,6 +14,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
 from employees.forms import ProjectJoinForm
@@ -21,6 +22,7 @@ from employees.models import Report
 from employees.models import TaskActivityType
 from employees.serializers import ReportSerializer
 from managers.models import Project
+from users.models import CustomUser
 
 
 class ReportViewSet(viewsets.ModelViewSet):
@@ -170,4 +172,21 @@ class ReportDetail(APIView):
 def delete_report(_request: HttpRequest, pk: int) -> HttpResponseRedirectBase:
     report = get_object_or_404(Report, pk=pk)
     report.delete()
+
     return redirect("custom-report-list")
+
+
+class AuthorReportList(APIView):
+    renderer_classes = [renderers.TemplateHTMLRenderer]
+    template_name = "employees/author_report_list.html"
+    user_interface_text = AuthorReportListStrings
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self, pk):
+        return Report.objects.filter(author=pk).order_by("-date", "project__name")
+
+    def get(self, _request, pk):
+        user = get_object_or_404(CustomUser, pk=pk)
+        queryset = self.get_queryset(user.pk)
+        reports_dict = query_as_dict(queryset)
+        return Response({"user_name": user.email, "reports_dict": reports_dict, "UI_text": self.user_interface_text})
