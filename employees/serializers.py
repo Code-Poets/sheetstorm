@@ -53,3 +53,11 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
         if isinstance(self.instance, Report):
             data["work_hours"] = self.instance.work_hours_str
         return data
+
+
+class AdminReportSerializer(ReportSerializer):
+    editable = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Report
+        fields = ("url", "date", "project", "description", "work_hours", "creation_date", "last_update", "editable")
