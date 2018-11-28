@@ -204,6 +204,15 @@ class UserDetail(APIView):
         return redirect('custom-users-list')
 
 
+def delete_account(request, pk):
+    if str(request.user.pk) == pk:
+        user = get_object_or_404(CustomUser, pk=pk)
+        user.delete()
+        return redirect('logout')
+    else:
+        return redirect('home')
+
+
 def delete_user(request, pk):
     user = get_object_or_404(CustomUser, pk=pk)
     user.delete()

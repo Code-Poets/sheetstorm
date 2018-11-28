@@ -16,7 +16,7 @@
         </div>
 </br>
 </br>
-  <form action="{% url 'custom-user-delete' pk=user.pk %}" method="POST">
+  <form action="{% url 'custom-account-delete' pk=user.pk %}" method="POST">
       {% csrf_token %}
       <input type="submit" value="Delete account">
   </form>
