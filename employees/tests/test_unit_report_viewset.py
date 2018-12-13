@@ -46,7 +46,7 @@ class ReportViewSetTests(TestCase):
     REPORT LIST
     -----------
     """
-    def test_report_list_view_should_display_users_report_list(self):
+    def test_report_list_view_should_display_users_report_list_on_get(self):
         request = APIRequestFactory().get(path=reverse('report-list'))
         request.user = self.user
         response = ReportViewSet.as_view({'get': 'list'})(request)
@@ -60,7 +60,7 @@ class ReportViewSetTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_report_list_view_should_not_display_other_users_reports(self):
-        other_user=CustomUser(
+        other_user = CustomUser(
             email="otheruser@example.com",
             password='otheruserpasswd',
             first_name='Jane',
@@ -86,7 +86,7 @@ class ReportViewSetTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, other_report.description)
 
-    def test_that_report_list_view_should_add_new_report_on_post(self):
+    def test_report_list_view_should_add_new_report_on_post(self):
         request = APIRequestFactory().post(
             path=reverse('report-list'),
             data={
@@ -106,7 +106,7 @@ class ReportViewSetTests(TestCase):
     REPORT DETAIL
     -------------
     """
-    def test_report_detail_view_should_display_report_details(self):
+    def test_report_detail_view_should_display_report_details_on_get(self):
         request = APIRequestFactory().get(path=reverse('report-detail', args=(self.report.pk,)))
         request.user = self.user
         response = ReportViewSet.as_view({'get': 'retrieve'})(request, pk=self.report.pk)
@@ -119,7 +119,7 @@ class ReportViewSetTests(TestCase):
         response = ReportViewSet.as_view({'get': 'retrieve'})(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 403)
 
-    def test_report_detail_view_should_not_render_non_existing_report(self):
+    def test_report_detail_view_should_not_render_non_existing_report_on_get(self):
         request = APIRequestFactory().get(path=reverse('report-detail', args=(999,)))
         request.user = self.user
         response = ReportViewSet.as_view({'get': 'retrieve'})(request, pk=999)
