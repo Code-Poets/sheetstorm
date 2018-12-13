@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
+from freezegun import freeze_time
 from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
@@ -316,6 +317,17 @@ class ReportCustomListTests(TestCase):
         serializer = view._create_serializer()
         self.assertTrue(new_project in serializer.fields["project"].queryset)
         self.assertTrue(self.project not in serializer.fields["project"].queryset)
+
+    def test_custom_report_list_create_serializer_method_should_return_serializer_with_date_field_containing_current_date(
+        self
+    ):
+        request = APIRequestFactory().get(path=self.url)
+        request.user = self.user
+        view = ReportList()
+        view.request = request
+        with freeze_time("2010-01-21"):
+            serializer = view._create_serializer()
+            self.assertEqual(serializer.fields["date"].initial, "2010-01-21")
 
     def test_custom_report_list_view_should_add_user_to_project_selected_in_project_join_form_on_join(self):
         new_project = Project(name="New Project", start_date=datetime.datetime.now())
