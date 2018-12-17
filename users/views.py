@@ -106,11 +106,13 @@ class SignUp(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = 'signup.html'
 
-    def get(self, request):
+    @classmethod
+    def get(cls, request):
         serializer = CustomRegisterSerializer(context={'request': request})
         return Response({'serializer': serializer})
 
-    def post(self, request):
+    @classmethod
+    def post(cls, request):
         serializer = CustomRegisterSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -126,11 +128,13 @@ class UserCreate(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = 'user_create.html'
 
-    def get(self, request):
+    @classmethod
+    def get(cls, request):
         serializer = UserCreateSerializer(context={'request': request})
         return Response({'serializer': serializer})
 
-    def post(self, request):
+    @classmethod
+    def post(cls, request):
         serializer = UserCreateSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -151,7 +155,8 @@ class UserUpdate(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = 'user_update.html'
 
-    def get(self, request, pk):
+    @classmethod
+    def get(cls, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
         if request.user.user_type == CustomUser.UserType.ADMIN.name:
             serializer = UserDetailSerializer(user, context={'request': request})
@@ -159,7 +164,8 @@ class UserUpdate(APIView):
             serializer = UserUpdateSerializer(user, context={'request': request})
         return Response({'serializer': serializer, 'user': user})
 
-    def post(self, request, pk):
+    @classmethod
+    def post(cls, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
         if request.user.user_type == CustomUser.UserType.ADMIN.name:
             serializer = UserDetailSerializer(
@@ -187,12 +193,14 @@ class UserDetail(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = 'users_detail.html'
 
-    def get(self, request, pk):
+    @classmethod
+    def get(cls, request, pk):
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserDetailSerializer(user_detail, context={'request': request})
         return Response({'serializer': serializer, 'user_detail': user_detail})
 
-    def post(self, request, pk):
+    @classmethod
+    def post(cls, request, pk):
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserDetailSerializer(
             user_detail,
@@ -219,9 +227,12 @@ def delete_account(request, pk):
 
 
 def delete_user(request, pk):
-    user = get_object_or_404(CustomUser, pk=pk)
-    user.delete()
-    return redirect('custom-users-list')
+    if request.user.user_type == CustomUser.UserType.ADMIN.name:
+        user = get_object_or_404(CustomUser, pk=pk)
+        user.delete()
+        return redirect('custom-users-list')
+    else:
+        return redirect('home')
 
 
 class UserList(APIView):
@@ -232,11 +243,13 @@ class UserList(APIView):
         permissions.IsAuthenticated,
     )
 
-    def get_queryset(self):
+    @classmethod
+    def get_queryset(cls):
         return CustomUser.objects.order_by('id')
 
-    def get(self, request):
-        users_queryset = self.get_queryset()
+    @classmethod
+    def get(cls, request):
+        users_queryset = cls.get_queryset()
         users_serializer = UserListSerializer(context={'request': request})
         return Response({
             'serializer': users_serializer,
