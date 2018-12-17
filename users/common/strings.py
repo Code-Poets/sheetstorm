@@ -5,7 +5,9 @@ from users.common import constants
 
 
 class ConfirmationMessages:
-    SUCCESSFUL_UPDATE_USER_MESSAGE = ugettext_lazy("Account has been successfully updated!")
+    SUCCESSFUL_UPDATE_USER_MESSAGE = ugettext_lazy('Account has been successfully updated!')
+    SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy('Your password has been successfully updated!')
+    FAILED_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy('Please correct the error below.')
 
 
 class PermissionsMessage:

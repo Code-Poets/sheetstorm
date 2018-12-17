@@ -23,6 +23,7 @@ urlpatterns = format_suffix_patterns(
         url(r"^api/account/(?P<pk>[0-9]+)/$", user_account_detail, name="user-account-detail"),
         url(r"^$", views.index, name="home"),
         path("accounts/", include("django.contrib.auth.urls")),
+        url(r'^user/password/$', views.change_password, name='change_password'),
         url(r"^signup/$", views.SignUp.as_view(), name="signup"),
         url(r"^user/(?P<pk>[0-9]+)/$", views.UserUpdate.as_view(), name="custom-user-update"),
         url(r"^user/create/$", views.UserCreate.as_view(), name="custom-user-create"),

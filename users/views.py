@@ -2,7 +2,9 @@ from typing import Type
 from typing import Union
 
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirectBase
@@ -84,6 +86,23 @@ def index(request: HttpRequest) -> HttpResponse:
     request.session["num_visits"] = num_visits + 1
 
     return render(request, "home.html", context={"num_visits": num_visits})
+
+
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, ConfirmationMessages.SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE)
+            return redirect('change_password')
+        else:
+            messages.error(request, ConfirmationMessages.FAILED_USER_PASSWORD_CHANGE_MESSAGE)
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'change_password.html', {
+        'form': form
+    })
 
 
 class SignUp(APIView):
