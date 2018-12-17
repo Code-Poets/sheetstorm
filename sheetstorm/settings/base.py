@@ -33,28 +33,31 @@ ALLOWED_HOSTS = []  # type: ignore
 # Application definition
 
 INSTALLED_APPS = [
+    # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
     'django_countries',
+    'users',
+    # 3rd party
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'bootstrap_datepicker_plus',
     'crispy_forms',
-    'users',
     'markdown_deux',
+    'raven.contrib.django.raven_compat',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
     'rest_auth.registration',
-    'allauth.socialaccount',
+    # SheetStorm
     'managers.apps.ManagersConfig',
     'employees.apps.EmployeesConfig',
-    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE = [
@@ -256,7 +259,9 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 }
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
 SITE_ID = 1
 
