@@ -154,7 +154,7 @@ git clone https://github.com/Code-Poets/time-monkey.git
     pgc install pg10
     ```
 
-5.  Edit file located in *\init\pg_hba.conf*, add the following line to file:
+5.  Edit file located in *C:\bigsql\pg10\init\pg_hba.conf*, add the following line to file:
     ```
     local   all             postgres                                trust
     ```   
