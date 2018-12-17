@@ -7,7 +7,7 @@ printf "=============================== LINT ===============================\n"
 printf "\n"
 
 printf "========================= MYPY STATIC TYPE CHECKER =================\n"
-mypy --config-file=mypy.ini time_monkey/
+mypy --config-file=mypy.ini .
 printf "\n"
 
 printf "========================= UNIT TESTS WITH COVERAGE =================\n"
