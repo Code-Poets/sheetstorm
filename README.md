@@ -114,6 +114,10 @@ git clone https://github.com/Code-Poets/time-monkey.git
     ```
     Restart PostgreSQL:
     ```
+    brew services restart postgresql
+    ```
+    If server is unavailable, even though homebrew claims that service is running, try manual restart with:
+    ```
     pg_ctl -D /usr/local/var/postgres restart
     ```
 
