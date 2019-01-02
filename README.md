@@ -1,6 +1,11 @@
 # time-monkey
 Base application for management of employees working hours
 
+## Software requirements
+Python 3.7.0
+Django 2.1.1
+Django REST framework 3.8.2
+
 ## Environment set-up
 
 Clone following repository:
@@ -109,6 +114,10 @@ git clone https://github.com/Code-Poets/time-monkey.git
     ```
     Restart PostgreSQL:
     ```
+    brew services restart postgresql
+    ```
+    If server is unavailable, even though homebrew claims that service is running, try manual restart with:
+    ```
     pg_ctl -D /usr/local/var/postgres restart
     ```
 
@@ -154,7 +163,7 @@ git clone https://github.com/Code-Poets/time-monkey.git
     pgc install pg10
     ```
 
-5.  Edit file located in *\init\pg_hba.conf*, add the following line to file:
+5.  Edit file located in *C:\bigsql\pg10\init\pg_hba.conf*, add the following line to file:
     ```
     local   all             postgres                                trust
     ```   
