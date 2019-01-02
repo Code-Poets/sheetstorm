@@ -6,9 +6,11 @@ django-countries
 django-allauth
 django-rest-auth
 djangorestframework
+freezegun
 idna
 oauthlib
 psycopg2
+python-dateutil
 python3-openid
 pytz
 PyYAML
