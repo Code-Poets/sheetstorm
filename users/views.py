@@ -13,8 +13,8 @@ from django.shortcuts import render
 
 from users.common.fields import Action
 from users.models import CustomUser
-from users.permissions import IsAdminUser
-from users.permissions import IsOwnerOrAdmin
+from users.permissions import AuthenticatedAdmin
+from users.permissions import AuthenticatedAdminOrUser
 from users.serializers import CustomRegisterSerializer
 from users.serializers import UserCreateSerializer
 from users.serializers import UserDetailSerializer
@@ -60,7 +60,7 @@ def api_root(request, format=None):
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (AuthenticatedAdmin,)
 
     def get_serializer_class(self):
         if self.action == Action.LIST.value:
@@ -76,7 +76,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
-    permission_classes = (IsOwnerOrAdmin,)
+    permission_classes = (AuthenticatedAdminOrUser,)
 
     def get_serializer_class(self):
         if self.action == Action.RETRIEVE.value:
