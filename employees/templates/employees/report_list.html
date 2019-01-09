@@ -4,9 +4,20 @@
 {% load rest_framework %}
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript">
+        var join_discard_text = "{{ UI_text.JOIN_POPUP_NO.value }}";
+    </script>
+    <script src="{% static 'employees/scripts/join_popup_window.js' %}"></script>
+</head>
 
 <h1>{{ UI_text.PAGE_TITLE.value }}</h1>
+
+<input type="button" id="opener" value="{{ UI_text.JOIN_PROJECT_BUTTON.value }}"/>
 
 <div class="modal-dialog">
     <form action="{% url 'custom-report-list' %}" method="POST">
@@ -15,6 +26,15 @@
         <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
     </form>
 </div>
+
+<div id="dialog" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
+    <form action="{% url 'custom-report-list' %}" method="POST">
+        {% csrf_token %}
+        {{ project_form }}
+        <input type="submit" name="join" value="{{ UI_text.JOIN_POPUP_YES.value }}">
+    </form>
+</div>
+
 </br>
 <div class="container">
     <div class="table-responsive">
