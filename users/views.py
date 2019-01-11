@@ -114,11 +114,19 @@ class SignUp(APIView):
     @classmethod
     def post(cls, request):
         serializer = CustomRegisterSerializer(data=request.data)
-
         if not serializer.is_valid():
+            try:
+                serializer.errors['non_field_errors']
+            except:
+                return Response({
+                    'serializer': serializer,
+                    'errors': serializer.errors,
+                    'non_field_errors': None,
+                })
             return Response({
                 'serializer': serializer,
                 'errors': serializer.errors,
+                'non_field_errors': serializer.errors['non_field_errors'],
             })
         serializer.save(request)
         return redirect('login')
