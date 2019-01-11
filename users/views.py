@@ -6,12 +6,14 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 
 from users.common.fields import Action
+from users.common.strings import ConfirmationMessages
 from users.models import CustomUser
 from users.permissions import AuthenticatedAdmin
 from users.permissions import AuthenticatedAdminOrUser
@@ -194,6 +196,7 @@ class UserUpdate(APIView):
                 'errors': serializer.errors,
             })
         serializer.save()
+        messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
         return redirect('custom-user-update', pk=pk)
 
 
@@ -222,7 +225,8 @@ class UserDetail(APIView):
                 'errors': serializer.errors,
             })
         serializer.save()
-        return redirect('custom-users-list')
+        messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
+        return redirect('custom-users-detail', pk=pk)
 
 
 def delete_account(request, pk):

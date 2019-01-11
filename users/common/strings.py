@@ -3,6 +3,10 @@ from django.utils.translation import ugettext_lazy
 from users.common import constants
 
 
+class ConfirmationMessages:
+    SUCCESSFUL_UPDATE_USER_MESSAGE = ugettext_lazy('Account has been successfully updated!')
+
+
 class PermissionsMessage:
     NONE_ADMIN_USER = ugettext_lazy('You are not allowed to enter - for administration only.')
     NONE_ADMIN_OR_OWNER_USER = ugettext_lazy("It's none of your business.")

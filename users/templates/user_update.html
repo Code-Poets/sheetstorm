@@ -15,6 +15,16 @@
 
           <div class="panel-heading">
             <h1>Account details</h1>
+            <br>
+            {% if messages %}
+            <ul class="messages" style="list-style-type: none;">
+                {% for message in messages %}
+                <li><font color="green"><b>{{ message }}</b></font></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <br>
+
           </div>
             <form class="form-horizonal" action="{% url 'custom-user-update' pk=user.pk %}" method="POST">
               {% csrf_token %}
