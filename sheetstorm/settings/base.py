@@ -173,3 +173,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.AdminRenderer',
     )
 }
+
+COUNTRIES_FIRST = [
+    'PL',
+    'GB',
+    'DE',
+    'FR',
+    'US',
+]
