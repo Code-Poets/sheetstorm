@@ -3,28 +3,7 @@ from django.test import TestCase
 from django.db.models.base import Model
 from freezegun import freeze_time
 from rest_framework.serializers import BaseSerializer
-import math
 import datetime
-
-
-"""
-Generates number with one too many digits than specified, based on e mathematical constant.
-Example: digits=4 will return 135.91
-"""
-def generate_too_many_digits(digits):
-    assert isinstance(digits, int)
-    assert digits > 1
-    return round((math.e / 2 * 10 ** (digits - 2)), 2)
-
-
-"""
-Generates number with one too many decimal places than specified, based on e mathematical constant.
-Example: decimal_places=2 will return 1.359
-"""
-def generate_too_many_decimal_places(decimal_places):
-    assert isinstance(decimal_places, int)
-    assert decimal_places >= 0
-    return round((math.e / 2), decimal_places + 1)
 
 
 class BaseModelTestCase(TestCase):
