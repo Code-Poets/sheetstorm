@@ -1,20 +1,13 @@
 import datetime
-import math
-import decimal
+from decimal import Decimal
 
-from employees.serializers import ReportSerializer
 from employees.common.constants import ReportModelConstants
+from employees.serializers import ReportSerializer
 from managers.models import Project
 from users.models import CustomUser
 from utils.base_tests import BaseSerializerTestCase
-
-
-def generate_too_many_digits(digits):
-    return round((math.e / 2 * 10 ** (digits - 2)), 2)
-
-
-def generate_too_many_decimal_places(decimal_places):
-    return round((math.e / 2), decimal_places + 1)
+from utils.sample_data_generators import generate_decimal_with_decimal_places
+from utils.sample_data_generators import generate_decimal_with_digits
 
 
 class ReportSerializerTests(BaseSerializerTestCase):
@@ -26,25 +19,14 @@ class ReportSerializerTests(BaseSerializerTestCase):
         'description': 'Some description',
         'author': None,
         'project': None,
-        'work_hours': decimal.Decimal('8.00'),
+        'work_hours': Decimal('8.00'),
     }
 
-    work_hours_error_margin = decimal.Decimal(10 ** -ReportModelConstants.DECIMAL_PLACES.value)
     SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = 'This is a string'
-    DESCRIPTION_DATA_EXCEEDING_LIMIT = 'a' * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1)
-    WORK_HOURS_DATA_EXCEEDING_MAX_VALUE = ReportModelConstants.MAX_WORK_HOURS.value + work_hours_error_margin
-    WORK_HOURS_DATA_EXCEEDING_MIN_VALUE = ReportModelConstants.MIN_WORK_HOURS.value - work_hours_error_margin
-
-    WORK_HOURS_DATA_EXCEEDING_DECIMAL_MAX_VALUE = ReportModelConstants.MAX_WORK_HOURS.value - 1 + \
-                                                  ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + \
-                                                  work_hours_error_margin
-    WORK_HOURS_DATA_EXCEEDING_DIGITS_NUMBER = generate_too_many_digits(ReportModelConstants.MAX_DIGITS.value)
-    WORK_HOURS_DATA_EXCEEDING_DECIMAL_PLACES = generate_too_many_decimal_places(
-        ReportModelConstants.DECIMAL_PLACES.value)
 
     def setUp(self):
         author = CustomUser(
-            email="testuser@example.com",
+            email="testuser@codepoets.it",
             password='newuserpasswd',
             first_name='John',
             last_name='Doe',
@@ -70,7 +52,7 @@ class ReportSerializerTests(BaseSerializerTestCase):
         self.field_should_accept_input(field='description', value='Example description')
 
     def test_report_serializer_work_hours_field_should_accept_correct_value(self):
-        self.field_should_accept_input(field='work_hours', value=decimal.Decimal('8.00'))
+        self.field_should_accept_input(field='work_hours', value=Decimal('8.00'))
 
     """
     ---------------
@@ -89,7 +71,7 @@ class ReportSerializerTests(BaseSerializerTestCase):
     ----------------------
     """
     def test_report_serializer_description_field_should_not_accept_string_longer_than_set_limit(self):
-        self.field_should_not_accept_input(field='description', value=self.DESCRIPTION_DATA_EXCEEDING_LIMIT)
+        self.field_should_not_accept_input(field='description', value='a' * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1))
 
     def test_report_serializer_description_field_should_not_be_empty(self):
         self.field_should_not_accept_null(field='description')
@@ -100,19 +82,19 @@ class ReportSerializerTests(BaseSerializerTestCase):
     ---------------------
     """
     def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_digits_number(self):
-        self.field_should_not_accept_input(field='work_hours', value=self.WORK_HOURS_DATA_EXCEEDING_DIGITS_NUMBER)
+        self.field_should_not_accept_input(field='work_hours', value=generate_decimal_with_digits(digits=ReportModelConstants.MAX_DIGITS.value + 1))
 
     def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_decimal_places_number(self):
-        self.field_should_not_accept_input(field='work_hours', value=self.WORK_HOURS_DATA_EXCEEDING_DECIMAL_PLACES)
+        self.field_should_not_accept_input(field='work_hours', value=generate_decimal_with_decimal_places(decimal_places=ReportModelConstants.DECIMAL_PLACES.value + 1))
 
     def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input(field='work_hours', value=self.WORK_HOURS_DATA_EXCEEDING_MAX_VALUE)
+        self.field_should_not_accept_input(field='work_hours', value=ReportModelConstants.MAX_WORK_HOURS.value + Decimal('0.01'))
 
     def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_minimum(self):
-        self.field_should_not_accept_input(field='work_hours', value=self.WORK_HOURS_DATA_EXCEEDING_MIN_VALUE)
+        self.field_should_not_accept_input(field='work_hours', value=ReportModelConstants.MIN_WORK_HOURS.value - Decimal('0.01'))
 
     def test_report_serializer_work_hours_field_should_not_accept_decimal_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input(field='work_hours', value=self.WORK_HOURS_DATA_EXCEEDING_DECIMAL_MAX_VALUE)
+        self.field_should_not_accept_input(field='work_hours', value=ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + Decimal('0.01'))
 
     def test_report_serializer_work_hours_should_not_accept_non_numeric_value(self):
         self.field_should_not_accept_input(field='work_hours', value=self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
