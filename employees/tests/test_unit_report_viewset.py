@@ -315,6 +315,78 @@ class ReportListTests(TestCase):
         self.assertEqual(queryset[1], self.report)
         self.assertEqual(queryset[2], other_report_2)
 
+    def test_custom_report_list_add_project_method_should_register_current_user_as_project_member(self):
+        new_project = Project(
+            name="New Project",
+            start_date=datetime.datetime.now(),
+        )
+        new_project.full_clean()
+        new_project.save()
+        request = APIRequestFactory().get(path=self.url)
+        request.user = self.user
+        view = ReportList()
+        view.request = request
+        serializer = view._create_serializer()
+        view._add_project(serializer, new_project)
+        self.assertTrue(self.user in new_project.members.all())
+        self.assertEqual(serializer.fields['project'].initial, new_project)
+
+    def test_custom_report_list_create_serializer_method_should_return_serializer_with_project_field_options_containing_only_projects_to_which_current_user_belongs(self):
+        new_project = Project(
+            name="New Project",
+            start_date=datetime.datetime.now(),
+        )
+        new_project.full_clean()
+        new_project.save()
+        new_project.members.add(self.user)
+        new_project.full_clean()
+        new_project.save()
+        request = APIRequestFactory().get(path=self.url)
+        request.user = self.user
+        view = ReportList()
+        view.request = request
+        serializer = view._create_serializer()
+        self.assertTrue(new_project in serializer.fields['project'].queryset)
+        self.assertTrue(self.project not in serializer.fields['project'].queryset)
+
+    def test_custom_report_list_view_should_add_user_to_project_selected_in_project_join_form_on_join(self):
+        new_project = Project(
+            name="New Project",
+            start_date=datetime.datetime.now(),
+        )
+        new_project.full_clean()
+        new_project.save()
+        request = APIRequestFactory().post(
+            path=self.url,
+            data={
+                'projects': new_project.id,
+                'join': "join",
+            }
+        )
+        request.user = self.user
+        response = ReportList.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.user in new_project.members.all())
+        self.assertEqual(response.data['serializer'].fields['project'].initial, new_project)
+
+    def test_custom_report_list_view_should_not_add_user_to_project_selected_in_project_join_form_on_post(self):
+        new_project = Project(
+            name="New Project",
+            start_date=datetime.datetime.now(),
+        )
+        new_project.full_clean()
+        new_project.save()
+        request = APIRequestFactory().post(
+            path=self.url,
+            data={
+                'projects': new_project.id,
+            }
+        )
+        request.user = self.user
+        response = ReportList.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.user in new_project.members.all())
+
 
 class ReportDetailTests(TestCase):
     def setUp(self):
@@ -334,6 +406,7 @@ class ReportDetailTests(TestCase):
         )
         self.project.full_clean()
         self.project.save()
+        self.project.members.add(self.user)
 
         self.report = Report(
             date=datetime.datetime.now().date(),
@@ -416,6 +489,44 @@ class ReportDetailTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.data['errors'])
         self.assertNotEqual(new_description, self.report.description)
+
+    def test_custom_report_detail_view_should_not_update_report_if_author_is_not_a_member_of_selected_project(self):
+        other_project = Project(
+            name="Other Project",
+            start_date=datetime.datetime.now(),
+        )
+        other_project.full_clean()
+        other_project.save()
+        new_description = 'Some other description'
+        request = APIRequestFactory().post(
+            path=reverse('custom-report-detail', args=(self.report.pk,)),
+            data={
+                'date': datetime.datetime.now().date(),
+                'description': new_description,
+                'project': other_project,
+                'work_hours': Decimal('8.00'),
+            },
+        )
+        request.user = self.user
+        response = ReportDetail.as_view()(request, pk=self.report.pk)
+        self.report.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['errors']['project'][0].code, 'does_not_exist')
+        self.assertNotEqual(new_description, self.report.description)
+        self.assertNotEqual(other_project, self.report.project)
+
+    def test_custom_report_detail_view_project_field_should_not_display_projects_the_author_is_not_a_member_of(self):
+        other_project = Project(
+            name="Other Project",
+            start_date=datetime.datetime.now(),
+        )
+        other_project.full_clean()
+        other_project.save()
+        request = APIRequestFactory().get(path=reverse('custom-report-detail', args=(self.report.pk,)))
+        request.user = self.user
+        response = ReportDetail.as_view()(request, pk=self.report.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(other_project not in response.data['serializer']._fields['project'].queryset)
 
 
 class DeleteReportTests(TestCase):
