@@ -1,9 +1,9 @@
+import datetime
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.db.models.base import Model
 from freezegun import freeze_time
 from rest_framework.serializers import BaseSerializer
-import datetime
 
 
 class BaseModelTestCase(TestCase):
@@ -43,7 +43,7 @@ class BaseModelTestCase(TestCase):
             if error_class:
                 error = error_class
             if error_message:
-                with self.assertRaisesRegexp(
+                with self.assertRaisesRegex(
                         error,
                         error_message,
                 ):
@@ -139,7 +139,7 @@ class BaseModelTestCase(TestCase):
     """
     def key_should_not_accept_incorrect_input(self, field, value, error_message=None):
         if error_message:
-            with self.assertRaisesRegexp(
+            with self.assertRaisesRegex(
                     ValueError,
                     error_message,
             ):

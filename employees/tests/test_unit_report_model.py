@@ -46,14 +46,6 @@ class TestReportModel(BaseModelTestCase):
 
         self.REPORT_MODEL_DATA = self.required_input.copy()
 
-    """
-    @pytest.mark.parametrize(('test_date_input'), [
-    '2018-10-31',
-    '2018-10-01',
-    '2018-11-01',
-    '2018-11-30',
-    ])
-    """
     # PARAM
     def test_report_model_save_date_field_should_accept_correct_input(self):
         self.field_should_accept_input('date', datetime.datetime.now().date())

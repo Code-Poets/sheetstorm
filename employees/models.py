@@ -30,8 +30,7 @@ class Report(models.Model):
     work_hours = models.DecimalField(
         max_digits=ReportModelConstants.MAX_DIGITS.value,
         decimal_places=ReportModelConstants.DECIMAL_PLACES.value,
-        validators=
-        [
+        validators=[
             MinValueValidator(ReportModelConstants.MIN_WORK_HOURS.value),
             MaxValueValidator(ReportModelConstants.MAX_WORK_HOURS.value),
             MaxDecimalValueValidator(ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value),
