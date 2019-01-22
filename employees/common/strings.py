@@ -53,3 +53,15 @@ class TaskActivitiesStrings(Enum):
     TRAINING = ugettext_lazy("Training")
     MENTORSHIP = ugettext_lazy("Mentorship")
     GRAPHIC_DESIGN = ugettext_lazy("Graphic design")
+
+
+class AuthorReportListStrings(NotCallableMixin, Enum):
+    PAGE_TITLE = ugettext_lazy(": Reports")
+    DATE_COLUMN_HEADER = ugettext_lazy("Date")
+    PROJECT_COLUMN_HEADER = ugettext_lazy("Project")
+    WORK_HOURS_COLUMN_HEADER = ugettext_lazy("Work hours")
+    DESCRIPTION_COLUMN_HEADER = ugettext_lazy("Description")
+    CREATION_DATE_COLUMN_HEADER = ugettext_lazy("Created")
+    LAST_UPDATE_COLUMN_HEADER = ugettext_lazy("Last update")
+    EDITED_COLUMN_HEADER = ugettext_lazy("Edited")
+    NO_REPORTS_MESSAGE = ugettext_lazy("This employee has no reports to display.")
