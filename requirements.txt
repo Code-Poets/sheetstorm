@@ -10,6 +10,9 @@ freezegun
 idna
 oauthlib
 psycopg2
+pytest
+pytest-cov
+pytest-django
 python-dateutil
 python3-openid
 pytz
