@@ -1,0 +1,62 @@
+- model: employees.report
+  pk: 1
+  fields: {date: 2019-01-13, description: "Some report\r\ncontaining multiple lines\r\
+      \nin description.", creation_date: !!timestamp '2019-01-14 10:21:00.191406+00:00',
+    last_update: !!timestamp '2019-01-14 10:21:00.191432+00:00', author: 2, project: 2,
+    work_hours: '8.00', editable: true}
+- model: employees.report
+  pk: 2
+  fields: {date: 2019-01-14, description: Some report, creation_date: !!timestamp '2019-01-14
+      10:21:20.936423+00:00', last_update: !!timestamp '2019-01-14 10:21:59.931531+00:00',
+    author: 2, project: 2, work_hours: '4.00', editable: true}
+- model: employees.report
+  pk: 3
+  fields: {date: 2019-01-14, description: Some report on the same day as other., creation_date: !!timestamp '2019-01-14
+      10:21:51.612143+00:00', last_update: !!timestamp '2019-01-14 10:41:03.177329+00:00',
+    author: 2, project: 1, work_hours: '4.00', editable: true}
+- model: employees.report
+  pk: 4
+  fields: {date: 2019-01-14, description: Some report, creation_date: !!timestamp '2019-01-14
+      10:24:41.328051+00:00', last_update: !!timestamp '2019-01-14 10:24:41.328074+00:00',
+    author: 3, project: 2, work_hours: '6.00', editable: true}
+- model: employees.report
+  pk: 5
+  fields: {date: 2019-01-13, description: Some report containing hours with fraction,
+    creation_date: !!timestamp '2019-01-14 10:25:29.610331+00:00', last_update: !!timestamp '2019-01-14
+      10:25:29.610354+00:00', author: 3, project: 3, work_hours: '8.30', editable: true}
+- model: employees.report
+  pk: 6
+  fields: {date: 2019-01-13, description: "Some report containing:\r\n- multiple lines\
+      \ in description\r\n- time with fraction", creation_date: !!timestamp '2019-01-14
+      10:27:28.905176+00:00', last_update: !!timestamp '2019-01-14 10:27:28.905199+00:00',
+    author: 4, project: 2, work_hours: '7.59', editable: true}
+- model: employees.report
+  pk: 7
+  fields: {date: 2019-01-14, description: Some report, creation_date: !!timestamp '2019-01-14
+      10:27:50.287324+00:00', last_update: !!timestamp '2019-01-14 10:38:31.086140+00:00',
+    author: 4, project: 2, work_hours: '2.00', editable: true}
+- model: employees.report
+  pk: 8
+  fields: {date: 2019-01-14, description: Some report containing time with fraction.,
+    creation_date: !!timestamp '2019-01-14 10:29:05.896158+00:00', last_update: !!timestamp '2019-01-14
+      10:29:05.896181+00:00', author: 5, project: 1, work_hours: '7.01', editable: true}
+- model: employees.report
+  pk: 9
+  fields: {date: 2019-01-13, description: Some report, creation_date: !!timestamp '2019-01-14
+      10:29:24.237593+00:00', last_update: !!timestamp '2019-01-14 10:29:24.237615+00:00',
+    author: 5, project: 3, work_hours: '8.00', editable: true}
+- model: employees.report
+  pk: 10
+  fields: {date: 2019-01-14, description: Some report on the same day as other, creation_date: !!timestamp '2019-01-14
+      10:39:15.431063+00:00', last_update: !!timestamp '2019-01-14 10:39:15.431085+00:00',
+    author: 4, project: 1, work_hours: '2.00', editable: true}
+- model: employees.report
+  pk: 11
+  fields: {date: 2019-01-14, description: Some report on the same day as other two,
+    creation_date: !!timestamp '2019-01-14 10:39:56.822838+00:00', last_update: !!timestamp '2019-01-14
+      10:39:56.822863+00:00', author: 4, project: 3, work_hours: '4.00', editable: true}
+- model: employees.report
+  pk: 12
+  fields: {date: 2019-01-14, description: Some report, creation_date: !!timestamp '2019-01-14
+      10:46:47.257869+00:00', last_update: !!timestamp '2019-01-14 10:46:47.257892+00:00',
+    author: 6, project: 3, work_hours: '8.00', editable: true}

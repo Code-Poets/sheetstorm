@@ -159,8 +159,11 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SITE_ID = 1
+
 FIXTURE_DIRS = [
-  'users/fixtures/',
+    'users/fixtures/',
+    'managers/fixtures/',
+    'employees/fixtures/',
 ]
 
 REST_FRAMEWORK = {
