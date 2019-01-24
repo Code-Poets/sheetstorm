@@ -162,3 +162,8 @@ class TestReportModel(BaseModelTestCase):
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_decimal_value_exceeding_set_maximum(self):
         self.field_should_not_accept_input('work_hours', ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + Decimal('0.01'))
+
+    # PARAM
+    def test_report_model_work_hours_str_property_should_return_work_hours_field_value_as_string_with_colon_instead_of_dot(self):
+        report = self.initiate_model('work_hours', Decimal('8.00'))
+        self.assertEqual(report.work_hours_str, '8:00')
