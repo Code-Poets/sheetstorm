@@ -7,9 +7,11 @@ from freezegun import freeze_time
 from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
+from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportListStrings
 from employees.models import Report
 from employees.models import TaskActivityType
+from employees.views import ProjectReportList
 from employees.views import ReportDetail
 from employees.views import ReportList
 from employees.views import ReportViewSet
@@ -521,3 +523,135 @@ class DeleteReportTests(TestCase):
         response = delete_report(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Report.objects.all().count(), 0)
+
+
+class ProjectReportListTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser(
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
+        )
+        self.user.full_clean()
+        self.user.save()
+
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
+        self.project.full_clean()
+        self.project.save()
+        self.project.members.add(self.user)
+
+        self.report = Report(
+            date=datetime.datetime.now().date(),
+            description="Some description",
+            author=self.user,
+            project=self.project,
+            work_hours=Decimal("8.00"),
+        )
+        self.report.full_clean()
+        self.report.save()
+
+    def test_project_report_list_view_should_display_projects_report_list_on_get(self):
+        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
+        request.user = self.user
+        response = ProjectReportList.as_view()(request, pk=self.project.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.report.description)
+        dictionary = response.data["reports_dict"]
+        reports = list(dictionary.values())[0]
+        self.assertTrue(self.report in reports)
+
+    def test_project_report_list_view_should_not_be_accessible_for_unauthenticated_user(self):
+        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
+        request.user = AnonymousUser()
+        response = ProjectReportList.as_view()(request, pk=self.project.pk)
+        self.assertEqual(response.status_code, 403)
+
+    def test_project_report_list_view_should_not_display_non_existing_projects_reports(self):
+        request = APIRequestFactory().get(path=reverse("project-report-list", args=(999,)))
+        request.user = self.user
+        response = ProjectReportList.as_view()(request, 999)
+        self.assertEqual(response.status_code, 404)
+
+    def test_project_report_list_view_should_not_display_other_projects_reports(self):
+        other_project = Project(name="Other Project", start_date=datetime.datetime.now())
+        other_project.full_clean()
+        other_project.save()
+
+        other_report = Report(
+            date=datetime.datetime.now().date(),
+            description="Some other description",
+            author=self.user,
+            project=other_project,
+            work_hours=Decimal("8.00"),
+        )
+        other_report.full_clean()
+        other_report.save()
+
+        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
+        request.user = self.user
+        response = ProjectReportList.as_view()(request, pk=self.project.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, other_report.description)
+
+    def test_project_report_list_view_should_display_message_if_project_has_no_reports(self):
+        other_project = Project(name="Other Project", start_date=datetime.datetime.now())
+        other_project.full_clean()
+        other_project.save()
+        request = APIRequestFactory().get(path=reverse("project-report-list", args=(other_project.pk,)))
+        request.user = self.user
+        response = ProjectReportList.as_view()(request, pk=other_project.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, ProjectReportListStrings.NO_REPORTS_MESSAGE.value)
+
+    def test_project_report_list_get_queryset_method_should_return_queryset_containing_reports_for_project(self):
+        other_user = CustomUser(
+            email="otheruser@codepoets.it", password="otheruserpasswd", first_name="Jane", last_name="Doe", country="PL"
+        )
+        other_user.full_clean()
+        other_user.save()
+        self.project.members.add(other_user)
+
+        other_project = Project(name="Project test", start_date=datetime.datetime.now())
+        other_project.full_clean()
+        other_project.save()
+        other_project.members.add(self.user)
+        other_project.members.add(other_user)
+
+        other_project_report = Report(
+            date=datetime.datetime.now().date(),
+            description="Some other description",
+            author=self.user,
+            project=other_project,
+            work_hours=Decimal("8.00"),
+        )
+        other_project_report.full_clean()
+        other_project_report.save()
+
+        other_report_1 = Report(
+            date=datetime.datetime.now().date(),
+            description="Some other description",
+            author=other_user,
+            project=self.project,
+            work_hours=Decimal("8.00"),
+        )
+        other_report_1.full_clean()
+        other_report_1.save()
+
+        other_report_2 = Report(
+            date=datetime.date(2001, 1, 1),
+            description="Some other description",
+            author=self.user,
+            project=self.project,
+            work_hours=Decimal("8.00"),
+        )
+        other_report_2.full_clean()
+        other_report_2.save()
+
+        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
+        request.user = self.user
+        view = ProjectReportList()
+        view.request = request
+        queryset = view.get_queryset(self.project.pk)
+        self.assertIsNotNone(queryset)
+        self.assertEqual(len(queryset), 3)
+        self.assertFalse(other_project_report in queryset)
+        self.assertEqual(queryset[0], other_report_1)
+        self.assertEqual(queryset[1], self.report)
