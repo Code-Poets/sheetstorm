@@ -26,7 +26,7 @@
 {% url 'custom-report-list' as custom_report_list_url %}
 <div class="wrapper">
     <!-- Sidebar Holder -->
-    <nav id="sidebar">
+    <nav id="sidebar" class="hidden-print">
         <div class="sidebar-header">
             <img src="{% static 'users/images/white/iko-33.png' %}"/>
             <p><strong>{{ user.user_type }}</strong></p>
@@ -116,7 +116,7 @@
         </div>
     </nav>
     <div id="content">
-        <nav style="text-align: left">
+        <nav style="text-align: left" class="hidden-print">
             <button class="btn" id="sidebarCollapse"><i class="toggle glyphicon glyphicon-chevron-left"></i></button>
         </nav>
     {% endif %}
