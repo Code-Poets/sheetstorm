@@ -50,10 +50,25 @@ $(function () {
           {
             text: "Yes",
             click: function () {
-              window.location.href = "{% url 'custom-user-delete' pk=user_detail.pk %}";              }
+              $('#dialog_info').dialog('open');
+              $(this).dialog('close');
+            }
           }
         ]
     }).prev().find(".ui-dialog-titlebar-close").hide ();
+
+     $("#dialog_info").dialog ({
+         modal: true,
+         autoOpen: false,
+         buttons : [
+           {
+             text: "OK",
+             click: function () {
+               $(this).dialog('close');
+             }
+           },
+         ]
+     }).prev().find(".ui-dialog-titlebar-close").hide ();
 
     $("#opener_user_account").click(function () {
         $('#dialog_user_account').dialog('open');
