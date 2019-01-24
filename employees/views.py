@@ -21,6 +21,7 @@ from rest_framework.views import APIView
 
 from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
+from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
 from employees.forms import AdminReportForm
@@ -220,3 +221,22 @@ class AdminReportView(UpdateView):
         self.object.editable = True
         self.object.save()
         return super().form_valid(form)
+
+
+class ProjectReportList(APIView):
+    renderer_classes = [renderers.TemplateHTMLRenderer]
+    template_name = "employees/project_report_list.html"
+    user_interface_text = ProjectReportListStrings
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @classmethod
+    def get_queryset(cls, pk: int) -> QuerySet:
+        return Report.objects.filter(project=pk).order_by("-date")
+
+    def get(self, _request: HttpRequest, pk: int) -> Response:
+        project = get_object_or_404(Project, pk=pk)
+        queryset = self.get_queryset(project.pk)
+        reports_dict = query_as_dict(queryset)
+        return Response(
+            {"project_name": project.name, "reports_dict": reports_dict, "UI_text": self.user_interface_text}
+        )
