@@ -74,3 +74,17 @@ class AdminReportDetailStrings(NotCallableMixin, Enum):
     PAGE_TITLE = ugettext_lazy("Report - ")
     UPDATE_REPORT_BUTTON = ugettext_lazy("Update")
     DISCARD_CHANGES_BUTTON = ugettext_lazy("Discard")
+
+
+class ProjectReportListStrings(NotCallableMixin, Enum):
+    PAGE_TITLE = ugettext_lazy(": Reports")
+    DATE_COLUMN_HEADER = ugettext_lazy("Date")
+    PROJECT_COLUMN_HEADER = ugettext_lazy("Project")
+    AUTHOR_COLUMN_HEADER = ugettext_lazy("Author")
+    WORK_HOURS_COLUMN_HEADER = ugettext_lazy("Work hours")
+    DESCRIPTION_COLUMN_HEADER = ugettext_lazy("Description")
+    CREATION_DATE_COLUMN_HEADER = ugettext_lazy("Created")
+    LAST_UPDATE_COLUMN_HEADER = ugettext_lazy("Last update")
+    EDITED_COLUMN_HEADER = ugettext_lazy("Edited")
+    TASK_ACTIVITY_HEADER = ugettext_lazy("Task Activity")
+    NO_REPORTS_MESSAGE = ugettext_lazy("There are no reports for this project to display.")
