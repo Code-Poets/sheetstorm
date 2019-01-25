@@ -13,7 +13,7 @@ class AuthenticatedAdmin(permissions.BasePermission):
         return  is_user_authenticated and is_user_admin
 
 
-class AuthenticatedAdminOrUser(permissions.BasePermission):
+class AuthenticatedAdminOrOwnerUser(permissions.BasePermission):
     message = PermissionsMessage.NONE_ADMIN_OR_OWNER_USER
 
     def has_permission(self, request, view):

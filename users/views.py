@@ -16,7 +16,7 @@ from users.common.fields import Action
 from users.common.strings import ConfirmationMessages
 from users.models import CustomUser
 from users.permissions import AuthenticatedAdmin
-from users.permissions import AuthenticatedAdminOrUser
+from users.permissions import AuthenticatedAdminOrOwnerUser
 from users.serializers import CustomRegisterSerializer
 from users.serializers import UserCreateSerializer
 from users.serializers import UserDetailSerializer
@@ -78,7 +78,7 @@ class UsersViewSet(viewsets.ModelViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
-    permission_classes = (AuthenticatedAdminOrUser,)
+    permission_classes = (AuthenticatedAdminOrOwnerUser,)
 
     def get_serializer_class(self):
         if self.action == Action.RETRIEVE.value:
