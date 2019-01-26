@@ -19,7 +19,7 @@ from users.permissions import AuthenticatedAdmin
 from users.permissions import AuthenticatedAdminOrOwnerUser
 from users.serializers import CustomRegisterSerializer
 from users.serializers import UserCreateSerializer
-from users.serializers import UserDetailSerializer
+from users.serializers import UserUpdateByAdminSerializer
 from users.serializers import UserListSerializer
 from users.serializers import UserSerializer
 from users.serializers import UserUpdateSerializer
@@ -68,7 +68,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         if self.action == Action.LIST.value:
             return UserListSerializer
         if self.action == Action.RETRIEVE.value:
-            return UserDetailSerializer
+            return UserUpdateByAdminSerializer
         if self.action == Action.CREATE.value:
             return UserCreateSerializer
         if self.action == Action.UPDATE.value:
@@ -82,7 +82,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == Action.RETRIEVE.value:
-            return UserDetailSerializer
+            return UserUpdateByAdminSerializer
         if self.action == Action.UPDATE.value:
             return UserUpdateSerializer
         return UserSerializer
@@ -169,7 +169,7 @@ class UserUpdate(APIView):
     def get(cls, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
         if request.user.user_type == CustomUser.UserType.ADMIN.name:
-            serializer = UserDetailSerializer(user, context={'request': request})
+            serializer = UserUpdateByAdminSerializer(user, context={'request': request})
         else:
             serializer = UserUpdateSerializer(user, context={'request': request})
         return Response({'serializer': serializer, 'user': user})
@@ -178,7 +178,7 @@ class UserUpdate(APIView):
     def post(cls, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
         if request.user.user_type == CustomUser.UserType.ADMIN.name:
-            serializer = UserDetailSerializer(
+            serializer = UserUpdateByAdminSerializer(
                 user,
                 data=request.data,
                 context={'request': request},
@@ -200,20 +200,20 @@ class UserUpdate(APIView):
         return redirect('custom-user-update', pk=pk)
 
 
-class UserDetail(APIView):
+class UserUpdateByAdmin(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = 'users_detail.html'
 
     @classmethod
     def get(cls, request, pk):
         user_detail = get_object_or_404(CustomUser, pk=pk)
-        serializer = UserDetailSerializer(user_detail, context={'request': request})
+        serializer = UserUpdateByAdminSerializer(user_detail, context={'request': request})
         return Response({'serializer': serializer, 'user_detail': user_detail})
 
     @classmethod
     def post(cls, request, pk):
         user_detail = get_object_or_404(CustomUser, pk=pk)
-        serializer = UserDetailSerializer(
+        serializer = UserUpdateByAdminSerializer(
             user_detail,
             data=request.data,
             context={'request': request},
@@ -226,7 +226,7 @@ class UserDetail(APIView):
             })
         serializer.save()
         messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
-        return redirect('custom-users-detail', pk=pk)
+        return redirect('custom-user-update-by-admin', pk=pk)
 
 
 class UserList(APIView):

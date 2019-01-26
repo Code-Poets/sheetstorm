@@ -39,7 +39,7 @@ class UserListTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
-class UserDetailTests(TestCase):
+class UserUpdateByAdminTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
             email="testuser@codepoets.it",
@@ -51,25 +51,25 @@ class UserDetailTests(TestCase):
         self.user.full_clean()
         self.user.save()
 
-    def test_user_detail_view_should_display_user_details_on_get(self):
-        request = APIRequestFactory().get(path=reverse('custom-users-detail', args=(self.user.pk,)))
+    def test_user_update_by_admin_view_should_display_user_details_on_get(self):
+        request = APIRequestFactory().get(path=reverse('custom-user-update-by-admin', args=(self.user.pk,)))
         request.user = self.user
-        response = views.UserDetail.as_view()(request, pk=self.user.pk)
+        response = views.UserUpdateByAdmin.as_view()(request, pk=self.user.pk)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.user.email)
         self.assertEqual(response.data['serializer'].instance, self.user)
 
-    def test_user_detail_view_should_not_render_non_existing_user(self):
+    def test_user_update_by_admin_view_should_not_render_non_existing_user(self):
         not_existing_pk = 1000
-        request = APIRequestFactory().get(path=reverse('custom-users-detail', args=(not_existing_pk,)))
+        request = APIRequestFactory().get(path=reverse('custom-user-update-by-admin', args=(not_existing_pk,)))
         request.user = self.user
-        response = views.UserDetail.as_view()(request, pk=not_existing_pk)
+        response = views.UserUpdateByAdmin.as_view()(request, pk=not_existing_pk)
         self.assertEqual(response.status_code, 404)
 
     def test_user_update_by_admin_view_should_update_user_on_post(self):
         old_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH)
         response = self.client.post(
-            path=reverse('custom-users-detail', args=(self.user.pk,)),
+            path=reverse('custom-user-update-by-admin', args=(self.user.pk,)),
             data={
                 'email': self.user.email,
                 'phone_number': old_phone_number,
@@ -79,17 +79,17 @@ class UserDetailTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(old_phone_number, self.user.phone_number)
 
-    def test_user_detail_view_should_not_update_user_on_post_if_form_is_invalid(self):
+    def test_user_update_by_admin_view_should_not_update_user_on_post_if_form_is_invalid(self):
         phone_number_before_request = self.user.phone_number
         invalid_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH - 1)
         request = APIRequestFactory().post(
-            path=reverse('custom-users-detail', args=(self.user.pk,)),
+            path=reverse('custom-user-update-by-admin', args=(self.user.pk,)),
             data={
                 'email': self.user.email,
                 'phone_number': invalid_phone_number,
             },
         )
-        response = views.UserDetail.as_view()(request, pk=self.user.pk)
+        response = views.UserUpdateByAdmin.as_view()(request, pk=self.user.pk)
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(phone_number_before_request, self.user.phone_number)

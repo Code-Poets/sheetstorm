@@ -54,7 +54,7 @@ class UserListSerializer(UserSerializer):
         )
 
 
-class UserDetailSerializer(UserSerializer):
+class UserUpdateByAdminSerializer(UserSerializer):
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
 
     class Meta:
