@@ -166,29 +166,29 @@ class UserUpdate(APIView):
     template_name = 'user_update.html'
 
     @classmethod
+    def return_suitable_serializer_for_get_method(cls, request, user):
+        if request.user.user_type == CustomUser.UserType.ADMIN.name:
+            return UserUpdateByAdminSerializer(user, context={'request': request},)
+        else:
+            return UserUpdateSerializer(user, context={'request': request},)
+
+    @classmethod
+    def return_suitable_serializer_for_post_method(cls, request, user):
+        if request.user.user_type == CustomUser.UserType.ADMIN.name:
+            return UserUpdateByAdminSerializer(user, data=request.data, context={'request': request},)
+        else:
+            return UserUpdateSerializer(user, data=request.data, context={'request': request},)
+
+    @classmethod
     def get(cls, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
-        if request.user.user_type == CustomUser.UserType.ADMIN.name:
-            serializer = UserUpdateByAdminSerializer(user, context={'request': request})
-        else:
-            serializer = UserUpdateSerializer(user, context={'request': request})
+        serializer = cls.return_suitable_serializer_for_get_method(request, user)
         return Response({'serializer': serializer, 'user': user})
 
     @classmethod
     def post(cls, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
-        if request.user.user_type == CustomUser.UserType.ADMIN.name:
-            serializer = UserUpdateByAdminSerializer(
-                user,
-                data=request.data,
-                context={'request': request},
-            )
-        else:
-            serializer = UserUpdateSerializer(
-                user,
-                data=request.data,
-                context={'request': request},
-            )
+        serializer = cls.return_suitable_serializer_for_post_method(request, user)
         if not serializer.is_valid():
             return Response({
                 'serializer': serializer,
