@@ -40,7 +40,7 @@ class Project(models.Model):
         return self.name
 
     def get_report_ordered(self) -> QuerySet:
-        return self.report_set.select_related("task_activities").order_by("-date", "project__name")
+        return self.report_set.select_related("task_activities").order_by("author__email", "-date", "-creation_date")
 
 
 @receiver(m2m_changed, sender=Project.managers.through)
