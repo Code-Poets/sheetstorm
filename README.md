@@ -1,4 +1,4 @@
-# time-monkey
+# sheetstorm
 Base application for management of employees working hours
 
 ## Software requirements
@@ -10,7 +10,7 @@ Django REST framework 3.8.2
 
 Clone following repository:
 ```
-git clone https://github.com/Code-Poets/time-monkey.git
+git clone https://github.com/Code-Poets/sheetstorm.git
 ```
 
 
@@ -36,12 +36,12 @@ git clone https://github.com/Code-Poets/time-monkey.git
 
 4. Create new virtualenv and install all dependencies:
     ```
-    virtualenv ~/.virtualenvs/time-monkey --python python3.7
-    . ~/.virtualenvs/time-monkey/bin/activate
+    virtualenv ~/.virtualenvs/sheetstorm --python python3.7
+    . ~/.virtualenvs/sheetstorm/bin/activate
     pip install pip --upgrade
     
-    # Dependencies for running time-monkey application
-    pip install --requirement time-monkey/requirements.lock
+    # Dependencies for running sheetstorm application
+    pip install --requirement sheetstorm/requirements.lock
     ```
 
 5. Install PostgreSQL:
@@ -93,12 +93,12 @@ git clone https://github.com/Code-Poets/time-monkey.git
 
 6. Create new virtualenv and install all dependencies:
     ```
-    virtualenv ~/.virtualenvs/time-monkey --python python3.7
-    source ~/.virtualenvs/time-monkey/bin/activate
+    virtualenv ~/.virtualenvs/sheetstorm --python python3.7
+    source ~/.virtualenvs/sheetstorm/bin/activate
     pip install pip --upgrade
 
-    # Dependencies for running time-monkey application
-    pip install --requirement time-monkey/requirements.lock
+    # Dependencies for running sheetstorm application
+    pip install --requirement sheetstorm/requirements.lock
     ```
 
 7. Install PostgreSQL with `brew install postgresql`.
@@ -143,12 +143,12 @@ git clone https://github.com/Code-Poets/time-monkey.git
     
 3. Create new virtualenv and install all dependencies:
     ```
-    virtualenv ~/.virtualenvs/time-monkey --python python3.7
+    virtualenv ~/.virtualenvs/sheetstorm --python python3.7
     <your venv location>\Scripts\activate
     pip install pip --upgrade
 
-    # Dependencies for running time-monkey application
-    pip install --requirement time-monkey/requirements.lock
+    # Dependencies for running sheetstorm application
+    pip install --requirement sheetstorm/requirements.lock
     ```
 
 4. Install BigSQL PGC and PostgreSQL 10.5: 
@@ -181,13 +181,13 @@ git clone https://github.com/Code-Poets/time-monkey.git
 
 ### Local configuration
 
-Create your local configuration in */time-monkey/settings/local_settings.py*
+Create your local configuration in */sheetstorm/settings/local_settings.py*
 ```
 from .development import *
 ```
 If your database configuration differs from the defaults, you may need to tweak the values below and add them to your local_settings.py too:
 ```
-DATABASES['NAME'] = 'time-monkey'
+DATABASES['NAME'] = 'sheetstorm'
 DATABASES['USER'] = 'postgres'
 DATABASES['PASSWORD'] = ''
 ```

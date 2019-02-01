@@ -1,6 +1,6 @@
 #!/bin/bash
 
-printf "[FLAKE8: time-monkey]\n"
+printf "[FLAKE8: sheetstorm]\n"
 flake8                                                                                                      \
     --exclude=time_monkey/settings/,manage.py,employees/migrations,users/migrations,managers/migrations,    \
     --jobs=4                                                                                                \
@@ -8,7 +8,7 @@ flake8                                                                          
     --ignore=E124,E126,E128,E131,E156,E201,E221,E222,E241,E265,E271,E272,E701,F405
 printf "\n"
 
-printf "[PYLINT: time-monkey]\n"
+printf "[PYLINT: sheetstorm]\n"
 # Find all subdirectories of our python apps and use xargs to pass them as arguments to pylint
 
 find . -type d | xargs pylint --rcfile=pylintrc
