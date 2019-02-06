@@ -2,6 +2,14 @@
 {% load i18n %}
 {% block content %}
 {% load rest_framework %}
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script type="text/javascript" src="{% static 'users/scripts/delete_account_popup.js' %}"></script>
+</head>
 
       <div class="modal-dialog" style="margin-bottom:0">
 
@@ -11,14 +19,26 @@
             <form class="form-horizonal" action="{% url 'custom-user-update' pk=user.pk %}" method="POST">
               {% csrf_token %}
               {% render_form serializer template_pack='rest_framework/vertical' %}
-              <input type="submit" value="Update">
+              <button type="submit" class="btn btn-success">
+                <span class="glyphicon glyphicon-ok"></span> Update
+              </button>
+              <a href="{% url 'custom-user-update' pk=user.pk %}" class="btn btn btn-default">
+                <span class="glyphicon glyphicon-repeat"></span> Discard
+              </a>
             </form>
         </div>
 </br>
 </br>
-  <form action="{% url 'custom-account-delete' pk=user.pk %}" method="POST">
-      {% csrf_token %}
-      <input type="submit" value="Delete account">
-  </form>
+
+  <button type="button" id="opener_own_account" class="btn btn btn-danger">
+    <span class="glyphicon glyphicon-remove"></span> Delete
+  </button>
+
+  <div id="dialog_own_account" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
+    {% trans 'Do you want to delete' %} <br/>
+    {% trans 'your own account' %}?
+  </div>
+
+  <br><br>
 
 {% endblock %}
