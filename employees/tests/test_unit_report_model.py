@@ -6,8 +6,8 @@ from employees.models import Report
 from managers.models import Project
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase
-from utils.base_tests import generate_too_many_decimal_places
-from utils.base_tests import generate_too_many_digits
+from utils.sample_data_generators import generate_decimal_with_decimal_places
+from utils.sample_data_generators import generate_decimal_with_digits
 
 
 class TestReportModel(BaseModelTestCase):
@@ -21,22 +21,11 @@ class TestReportModel(BaseModelTestCase):
         'work_hours': Decimal('8.00'),
     }
 
-    WORK_HOURS_ERROR_MARGIN = Decimal(10 ** -ReportModelConstants.DECIMAL_PLACES.value)
     SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = 'This is a string'
-    DESCRIPTION_DATA_EXCEEDING_LIMIT = 'a' * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1)
-    WORK_HOURS_DATA_EXCEEDING_MAX_VALUE = ReportModelConstants.MAX_WORK_HOURS.value + WORK_HOURS_ERROR_MARGIN
-    WORK_HOURS_DATA_EXCEEDING_MIN_VALUE = ReportModelConstants.MIN_WORK_HOURS.value - WORK_HOURS_ERROR_MARGIN
-
-    WORK_HOURS_DATA_EXCEEDING_DECIMAL_MAX_VALUE = ReportModelConstants.MAX_WORK_HOURS.value - 1 + \
-                                                    ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + \
-                                                    WORK_HOURS_ERROR_MARGIN
-    WORK_HOURS_DATA_EXCEEDING_DIGITS_NUMBER = generate_too_many_digits(ReportModelConstants.MAX_DIGITS.value)
-    WORK_HOURS_DATA_EXCEEDING_DECIMAL_PLACES = generate_too_many_decimal_places(
-                                                    ReportModelConstants.DECIMAL_PLACES.value)
 
     def setUp(self):
         self.author = CustomUser(
-            email="testuser@example.com",
+            email="testuser@codepoets.it",
             password='newuserpasswd',
             first_name='John',
             last_name='Doe',
@@ -57,14 +46,6 @@ class TestReportModel(BaseModelTestCase):
 
         self.REPORT_MODEL_DATA = self.required_input.copy()
 
-    """
-    @pytest.mark.parametrize(('test_date_input'), [
-    '2018-10-31',
-    '2018-10-01',
-    '2018-11-01',
-    '2018-11-30',
-    ])
-    """
     # PARAM
     def test_report_model_save_date_field_should_accept_correct_input(self):
         self.field_should_accept_input('date', datetime.datetime.now().date())
@@ -120,7 +101,7 @@ class TestReportModel(BaseModelTestCase):
 
     # PARAM
     def test_report_model_description_field_should_not_accept_string_longer_than_set_limit(self):
-        self.field_should_not_accept_input('description', self.DESCRIPTION_DATA_EXCEEDING_LIMIT)
+        self.field_should_not_accept_input('description', 'a' * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1))
 
     def test_report_model_description_field_should_not_be_empty(self):
         self.field_should_not_accept_null('description')
@@ -164,20 +145,20 @@ class TestReportModel(BaseModelTestCase):
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_digits_number(self):
-        self.field_should_not_accept_input('work_hours', self.WORK_HOURS_DATA_EXCEEDING_DIGITS_NUMBER)
+        self.field_should_not_accept_input('work_hours', generate_decimal_with_digits(digits=ReportModelConstants.MAX_DIGITS.value + 1))
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_decimal_places_number(self):
-        self.field_should_not_accept_input('work_hours', self.WORK_HOURS_DATA_EXCEEDING_DECIMAL_PLACES)
+        self.field_should_not_accept_input('work_hours', generate_decimal_with_decimal_places(decimal_places=ReportModelConstants.DECIMAL_PLACES.value + 1))
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input('work_hours', self.WORK_HOURS_DATA_EXCEEDING_MAX_VALUE)
+        self.field_should_not_accept_input('work_hours', ReportModelConstants.MAX_WORK_HOURS.value + Decimal('0.01'))
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_minimum(self):
-        self.field_should_not_accept_input('work_hours', self.WORK_HOURS_DATA_EXCEEDING_MIN_VALUE)
+        self.field_should_not_accept_input('work_hours', ReportModelConstants.MIN_WORK_HOURS.value - Decimal('0.01'))
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_decimal_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input('work_hours', self.WORK_HOURS_DATA_EXCEEDING_DECIMAL_MAX_VALUE)
+        self.field_should_not_accept_input('work_hours', ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + Decimal('0.01'))

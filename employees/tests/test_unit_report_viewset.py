@@ -15,7 +15,7 @@ from users.models import CustomUser
 class ReportViewSetTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
-            email="testuser@example.com",
+            email="testuser@codepoets.it",
             password='newuserpasswd',
             first_name='John',
             last_name='Doe',
@@ -61,7 +61,7 @@ class ReportViewSetTests(TestCase):
 
     def test_report_list_view_should_not_display_other_users_reports(self):
         other_user = CustomUser(
-            email="otheruser@example.com",
+            email="otheruser@codepoets.it",
             password='otheruserpasswd',
             first_name='Jane',
             last_name='Doe',
