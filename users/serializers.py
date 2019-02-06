@@ -27,7 +27,15 @@ class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
             except CustomUser.DoesNotExist:
                 return email
             raise serializers.ValidationError(
-                CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
+                CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN)
+        else:
+            if self.instance is not None and email != instance_old_email:
+                try:
+                    CustomUser.objects.get(email=email)
+                except CustomUser.DoesNotExist:
+                    return email
+                raise serializers.ValidationError(
+                    CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
         return email
 
 
@@ -47,6 +55,8 @@ class UserListSerializer(UserSerializer):
 
 
 class UserDetailSerializer(UserSerializer):
+    email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
+
     class Meta:
         model = CustomUser
         fields = (
