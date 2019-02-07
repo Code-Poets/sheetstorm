@@ -122,6 +122,26 @@ class SignUp(APIView):
         return redirect('login')
 
 
+class UserCreate(APIView):
+    renderer_classes = [renderers.TemplateHTMLRenderer]
+    template_name = 'user_create.html'
+
+    def get(self, request):
+        serializer = CustomRegisterSerializer(context={'request': request})
+        return Response({'serializer': serializer})
+
+    def post(self, request):
+        serializer = CustomRegisterSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response({
+                'serializer': serializer,
+                'errors': serializer.errors,
+            })
+        serializer.save(request)
+        return redirect('custom-users-list')
+
+
 class UserUpdate(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = 'user_update.html'

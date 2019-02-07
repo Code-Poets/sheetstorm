@@ -3,7 +3,13 @@
 {% block content %}
 {% load rest_framework %}
 
-    <h1>Employees</h1>
+<h1>
+  &nbsp; Employees list &nbsp;
+  <a href="{% url 'custom-user-create' %}" class="btn btn-default btn-sm">
+    <span class="glyphicon glyphicon-plus"></span>
+  </a>
+</h1>
+<br>
 
 <ul>
   <div class="container">
@@ -38,16 +44,14 @@
             {% endfor %}
           </td>
           <td class=Invisible align="center">
-            <form action="{% url 'custom-user-detail' pk=user.id %}" method="GET">
-                {% csrf_token %}
-              <input type="submit" value="Edit account">
-            </form>
+            <a href="{% url 'custom-users-detail' pk=user.id %}" class="btn btn-info">
+              <span class="glyphicon glyphicon-pencil"></span>
+            </a>
           </td>
           <td class=Invisible align="center">
-            <form action="{% url 'custom-user-detail' pk=user.id %}" method="GET">
-                {% csrf_token %}
-              <input type="submit" value="See reports">
-            </form>
+            <a href="{% url 'custom-users-detail' pk=user.id %}" class="btn btn-warning">
+              <span class="glyphicon glyphicon-list-alt"></span>
+            </a>
           </td>
         </tr>
           {% endfor %}
