@@ -89,13 +89,7 @@ class UserCreateSerializer(UserSerializer):
             'email',
             'first_name',
             'last_name',
-            'date_of_birth',
-            'phone_number',
-            'country',
             'user_type',
-            'is_staff',
-            'is_superuser',
-            'is_active',
         )
 
 

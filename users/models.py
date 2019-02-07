@@ -123,7 +123,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         blank=True,
         null=True,
     )
-    country = CountryField()
+    country = CountryField(blank=True)
     user_type = models.CharField(
         max_length=constants.USER_TYPE_MAX_LENGTH,
         choices=UserType.choices(),
