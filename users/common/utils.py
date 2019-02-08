@@ -1,3 +1,6 @@
+import random
+import string
+
 from rest_framework import serializers
 
 from users.common import constants
