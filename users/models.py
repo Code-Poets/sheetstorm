@@ -12,6 +12,7 @@ from users.common.fields import ChoiceEnum
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomUserUserTypeText
 from users.common.strings import CustomValidationErrorText
+from users.common.utils import custom_validate_email_function
 from users.common.validators import PhoneRegexValidator
 
 
@@ -30,11 +31,15 @@ class CustomUserManager(BaseUserManager):
         Creates and saves a user with the given email and password.
         Returns created user.
         """
-        if not email:
+
+        if email is None:
             raise CustomValidationError(
                 CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE,
                 ErrorCode.CREATE_USER_EMAIL_MISSING,
             )
+        else:
+            custom_validate_email_function(self, email)
+
         if not password:
             raise CustomValidationError(
                 CustomValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE,
@@ -138,6 +143,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = CustomUserModelText.VERBOSE_NAME_USER
         verbose_name_plural = CustomUserModelText.VERBOSE_NAME_PLURAL_USERS
         ordering = ('id',)
+
+    def clean(self):
+        custom_validate_email_function(self, self.email)
 
     def get_absolute_url(self):
         """

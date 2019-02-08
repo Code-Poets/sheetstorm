@@ -1,5 +1,7 @@
 import enum
 
+DEFAULT_COUNTRY_CODE = 'PL'
+
 VALID_EMAIL_DOMAIN_LIST = ["codepoets.it", ]
 
 EMAIL_MAX_LENGTH = 255

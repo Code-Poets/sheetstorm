@@ -30,7 +30,6 @@ class CustomUserModelText:
 class CustomValidationErrorText:
     VALIDATION_ERROR_EMAIL_MESSAGE = 'The given email must be set'
     VALIDATION_ERROR_PASSWORD_MESSAGE = 'The given password must be set'
-    VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN = ugettext_lazy("Please enter an e-mail address with a valid domain (codepoets.it)")
     VALIDATION_ERROR_EMAIL_MALFORMED_FIRST_PART = "Invalid first part of email - you cannot use '' or ' ' signs"
     VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE = 'The given email must contain one "@" sign'
     VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN = "Please enter an e-mail address with a valid domain (" + ', '.join(constants.VALID_EMAIL_DOMAIN_LIST) + ")"
