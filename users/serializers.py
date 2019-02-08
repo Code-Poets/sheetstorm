@@ -7,6 +7,7 @@ from django_countries.serializers import CountryFieldMixin
 
 from rest_framework import serializers
 from users.common.strings import CustomValidationErrorText
+from users.common.utils import custom_validate_email_function
 from users.models import CustomUser
 
 
@@ -14,6 +15,20 @@ class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = '__all__'
+
+    def validate_email(self, email):
+        if self.instance is not None:
+            instance_old_email = self.instance.email
+        email = allauth_get_adapter().clean_email(email)
+        custom_validate_email_function(self, email)
+        if self.instance is not None and email != instance_old_email:
+            try:
+                CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
+                return email
+            raise serializers.ValidationError(
+                CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
+        return email
 
 
 class UserListSerializer(UserSerializer):
@@ -101,6 +116,7 @@ class CustomRegisterSerializer(serializers.Serializer):
 
     def validate_email(self, email):
         email = allauth_get_adapter().clean_email(email)
+        custom_validate_email_function(self, email)
         if allauth_settings.UNIQUE_EMAIL:
             if email and email_address_exists(email):
                 raise serializers.ValidationError(

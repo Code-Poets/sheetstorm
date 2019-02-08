@@ -5,7 +5,7 @@
     password: pbkdf2_sha256$120000$NIveKSKy7jH9$WOSXy2U+jkcBq002qTVJ16iLDsIo3tEaP7bI/0ENTK0=
     last_login: 2018-11-08 10:39:29.156254+00:00
     is_superuser: true
-    email: admin@example.com
+    email: admin@codepoets.it
     first_name: ''
     last_name: ''
     is_staff: true
@@ -25,7 +25,7 @@
     password: pbkdf2_sha256$120000$dEooFYtxPOlq$SJanEIVWkMpPptvId7e0fQjcUpQ9qXgj2RiJm7042d4=
     last_login: 2018-11-08 10:40:25.453502+00:00
     is_superuser: false
-    email: user1@example.com
+    email: user1@codepoets.it
     first_name: "Mieczys\u0142aw"
     last_name: Mietkowiak
     is_staff: false
@@ -45,7 +45,7 @@
     password: pbkdf2_sha256$120000$E8IqYRSb0S9h$K72bVsHB7rhY+tXZq5bYBo2jbTHvtDrIr1FDd4i9YOk=
     last_login: null
     is_superuser: false
-    email: user2@example.com
+    email: user2@codepoets.it
     first_name: Andromeda
     last_name: Adamiak
     is_staff: false
