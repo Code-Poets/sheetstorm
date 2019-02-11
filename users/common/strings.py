@@ -3,6 +3,11 @@ from django.utils.translation import ugettext_lazy
 from users.common import constants
 
 
+class PermissionsMessage:
+    NONE_ADMIN_USER = ugettext_lazy('You are not allowed to enter - for administration only.')
+    NONE_ADMIN_OR_OWNER_USER = ugettext_lazy("It's none of your business.")
+
+
 class CustomUserAdminText:
     PERSONAL_INFO = ugettext_lazy('Personal info')
     STATUS = ugettext_lazy('Status')
