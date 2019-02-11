@@ -9,57 +9,6 @@ from users.common import constants
 from users.models import CustomUser
 
 
-class TestCustomUserLogin(TestCase):
-    def setUp(self):
-        CustomUser.objects._create_user(
-            "testuser@codepoets.it",
-            "testuserpasswd",
-            False,
-            False,
-            CustomUser.UserType.EMPLOYEE.name,
-        )
-
-    def test_user_should_login_correctly(self):
-        self.assertTrue(
-            self.client.login(
-                email="testuser@codepoets.it",
-                password="testuserpasswd",
-            )
-        )
-
-    def test_user_should_not_login_correctly_with_wrong_email(self):
-        self.assertFalse(
-            self.client.login(
-                email="wrongtestuser@codepoets.it",
-                password="testuserpasswd",
-            )
-        )
-
-    def test_user_should_not_login_correctly_with_wrong_password(self):
-        self.assertFalse(
-            self.client.login(
-                email="testuser@codepoets.it",
-                password="wrongtestuserpasswd",
-            )
-        )
-
-    def test_user_should_not_login_correctly_with_no_email(self):
-        self.assertFalse(
-            self.client.login(
-                email=None,
-                password="wrongtestuserpasswd",
-            )
-        )
-
-    def test_user_should_not_login_correctly_with_no_password(self):
-        self.assertFalse(
-            self.client.login(
-                email="testuser@codepoets.it",
-                password=None,
-            )
-        )
-
-
 class TestCustomUserModel(TestCase):
     def test_user_should_hold_email_address(self):
         with self.assertRaisesRegex(
@@ -98,7 +47,7 @@ class TestCustomUserModel(TestCase):
         )
         with self.assertRaisesRegex(
             ValidationError,
-            "User with this Email address already exists.",
+            CustomValidationErrorText.VALIDATION_ERROR_EMAIL_EXISTING_MESSAGE,
         ):
             new_user.full_clean()
 
