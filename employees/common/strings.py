@@ -5,7 +5,9 @@ from django.utils.translation import ugettext_lazy
 from utils.decorators import notCallable
 
 
-MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE = ugettext_lazy('Ensure this value is less than or equal to ')
+MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE = ugettext_lazy('Minutes cannot be greater than 59.')
+MAX_HOURS_VALUE_VALIDATOR_MESSAGE = ugettext_lazy('This value cannot be greater than 24:00.')
+MIN_HOURS_VALUE_VALIDATOR_MESSAGE = ugettext_lazy('This value must be greater than 0.')
 
 
 @notCallable

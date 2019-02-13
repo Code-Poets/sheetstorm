@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
 from employees.common.constants import ReportModelConstants
+from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
+from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.validators import MaxDecimalValueValidator
 from employees.models import Report
 from managers.models import Project
@@ -15,6 +17,8 @@ class HoursField(serializers.DecimalField):
             decimal_places=ReportModelConstants.DECIMAL_PLACES.value,
             validators=[MaxDecimalValueValidator(ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value)],
             **kwargs)
+        self.validators[1].message = MAX_HOURS_VALUE_VALIDATOR_MESSAGE
+        self.validators[2].message = MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 
     def to_internal_value(self, data):
         if isinstance(data, str) and ':' in data:
