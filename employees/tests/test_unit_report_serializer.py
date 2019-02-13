@@ -134,6 +134,93 @@ class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
         self.assertEqual(data["work_hours"], "8:00")
 
 
+class AdminReportSerializerTests(DataSetUpToTests):
+    serializer_class = AdminReportSerializer
+
+    def test_report_serializer_creation_date_field_should_ignore_input_on_model_update(self):
+        timestamp = datetime.datetime(2001, 1, 1, 0, 0, 0, 0)
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("8.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("admin-report-detail", args=(report.pk,)))
+        serializer = AdminReportSerializer(
+            instance=report,
+            context={"request": request},
+            data={
+                "date": self.required_input["date"],
+                "description": self.required_input["description"],
+                "author": self.required_input["author"],
+                "project": self.required_input["project"],
+                "work_hours": self.required_input["work_hours"],
+                "creation_date": timestamp,
+            },
+        )
+        self.assertTrue(serializer.is_valid())
+        serializer.save()
+        self.assertFalse(serializer.instance.creation_date is timestamp)
+
+    def test_report_serializer_last_update_field_should_ignore_input_on_model_update(self):
+        timestamp = datetime.datetime(2001, 1, 1, 0, 0, 0, 0)
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("8.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("admin-report-detail", args=(report.pk,)))
+        serializer = AdminReportSerializer(
+            instance=report,
+            context={"request": request},
+            data={
+                "date": self.required_input["date"],
+                "description": self.required_input["description"],
+                "author": self.required_input["author"],
+                "project": self.required_input["project"],
+                "work_hours": self.required_input["work_hours"],
+                "last_update": timestamp,
+            },
+        )
+        self.assertTrue(serializer.is_valid())
+        serializer.save()
+        self.assertFalse(serializer.instance.last_update is timestamp)
+
+    def test_report_serializer_editable_field_should_ignore_input_on_model_update(self):
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("8.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("admin-report-detail", args=(report.pk,)))
+        serializer = AdminReportSerializer(
+            instance=report,
+            context={"request": request},
+            data={
+                "date": self.required_input["date"],
+                "description": self.required_input["description"],
+                "author": self.required_input["author"],
+                "project": self.required_input["project"],
+                "work_hours": self.required_input["work_hours"],
+                "editable": False,
+            },
+        )
+        self.assertTrue(serializer.is_valid())
+        serializer.save()
+        self.assertTrue(serializer.instance.editable)
+
+
 class HoursFieldTests(TestCase):
     def test_to_internal_value_should_change_string_with_colon_representing_hour_to_numeric_value_with_dot_separator(
         self
