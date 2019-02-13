@@ -11,6 +11,7 @@ from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.models import Report
 from employees.models import TaskActivityType
+from employees.serializers import AdminReportSerializer
 from employees.serializers import HoursField
 from employees.serializers import ReportSerializer
 from managers.models import Project
@@ -121,7 +122,7 @@ class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
     ):
         report = Report(
             date=datetime.datetime.now().date(),
-            description="Some description",
+            description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
             work_hours=Decimal("8.00"),
@@ -132,6 +133,93 @@ class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
         serializer = ReportSerializer(report, context={"request": request})
         data = serializer.to_representation(report)
         self.assertEqual(data["work_hours"], "8:00")
+
+
+class AdminReportSerializerTests(DataSetUpToTests):
+    serializer_class = AdminReportSerializer
+
+    def test_report_serializer_creation_date_field_should_ignore_input_on_model_update(self):
+        timestamp = datetime.datetime(2001, 1, 1, 0, 0, 0, 0)
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("8.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
+        serializer = AdminReportSerializer(
+            instance=report,
+            context={"request": request},
+            data={
+                "date": self.required_input["date"],
+                "description": self.required_input["description"],
+                "author": self.required_input["author"],
+                "project": self.required_input["project"],
+                "work_hours": self.required_input["work_hours"],
+                "creation_date": timestamp,
+            },
+        )
+        self.assertTrue(serializer.is_valid())
+        serializer.save()
+        self.assertFalse(serializer.instance.creation_date is timestamp)
+
+    def test_report_serializer_last_update_field_should_ignore_input_on_model_update(self):
+        timestamp = datetime.datetime(2001, 1, 1, 0, 0, 0, 0)
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("8.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
+        serializer = AdminReportSerializer(
+            instance=report,
+            context={"request": request},
+            data={
+                "date": self.required_input["date"],
+                "description": self.required_input["description"],
+                "author": self.required_input["author"],
+                "project": self.required_input["project"],
+                "work_hours": self.required_input["work_hours"],
+                "last_update": timestamp,
+            },
+        )
+        self.assertTrue(serializer.is_valid())
+        serializer.save()
+        self.assertFalse(serializer.instance.last_update is timestamp)
+
+    def test_report_serializer_editable_field_should_ignore_input_on_model_update(self):
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("8.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
+        serializer = AdminReportSerializer(
+            instance=report,
+            context={"request": request},
+            data={
+                "date": self.required_input["date"],
+                "description": self.required_input["description"],
+                "author": self.required_input["author"],
+                "project": self.required_input["project"],
+                "work_hours": self.required_input["work_hours"],
+                "editable": False,
+            },
+        )
+        self.assertTrue(serializer.is_valid())
+        serializer.save()
+        self.assertTrue(serializer.instance.editable)
 
 
 class HoursFieldTests(TestCase):
