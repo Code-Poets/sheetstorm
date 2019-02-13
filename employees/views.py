@@ -17,12 +17,14 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
 from employees.forms import ProjectJoinForm
 from employees.models import Report
 from employees.models import TaskActivityType
+from employees.serializers import AdminReportSerializer
 from employees.serializers import ReportSerializer
 from managers.models import Project
 from users.models import CustomUser
@@ -138,6 +140,8 @@ class ReportDetail(APIView):
     model_class = Report
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_detail.html"
+    user_interface_text = ReportDetailStrings
+    serializer_class = ReportSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def _create_serializer(self, report: Report, data: Any = None) -> ReportSerializer:
@@ -189,3 +193,25 @@ class AuthorReportView(DetailView):
         context = super().get_context_data(**kwargs)
         context["UI_text"] = AuthorReportListStrings
         return context
+
+
+class AdminReportDetail(ReportDetail):
+    template_name = "employees/admin_report_detail.html"
+    user_interface_text = AdminReportDetailStrings
+    serializer_class = AdminReportSerializer
+
+    def post(self, request, pk):
+        report = get_object_or_404(Report, pk=pk)
+        if "discard" not in request.POST:
+            serializer = self.serializer_class(report, data=request.data, context={"request": request})
+            if not serializer.is_valid():
+                return Response(
+                    {
+                        "serializer": serializer,
+                        "report": report,
+                        "errors": serializer.errors,
+                        "UI_text": ReportDetailStrings,
+                    }
+                )
+            serializer.save()
+        return redirect("author-report-list", report.author.id)
