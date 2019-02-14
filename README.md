@@ -187,8 +187,8 @@ from .development import *
 ```
 If your database configuration differs from the defaults, you may need to tweak the values below and add them to your local_settings.py too:
 ```
-DATABASES['NAME'] = 'sheetstorm'
-DATABASES['USER'] = 'postgres'
-DATABASES['PASSWORD'] = ''
+DATABASES['default']['NAME'] = 'sheetstorm'
+DATABASES['default']['USER'] = 'postgres'
+DATABASES['deafult']['PASSWORD'] = ''
 ```
 
