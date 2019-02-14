@@ -2,9 +2,9 @@
 Base application for management of employees working hours
 
 ## Software requirements
-Python 3.7.0
-Django 2.1.1
-Django REST framework 3.8.2
+- Python 3.7.0
+- Django 2.1.1
+- Django REST framework 3.8.2
 
 ## Environment set-up
 
