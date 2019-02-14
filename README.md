@@ -49,7 +49,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
     sudo apt install postgresql postgresql-contrib
     ```
 
-6. Edit file located in */etc/postgresql/<version>/main/pg_hba.conf*, change ***\<method\>*** to ***trust*** in the following line:
+6. With administrative rights, edit file located in */etc/postgresql/<version>/main/pg_hba.conf*. Change ***\<method\>*** to ***trust*** in the following line:
     ```
     local   all             postgres                                <method>
     ```
@@ -108,7 +108,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
     initdb /usr/local/var/postgres
     ```
 
-8.  Edit file located in */usr/local/var/postgres/pg_hba.conf*, change ***\<method\>*** to ***trust*** in the following line:
+8.  With administrative rights, edit file located in */usr/local/var/postgres/pg_hba.conf*. Change ***\<method\>*** to ***trust*** in the following line:
     ```
     local   all             postgres                                <method>
     ```
