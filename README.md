@@ -60,7 +60,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
 
 7. Create database for application: 
     ```
-    createdb -U postgres time_monkey
+    createdb -U postgres sheetstorm
     ```
 
 
@@ -123,7 +123,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
 
 9. Create database for application: 
     ```
-    createdb -U postgres time_monkey
+    createdb -U postgres sheetstorm
     ```
 
 
@@ -174,7 +174,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
 
 6. Create database for application by running the following command in Command Prompt: 
     ```
-    C:\bigsql\pg10\bin\createdb -U postgres time_monkey.
+    C:\bigsql\pg10\bin\createdb -U postgres sheetstorm.
     ```
 
 
