@@ -4,6 +4,28 @@ from users.common import constants
 from users.common.constants import ErrorCode
 from users.common.exceptions import CustomValidationError
 from users.common.strings import CustomValidationErrorText
+from users import models
+
+
+def generate_random_string_from_letters_and_digits(length):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
+def generate_random_phone_number(length):
+    return ''.join(random.choices(string.digits, k=length))
+
+
+def create_user_using_full_clean_and_save(email, first_name, last_name, phone_number, password):
+    user = models.CustomUser(
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        phone_number=phone_number,
+    )
+    user.set_password(password)
+    user.full_clean()
+    user.save()
+    return user
 
 
 def raise_serializer_exception(error_message):
