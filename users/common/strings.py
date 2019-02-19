@@ -1,4 +1,15 @@
+# pylint: disable=line-too-long
 from django.utils.translation import ugettext_lazy
+from users.common import constants
+
+
+class ConfirmationMessages:
+    SUCCESSFUL_UPDATE_USER_MESSAGE = ugettext_lazy('Account has been successfully updated!')
+
+
+class PermissionsMessage:
+    NONE_ADMIN_USER = ugettext_lazy('You are not allowed to enter - for administration only.')
+    NONE_ADMIN_OR_OWNER_USER = ugettext_lazy("It's none of your business.")
 
 
 class CustomUserAdminText:
@@ -27,7 +38,12 @@ class CustomUserModelText:
 
 class CustomValidationErrorText:
     VALIDATION_ERROR_EMAIL_MESSAGE = 'The given email must be set'
+    VALIDATION_ERROR_EMAIL_EXISTING_MESSAGE = 'User with this Email address already exists.'
     VALIDATION_ERROR_PASSWORD_MESSAGE = 'The given password must be set'
+    VALIDATION_ERROR_EMAIL_MALFORMED_FIRST_PART = "Invalid first part of email - you cannot use '' or ' ' signs"
+    VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE = 'The given email must contain one "@" sign'
+    VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN = "Please enter an e-mail address with a valid domain (" + ', '.join(constants.VALID_EMAIL_DOMAIN_LIST) + ")"
+    VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN_SHORT = "Please enter an e-mail address with a valid domain"
     VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = ugettext_lazy("A user is already registered with this e-mail address.")
     VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE = ugettext_lazy("The two password fields didn't match.")
 

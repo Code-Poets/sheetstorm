@@ -68,7 +68,7 @@ ROOT_URLCONF = 'sheetstorm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -138,6 +138,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
 
 
 ACCOUNT_USERNAME_REQUIRED = False
@@ -171,3 +173,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.AdminRenderer',
     )
 }
+
+COUNTRIES_FIRST = [
+    'PL',
+    'GB',
+    'DE',
+    'FR',
+    'US',
+]

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+
+<h2>
+  <small>
+    <a href="{% url 'custom-users-list' %}">
+      <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+  </small>
+  &nbsp;Create new employee&nbsp;
+</h2>
+
+<div class="modal-dialog">
+  <form action="{% url 'custom-user-create' %}" method="post">
+      {% csrf_token %}
+      {% render_form serializer template_pack='rest_framework/vertical' %}
+      <br/>
+     <button type="submit" class="btn btn-primary">
+       <span class="glyphicon glyphicon-plus"></span> Create
+    </button>
+  </form>
+</div>
+{% endblock %}

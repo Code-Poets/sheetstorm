@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script type="text/javascript" src="{% static 'users/scripts/delete_account_popup.js' %}"></script>
+</head>
+
+      <div class="modal-dialog" style="margin-bottom:0">
+
+          <div class="panel-heading">
+            <h1>
+              <small>
+                <a href="{% url 'custom-users-list' %}">
+                  <span class="glyphicon glyphicon-chevron-left"></span>
+                </a>
+              </small>
+              &nbsp;Account details&nbsp;
+            </h1>
+            <br>
+            {% if messages %}
+            <ul class="messages" style="list-style-type: none;">
+                {% for message in messages %}
+                <li><font color="green"><b>{{ message }}</b></font></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <br>
+
+          </div>
+            <form class="form-horizonal" action="{% url 'custom-user-update-by-admin' pk=user_detail.pk %}" method="POST">
+              {% csrf_token %}
+              {% render_form serializer template_pack='rest_framework/vertical' %}
+              <button type="submit" class="btn btn-success">
+                <span class="glyphicon glyphicon-ok"></span> Update
+              </button>
+              <a href="{% url 'custom-user-update-by-admin' pk=user.pk %}" class="btn btn btn-default">
+                <span class="glyphicon glyphicon-repeat"></span> Discard
+              </a>
+            </form>
+        </div>
+</br>
+</br>
+
+  <button type="button" id="opener_user_account" class="btn btn btn-danger">
+    <span class="glyphicon glyphicon-remove"></span> Delete
+  </button>
+
+  <div id="dialog_user_account" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
+    {% trans 'Do you want to delete' %} <br/> <b>{{ user_detail.email }} </b>
+    {% trans ' account' %}?
+  </div>
+
+  <div id="dialog_info" style="display: none" title="{% trans 'Wrong way' %}" align="center">
+    {% trans 'If you want that,' %} <br/>
+    {% trans 'go to the Django Admin site' %}.
+  </div>
+
+  <br><br>
+
+{% endblock %}

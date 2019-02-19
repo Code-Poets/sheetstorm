@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    {% load i18n %}
+    {% load rest_framework %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'users/center_style.css' %}" />
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <title>{% block title %}Sheet storm{% endblock %}</title>
+
+</head>
+<body>
+  <header>
+    {% if user.is_authenticated %}
+
+      <table>
+        <tr><br /></tr>
+        <tr>
+          <td class="padding"><a href="{% url 'home' %}">{% trans 'Home' %}</a></td>
+          <td class="padding"><a href="{% url 'custom-user-update' user.id %}">Account</a></td>
+            {% if user.user_type == "ADMIN" %}
+          <td class="padding"><a href="{% url 'custom-users-list' %}">{% trans 'Employees list' %}</a></td>
+            {% endif %}
+          <td class="padding"><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></td>
+        </tr>
+      </table>
+
+    {% else %}
+
+      <table>
+        <tr><br /></tr>
+        <tr>
+        </tr>
+      </table>
+
+    {% endif %}
+
+  </header>
+  <hr>
+  <main>
+<div>
+    {% block content %}
+    {% endblock %}
+</div>
+  </main>
+</body>
+</html>

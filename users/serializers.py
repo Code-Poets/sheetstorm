@@ -7,6 +7,7 @@ from django_countries.serializers import CountryFieldMixin
 
 from rest_framework import serializers
 from users.common.strings import CustomValidationErrorText
+from users.common.utils import custom_validate_email_function
 from users.models import CustomUser
 
 
@@ -15,11 +16,34 @@ class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
         model = CustomUser
         fields = '__all__'
 
+    def validate_email(self, email):
+        if self.instance is not None:
+            instance_old_email = self.instance.email
+        email = allauth_get_adapter().clean_email(email)
+        custom_validate_email_function(self, email)
+        if self.instance is not None and email != instance_old_email:
+            try:
+                CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
+                return email
+            raise serializers.ValidationError(
+                CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN)
+        else:
+            if self.instance is not None and email != instance_old_email:
+                try:
+                    CustomUser.objects.get(email=email)
+                except CustomUser.DoesNotExist:
+                    return email
+                raise serializers.ValidationError(
+                    CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
+        return email
+
 
 class UserListSerializer(UserSerializer):
     url = serializers.HyperlinkedIdentityField(
             view_name="users-detail",
     )
+
     class Meta:
         model = CustomUser
         fields = (
@@ -30,7 +54,9 @@ class UserListSerializer(UserSerializer):
         )
 
 
-class UserDetailSerializer(UserSerializer):
+class UserUpdateByAdminSerializer(UserSerializer):
+    email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
+
     class Meta:
         model = CustomUser
         fields = (
@@ -63,25 +89,38 @@ class UserCreateSerializer(UserSerializer):
             'email',
             'first_name',
             'last_name',
-            'date_of_birth',
-            'phone_number',
-            'country',
             'user_type',
-            'is_staff',
-            'is_superuser',
-            'is_active',
         )
 
 
 class CustomRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
-    first_name = serializers.CharField(required=False, write_only=True)
-    last_name = serializers.CharField(required=False, write_only=True)
-    password = serializers.CharField(required=True, write_only=True)
-    password_confirmation = serializers.CharField(required=True, write_only=True)
+    first_name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        write_only=True,
+    )
+    last_name = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        write_only=True,
+    )
+    password = serializers.CharField(
+        label='Password',
+        required=True,
+        write_only=True,
+        style={"input_type": "password"},
+    )
+    password_confirmation = serializers.CharField(
+        label='Password confirmation',
+        required=True,
+        write_only=True,
+        style={"input_type": "password"},
+    )
 
     def validate_email(self, email):
-        email = get_adapter().clean_email(email)
+        email = allauth_get_adapter().clean_email(email)
+        custom_validate_email_function(self, email)
         if allauth_settings.UNIQUE_EMAIL:
             if email and email_address_exists(email):
                 raise serializers.ValidationError(
@@ -89,7 +128,7 @@ class CustomRegisterSerializer(serializers.Serializer):
         return email
 
     def validate_password(self, password):
-        return get_adapter().clean_password(password)
+        return allauth_get_adapter().clean_password(password)
 
     def validate(self, data):
         if data['password'] != data['password_confirmation']:
@@ -101,12 +140,12 @@ class CustomRegisterSerializer(serializers.Serializer):
         return {
             'first_name': self.validated_data.get('first_name', ''),
             'last_name': self.validated_data.get('last_name', ''),
-            'password': self.validated_data.get('password', ''),
+            'password1': self.validated_data.get('password', ''),
             'email': self.validated_data.get('email', ''),
         }
 
     def save(self, request):
-        adapter = get_adapter()
+        adapter = allauth_get_adapter()
         user = adapter.new_user(request)
         self.cleaned_data = self.get_cleaned_data()
         adapter.save_user(request, user, self)
