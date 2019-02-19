@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+{% block title %}Sheet storm{% endblock %}
+
+{% block content %}
+
+    <h1>{% trans 'Web application sheet storm' %}</h1>
+    <br />
+
+    {% if user.is_authenticated %}
+      <h4>{% trans 'Welcome' %} <font color="orange">{{ user.email }}</font>!
+      </h4>
+      <br />
+
+    {% else %}
+
+      <h4>{% trans 'Welcome' %} <font color="orange"> {% trans 'unknown user' %}</font>!
+      </h4>
+      <br />
+
+    {% endif %}
+
+    <br />
+    <br />
+    <p>{% trans 'You have visited this page' %} {{ num_visits }} {% if num_visits == 1 %}{% trans 'time' %}{% else %}{% trans 'times' %}{% endif %}.</p>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+
+      <div class="modal-dialog" style="margin-bottom:0">
+
+          <div class="panel-heading">
+            <h1>Account details</h1>
+          </div>
+            <form class="form-horizonal" action="{% url 'custom-user-detail' pk=user.pk %}" method="POST">
+              {% csrf_token %}
+              {% render_form serializer template_pack='rest_framework/vertical' %}
+              <input type="submit" value="Update">
+            </form>
+            {% if errors %}
+                <p><strong>{{ errors }}</strong></p>
+            {% endif %}
+        </div>
+</br>
+</br>
+  <form action="{% url 'custom-user-delete' pk=user.pk %}" method="POST">
+      {% csrf_token %}
+      <input type="submit" value="Delete account">
+  </form>
+
+{% endblock %}

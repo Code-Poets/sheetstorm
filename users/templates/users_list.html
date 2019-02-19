@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+
+    <h1>Employees</h1>
+
+<ul>
+  <div class="container">
+    <div class="table-responsive">
+      <table class="table">
+        <tr>
+          <th>Id</th>
+          <th>Email</th>
+          <th>Type</th>
+          <th>First name</th>
+          <th>Last name</th>
+          <th>Projects</th>
+          <td class=Invisible></td>
+          <td class=Invisible></td>
+        </tr>
+        <tr>
+          {% for user in users_list %}
+          <td>{{ forloop.counter }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.user_type }}</td>
+          <td>{{ user.first_name }}</td>
+          <td>{{ user.last_name }}</td>
+          <td>
+            {% for members in user.members.all %}
+              {{ members.name }}
+              {% for managers in members.managers.all %}
+                {% if managers.email == user.email %}
+                  [M]
+                {% endif %}
+              {% endfor %}
+              ,
+            {% endfor %}
+          </td>
+          <td class=Invisible align="center">
+            <form action="{% url 'custom-user-detail' pk=user.id %}" method="GET">
+                {% csrf_token %}
+              <input type="submit" value="Edit account">
+            </form>
+          </td>
+          <td class=Invisible align="center">
+            <form action="{% url 'custom-user-detail' pk=user.id %}" method="GET">
+                {% csrf_token %}
+              <input type="submit" value="See reports">
+            </form>
+          </td>
+        </tr>
+          {% endfor %}
+      </table>
+    </div>
+  </div>
+</ul>
+
+{% endblock %}

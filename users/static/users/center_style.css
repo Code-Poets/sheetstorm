@@ -1,0 +1,12 @@
+table {
+  margin-left:auto;
+  margin-right:auto;
+}
+
+th, td.padding {
+  padding: 15px;
+}
+
+div {
+  text-align: center;
+}
