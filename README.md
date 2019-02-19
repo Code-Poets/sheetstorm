@@ -13,7 +13,7 @@ Clone following repository:
 git clone https://github.com/Code-Poets/sheetstorm.git
 ```
 
-
+**NOTE:** Upon completing all steps for required OS, please refer to the [local configuration](#local-configuration) sub-section.
 
 ### Ubuntu
     
@@ -191,4 +191,3 @@ DATABASES['default']['NAME'] = 'sheetstorm'
 DATABASES['default']['USER'] = 'postgres'
 DATABASES['deafult']['PASSWORD'] = ''
 ```
-
