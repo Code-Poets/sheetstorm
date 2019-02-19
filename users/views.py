@@ -122,26 +122,62 @@ class SignUp(APIView):
         return redirect('login')
 
 
-class UserDetail(APIView):
+class UserUpdate(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
-    template_name = 'user_detail.html'
+    template_name = 'user_update.html'
 
     def get(self, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
-        serializer = UserDetailSerializer(user, context={'request': request})
+        if request.user.user_type == CustomUser.UserType.ADMIN.name:
+            serializer = UserDetailSerializer(user, context={'request': request})
+        else:
+            serializer = UserUpdateSerializer(user, context={'request': request})
         return Response({'serializer': serializer, 'user': user})
 
     def post(self, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)
-        serializer = UserUpdateSerializer(
-            user,
-            data=request.data,
-            context={'request': request}
-        )
+        if request.user.user_type == CustomUser.UserType.ADMIN.name:
+            serializer = UserDetailSerializer(
+                user,
+                data=request.data,
+                context={'request': request},
+            )
+        else:
+            serializer = UserUpdateSerializer(
+                user,
+                data=request.data,
+                context={'request': request},
+            )
         if not serializer.is_valid():
             return Response({
                 'serializer': serializer,
                 'user': user,
+                'errors': serializer.errors,
+            })
+        serializer.save()
+        return redirect('custom-user-update', pk=pk)
+
+
+class UserDetail(APIView):
+    renderer_classes = [renderers.TemplateHTMLRenderer]
+    template_name = 'users_detail.html'
+
+    def get(self, request, pk):
+        user_detail = get_object_or_404(CustomUser, pk=pk)
+        serializer = UserDetailSerializer(user_detail, context={'request': request})
+        return Response({'serializer': serializer, 'user_detail': user_detail})
+
+    def post(self, request, pk):
+        user_detail = get_object_or_404(CustomUser, pk=pk)
+        serializer = UserDetailSerializer(
+            user_detail,
+            data=request.data,
+            context={'request': request},
+        )
+        if not serializer.is_valid():
+            return Response({
+                'serializer': serializer,
+                'user_detail': user_detail,
                 'errors': serializer.errors,
             })
         serializer.save()

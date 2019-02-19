@@ -34,7 +34,8 @@ urlpatterns = format_suffix_patterns([
     url(r'^$', views.index, name='home'),
     path('accounts/', include('django.contrib.auth.urls')),
     url(r'^signup/$', views.SignUp.as_view(), name='signup'),
-    url(r'^user/(?P<pk>[0-9]+)/$', views.UserDetail.as_view(), name='custom-user-detail'),
+    url(r'^user/(?P<pk>[0-9]+)/$', views.UserUpdate.as_view(), name='custom-user-update'),
     url(r'^user/(?P<pk>[0-9]+)/delete/$', views.delete_user, name='custom-user-delete'),
     url(r'^users/$', views.UserList.as_view(), name='custom-users-list'),
+    url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view(), name='custom-users-detail'),
 ])

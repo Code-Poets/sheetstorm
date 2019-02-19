@@ -24,7 +24,7 @@
         <tr><br /></tr>
         <tr>
           <td class="padding"><a href="{% url 'home' %}">{% trans 'Home' %}</a></td>
-          <td class="padding"><a href="{% url 'custom-user-detail' user.id %}">Account</a></td>
+          <td class="padding"><a href="{% url 'custom-user-update' user.id %}">Account</a></td>
             {% if user.user_type == "ADMIN" %}
           <td class="padding"><a href="{% url 'custom-users-list' %}">{% trans 'Employees list' %}</a></td>
             {% endif %}
