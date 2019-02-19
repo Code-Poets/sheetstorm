@@ -51,6 +51,66 @@
     text-align: right;
 }
 
+.author-reports-date-header{
+    width: 11.23%;
+}
+
+.author-reports-project-header {
+    width: 20.18%;
+}
+
+.author-reports-work-hours-header {
+    width: 8.16%;
+}
+
+.author-reports-creation-date-header {
+    width: 10.09%;
+}
+
+.author-reports-last-update-header {
+    width: 10.09%;
+}
+
+.author-reports-editable-header {
+    width: 5.09%;
+}
+
+.author-reports-edit-button-header {
+    width: 4.91%;
+}
+
+.author-reports-date-column{
+    text-align: left;
+}
+
+.author-reports-project-column {
+    text-align: left;
+}
+
+.author-reports-work-hours-column {
+    text-align: right;
+}
+
+.author-reports-description-column {
+    text-align: left;
+}
+
+.author-reports-creation-date-column {
+    text-align: center;
+}
+
+.author-reports-last-update-column {
+    text-align: center;
+}
+
+.author-reports-editable-column {
+    text-align: center;
+}
+
+.author-reports-edit-button-column {
+    text-align: right;
+}
+
 textarea.form-control {
       height: 200px;
       resize: vertical;
