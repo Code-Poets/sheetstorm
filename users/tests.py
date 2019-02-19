@@ -2,10 +2,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from django.core.validators import MaxLengthValidator
 from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework.test import APITestCase
-from rest_framework.test import APIClient
 
 from users.common.exceptions import CustomValidationError
 from users.common.strings import CustomUserModelText
@@ -25,44 +21,49 @@ class TestCustomUserLogin(TestCase):
         )
 
     def test_user_should_login_correctly(self):
-        self.assertTrue(self.client.login(
-            email="testuser@example.com",
-            password="testuserpasswd",
+        self.assertTrue(
+            self.client.login(
+                email="testuser@example.com",
+                password="testuserpasswd",
             )
         )
 
     def test_user_should_not_login_correctly_with_wrong_email(self):
-        self.assertFalse(self.client.login(
-            email="wrongtestuser@example.com",
-            password="testuserpasswd",
+        self.assertFalse(
+            self.client.login(
+                email="wrongtestuser@example.com",
+                password="testuserpasswd",
             )
         )
 
     def test_user_should_not_login_correctly_with_wrong_password(self):
-        self.assertFalse(self.client.login(
-            email="testuser@example.com",
-            password="wrongtestuserpasswd",
+        self.assertFalse(
+            self.client.login(
+                email="testuser@example.com",
+                password="wrongtestuserpasswd",
             )
         )
 
     def test_user_should_not_login_correctly_with_no_email(self):
-        self.assertFalse(self.client.login(
-            email=None,
-            password="wrongtestuserpasswd",
+        self.assertFalse(
+            self.client.login(
+                email=None,
+                password="wrongtestuserpasswd",
             )
         )
 
     def test_user_should_not_login_correctly_with_no_password(self):
-        self.assertFalse(self.client.login(
-            email="testuser@example.com",
-            password=None,
+        self.assertFalse(
+            self.client.login(
+                email="testuser@example.com",
+                password=None,
             )
         )
 
 
 class TestCustomUserModel(TestCase):
     def test_user_should_hold_email_address(self):
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             CustomValidationError,
             CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE,
         ):
@@ -75,7 +76,7 @@ class TestCustomUserModel(TestCase):
             )
 
     def test_user_should_hold_password(self):
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             CustomValidationError,
             CustomValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE,
         ):
@@ -88,15 +89,15 @@ class TestCustomUserModel(TestCase):
             )
 
     def test_user_should_not_hold_same_email_as_another_user(self):
-        old_user = CustomUser.objects.create(
-            email = "testuser@example.com",
-            password = 'newuserpasswd',
+        CustomUser.objects.create(
+            email="testuser@example.com",
+            password='newuserpasswd',
         )
         new_user = CustomUser(
-            email = "testuser@example.com",
-            password = 'newuserpasswd',
+            email="testuser@example.com",
+            password='newuserpasswd',
         )
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValidationError,
             "User with this Email address already exists.",
         ):
@@ -104,10 +105,10 @@ class TestCustomUserModel(TestCase):
 
     def test_user_should_not_hold_email_without_at_sign(self):
         new_user = CustomUser(
-            email = "wrongtestuserexample.com",
-            password = 'newuserpasswd',
+            email="wrongtestuserexample.com",
+            password='newuserpasswd',
         )
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValidationError,
             str(EmailValidator.message),
         ):
@@ -115,11 +116,11 @@ class TestCustomUserModel(TestCase):
 
     def test_user_should_not_hold_first_name_longer_than_FIRST_NAME_MAX_LENGTH(self):
         new_user = CustomUser(
-            email = "testuser@example.com",
-            password = 'newuserpasswd',
-            first_name = 'a'*(constants.FIRST_NAME_MAX_LENGTH+1),
+            email="testuser@example.com",
+            password='newuserpasswd',
+            first_name='a' * (constants.FIRST_NAME_MAX_LENGTH + 1),
         )
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValidationError,
             str(MaxLengthValidator.message),
         ):
@@ -127,55 +128,56 @@ class TestCustomUserModel(TestCase):
 
     def test_user_should_not_hold_last_name_longer_than_LAST_NAME_MAX_LENGTH(self):
         new_user = CustomUser(
-            email = "testuser@example.com",
-            password = 'newuserpasswd',
-            last_name = 'a'*(constants.LAST_NAME_MAX_LENGTH+1),
+            email="testuser@example.com",
+            password='newuserpasswd',
+            last_name='a' * (constants.LAST_NAME_MAX_LENGTH + 1),
         )
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValidationError,
             str(MaxLengthValidator.message),
         ):
             new_user.full_clean()
 
     def test_user_should_hold_phone_number_shorter_or_equal_to_PHONE_NUMBER_MAX_LENGTH(self):
-        new_user = CustomUser (
-            email = "testuser@example.com",
-            password = 'newuserpasswd',
-            phone_number = "1"*(constants.PHONE_NUMBER_MAX_LENGTH+1),
+        new_user = CustomUser(
+            email="testuser@example.com",
+            password='newuserpasswd',
+            phone_number="1" * (constants.PHONE_NUMBER_MAX_LENGTH + 1),
         )
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValidationError,
             str(CustomUserModelText.PHONE_REGEX_MESSAGE),
         ):
             new_user.full_clean()
 
     def test_user_should_hold_phone_number_longer_or_equal_to_PHONE_NUMBER_MIN_LENGTH(self):
-        new_user = CustomUser (
-            email = "testuser@example.com",
-            password = 'newuserpasswd',
-            phone_number = "1"*(constants.PHONE_NUMBER_MIN_LENGTH-1),
+        new_user = CustomUser(
+            email="testuser@example.com",
+            password='newuserpasswd',
+            phone_number="1" * (constants.PHONE_NUMBER_MIN_LENGTH - 1),
         )
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValidationError,
             str(CustomUserModelText.PHONE_REGEX_MESSAGE),
         ):
             new_user.full_clean()
 
     def test_user_should_hold_phone_number_with_all_digits(self):
-        new_user = CustomUser (
-            email = "testuser@example.com",
-            password = 'newuserpasswd',
-            phone_number = "X"*constants.PHONE_NUMBER_MIN_LENGTH,
+        new_user = CustomUser(
+            email="testuser@example.com",
+            password='newuserpasswd',
+            phone_number="X" * constants.PHONE_NUMBER_MIN_LENGTH,
         )
-        with self.assertRaisesRegexp(
+        with self.assertRaisesRegex(
             ValidationError,
             str(CustomUserModelText.PHONE_REGEX_MESSAGE),
         ):
             new_user.full_clean()
 
+
 class TestCustomUserModelMethods(TestCase):
     def setUp(self):
-        new_user = CustomUser.objects.create(
+        CustomUser.objects.create(
             email="testuser@example.com",
             first_name="testusername",
             last_name="testuserlastname",

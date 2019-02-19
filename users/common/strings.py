@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 from django.utils.translation import ugettext_lazy
 
 

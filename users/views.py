@@ -1,6 +1,6 @@
-from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import renderers
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -27,35 +27,35 @@ from users.serializers import UserUpdateSerializer
 def api_root(request, format=None):
     if request.user.is_authenticated and request.user.user_type == CustomUser.UserType.ADMIN.name:
         return Response({
-                'users': reverse(
-                    'users-list',
-                    request=request,
-                    format=format,
-                ),
-                'account': reverse(
-                    'user-account-detail',
-                    args=(request.user.pk,),
-                    request=request,
-                    format=format,
-                ),
-            })
+            'users': reverse(
+                'users-list',
+                request=request,
+                format=format,
+            ),
+            'account': reverse(
+                'user-account-detail',
+                args=(request.user.pk,),
+                request=request,
+                format=format,
+            ),
+        })
     elif request.user.is_authenticated:
         return Response({
-                'account': reverse(
-                    'user-account-detail',
-                    args=(request.user.pk,),
-                    request=request,
-                    format=format,
-                ),
-            })
+            'account': reverse(
+                'user-account-detail',
+                args=(request.user.pk,),
+                request=request,
+                format=format,
+            ),
+        })
     else:
         return Response({
-                'registration': reverse(
-                    'rest_register',
-                    request=request,
-                    format=format,
-                ),
-            })
+            'registration': reverse(
+                'rest_register',
+                request=request,
+                format=format,
+            ),
+        })
 
 
 class UsersViewSet(viewsets.ModelViewSet):

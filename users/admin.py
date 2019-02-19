@@ -10,7 +10,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (
             None, {
-                'fields': ('email','password')
+                'fields': ('email', 'password')
             }
         ),
         (
@@ -74,5 +74,6 @@ class CustomUserAdmin(UserAdmin):
         'last_name',
     )
     ordering = ('email',)
+
 
 admin.site.register(CustomUser, CustomUserAdmin)

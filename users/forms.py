@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django_countries.widgets import CountrySelectWidget
 from users.models import CustomUser
 
+
 class CustomUserCreationForm(UserCreationForm):
     """
     A form that creates a user, without privileges,
@@ -11,6 +12,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ("email",)
+
 
 class CustomUserChangeForm(UserChangeForm):
     """

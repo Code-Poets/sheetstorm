@@ -2,14 +2,13 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
-from django_countries.fields import CountryField
 from django.db import models
+from django_countries.fields import CountryField
 
 from users.common import constants
 from users.common.constants import ErrorCode
 from users.common.exceptions import CustomValidationError
 from users.common.fields import ChoiceEnum
-from users.common.strings import CustomUserCountryText
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomUserUserTypeText
 from users.common.strings import CustomValidationErrorText
@@ -52,7 +51,6 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save()
         return user
-
 
     def create_superuser(
         self,
