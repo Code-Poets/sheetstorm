@@ -2,9 +2,9 @@
 Base application for management of employees working hours
 
 ## Software requirements
-Python 3.7.0
-Django 2.1.1
-Django REST framework 3.8.2
+- Python 3.7.0
+- Django 2.1.1
+- Django REST framework 3.8.2
 
 ## Environment set-up
 
@@ -13,7 +13,7 @@ Clone following repository:
 git clone https://github.com/Code-Poets/sheetstorm.git
 ```
 
-
+**NOTE:** Upon completing all steps for required OS, please refer to the [local configuration](#local-configuration) sub-section.
 
 ### Ubuntu
     
@@ -49,7 +49,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
     sudo apt install postgresql postgresql-contrib
     ```
 
-6. Edit file located in */etc/postgresql/<version>/main/pg_hba.conf*, change ***\<method\>*** to ***trust*** in the following line:
+6. With administrative rights, edit file located in */etc/postgresql/<version>/main/pg_hba.conf*. Change ***\<method\>*** to ***trust*** in the following line:
     ```
     local   all             postgres                                <method>
     ```
@@ -60,7 +60,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
 
 7. Create database for application: 
     ```
-    createdb -U postgres time_monkey
+    createdb -U postgres sheetstorm
     ```
 
 
@@ -108,7 +108,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
     initdb /usr/local/var/postgres
     ```
 
-8.  Edit file located in */usr/local/var/postgres/pg_hba.conf*, change ***\<method\>*** to ***trust*** in the following line:
+8.  With administrative rights, edit file located in */usr/local/var/postgres/pg_hba.conf*. Change ***\<method\>*** to ***trust*** in the following line:
     ```
     local   all             postgres                                <method>
     ```
@@ -123,7 +123,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
 
 9. Create database for application: 
     ```
-    createdb -U postgres time_monkey
+    createdb -U postgres sheetstorm
     ```
 
 
@@ -174,7 +174,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
 
 6. Create database for application by running the following command in Command Prompt: 
     ```
-    C:\bigsql\pg10\bin\createdb -U postgres time_monkey.
+    C:\bigsql\pg10\bin\createdb -U postgres sheetstorm.
     ```
 
 
@@ -187,8 +187,7 @@ from .development import *
 ```
 If your database configuration differs from the defaults, you may need to tweak the values below and add them to your local_settings.py too:
 ```
-DATABASES['NAME'] = 'sheetstorm'
-DATABASES['USER'] = 'postgres'
-DATABASES['PASSWORD'] = ''
+DATABASES['default']['NAME'] = 'sheetstorm'
+DATABASES['default']['USER'] = 'postgres'
+DATABASES['deafult']['PASSWORD'] = ''
 ```
-
