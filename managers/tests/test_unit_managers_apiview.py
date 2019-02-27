@@ -36,6 +36,7 @@ class ProjectTest(TestCase):
         self.custom_projects_list_url = [
             reverse("custom-projects-list"),
             reverse("custom-project-detail", args=(self.project.pk,)),
+            reverse('custom-project-update', args=(self.project.pk,)),
         ]
 
 
@@ -140,3 +141,51 @@ class ProjectDetailTests(ProjectTest):
         request.user = self.user
         response = views.ProjectDetail.as_view()(request, self.project.pk + 1)
         self.assertEqual(response.status_code, 404)
+
+
+class ProjectUpdateTests(ProjectTest):
+    def test_project_update_view_should_display_project_update_serializer_on_get(self):
+        request = APIRequestFactory().get(path=self.custom_projects_list_url[2])
+        request.user = self.user
+        response = views.ProjectUpdate.as_view()(request, self.project.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.project.name)
+        self.assertEqual(response.data['serializer'].instance, self.project)
+
+    def test_project_update_view_should_return_404_status_code_on_get_if_project_does_not_exist(self):
+        request = APIRequestFactory().get(path=self.custom_projects_list_url[2])
+        request.user = self.user
+        response = views.ProjectUpdate.as_view()(request, self.project.pk + 1)
+        self.assertEqual(response.status_code, 404)
+
+    def test_project_update_view_should_update_project_on_post(self):
+        request = APIRequestFactory().post(
+            path=self.custom_projects_list_url[2],
+            data={
+                'name': 'New Example Project Name',
+                'start_date': self.project.start_date,
+                'managers': [self.user.pk, ],
+                'members': [self.user.pk, ],
+            }
+        )
+        request.user = self.user
+        response = views.ProjectUpdate.as_view()(request, self.project.pk)
+        self.project.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual('New Example Project Name', self.project.name)
+
+    def test_project_update_view_should_update_project_on_post_if_data_is_invalid(self):
+        request = APIRequestFactory().post(
+            path=self.custom_projects_list_url[2],
+            data={
+                'start_date': self.project.start_date,
+                'managers': [self.user.pk, ],
+                'members': [self.user.pk, ],
+            }
+        )
+        request.user = self.user
+        response = views.ProjectUpdate.as_view()(request, self.project.pk)
+        self.project.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.data.get('errors'), None)
+        self.assertTrue('name' in response.data.get('errors'))
