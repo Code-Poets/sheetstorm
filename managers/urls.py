@@ -1,11 +1,12 @@
-from django.urls import include, path
+from django.conf.urls import url
+from django.urls import include
 from rest_framework import routers
 from managers import views
 
 
 router = routers.DefaultRouter()
-router.register(r'projects', views.ProjectViewSet)
+router.register(r'projects', views.ProjectViewSet, 'project')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    url('^', include(router.urls)),
 ]
