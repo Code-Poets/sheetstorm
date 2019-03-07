@@ -4,7 +4,7 @@
 {% load rest_framework %}
 
 <h1>
-  &nbsp; Employees list &nbsp;
+  &nbsp; {% trans 'Employees' %} &nbsp;
   <a href="{% url 'custom-user-create' %}" class="btn btn-default btn-sm">
     <span class="glyphicon glyphicon-plus"></span>
   </a>
@@ -16,12 +16,12 @@
     <div class="table-responsive">
       <table class="table">
         <tr>
-          <th>Id</th>
-          <th>Email</th>
-          <th>Type</th>
-          <th>First name</th>
-          <th>Last name</th>
-          <th>Projects</th>
+          <th>{% trans 'Id' %}</th>
+          <th>{% trans 'Email' %}</th>
+          <th>{% trans 'Type' %}</th>
+          <th>{% trans 'First name' %}</th>
+          <th>{% trans 'Last name' %}</th>
+          <th>{% trans 'Projects' %}</th>
           <td class=Invisible></td>
           <td class=Invisible></td>
         </tr>
