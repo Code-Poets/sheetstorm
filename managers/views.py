@@ -87,3 +87,12 @@ class ProjectUpdateView(UpdateView):
 
     def get_success_url(self) -> str:
         return reverse("custom-project-detail", kwargs={"pk": self.kwargs["pk"]})
+
+
+def delete_project(request, pk):
+    if request.user.user_type == CustomUser.UserType.ADMIN.name:
+        project = get_object_or_404(Project, pk=pk)
+        project.delete()
+        return redirect('custom-projects-list')
+    else:
+        return redirect('home')
