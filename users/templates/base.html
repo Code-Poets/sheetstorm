@@ -16,6 +16,9 @@
 
   <title>{% block title %}Sheet storm{% endblock %}</title>
 
+    {% block extra_head %}
+      <link rel="stylesheet" type="text/css" href="{% static 'managers/tooltip.css' %}" />
+    {% endblock %}
 </head>
 <body>
   <header>
