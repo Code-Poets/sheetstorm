@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from managers.forms import ProjectForm
 from managers.models import Project
 from managers.serializers import ProjectSerializer
+from managers.serializers import ProjectCreateSerializer
 from users.models import CustomUser
 
 
@@ -42,6 +43,25 @@ class ProjectsList(ListView):
                 projects_queryset = projects_queryset.order_by(self.request.GET.get("sort"))
 
         return projects_queryset
+
+
+class ProjectCreate(APIView):
+    renderer_classes = [renderers.TemplateHTMLRenderer]
+    template_name = 'managers/project_create.html'
+
+    def get(self, request):
+        project_serializer = ProjectCreateSerializer(context={'request': request})
+        return Response({'serializer': project_serializer})
+
+    def post(self, request):
+        project_serializer = ProjectCreateSerializer(data=request.data, context={'request': request})
+        if not project_serializer.is_valid():
+            return Response({
+                'serializer': project_serializer,
+                'errors': project_serializer.errors,
+            })
+        project_serializer.save()
+        return redirect('custom-projects-list')
 
 
 class ProjectDetail(APIView):
