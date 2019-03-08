@@ -63,7 +63,7 @@
           {% for project in object_list.filter_active %}
             <div class="col-sm-4">
               <div class="list-group">
-                  <div class="list-group-item list-group-item-action flex-column align-items-start active">
+                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-action flex-column align-items-start active">
                     <div class="d-flex w-100 justify-content-between">
                       <h4 class="mb-1">{{ project.name }}</h4>
                     </div>
@@ -73,7 +73,7 @@
                                 {{user.first_name}} {{user.last_name}}<br>
                       {% endfor %}</small>
                     <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
-                  </div>
+                  </a>
               </div>
             </div>
             {% if forloop.counter|divisibleby:3 %}
@@ -99,7 +99,7 @@
           {% for project in object_list.filter_terminated %}
             <div class="col-sm-4">
               <div class="list-group">
-                <div class="list-group-item list-group-item-info flex-column align-items-start">
+                <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-info flex-column align-items-start">
                   <div class="d-flex w-100 justify-content-between">
                     <h4 class="mb-1">{{ project.name }}</h4>
                   </div>
@@ -109,7 +109,7 @@
                               {{user.first_name}} {{user.last_name}}<br>
                     {% endfor %}</small>
                   <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
-                </div>
+                </a>
               </div>
             </div>
             {% if forloop.counter|divisibleby:3 %}
@@ -135,7 +135,7 @@
           {% for project in object_list.filter_completed %}
           <div class="col-sm-4">
             <div class="list-group">
-                <div class="list-group-item list-group-item-action list-group-item-success flex-column align-items-start">
+                <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-action list-group-item-success flex-column align-items-start">
                   <div class="d-flex w-100 justify-content-between">
                     <h4 class="mb-1">{{ project.name }}</h4>
                   </div>
@@ -145,7 +145,7 @@
                               {{user.first_name}} {{user.last_name}}<br>
                     {% endfor %}</small>
                   <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
-                </div>
+                </a>
               </div>
             </div>
             {% if forloop.counter|divisibleby:3 %}
@@ -172,11 +172,11 @@
             <div class="col-sm-4">
               <div class="list-group">
                 {% if project.terminated is False and project.stop_date is None %}
-                  <div class="list-group-item list-group-item-action flex-column align-items-start active">
+                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-action flex-column align-items-start active">
                 {% elif project.stop_date is not None %}
-                  <div class="list-group-item list-group-item-success flex-column align-items-start">
+                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-success flex-column align-items-start">
                 {% else %}
-                  <div class="list-group-item list-group-item-info flex-column align-items-start">
+                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-info flex-column align-items-start">
                 {% endif %}
                     <div class="d-flex w-100 justify-content-between">
                       <h4 class="mb-1">{{ project.name }}</h4>
@@ -191,7 +191,7 @@
                                 {{user.first_name}} {{user.last_name}}<br>
                       {% endfor %}</small>
                     <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
-                  </div>
+                  </a>
                 </div>
             </div>
             {% if forloop.counter|divisibleby:3 %}
