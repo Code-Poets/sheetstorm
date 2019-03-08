@@ -8,5 +8,6 @@ router = routers.DefaultRouter()
 router.register(r'projects', views.ProjectViewSet, 'project')
 
 urlpatterns = [
-    url('^', include(router.urls)),
+    url('^api/', include(router.urls)),
+    url('^projects/', views.ProjectsList.as_view(), name='custom-projects-list'),
 ]
