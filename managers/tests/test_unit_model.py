@@ -1,6 +1,7 @@
+import datetime
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from django.utils import timezone
 from managers.commons.constants import MAX_NAME_LENGTH
 from managers.models import Project
 
@@ -10,37 +11,31 @@ class TestProjectModel(TestCase):
         project = Project(
             name='X',
         )
-        with self.assertRaisesRegexp(
-            ValidationError,
-            "This field cannot be null.",
-        ):
+        with self.assertRaises(ValidationError) as exception:
             project.full_clean()
+        self.assertTrue("This field cannot be null." in str(exception.exception))
 
     def test_that_project_name_should_not_be_blank(self):
         project = Project(
-            start_date=timezone.now(),
+            start_date=datetime.datetime.now().date(),
         )
-        with self.assertRaisesRegexp(
-                ValidationError,
-                "This field cannot be blank.",
-        ):
+        with self.assertRaises(ValidationError) as exception:
             project.full_clean()
+        self.assertTrue("This field cannot be blank." in str(exception.exception))
 
     def test_that_project_name_should_not_be_longer_than_set_max_length(self):
         project = Project(
-            start_date=timezone.now(),
-            name='X'*(MAX_NAME_LENGTH+1),
+            start_date=datetime.datetime.now().date(),
+            name='X' * (MAX_NAME_LENGTH + 1),
         )
-        with self.assertRaisesRegexp(
-            ValidationError,
-            "Ensure this value has at most " + str(MAX_NAME_LENGTH) + " characters",
-        ):
+        with self.assertRaises(ValidationError) as exception:
             project.full_clean()
+        self.assertTrue("Ensure this value has at most " + str(MAX_NAME_LENGTH) + " characters" in str(exception.exception))  # pylint: disable=line-too-long # noqa E501
 
     def test_that_project_name_should_be_shorter_than_or_equal_set_max_length(self):
         project = Project(
-            start_date=timezone.now(),
-            name='X'*MAX_NAME_LENGTH,
+            start_date=datetime.datetime.now().date(),
+            name='X' * MAX_NAME_LENGTH,
         )
         try:
             project.full_clean()
