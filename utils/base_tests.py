@@ -1,7 +1,7 @@
-import datetime
 from django.core.exceptions import ValidationError
-from django.test import TestCase
 from django.db.models.base import Model
+from django.test import TestCase
+from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework.serializers import BaseSerializer
 
@@ -109,7 +109,7 @@ class BaseModelTestCase(TestCase):
     Using any other time-related type can result in fail!
     """
     def field_auto_now_test(self, auto_field, update_field, value):
-        with freeze_time(datetime.datetime.now()) as frozen_datetime:
+        with freeze_time(timezone.now()) as frozen_datetime:
             model = self.default_model()
             model.full_clean()
             model.save()
@@ -118,7 +118,7 @@ class BaseModelTestCase(TestCase):
             model.full_clean()
             model.save()
             current_value = getattr(model, auto_field)
-            self.assertEqual(current_value.timestamp(), datetime.datetime.now().timestamp())
+            self.assertEqual(current_value, timezone.now())
 
     """
     Test that specified field should be given default non-null value,
