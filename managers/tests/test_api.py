@@ -193,3 +193,51 @@ class ProjectDetailTests(ProjectTest):
         request.user = self.user
         response = views.ProjectDetail.as_view()(request, self.project.pk + 1)
         self.assertEqual(response.status_code, 404)
+
+
+class ProjectCreateTests(ProjectTest):
+    def setUp(self):
+        super().setUp()
+        self.url = reverse("custom-project-create", kwargs={"pk": self.project.pk})
+        self.data = {
+            'name': 'Another Example Project',
+            'start_date': datetime.datetime.now().date() - datetime.timedelta(days=30),
+            'terminated': False,
+            'managers': [self.user.pk],
+            'members': [self.user.pk],
+        }
+
+    def test_project_create_view_should_display_create_project_form_on_get(self):
+        request = APIRequestFactory().get(path=self.custom_projects_list_url[3])
+        request.user = self.user
+        response = views.ProjectCreate.as_view()(request,)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Create new project')
+
+    def test_project_create_view_should_add_new_project_on_post(self):
+        request = APIRequestFactory().post(
+            path=self.custom_projects_list_url[3],
+            data=self.data
+        )
+        request.user = self.user
+        response = views.ProjectCreate.as_view()(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/managers/projects/')
+        self.assertEqual(Project.objects.filter(name='Another Example Project').count(), 1)
+
+    def test_project_create_view_should_not_add_new_project_on_post_if_data_is_invalid(self):
+        request = APIRequestFactory().post(
+            path=self.custom_projects_list_url[3],
+            data={
+                'start_date': datetime.datetime.now().date() - datetime.timedelta(days=30),
+                'terminated': False,
+                'managers': [self.user.pk, ],
+                'members': [self.user.pk, ],
+            }
+        )
+        request.user = self.user
+        response = views.ProjectCreate.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.data.get('errors'), None)
+        self.assertTrue('name' in response.data.get('errors'))
+        self.assertEqual(Project.objects.filter(name='Another Example Project').count(), 0)
