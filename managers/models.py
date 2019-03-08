@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+
 from managers.commons.constants import MAX_NAME_LENGTH
 from users.models import CustomUser
 
@@ -20,8 +21,8 @@ class Project(models.Model):
     start_date = models.DateField()
     stop_date = models.DateField(null=True, blank=True)
     terminated = models.BooleanField(default=False)
-    managers = models.ManyToManyField(CustomUser, related_name="managers")
-    members = models.ManyToManyField(CustomUser, related_name="members")
+    managers = models.ManyToManyField(CustomUser, related_name="manager_projects")
+    members = models.ManyToManyField(CustomUser, related_name="projects")
 
     objects = ProjectQuerySet.as_manager()
 
