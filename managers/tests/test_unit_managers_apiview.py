@@ -36,6 +36,7 @@ class ProjectTest(TestCase):
         self.project.members.add(self.user)
         self.custom_projects_list_url = [
             reverse('custom-projects-list'),
+            reverse('custom-project-detail', args=(self.project.pk,)),
         ]
 
 
@@ -123,3 +124,20 @@ class ProjectsListTests(ProjectTest):
         projects_list = response.context_data['object_list']
         self.assertTrue(projects_list.ordered)
         self.assertTrue('-members_count' in projects_list.query.order_by)
+
+
+class ProjectDetailTests(ProjectTest):
+    def test_project_detail_view_should_display_project_details_on_get(self):
+        request = APIRequestFactory().get(path=self.custom_projects_list_url[1])
+        request.user = self.user
+        response = views.ProjectDetail.as_view()(request, self.project.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.project.name)
+        project = response.data['project']
+        self.assertEqual(self.project, project)
+
+    def test_project_detail_view_should_return_404_status_code_on_get_if_project_does_not_exist(self):
+        request = APIRequestFactory().get(path=self.custom_projects_list_url[1])
+        request.user = self.user
+        response = views.ProjectDetail.as_view()(request, self.project.pk + 1)
+        self.assertEqual(response.status_code, 404)
