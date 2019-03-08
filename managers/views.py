@@ -3,6 +3,7 @@ from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.views.generic import ListView
 from rest_framework import renderers
 from rest_framework import viewsets
@@ -49,3 +50,32 @@ class ProjectDetail(APIView):
     def get(_request: HttpRequest, pk: int) -> Response:
         project = get_object_or_404(Project, pk=pk)
         return Response({"project": project})
+
+
+class ProjectUpdate(APIView):
+    renderer_classes = [renderers.TemplateHTMLRenderer]
+    template_name = 'managers/project_update.html'
+
+    def get(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        project_serializer = ProjectSerializer(
+            project,
+            context={'request': request},
+        )
+        return Response({'serializer': project_serializer, 'project': project})
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        project_serializer = ProjectSerializer(
+            project,
+            data=request.data,
+            context={'request': request},
+        )
+        if not project_serializer.is_valid():
+            return Response({
+                'serializer': project_serializer,
+                'project': project,
+                'errors': project_serializer.errors,
+            })
+        project_serializer.save()
+        return redirect('custom-project-detail', pk=pk)
