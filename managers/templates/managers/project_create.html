@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load i18n %}
+{% load rest_framework %}
+{% load static %}
+
+<h2>
+  <small>
+    <a href="{% url 'custom-projects-list' %}">
+      <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+  </small>
+  &nbsp;{% trans "Create new project" %}&nbsp;
+</h2>
+
+<div class="modal-dialog" style="margin-bottom:0">
+  <form action="{% url 'custom-project-create' %}" method="post">
+      {% csrf_token %}
+      {% render_form serializer template_pack='rest_framework/vertical' %}
+          <div class="tool_tip">
+            <font color="grey">{% trans "How to add more employees" %}?</font>
+            <span class="tooltip_text">{% trans "Select by CTRL + click" %}</span>
+          </div>
+      <br/><br/><br/>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus"></span>{% trans "Create" %}
+      </button>
+  </form>
+</div>
+
+{% endblock %}
