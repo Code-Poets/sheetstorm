@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+
+<h2>
+  <small>
+    <a href="{% url 'custom-projects-list' %}">
+      <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+  </small>
+  &nbsp;{{ project.name }}&nbsp;
+  <small>
+    <a href="#">
+      <span class="glyphicon glyphicon-pencil"></span>
+    </a>
+  </small>
+</h2>
+
+<br/>
+
+<u1>
+  <b>{% trans "Started at:" %} </b> {{ project.start_date }}
+  {% if project.terminated %}
+    &nbsp; <font color="Grey"> {% trans  "terminated" %}</font>
+  {% endif %}
+  <br>
+
+  {% if project.stop_date is not None %}
+    <b>{% trans "Completed at:" %} </b>
+    {{ project.stop_date }}<br>
+  {% endif %}
+
+  <br/>
+
+  <b>{% trans "Managers:" %} </b><br>
+  <div class="container">
+    <br/>
+    {% for user in project.managers.all %}
+    <div class="col-sm-3">
+      <div class="list-group">
+        <div class="list-group-item list-group-item-action list-group-item-warning">
+          <table>
+            <tr>
+              <td rowspan="2">
+                <font size="5"><span class="glyphicon glyphicon-user"></span></font>
+              </td>
+              <td>
+                &nbsp; <small>{{ user.email }} </small>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                &nbsp; <small>{{ user.first_name }} {{ user.last_name }}</small>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <br/>
+
+  <b>{% trans "Members:" %} </b><br>
+    <div class="container">
+      <br/>
+      {% for user in project.members.all %}
+      <div class="col-sm-3">
+        <div class="list-group">
+          <div class="list-group-item list-group-item-action list-group-item-dark">
+            <table>
+              <tr>
+                <td rowspan="2">
+                  <font size="5"><span class="glyphicon glyphicon-user"></span></font>
+                </td>
+                <td>
+                  &nbsp; <small>{{ user.email }} </small>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  &nbsp; <small>{{ user.first_name }} {{ user.last_name }}</small>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+</u1>
+
+{% endblock %}
