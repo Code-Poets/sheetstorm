@@ -1,8 +1,11 @@
 import datetime
 import logging
 from typing import Any
+from typing import Union
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
+from django.db.models.query import Prefetch
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import QueryDict
@@ -14,21 +17,28 @@ from django.utils.decorators import method_decorator
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
+from django.views.generic.base import ContextMixin
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE
+from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
+from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
+from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
 from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
+from employees.common.strings import MonthNavigationText
 from employees.common.strings import ProjectReportDetailStrings
 from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
+from employees.forms import MonthSwitchForm
 from employees.forms import ProjectJoinForm
 from employees.forms import ReportForm
 from employees.models import Report
@@ -54,6 +64,87 @@ class ReportViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer: ReportSerializer) -> None:
         logger.info(f"Perform create method for user: {self.request.user}")
         serializer.save(author=self.request.user)
+
+
+class MonthNavigationMixin(ContextMixin):
+    url_name = ""
+    kwargs = {}  # type: dict
+
+    def _get_previous_month_url(self, year: int, month: int, pk: int) -> str:
+        date = datetime.date(year=year, month=month, day=1) + relativedelta(months=-1)
+        return reverse(self.url_name, kwargs={"pk": pk, "year": date.year, "month": date.month})
+
+    def _get_next_month_url(self, year: int, month: int, pk: int) -> str:
+        date = datetime.date(year=year, month=month, day=1) + relativedelta(months=+1)
+        return reverse(self.url_name, kwargs={"pk": pk, "year": date.year, "month": date.month})
+
+    def _get_recent_month_url(self, pk: int) -> str:
+        date = datetime.datetime.now().date()
+        return reverse(self.url_name, kwargs={"pk": pk, "year": date.year, "month": date.month})
+
+    @staticmethod
+    def _get_title_date(year: int, month: int) -> str:
+        date = datetime.date(year=year, month=month, day=1)
+        return date.strftime("%m/%y")
+
+    def _date_out_of_bonds(self) -> bool:
+        year_too_old = int(self.kwargs["year"]) < MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
+        date_too_old = (
+            int(self.kwargs["month"]) < MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
+            and int(self.kwargs["year"]) == MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
+        )
+        year_too_far = int(self.kwargs["year"]) > MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
+        date_too_far = (
+            int(self.kwargs["month"]) > MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE
+            and int(self.kwargs["year"]) == MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
+        )
+        return year_too_old or date_too_old or year_too_far or date_too_far
+
+    def _get_month_navigator_params(self) -> dict:
+        disable_next_button = False
+        disable_previous_button = False
+        year = int(self.kwargs["year"])
+        month = int(self.kwargs["month"])
+        pk = self.kwargs.get("pk", None)
+
+        if month == MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE and year == MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE:
+            disable_next_button = True
+        elif month == MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE and year == MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE:
+            disable_previous_button = True
+
+        return {
+            "path": self.request.path,
+            "navigation_text": MonthNavigationText,
+            "month_form": MonthSwitchForm(initial_date=datetime.date(year=year, month=month, day=1)),
+            "next_month_url": self._get_next_month_url(year, month, pk),
+            "recent_month_url": self._get_recent_month_url(pk),
+            "previous_month_url": self._get_previous_month_url(year, month, pk),
+            "disable_next_button": disable_next_button,
+            "disable_previous_button": disable_previous_button,
+            "title_date": self._get_title_date(year, month),
+        }
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data.update(self._get_month_navigator_params())
+        return context_data
+
+    def redirect_to_another_month(self, request: HttpRequest) -> HttpResponseRedirectBase:
+        post_data = request.POST.copy()
+        post_data["date"] = datetime.datetime.strptime(post_data["date"], "%m-%Y")
+        form = MonthSwitchForm(data=post_data)
+        if form.is_valid():
+            return redirect(
+                reverse(
+                    self.url_name,
+                    kwargs={"pk": self.kwargs["pk"], "year": post_data["date"].year, "month": post_data["date"].month},
+                )
+            )
+        else:
+            return redirect(request.path)
+
+    def redirect_to_current_month(self) -> HttpResponseRedirectBase:
+        return redirect(self._get_recent_month_url(int(self.kwargs["pk"])))
 
 
 @method_decorator(login_required, name="dispatch")
@@ -263,16 +354,34 @@ class AdminReportView(UpdateView):
     check_permissions(allowed_user_types=[CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name]),
     name="dispatch",
 )
-class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView):
+class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, MonthNavigationMixin):
     template_name = "employees/project_report_list.html"
     model = Project
-    queryset = Project.objects.prefetch_related("report_set")
+    url_name = "project-report-list"
+
+    def get_queryset(self) -> QuerySet:
+        return Project.objects.prefetch_related(
+            Prefetch(
+                "report_set",
+                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+            )
+        )
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context = super().get_context_data(**kwargs)
         context["UI_text"] = ProjectReportListStrings
         context["monthly_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_authors()
         return context
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Union[Response, HttpResponseRedirectBase]:
+        if self._date_out_of_bonds():
+            return self.redirect_to_current_month()
+        return super().get(request, *args, **kwargs)
+
+    def post(  # pylint: disable=unused-argument
+        self, request: HttpRequest, pk: int, year: int, month: int
+    ) -> HttpResponseRedirectBase:
+        return self.redirect_to_another_month(request)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -291,7 +400,10 @@ class ProjectReportDetail(UserIsManagerOfCurrentReportProjectMixin, UpdateView):
         return context_data
 
     def get_success_url(self) -> str:
-        return reverse("project-report-list", kwargs={"pk": self.object.project.id})
+        return reverse(
+            "project-report-list",
+            kwargs={"pk": self.object.project.id, "year": self.object.date.year, "month": self.object.date.month},
+        )
 
     def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
         self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
