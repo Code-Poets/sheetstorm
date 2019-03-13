@@ -9,6 +9,7 @@
   <script src="//code.jquery.com/jquery-1.12.4.js"></script>
   <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script type="text/javascript" src="{% static 'users/scripts/delete_account_popup.js' %}"></script>
+  <script type="text/javascript" src="{% static 'users/scripts/update_account_popup.js' %}"></script>
 </head>
 
       <div class="modal-dialog" style="margin-bottom:0">
@@ -36,7 +37,7 @@
             <form class="form-horizonal" action="{% url 'custom-user-update-by-admin' pk=user_detail.pk %}" method="POST">
               {% csrf_token %}
               {% render_form serializer template_pack='rest_framework/vertical' %}
-              <button type="submit" class="btn btn-success">
+              <button type="button" id="opener_user_account_update" class="btn btn-success">
                 <span class="glyphicon glyphicon-ok"></span> Update
               </button>
               <a href="{% url 'custom-user-update-by-admin' pk=user.pk %}" class="btn btn btn-default">
@@ -44,6 +45,7 @@
               </a>
             </form>
         </div>
+
 </br>
 </br>
 
@@ -59,6 +61,11 @@
   <div id="dialog_info" style="display: none" title="{% trans 'Wrong way' %}" align="center">
     {% trans 'If you want that,' %} <br/>
     {% trans 'go to the Django Admin site' %}.
+  </div>
+
+  <div id="dialog_user_account_update" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
+    {% trans 'Do you want to update' %} <br/> <b>{{ user_detail.email }} </b>
+    {% trans ' account' %}?
   </div>
 
   <br><br>
