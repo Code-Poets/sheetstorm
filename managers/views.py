@@ -9,6 +9,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.shortcuts import reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
@@ -72,6 +73,12 @@ class ProjectsListView(ListView):
 class ProjectDetailView(UserIsManagerOfCurrentProjectMixin, DetailView):
     template_name = "managers/project_detail.html"
     model = Project
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["year"] = timezone.now().year
+        context["month"] = timezone.now().month
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
