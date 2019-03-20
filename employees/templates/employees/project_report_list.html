@@ -19,14 +19,14 @@
             <thead>
                 <tr>
                     <th class="project-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+                    <th class="visible-print-block project-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
                     <th class="project-reports-task-activity-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
                     <th class="project-reports-work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
                     <th class="project-reports-description-header">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-creation-date-header">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-last-update-header">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-editable-header">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
-                    <td class="project-reports-edit-button-header Invisible"></td>
+                    <th class="project-reports-creation-date-header hidden-print">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-last-update-header hidden-print">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-editable-header hidden-print">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
+                    <td class="project-reports-edit-button-header hidden-print Invisible"></td>
                 </tr>
             </thead>
             <tbody>
@@ -40,14 +40,14 @@
                     {% else %}
                     <tr>
                     {% endif %}
-                    <td class="project-reports-project-column" >{{ report.project.name }}</td>
+                    <td class="visible-print-block project-reports-project-column" >{{ report.project.name }}</td>
                     <td class="project-reports-task-activity-column">{{ report.task_activities }}</td>
                     <td class="project-reports-work-hours-column">{{ report.work_hours_str }}</td>
                     <td class="project-reports-description-column">{{ report.markdown_description|safe }}</td>
-                    <td class="project-reports-creation-date-column">{{ report.creation_date }}</td>
-                    <td class="project-reports-last-update-column">{{ report.last_update }}</td>
-                    <td class="project-reports-editable-column">{{ report.editable|yesno:"False,True" }}</td>
-                    <td class="project-reports-edit-button-column Invisible">
+                    <td class="project-reports-creation-date-column hidden-print">{{ report.creation_date }}</td>
+                    <td class="project-reports-last-update-column hidden-print">{{ report.last_update }}</td>
+                    <td class="project-reports-editable-column hidden-print">{{ report.editable|yesno:"False,True" }}</td>
+                    <td class="project-reports-edit-button-column hidden-print Invisible">
                         <a href="{% url 'project-report-detail' pk=report.id %}" class="btn btn-info">
                             <span class="glyphicon glyphicon-pencil"></span>
                         </a>
