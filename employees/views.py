@@ -119,9 +119,20 @@ class ReportDetail(APIView):
         permissions.IsAuthenticated,
     )
 
+    def _create_serializer(self, report, data=None):
+        if data is None:
+            reports_serializer = ReportSerializer(report, context={'request': self.request},)
+        else:
+            reports_serializer = ReportSerializer(report, data=data, context={'request': self.request}, )
+        reports_serializer.fields['project'].queryset = \
+            Project.objects.filter(
+                members__id=report.author.pk
+        ).order_by('name')
+        return reports_serializer
+
     def get(self, request, pk):
         report = get_object_or_404(Report, pk=pk)
-        serializer = ReportSerializer(report, context={'request': request})
+        serializer = self._create_serializer(report)
         return Response({
             'serializer': serializer,
             'report': report,
@@ -131,11 +142,7 @@ class ReportDetail(APIView):
     def post(self, request, pk):
         if "discard" not in request.POST:
             report = get_object_or_404(Report, pk=pk)
-            serializer = ReportSerializer(
-                report,
-                data=request.data,
-                context={'request': request}
-            )
+            serializer = self._create_serializer(report, request.data)
             if not serializer.is_valid():
                 return Response({
                     'serializer': serializer,
