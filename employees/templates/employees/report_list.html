@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+
+<h1>{{ UI_text.PAGE_TITLE.value }}</h1>
+
+<div class="modal-dialog">
+    <form action="{% url 'custom-report-list' %}" method="POST">
+        {% csrf_token %}
+        {% render_form serializer template_pack='rest_framework/vertical' %}
+        <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+    </form>
+</div>
+</br>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th class="date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+                <th class="project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+                <th class="work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+                <th>{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+                <td class="edit-button-header Invisible"></td>
+            </tr>
+            {% for date, reports in reports_dict.items %}
+            <tr>
+                <td class="date-column" rowspan={{ reports|length }}>
+                    {{ date }}
+                </td>
+                {% for report in reports %}
+                    {% if forloop.counter > 1 %}
+                    <tr>
+                    {% endif %}
+                <td class="project-column">
+                    {{ report.project }}
+                </td>
+                <td class="work-hours-column">
+                    {{ report.work_hours }}
+                </td>
+                <td class="description-column">
+                    {{ report.description }}
+                </td>
+                <td class="edit-button-column Invisible">
+                    {% if report.editable %}
+                    <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

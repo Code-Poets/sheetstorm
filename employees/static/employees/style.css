@@ -1,0 +1,44 @@
+#dialog {
+    display: none;
+    text-align: center;
+}
+
+.modal-dialog {
+    margin-bottom: 0;
+}
+
+.date-header {
+    width: 11.23%;
+}
+
+.project-header {
+    width: 20.18%;
+}
+
+.work-hours-header {
+    width: 8.16%;
+}
+
+.edit-button-header {
+    width: 8.77%;
+}
+
+.date-column {
+    text-align: left;
+}
+
+.project-column {
+    text-align: left;
+}
+
+.description-column {
+    text-align: left;
+}
+
+.work-hours-column {
+    text-align: right;
+}
+
+.edit-button-column {
+    text-align: right;
+}
