@@ -3,7 +3,7 @@ from employees.common.strings import MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE
 
 
 class MaxDecimalValueValidator(BaseValidator):
-    message = MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE + '%(limit_value)s.'
+    message = MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE
     code = 'max_decimal_value'
 
     def compare(self, a, b):

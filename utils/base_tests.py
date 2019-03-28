@@ -178,9 +178,11 @@ class BaseSerializerTestCase(TestCase):
     """
     Private method containing base code for running serializer validation tests.
     """
-    def _field_input_acceptance_test(self, field, value, is_valid):
+    def _field_input_acceptance_test(self, field, value, is_valid, error_message=None):
         serializer = self.initiate_serializer(field, value)
         self.assertEqual(serializer.is_valid(), is_valid)
+        if error_message is not None:
+            self.assertEqual(str(serializer.errors[field][0]), error_message)
 
     """
     Test that putting specified value in specified field should result in successful serializer validation.
@@ -189,17 +191,18 @@ class BaseSerializerTestCase(TestCase):
         self._field_input_acceptance_test(
             field=field,
             value=value,
-            is_valid=True
+            is_valid=True,
         )
 
     """
     Test that putting value in specified field should not result in successful serializer validation.
     """
-    def field_should_not_accept_input(self, field, value):
+    def field_should_not_accept_input(self, field, value, error_message=None):
         self._field_input_acceptance_test(
             field=field,
             value=value,
-            is_valid=False
+            is_valid=False,
+            error_message=error_message,
         )
 
     """
