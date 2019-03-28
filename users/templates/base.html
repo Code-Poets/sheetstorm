@@ -4,6 +4,7 @@
     {% load static %}
     {% load i18n %}
     {% load rest_framework %}
+    {% load user_type_tags %}
 
     <link rel="stylesheet" type="text/css" href="{% static 'users/center_style.css' %}" />
 
@@ -19,14 +20,19 @@
 <body>
   <header>
     {% if user.is_authenticated %}
-
+      {% get_admin_user_type as admin %}
+      {% get_manager_user_type as manager %}
       <table>
         <tr><br /></tr>
         <tr>
           <td class="padding"><a href="{% url 'home' %}">{% trans 'Home' %}</a></td>
-          <td class="padding"><a href="{% url 'custom-user-update' user.id %}">Account</a></td>
-            {% if user.user_type == "ADMIN" %}
+          <td class="padding"><a href="{% url 'custom-user-update' user.id %}">{% trans 'Account' %}</a></td>
+            {% if user.user_type == admin %}
           <td class="padding"><a href="{% url 'custom-users-list' %}">{% trans 'Employees' %}</a></td>
+          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
+            {% endif %}
+            {% if user.user_type == manager %}
+          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
             {% endif %}
           <td class="padding"><a href="{% url 'custom-report-list' %}">{% trans 'Reports' %}</a></td>
           <td class="padding"><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></td>
