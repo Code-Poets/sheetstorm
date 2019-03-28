@@ -1,8 +1,11 @@
 from django.db.models import Count
 from django.db.models.functions import Lower
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from rest_framework import renderers
 from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from managers.models import Project
 from managers.serializers import ProjectSerializer
@@ -33,3 +36,12 @@ class ProjectsList(ListView):
                 projects_queryset = projects_queryset.order_by(self.request.GET.get('sort'))
 
         return projects_queryset
+
+
+class ProjectDetail(APIView):
+    renderer_classes = [renderers.TemplateHTMLRenderer]
+    template_name = 'managers/project_detail.html'
+
+    def get(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        return Response({'project': project})
