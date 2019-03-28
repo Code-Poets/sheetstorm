@@ -27,6 +27,10 @@
           <td class="padding"><a href="{% url 'custom-user-update' user.id %}">Account</a></td>
             {% if user.user_type == "ADMIN" %}
           <td class="padding"><a href="{% url 'custom-users-list' %}">{% trans 'Employees' %}</a></td>
+          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
+            {% endif %}
+            {% if user.user_type == "MANAGER" %}
+          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
             {% endif %}
           <td class="padding"><a href="{% url 'custom-report-list' %}">{% trans 'Reports' %}</a></td>
           <td class="padding"><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></td>
