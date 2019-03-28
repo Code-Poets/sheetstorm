@@ -42,3 +42,8 @@
 .edit-button-column {
     text-align: right;
 }
+
+textarea.form-control {
+      height: 200px;
+      resize: vertical;
+}
