@@ -7,6 +7,7 @@ from django.test import TestCase
 
 from employees.common.strings import ReportValidationStrings
 from employees.forms import DurationFieldForm
+from employees.forms import MonthSwitchForm
 from employees.forms import ProjectJoinForm
 from managers.models import Project
 
@@ -49,3 +50,19 @@ class TestDurationFieldForm:
         with pytest.raises(ValidationError) as exception:
             self._test_duration_field_form(initial_value, input_value)
         assertpy.assert_that(exception.value.message).is_equal_to(ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
+
+
+class MonthSwitchFormTests(TestCase):
+    def test_init_with_provided_optional_date_parameter_should_add_equal_initial_value_to_date_field(self):
+        month_switcth_form = MonthSwitchForm(initial_date=datetime.date(year=2019, month=5, day=1))
+        self.assertEqual(month_switcth_form.fields["date"].initial, datetime.date(year=2019, month=5, day=1))
+
+    def test_eq_should_return_true_if_both_forms_share_the_same_date_field_data(self):
+        form1 = MonthSwitchForm(initial_date=datetime.date(year=2019, month=5, day=1))
+        form2 = MonthSwitchForm(initial_date=datetime.date(year=2019, month=5, day=1))
+        self.assertTrue(form1 == form2)
+
+    def test_eq_should_return_false_if_both_forms_have_different_initial_value(self):
+        form1 = MonthSwitchForm(initial_date=datetime.date(year=2019, month=5, day=1))
+        form2 = MonthSwitchForm()
+        self.assertTrue(form1 != form2)
