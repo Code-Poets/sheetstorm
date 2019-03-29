@@ -15,7 +15,7 @@ class AccessPermissionsTestCase(TestCase):
     def test_that_sending_request_to_view_should_be_allowed_only_for_defined_user_types(self):
         urls_to_allowed_user_types = {
             # Employees.
-            reverse("custom-report-list"): [
+            reverse("custom-report-list", kwargs={"year": 2019, "month": 5}): [
                 CustomUser.UserType.EMPLOYEE.name,
                 CustomUser.UserType.MANAGER.name,
                 CustomUser.UserType.ADMIN.name,

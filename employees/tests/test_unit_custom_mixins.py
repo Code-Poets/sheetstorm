@@ -16,6 +16,13 @@ class MonthNavigationMixinCustomMethodsTests(TestCase):
     def setUp(self):
         self.mixin = MonthNavigationMixin()
 
+    def test_get_url_from_date_should_return_url_with_no_pk_if_none_is_provided(self):
+        current_date = datetime.datetime.now().date()
+        self.mixin.url_name = "custom-report-list"
+        self.assertEqual(
+            self.mixin._get_url_from_date(current_date, None), f"/reports/{current_date.year}/{current_date.month}/"
+        )
+
     def test_get_title_date_should_return_five_character_string_containing_month_number_separator_and_two_last_digits_of_year_number(
         self
     ):
@@ -37,19 +44,19 @@ class MonthNavigationMixinCustomMethodsTests(TestCase):
         )
 
 
-class TestDateOutOfBondsMethod:
-    def _test_date_out_of_bonds_method(self, year, month):  # pylint: disable=no-self-use
+class TestDateOutOfBoundsMethod:
+    def _test_date_out_of_bounds_method(self, year, month):  # pylint: disable=no-self-use
         mixin = MonthNavigationMixin()
         mixin.kwargs = {"year": year, "month": month}
-        return mixin._date_out_of_bonds()
+        return mixin._date_out_of_bounds()
 
     @pytest.mark.parametrize(("year", "month"), [("2019", "5"), ("2020", "4"), ("2099", "12")])
-    def test_date_out_of_bonds_should_return_true_if_selected_date_is_inside_the_defined_scope(self, year, month):
-        assertpy.assert_that(self._test_date_out_of_bonds_method(year, month)).is_false()
+    def test_date_out_of_bounds_should_return_true_if_selected_date_is_inside_the_defined_scope(self, year, month):
+        assertpy.assert_that(self._test_date_out_of_bounds_method(year, month)).is_false()
 
     @pytest.mark.parametrize(("year", "month"), [("2019", "4"), ("2018", "9"), ("2100", "1")])
-    def test_date_out_of_bonds_should_return_false_if_selected_date_is_outside_of_defined_scope(self, year, month):
-        assertpy.assert_that(self._test_date_out_of_bonds_method(year, month)).is_true()
+    def test_date_out_of_bounds_should_return_false_if_selected_date_is_outside_of_defined_scope(self, year, month):
+        assertpy.assert_that(self._test_date_out_of_bounds_method(year, month)).is_true()
 
 
 class MonthNavigationMixinContextDataTests(TestCase):

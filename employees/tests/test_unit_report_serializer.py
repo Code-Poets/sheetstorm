@@ -64,7 +64,7 @@ class ReportSerializerTests(DataSetUpToTests):
         )
         report.full_clean()
         report.save()
-        request = APIRequestFactory().get(path=reverse("custom-report-list"))
+        request = APIRequestFactory().get(path=reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         data = self.required_input.copy()
         data["work_hours"] = "12:00"
         request.user = data["author"]
@@ -83,7 +83,7 @@ class ReportSerializerTests(DataSetUpToTests):
         )
         report.full_clean()
         report.save()
-        request = APIRequestFactory().get(path=reverse("custom-report-list"))
+        request = APIRequestFactory().get(path=reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         data = self.required_input.copy()
         data["work_hours"] = "12.01"
         request.user = data["author"]
