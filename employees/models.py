@@ -1,6 +1,7 @@
 from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db import models
+from markdown_deux import markdown
 
 from employees.common.constants import ReportModelConstants
 from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
@@ -53,3 +54,7 @@ class Report(models.Model):
     @property
     def work_hours_str(self):
         return self.work_hours.to_eng_string().replace('.', ':')
+
+    @property
+    def markdown_description(self):
+        return markdown(self.description)

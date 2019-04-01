@@ -42,8 +42,8 @@
                     {{ report.work_hours_str }}
                 </td>
                 <td class="description-column">
-                    {{ report.description }}
-                </td>
+                    {{ report.markdown_description|safe|linebreaksbr }}
+                <td>
                 <td class="edit-button-column Invisible">
                     {% if report.editable %}
                     <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">
