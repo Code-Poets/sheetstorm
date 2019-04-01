@@ -4,60 +4,59 @@
 {% load rest_framework %}
 
 <h1>
-  &nbsp; {% trans 'Employees' %} &nbsp;
-  <a href="{% url 'custom-user-create' %}" class="btn btn-default btn-sm">
-    <span class="glyphicon glyphicon-plus"></span>
-  </a>
+    &nbsp; {% trans 'Employees' %} &nbsp;
+    <a href="{% url 'custom-user-create' %}" class="btn btn-default btn-sm">
+        <span class="glyphicon glyphicon-plus"></span>
+    </a>
 </h1>
 <br>
 
 <ul>
-  <div class="container">
-    <div class="table-responsive">
-      <table class="table">
-        <tr>
-          <th>{% trans 'Id' %}</th>
-          <th>{% trans 'Email' %}</th>
-          <th>{% trans 'Type' %}</th>
-          <th>{% trans 'First name' %}</th>
-          <th>{% trans 'Last name' %}</th>
-          <th>{% trans 'Projects' %}</th>
-          <td class=Invisible></td>
-          <td class=Invisible></td>
-        </tr>
-        <tr>
-          {% for user in users_list %}
-          <td>{{ forloop.counter }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.user_type }}</td>
-          <td>{{ user.first_name }}</td>
-          <td>{{ user.last_name }}</td>
-          <td>
-            {% for members in user.members.all %}
-              {{ members.name }}
-              {% for managers in members.managers.all %}
-                {% if managers.email == user.email %}
-                  [M]
-                {% endif %}
-              {% endfor %}
-              ,
-            {% endfor %}
-          </td>
-          <td class=Invisible align="center">
-            <a href="{% url 'custom-user-update-by-admin' pk=user.id %}" class="btn btn-info">
-              <span class="glyphicon glyphicon-pencil"></span>
-            </a>
-          </td>
-          <td class=Invisible align="center">
-            <a href="{% url 'custom-user-update-by-admin' pk=user.id %}" class="btn btn-warning">
-              <span class="glyphicon glyphicon-list-alt"></span>
-            </a>
-          </td>
-        </tr>
-          {% endfor %}
-      </table>
+    <div class="container">
+        <div class="table-responsive">
+            <table class="table">
+                <tr>
+                    <th>{% trans 'Id' %}</th>
+                    <th>{% trans 'Email' %}</th>
+                    <th>{% trans 'Type' %}</th>
+                    <th>{% trans 'First name' %}</th>
+                    <th>{% trans 'Last name' %}</th>
+                    <th>{% trans 'Projects' %}</th>
+                    <td class=Invisible></td>
+                    <td class=Invisible></td>
+                </tr>
+                <tr>
+                    {% for user in users_list %}
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.user_type }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>
+                        {% for project in user.projects.all %}
+                        {{ project.name }}{% if user in project.managers.all %}[M]{% endif %},
+                        {% endfor %}
+                        {% for manager_project in user.manager_projects.all %}
+                            {% if user not in manager_project.members.all %}
+                                {{ manager_project.name }}[M],
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class=Invisible align="center">
+                        <a href="{% url 'custom-user-update-by-admin' pk=user.id %}" class="btn btn-info">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                    </td>
+                    <td class=Invisible align="center">
+                        <a href="{% url 'custom-user-update-by-admin' pk=user.id %}" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-list-alt"></span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
-  </div>
 </ul>
 
 {% endblock %}

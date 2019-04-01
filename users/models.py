@@ -3,6 +3,8 @@ from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django_countries.fields import CountryField
 
 from users.common import constants
@@ -171,3 +173,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         Sends an email to this user.
         """
         send_mail(subject, message, from_email, [self.email])
+
+
+@receiver(post_save, sender=CustomUser)
+def update_from_manager_to_employee(sender, **kwargs):
+    user = kwargs['instance']
+    if user.user_type == CustomUser.UserType.EMPLOYEE.name:
+        user.manager_projects.clear()
