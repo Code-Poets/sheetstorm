@@ -13,7 +13,8 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ UI_text.PAGE_TITLE.value }}</h1>
+{% include "employees/month_navigation_bar.html" %}
+<h1>{{ UI_text.PAGE_TITLE.value }} {{ title_date }}</h1>
 
 <input class="hidden-print" type="button" id="opener" value="{{ UI_text.JOIN_PROJECT_BUTTON.value }}"/>
 
@@ -21,7 +22,7 @@
     {% for error in errors.non_field_errors %}
     <h4><font color="red">{{ error }}</font></h4>
     {% endfor %}
-    <form action="{% url 'custom-report-list' %}" method="POST">
+    <form action="{{ path }}" method="POST">
         {% csrf_token %}
         {% render_form serializer template_pack='rest_framework/vertical' %}
         <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown is supported</a><br/>
@@ -30,7 +31,7 @@
 </div>
 
 <div class="hidden-print" id="dialog" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
-    <form action="{% url 'custom-report-list' %}" id="join_form" method="POST">
+    <form action="{{ path }}" id="join_form" method="POST">
         {% csrf_token %}
         {{ project_form }}
         <input type="submit" name="join" value="{{ UI_text.JOIN_POPUP_YES.value }}">
@@ -96,6 +97,7 @@
 {% endblock %}
 
 {% block extra_script %}
+    {{ month_form.media }}
     <script src="//code.jquery.com/jquery-1.12.4.js"></script>
     <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script type="text/javascript">
