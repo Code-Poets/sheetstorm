@@ -1,7 +1,10 @@
+appdirs==1.4.3
 atomicwrites==1.2.1
 attrs==18.2.0
+black==19.3b0
 certifi==2018.8.24
 chardet==3.0.4
+Click==7.0
 coverage==4.5.2
 defusedxml==0.5.0
 Django==2.1.1
@@ -41,4 +44,5 @@ requests==2.19.1
 requests-oauthlib==1.0.0
 six==1.11.0
 text-unidecode==1.2
+toml==0.10.0
 urllib3==1.23
