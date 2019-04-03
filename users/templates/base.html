@@ -23,7 +23,9 @@
 {% url 'custom-user-update' user.id as account_url %}
 {% url 'custom-users-list' as custom_users_list_url %}
 {% url 'custom-projects-list' as custom_projects_list_url %}
-{% url 'custom-report-list' as custom_report_list_url %}
+{% now "Y" as year %}
+{% now "n" as month %}
+{% url 'custom-report-list' year month as custom_report_list_url %}
 <div class="wrapper">
     <!-- Sidebar Holder -->
     <nav id="sidebar" class="hidden-print">
@@ -76,6 +78,7 @@
             {% if user.user_type == manager or user.user_type == admin %}
             <li>
                 {% if request.path == custom_projects_list_url %}
+                <!--highlight won't work now because of date parameters-->
                 <a class="active" href="{% url 'custom-projects-list' %}">
                     <img src="{% static 'users/images/white/iko-04.png' %}">
                     <span>{% trans 'Projects' %}</span>
@@ -90,12 +93,12 @@
             {% endif %}
             <li>
                 {% if request.path == custom_report_list_url %}
-                <a class="active" href="{% url 'custom-report-list' %}">
+                <a class="active" href="{% url 'custom-report-list' year month %}">
                     <img src="{% static 'users/images/white/iko-05.png' %}">
                     <span>{% trans 'Reports' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-report-list' %}">
+                <a href="{% url 'custom-report-list' year month %}">
                     <img src="{% static 'users/images/grey/ico-05.png' %}">
                     <span>{% trans 'Reports' %}</span>
                 </a>
