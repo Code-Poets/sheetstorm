@@ -159,7 +159,9 @@ disable=print-statement,
         unused-wildcard-import,
         wildcard-import,
         missing-final-newline,
-        parse-error
+        parse-error,
+        import-error,
+        line-too-long,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
