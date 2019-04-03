@@ -18,7 +18,7 @@
             {% csrf_token %}
             {{ form|crispy }}
             <input type="submit" value="{{ UI_text.UPDATE_REPORT_BUTTON.value }}">
-            <button type="button" name="discard"><a href="{% url 'custom-report-list' %}">{{ UI_text.DISCARD_CHANGES_BUTTON.value }}</a></button>
+            <button type="button" name="discard"><a href="{% url 'custom-report-list' object.date.year object.date.month %}">{{ UI_text.DISCARD_CHANGES_BUTTON.value }}</a></button>
             <input type="button" id="opener" value="{{ UI_text.DELETE_REPORT_BUTTON.value }}">
        </div>
     </form>
