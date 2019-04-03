@@ -11,7 +11,7 @@ router.register(r"reports", views.ReportViewSet, "report")
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
     url(r"^api/", include(router.urls)),
-    url(r"^reports/$", views.ReportList.as_view(), name="custom-report-list"),
+    url(r"^reports/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$", views.ReportList.as_view(), name="custom-report-list"),
     url(r"^reports/(?P<pk>[0-9]+)/$", views.ReportDetailView.as_view(), name="custom-report-detail"),
     url(r"^reports/(?P<pk>[0-9]+)/delete/$", views.ReportDeleteView.as_view(), name="custom-report-delete"),
     url(r"^reports/author/(?P<pk>[0-9]+)/$", views.AuthorReportView.as_view(), name="author-report-list"),
