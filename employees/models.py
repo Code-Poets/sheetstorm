@@ -36,6 +36,11 @@ class Report(models.Model):
 
     date = models.DateField()
     description = models.CharField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
+    task_activities = models.CharField(
+        max_length=ReportModelConstants.TASK_ACTIVITIES_MAX_LENGTH.value,
+        choices=TaskType.choices(),
+        default=TaskType.OTHER.name,
+    )
     creation_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(CustomUser, on_delete=models.PROTECT)

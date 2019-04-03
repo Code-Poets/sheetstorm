@@ -9,3 +9,4 @@ class ReportModelConstants(Enum):
     MAX_WORK_HOURS = Decimal("24.00")
     MIN_WORK_HOURS = Decimal("0.01")
     MAX_WORK_HOURS_DECIMAL_VALUE = Decimal("0.59")
+    TASK_ACTIVITIES_MAX_LENGTH = 20
