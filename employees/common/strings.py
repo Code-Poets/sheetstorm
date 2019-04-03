@@ -52,4 +52,3 @@ class TaskActivitiesStrings(Enum):
     TRAINING = ugettext_lazy("Training")
     MENTORSHIP = ugettext_lazy("Mentorship")
     GRAPHIC_DESIGN = ugettext_lazy("Graphic design")
-
