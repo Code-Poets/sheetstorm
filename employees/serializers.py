@@ -45,7 +45,7 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Report
-        fields = ("url", "date", "project", "author", "description", "work_hours")
+        fields = ("url", "date", "project", "author", "task_activities", "description", "work_hours")
 
     def to_representation(self, instance: Report) -> Report:
         data = super().to_representation(instance)
