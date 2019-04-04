@@ -1,5 +1,11 @@
+from typing import Type
+from typing import Union
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest
+from django.http import HttpResponse
+from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
@@ -25,52 +31,54 @@ from users.serializers import UserUpdateSerializer
 
 
 @api_view()
-def api_root(request, format=None):
+def api_root(request: HttpRequest, _format: str = None) -> Response:
     if request.user.is_authenticated and request.user.user_type == CustomUser.UserType.ADMIN.name:
         return Response(
             {
-                "users": reverse("users-list", request=request, format=format),
-                "account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=format),
+                "users": reverse("users-list", request=request, format=_format),
+                "account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=_format),
             }
         )
     elif request.user.is_authenticated:
         return Response(
-            {"account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=format)}
+            {"account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=_format)}
         )
     else:
-        return Response({"registration": reverse("rest_register", request=request, format=format)})
+        return Response({"registration": reverse("rest_register", request=request, format=_format)})
 
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = (AuthenticatedAdmin,)
 
-    def get_serializer_class(self):
-        if self.action == Action.LIST.value:
+    def get_serializer_class(
+        self
+    ) -> Type[Union[UserListSerializer, UserUpdateByAdminSerializer, UserCreateSerializer, UserSerializer]]:
+        if self.action == Action.LIST.value:  # pylint: disable=no-member
             return UserListSerializer
-        if self.action == Action.RETRIEVE.value:
+        elif self.action == Action.RETRIEVE.value:  # pylint: disable=no-member
             return UserUpdateByAdminSerializer
-        if self.action == Action.CREATE.value:
+        elif self.action in [Action.CREATE.value, Action.UPDATE.value]:  # pylint: disable=no-member
             return UserCreateSerializer
-        if self.action == Action.UPDATE.value:
-            return UserCreateSerializer
-        return UserSerializer
+        else:
+            return UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     permission_classes = (AuthenticatedAdminOrOwnerUser,)
 
-    def get_serializer_class(self):
-        if self.action == Action.RETRIEVE.value:
+    def get_serializer_class(self) -> Type[Union[UserUpdateByAdminSerializer, UserUpdateSerializer, UserSerializer]]:
+        if self.action == Action.RETRIEVE.value:  # pylint: disable=no-member
             return UserUpdateByAdminSerializer
-        if self.action == Action.UPDATE.value:
+        elif self.action == Action.UPDATE.value:  # pylint: disable=no-member
             return UserUpdateSerializer
-        return UserSerializer
+        else:
+            return UserSerializer
 
 
 @login_required
-def index(request):
+def index(request: HttpRequest) -> HttpResponse:
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get("num_visits", 0)
     request.session["num_visits"] = num_visits + 1
@@ -84,27 +92,24 @@ class SignUp(APIView):
     template_name = "signup.html"
 
     @classmethod
-    def get(cls, request):
+    def get(cls, request: HttpRequest) -> Response:
         serializer = CustomRegisterSerializer(context={"request": request})
         return Response({"serializer": serializer})
 
     @classmethod
-    def post(cls, request):
+    def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
         serializer = CustomRegisterSerializer(data=request.data)
         if not serializer.is_valid():
-            try:
-                serializer.errors["non_field_errors"]
-            except:
-                return Response({"serializer": serializer, "errors": serializer.errors, "non_field_errors": None})
             return Response(
                 {
                     "serializer": serializer,
                     "errors": serializer.errors,
-                    "non_field_errors": serializer.errors["non_field_errors"],
+                    "non_field_errors": serializer.errors.get("non_field_errors"),
                 }
             )
-        serializer.save(request)
-        return redirect("login")
+        else:
+            serializer.save(request)
+            return redirect("login")
 
 
 class UserCreate(APIView):
@@ -112,12 +117,12 @@ class UserCreate(APIView):
     template_name = "user_create.html"
 
     @classmethod
-    def get(cls, request):
+    def get(cls, request: HttpRequest) -> Response:
         serializer = UserCreateSerializer(context={"request": request})
         return Response({"serializer": serializer})
 
     @classmethod
-    def post(cls, request):
+    def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
         serializer = UserCreateSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -136,27 +141,31 @@ class UserUpdate(APIView):
     template_name = "user_update.html"
 
     @classmethod
-    def return_suitable_serializer_for_get_method(cls, request, user):
+    def return_suitable_serializer_for_get_method(
+        cls, request: HttpRequest, user: CustomUser
+    ) -> Union[UserUpdateByAdminSerializer, UserUpdateSerializer]:
         if request.user.user_type == CustomUser.UserType.ADMIN.name:
             return UserUpdateByAdminSerializer(user, context={"request": request})
         else:
             return UserUpdateSerializer(user, context={"request": request})
 
     @classmethod
-    def return_suitable_serializer_for_post_method(cls, request, user):
+    def return_suitable_serializer_for_post_method(
+        cls, request: HttpRequest, user: CustomUser
+    ) -> Union[UserUpdateByAdminSerializer, UserUpdateSerializer]:
         if request.user.user_type == CustomUser.UserType.ADMIN.name:
             return UserUpdateByAdminSerializer(user, data=request.data, context={"request": request})
         else:
             return UserUpdateSerializer(user, data=request.data, context={"request": request})
 
     @classmethod
-    def get(cls, request, pk):
+    def get(cls, request: HttpRequest, pk: int) -> Response:
         user = get_object_or_404(CustomUser, pk=pk)
         serializer = cls.return_suitable_serializer_for_get_method(request, user)
         return Response({"serializer": serializer, "user": user})
 
     @classmethod
-    def post(cls, request, pk):
+    def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
         user = get_object_or_404(CustomUser, pk=pk)
         serializer = cls.return_suitable_serializer_for_post_method(request, user)
         if not serializer.is_valid():
@@ -171,13 +180,13 @@ class UserUpdateByAdmin(APIView):
     template_name = "users_detail.html"
 
     @classmethod
-    def get(cls, request, pk):
+    def get(cls, request: HttpRequest, pk: int) -> Response:
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserUpdateByAdminSerializer(user_detail, context={"request": request})
         return Response({"serializer": serializer, "user_detail": user_detail})
 
     @classmethod
-    def post(cls, request, pk):
+    def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserUpdateByAdminSerializer(user_detail, data=request.data, context={"request": request})
         if not serializer.is_valid():
@@ -194,11 +203,11 @@ class UserList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     @classmethod
-    def get_queryset(cls):
+    def get_queryset(cls) -> CustomUser:
         return CustomUser.objects.order_by("id")
 
     @classmethod
-    def get(cls, request):
+    def get(cls, request: HttpRequest) -> Response:
         users_queryset = cls.get_queryset()
         users_serializer = UserListSerializer(context={"request": request})
         return Response({"serializer": users_serializer, "users_list": users_queryset})

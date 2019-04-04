@@ -1,3 +1,6 @@
+from decimal import Decimal
+from typing import Any
+
 from rest_framework import serializers
 
 from employees.common.constants import ReportModelConstants
@@ -9,7 +12,7 @@ from managers.models import Project
 
 
 class HoursField(serializers.DecimalField):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             max_value=ReportModelConstants.MAX_WORK_HOURS.value,
             min_value=ReportModelConstants.MIN_WORK_HOURS.value,
@@ -21,11 +24,12 @@ class HoursField(serializers.DecimalField):
         self.validators[1].message = MAX_HOURS_VALUE_VALIDATOR_MESSAGE
         self.validators[2].message = MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: str) -> Decimal:
         if isinstance(data, str) and ":" in data:
             converted = data.replace(":", ".")
             return super().to_internal_value(converted)
-        return super().to_internal_value(data)
+        else:
+            return super().to_internal_value(data)
 
 
 class ReportSerializer(serializers.HyperlinkedModelSerializer):
@@ -43,7 +47,7 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
         model = Report
         fields = ("url", "date", "project", "author", "description", "work_hours")
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Report) -> Report:
         data = super().to_representation(instance)
         if isinstance(self.instance, Report):
             data["work_hours"] = self.instance.work_hours_str

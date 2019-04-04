@@ -19,10 +19,8 @@ from utils.sample_data_generators import generate_decimal_with_decimal_places
 from utils.sample_data_generators import generate_decimal_with_digits
 
 
-class ReportSerializerTests(BaseSerializerTestCase):
-
+class DataSetUpToTests(BaseSerializerTestCase):
     serializer_class = ReportSerializer
-
     required_input = {
         "date": datetime.datetime.now().date(),
         "description": "Some description",
@@ -31,9 +29,9 @@ class ReportSerializerTests(BaseSerializerTestCase):
         "work_hours": Decimal("8.00"),
     }
 
-    SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = "This is a string"
-
     def setUp(self):
+
+        self.sample_string_for_type_validation_tests = "This is a string"
         author = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
@@ -47,6 +45,8 @@ class ReportSerializerTests(BaseSerializerTestCase):
         self.required_input["author"] = author
         self.required_input["project"] = project
 
+
+class ReportSerializerTests(DataSetUpToTests):
     def test_report_serializer_date_field_should_accept_correct_value(self):
         self.field_should_accept_input(field="date", value="2018-11-07")
 
@@ -56,24 +56,16 @@ class ReportSerializerTests(BaseSerializerTestCase):
     def test_report_serializer_work_hours_field_should_accept_correct_value(self):
         self.field_should_accept_input(field="work_hours", value=Decimal("8.00"))
 
-    """
-    ---------------
-    DATE FAIL TESTS
-    ---------------
-    """
 
+class ReportSerializerDateFailTests(DataSetUpToTests):
     def test_report_serializer_date_field_should_not_be_empty(self):
         self.field_should_not_accept_null(field="date")
 
     def test_report_serializer_date_field_should_not_accept_non_date_time_value(self):
-        self.field_should_not_accept_input(field="date", value=self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+        self.field_should_not_accept_input(field="date", value=self.sample_string_for_type_validation_tests)
 
-    """
-    ----------------------
-    DESCRIPTION FAIL TESTS
-    ----------------------
-    """
 
+class ReportSerializerDescriptionFailTests(DataSetUpToTests):
     def test_report_serializer_description_field_should_not_accept_string_longer_than_set_limit(self):
         self.field_should_not_accept_input(
             field="description", value="a" * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1)
@@ -82,12 +74,8 @@ class ReportSerializerTests(BaseSerializerTestCase):
     def test_report_serializer_description_field_should_not_be_empty(self):
         self.field_should_not_accept_null(field="description")
 
-    """
-    ---------------------
-    WORK HOURS FAIL TESTS
-    ---------------------
-    """
 
+class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
     def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_digits_number(self):
         self.field_should_not_accept_input(
             field="work_hours", value=generate_decimal_with_digits(digits=ReportModelConstants.MAX_DIGITS.value + 1)
@@ -121,7 +109,7 @@ class ReportSerializerTests(BaseSerializerTestCase):
         )
 
     def test_report_serializer_work_hours_should_not_accept_non_numeric_value(self):
-        self.field_should_not_accept_input(field="work_hours", value=self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+        self.field_should_not_accept_input(field="work_hours", value=self.sample_string_for_type_validation_tests)
 
     def test_report_serializer_work_hours_field_should_not_be_empty(self):
         self.field_should_not_accept_null(field="work_hours")
