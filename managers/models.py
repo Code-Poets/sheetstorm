@@ -4,7 +4,6 @@ from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
 from managers.commons.constants import MAX_NAME_LENGTH
-from users.common.strings import CustomUserUserTypeText
 from users.models import CustomUser
 
 
