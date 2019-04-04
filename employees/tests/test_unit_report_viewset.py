@@ -15,7 +15,7 @@ from managers.models import Project
 from users.models import CustomUser
 
 
-class ReportViewSetTests(TestCase):
+class DataSetUpToTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
@@ -37,12 +37,8 @@ class ReportViewSetTests(TestCase):
         self.report.full_clean()
         self.report.save()
 
-    """
-    -----------
-    REPORT LIST
-    -----------
-    """
 
+class ReportListTests(DataSetUpToTests):
     def test_report_list_view_should_display_users_report_list_on_get(self):
         request = APIRequestFactory().get(path=reverse("report-list"))
         request.user = self.user
@@ -94,12 +90,8 @@ class ReportViewSetTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Report.objects.all().count(), 2)
 
-    """
-    -------------
-    REPORT DETAIL
-    -------------
-    """
 
+class ReportDetailTests(DataSetUpToTests):
     def test_report_detail_view_should_display_report_details_on_get(self):
         request = APIRequestFactory().get(path=reverse("report-detail", args=(self.report.pk,)))
         request.user = self.user
@@ -144,7 +136,7 @@ class ReportViewSetTests(TestCase):
         self.assertEqual(Report.objects.all().count(), 0)
 
 
-class ReportListTests(TestCase):
+class ReportCustomListTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
@@ -336,7 +328,7 @@ class ReportListTests(TestCase):
         self.assertFalse(self.user in new_project.members.all())
 
 
-class ReportDetailTests(TestCase):
+class ReportCustomDetailTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"

@@ -5,9 +5,8 @@ from users.models import CustomUser
 
 class TestCustomUserLogin(TestCase):
     def setUp(self):
-        CustomUser.objects._create_user(
-            "testuser@codepoets.it", "testuserpasswd", False, False, CustomUser.UserType.EMPLOYEE.name
-        )
+        self.user_type = CustomUser.UserType.EMPLOYEE.name
+        CustomUser.objects._create_user("testuser@codepoets.it", "testuserpasswd", False, False, self.user_type)
 
     def test_user_client_should_log_in_with_correct_email_and_password(self):
         self.assertTrue(self.client.login(email="testuser@codepoets.it", password="testuserpasswd"))

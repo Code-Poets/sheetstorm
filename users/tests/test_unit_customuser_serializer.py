@@ -1,7 +1,7 @@
 import datetime
 
 from users.common import constants
-from users.common.utils import create_user_using_full_clean_and_save
+from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.serializers import CustomRegisterSerializer
 from users.serializers import UserSerializer
 from utils.base_tests import BaseSerializerTestCase

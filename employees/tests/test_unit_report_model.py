@@ -10,8 +10,7 @@ from utils.sample_data_generators import generate_decimal_with_decimal_places
 from utils.sample_data_generators import generate_decimal_with_digits
 
 
-class TestReportModel(BaseModelTestCase):
-
+class DataSetUpToTests(BaseModelTestCase):
     model_class = Report
     required_input = {
         "date": datetime.datetime.now().date(),
@@ -21,9 +20,9 @@ class TestReportModel(BaseModelTestCase):
         "work_hours": Decimal("8.00"),
     }
 
-    SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = "This is a string"
-
     def setUp(self):
+
+        self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = "This is a string"
         self.author = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
@@ -38,6 +37,9 @@ class TestReportModel(BaseModelTestCase):
         self.required_input["project"] = self.project
 
         self.REPORT_MODEL_DATA = self.required_input.copy()
+
+
+class TestReportModel(DataSetUpToTests):
 
     # PARAM
     def test_report_model_save_date_field_should_accept_correct_input(self):
@@ -73,12 +75,8 @@ class TestReportModel(BaseModelTestCase):
     def test_report_model_last_update_field_should_be_changed_on_update(self):
         self.field_auto_now_test("last_update", "description", "Updated")
 
-    """
-    ---------------
-    DATE FAIL TESTS
-    ---------------
-    """
 
+class TestReportDataParameterFails(DataSetUpToTests):
     def test_report_model_date_field_should_not_be_empty(self):
         self.field_should_not_accept_null("date")
 
@@ -86,11 +84,8 @@ class TestReportModel(BaseModelTestCase):
     def test_report_model_date_field_should_not_accept_non_date_value(self):
         self.field_should_not_accept_input("date", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
 
-    """
-    ----------------------
-    DESCRIPTION FAIL TESTS
-    ----------------------
-    """
+
+class TestReportDescriptionParameterFails(DataSetUpToTests):
 
     # PARAM
     def test_report_model_description_field_should_not_accept_string_longer_than_set_limit(self):
@@ -99,11 +94,9 @@ class TestReportModel(BaseModelTestCase):
     def test_report_model_description_field_should_not_be_empty(self):
         self.field_should_not_accept_null("description")
 
-    """
-    ------------------
-    PROJECT FAIL TESTS
-    ------------------
-    """
+
+class TestReportProjectParameterFails(DataSetUpToTests):
+
     # PARAM
     def test_report_model_project_field_should_not_accept_non_model_value(self):
         self.key_should_not_accept_incorrect_input("project", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
@@ -111,11 +104,8 @@ class TestReportModel(BaseModelTestCase):
     def test_report_model_work_project_field_should_not_be_empty(self):
         self.field_should_not_accept_null("project")
 
-    """
-    -----------------
-    AUTHOR FAIL TESTS
-    -----------------
-    """
+
+class TestReportAuthorParameterFails(DataSetUpToTests):
 
     # PARAM
     def test_report_model_author_field_should_not_accept_non_model_value(self):
@@ -124,11 +114,8 @@ class TestReportModel(BaseModelTestCase):
     def test_report_model_author_field_should_not_be_empty(self):
         self.field_should_not_accept_null("author")
 
-    """
-    ---------------------
-    WORK_HOURS FAIL TESTS
-    ---------------------
-    """
+
+class TestReportWorkHoursParameterFails(DataSetUpToTests):
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_non_numeric_value(self):

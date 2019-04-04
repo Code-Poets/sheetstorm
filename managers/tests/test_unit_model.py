@@ -5,7 +5,7 @@ from django.test import TestCase
 
 from managers.commons.constants import MAX_NAME_LENGTH
 from managers.models import Project
-from users.common.utils import create_user_using_full_clean_and_save
+from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.utils import generate_random_phone_number
 from users.common.utils import generate_random_string_from_letters_and_digits
 from utils.base_tests import BaseModelTestCase

@@ -34,10 +34,11 @@ class Project(models.Model):
 
 @receiver(m2m_changed, sender=Project.managers.through)
 def update_user_type(sender, action, pk_set, **kwargs):
+    assert sender == Project.managers.through
     project = kwargs["instance"]
-    if action == "pre_remove" or action == "post_remove":
+    if action in ["pre_remove", "post_remove"]:
         change_user_type_to_employee(pk_set)
-    elif action == "pre_add" or action == "post_add":
+    elif action in ["pre_add", "post_add"]:
         change_user_type_to_manager(project)
     else:
         return

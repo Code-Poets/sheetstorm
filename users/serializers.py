@@ -65,6 +65,10 @@ class UserCreateSerializer(UserSerializer):
 
 
 class CustomRegisterSerializer(serializers.Serializer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.cleaned_data = None
+
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
     first_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
     last_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
@@ -81,10 +85,11 @@ class CustomRegisterSerializer(serializers.Serializer):
                 raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
         return email
 
-    def validate_password(self, password):
+    @staticmethod
+    def validate_password(password):
         return allauth_get_adapter().clean_password(password)
 
-    def validate(self, data):
+    def validate(self, data):  # pylint: disable=no-self-use
         if data["password"] != data["password_confirmation"]:
             raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE)
         return data

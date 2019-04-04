@@ -7,9 +7,9 @@ from django.test import TestCase
 
 from users.common import constants
 from users.common.exceptions import CustomValidationError
+from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomValidationErrorText
-from users.common.utils import create_user_using_full_clean_and_save
 from users.common.utils import generate_random_string_from_letters_and_digits
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase

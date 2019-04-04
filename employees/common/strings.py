@@ -2,14 +2,11 @@ from enum import Enum
 
 from django.utils.translation import ugettext_lazy
 
-from utils.decorators import notCallable
-
 MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE = ugettext_lazy("Minutes cannot be greater than 59.")
 MAX_HOURS_VALUE_VALIDATOR_MESSAGE = ugettext_lazy("This value cannot be greater than 24:00.")
 MIN_HOURS_VALUE_VALIDATOR_MESSAGE = ugettext_lazy("This value must be greater than 0.")
 
 
-@notCallable
 class ReportListStrings(Enum):
     PAGE_TITLE = ugettext_lazy("Reports")
     CREATE_REPORT_BUTTON = ugettext_lazy("Create")
@@ -24,7 +21,6 @@ class ReportListStrings(Enum):
     EDIT_REPORT_BUTTON = ugettext_lazy("Edit")
 
 
-@notCallable
 class ReportDetailStrings(Enum):
     PAGE_TITLE = ugettext_lazy("Report - ")
     UPDATE_REPORT_BUTTON = ugettext_lazy("Update")

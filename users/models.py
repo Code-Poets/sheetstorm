@@ -128,5 +128,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 @receiver(post_save, sender=CustomUser)
 def update_from_manager_to_employee(sender, **kwargs):
     user = kwargs["instance"]
+    assert sender == CustomUser
     if user.user_type == CustomUser.UserType.EMPLOYEE.name:
         user.manager_projects.clear()

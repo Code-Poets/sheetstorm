@@ -43,6 +43,7 @@ class ProjectDetail(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "managers/project_detail.html"
 
-    def get(self, request, pk):
+    @staticmethod
+    def get(_request, pk):
         project = get_object_or_404(Project, pk=pk)
         return Response({"project": project})

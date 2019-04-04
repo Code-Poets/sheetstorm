@@ -131,7 +131,7 @@ class ReportDetail(APIView):
         )
         return reports_serializer
 
-    def get(self, request, pk):
+    def get(self, _request, pk):
         report = get_object_or_404(Report, pk=pk)
         serializer = self._create_serializer(report)
         return Response({"serializer": serializer, "report": report, "UI_text": ReportDetailStrings})

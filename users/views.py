@@ -25,20 +25,20 @@ from users.serializers import UserUpdateSerializer
 
 
 @api_view()
-def api_root(request, format=None):
+def api_root(request, _format=None):
     if request.user.is_authenticated and request.user.user_type == CustomUser.UserType.ADMIN.name:
         return Response(
             {
-                "users": reverse("users-list", request=request, format=format),
-                "account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=format),
+                "users": reverse("users-list", request=request, format=_format),
+                "account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=_format),
             }
         )
     elif request.user.is_authenticated:
         return Response(
-            {"account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=format)}
+            {"account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=_format)}
         )
     else:
-        return Response({"registration": reverse("rest_register", request=request, format=format)})
+        return Response({"registration": reverse("rest_register", request=request, format=_format)})
 
 
 class UsersViewSet(viewsets.ModelViewSet):
@@ -46,13 +46,13 @@ class UsersViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthenticatedAdmin,)
 
     def get_serializer_class(self):
-        if self.action == Action.LIST.value:
+        if self.action == Action.LIST.value:  # pylint: disable=no-member
             return UserListSerializer
-        if self.action == Action.RETRIEVE.value:
+        if self.action == Action.RETRIEVE.value:  # pylint: disable=no-member
             return UserUpdateByAdminSerializer
-        if self.action == Action.CREATE.value:
+        if self.action == Action.CREATE.value:  # pylint: disable=no-member
             return UserCreateSerializer
-        if self.action == Action.UPDATE.value:
+        if self.action == Action.UPDATE.value:  # pylint: disable=no-member
             return UserCreateSerializer
         return UserSerializer
 
@@ -62,9 +62,9 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthenticatedAdminOrOwnerUser,)
 
     def get_serializer_class(self):
-        if self.action == Action.RETRIEVE.value:
+        if self.action == Action.RETRIEVE.value:  # pylint: disable=no-member
             return UserUpdateByAdminSerializer
-        if self.action == Action.UPDATE.value:
+        if self.action == Action.UPDATE.value:  # pylint: disable=no-member
             return UserUpdateSerializer
         return UserSerializer
 
