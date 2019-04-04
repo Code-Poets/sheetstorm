@@ -7,10 +7,10 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
 from employees.models import Report
-from employees.views import delete_report
 from employees.views import ReportDetail
 from employees.views import ReportList
 from employees.views import ReportViewSet
+from employees.views import delete_report
 from managers.models import Project
 from users.models import CustomUser
 
@@ -18,28 +18,21 @@ from users.models import CustomUser
 class ReportViewSetTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
-            email="testuser@codepoets.it",
-            password='newuserpasswd',
-            first_name='John',
-            last_name='Doe',
-            country='PL'
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
         self.user.full_clean()
         self.user.save()
 
-        self.project = Project(
-            name="Test Project",
-            start_date=datetime.datetime.now(),
-        )
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
         self.project.full_clean()
         self.project.save()
 
         self.report = Report(
             date=datetime.datetime.now().date(),
-            description='Some description',
+            description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         self.report.full_clean()
         self.report.save()
@@ -49,58 +42,55 @@ class ReportViewSetTests(TestCase):
     REPORT LIST
     -----------
     """
+
     def test_report_list_view_should_display_users_report_list_on_get(self):
-        request = APIRequestFactory().get(path=reverse('report-list'))
+        request = APIRequestFactory().get(path=reverse("report-list"))
         request.user = self.user
-        response = ReportViewSet.as_view({'get': 'list'})(request)
+        response = ReportViewSet.as_view({"get": "list"})(request)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.report.description)
 
     def test_report_list_view_should_not_be_accessible_for_unauthenticated_user(self):
-        request = APIRequestFactory().get(path=reverse('report-list'))
+        request = APIRequestFactory().get(path=reverse("report-list"))
         request.user = AnonymousUser()
-        response = ReportViewSet.as_view({'get': 'list'})(request)
+        response = ReportViewSet.as_view({"get": "list"})(request)
         self.assertEqual(response.status_code, 403)
 
     def test_report_list_view_should_not_display_other_users_reports(self):
         other_user = CustomUser(
-            email="otheruser@codepoets.it",
-            password='otheruserpasswd',
-            first_name='Jane',
-            last_name='Doe',
-            country='PL',
+            email="otheruser@codepoets.it", password="otheruserpasswd", first_name="Jane", last_name="Doe", country="PL"
         )
         other_user.full_clean()
         other_user.save()
 
         other_report = Report(
             date=datetime.datetime.now().date(),
-            description='Some other description',
+            description="Some other description",
             author=other_user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         other_report.full_clean()
         other_report.save()
 
-        request = APIRequestFactory().get(path=reverse('report-list'))
+        request = APIRequestFactory().get(path=reverse("report-list"))
         request.user = self.user
-        response = ReportViewSet.as_view({'get': 'list'})(request)
+        response = ReportViewSet.as_view({"get": "list"})(request)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, other_report.description)
 
     def test_report_list_view_should_add_new_report_on_post(self):
         request = APIRequestFactory().post(
-            path=reverse('report-list'),
+            path=reverse("report-list"),
             data={
-                'date': datetime.datetime.now().date(),
-                'description': 'Some description',
-                'project': self.project,
-                'work_hours': Decimal('8.00'),
-            }
+                "date": datetime.datetime.now().date(),
+                "description": "Some description",
+                "project": self.project,
+                "work_hours": Decimal("8.00"),
+            },
         )
         request.user = self.user
-        response = ReportViewSet.as_view({'post': 'create'})(request)
+        response = ReportViewSet.as_view({"post": "create"})(request)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Report.objects.all().count(), 2)
 
@@ -109,46 +99,47 @@ class ReportViewSetTests(TestCase):
     REPORT DETAIL
     -------------
     """
+
     def test_report_detail_view_should_display_report_details_on_get(self):
-        request = APIRequestFactory().get(path=reverse('report-detail', args=(self.report.pk,)))
+        request = APIRequestFactory().get(path=reverse("report-detail", args=(self.report.pk,)))
         request.user = self.user
-        response = ReportViewSet.as_view({'get': 'retrieve'})(request, pk=self.report.pk)
+        response = ReportViewSet.as_view({"get": "retrieve"})(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.report.description)
 
     def test_report_list_view_should_not_be_accessible_for_unauthenticated_users(self):
-        request = APIRequestFactory().get(path=reverse('report-detail', args=(self.report.pk,)))
+        request = APIRequestFactory().get(path=reverse("report-detail", args=(self.report.pk,)))
         request.user = AnonymousUser()
-        response = ReportViewSet.as_view({'get': 'retrieve'})(request, pk=self.report.pk)
+        response = ReportViewSet.as_view({"get": "retrieve"})(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 403)
 
     def test_report_detail_view_should_not_render_non_existing_report_on_get(self):
-        request = APIRequestFactory().get(path=reverse('report-detail', args=(999,)))
+        request = APIRequestFactory().get(path=reverse("report-detail", args=(999,)))
         request.user = self.user
-        response = ReportViewSet.as_view({'get': 'retrieve'})(request, pk=999)
+        response = ReportViewSet.as_view({"get": "retrieve"})(request, pk=999)
         self.assertEqual(response.status_code, 404)
 
     def test_report_detail_view_should_update_report_on_put(self):
-        new_description = 'Some other description'
+        new_description = "Some other description"
         request = APIRequestFactory().put(
-            path=reverse('report-detail', args=(self.report.pk,)),
+            path=reverse("report-detail", args=(self.report.pk,)),
             data={
-                'date': datetime.datetime.now().date(),
-                'description': new_description,
-                'project': self.project,
-                'work_hours': Decimal('8.00'),
-            }
+                "date": datetime.datetime.now().date(),
+                "description": new_description,
+                "project": self.project,
+                "work_hours": Decimal("8.00"),
+            },
         )
         request.user = self.user
-        response = ReportViewSet.as_view({'put': 'update'})(request, pk=self.report.pk)
+        response = ReportViewSet.as_view({"put": "update"})(request, pk=self.report.pk)
         current_description = Report.objects.get(pk=self.report.pk).description
         self.assertEqual(response.status_code, 200)
         self.assertEqual(current_description, new_description)
 
     def test_report_detail_view_should_delete_report_on_delete(self):
-        request = APIRequestFactory().delete(path=reverse('report-detail', args=(self.report.pk,)))
+        request = APIRequestFactory().delete(path=reverse("report-detail", args=(self.report.pk,)))
         request.user = self.user
-        response = ReportViewSet.as_view({'delete': 'destroy'})(request, pk=self.report.pk)
+        response = ReportViewSet.as_view({"delete": "destroy"})(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Report.objects.all().count(), 0)
 
@@ -156,32 +147,25 @@ class ReportViewSetTests(TestCase):
 class ReportListTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
-            email="testuser@codepoets.it",
-            password='newuserpasswd',
-            first_name='John',
-            last_name='Doe',
-            country='PL'
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
         self.user.full_clean()
         self.user.save()
 
-        self.project = Project(
-            name="Test Project",
-            start_date=datetime.datetime.now(),
-        )
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
         self.project.full_clean()
         self.project.save()
 
         self.report = Report(
             date=datetime.datetime.now().date(),
-            description='Some description',
+            description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         self.report.full_clean()
         self.report.save()
-        self.url = reverse('custom-report-list')
+        self.url = reverse("custom-report-list")
 
     def test_custom_list_view_should_display_users_report_list_on_get(self):
         request = APIRequestFactory().get(path=self.url)
@@ -189,7 +173,7 @@ class ReportListTests(TestCase):
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.report.description)
-        dictionary = response.data['reports_dict']
+        dictionary = response.data["reports_dict"]
         reports = list(dictionary.values())[0]
         self.assertTrue(self.report in reports)
 
@@ -201,21 +185,17 @@ class ReportListTests(TestCase):
 
     def test_custom_list_view_should_not_display_other_users_reports(self):
         other_user = CustomUser(
-            email="otheruser@codepoets.it",
-            password='otheruserpasswd',
-            first_name='Jane',
-            last_name='Doe',
-            country='PL',
+            email="otheruser@codepoets.it", password="otheruserpasswd", first_name="Jane", last_name="Doe", country="PL"
         )
         other_user.full_clean()
         other_user.save()
 
         other_report = Report(
             date=datetime.datetime.now().date(),
-            description='Some other description',
+            description="Some other description",
             author=other_user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         other_report.full_clean()
         other_report.save()
@@ -230,11 +210,11 @@ class ReportListTests(TestCase):
         request = APIRequestFactory().post(
             path=self.url,
             data={
-                'date': datetime.datetime.now().date(),
-                'description': 'Some description',
-                'project': self.project,
-                'work_hours': Decimal('8.00'),
-            }
+                "date": datetime.datetime.now().date(),
+                "description": "Some description",
+                "project": self.project,
+                "work_hours": Decimal("8.00"),
+            },
         )
         request.user = self.user
         response = ReportList.as_view()(request)
@@ -244,62 +224,51 @@ class ReportListTests(TestCase):
     def test_custom_report_list_view_should_not_add_new_report_on_post_if_form_is_invalid(self):
         request = APIRequestFactory().post(
             path=self.url,
-            data={
-                'description': 'Some description',
-                'project': self.project,
-                'work_hours': Decimal('8.00'),
-            }
+            data={"description": "Some description", "project": self.project, "work_hours": Decimal("8.00")},
         )
         request.user = self.user
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Report.objects.all().count(), 1)
-        self.assertIsNotNone(response.data['errors'])
+        self.assertIsNotNone(response.data["errors"])
 
     def test_get_queryset_method_should_return_queryset_containing_all_of_current_users_reports(self):
         other_user = CustomUser(
-            email="otheruser@codepoets.it",
-            password='otheruserpasswd',
-            first_name='Jane',
-            last_name='Doe',
-            country='PL',
+            email="otheruser@codepoets.it", password="otheruserpasswd", first_name="Jane", last_name="Doe", country="PL"
         )
         other_user.full_clean()
         other_user.save()
 
-        other_project = Project(
-            name="Project test",
-            start_date=datetime.datetime.now(),
-        )
+        other_project = Project(name="Project test", start_date=datetime.datetime.now())
         other_project.full_clean()
         other_project.save()
 
         other_user_report = Report(
             date=datetime.datetime.now().date(),
-            description='Some other description',
+            description="Some other description",
             author=other_user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         other_user_report.full_clean()
         other_user_report.save()
 
         other_report_1 = Report(
             date=datetime.datetime.now().date(),
-            description='Some other description',
+            description="Some other description",
             author=self.user,
             project=other_project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         other_report_1.full_clean()
         other_report_1.save()
 
         other_report_2 = Report(
             date=datetime.date(2001, 1, 1),
-            description='Some other description',
+            description="Some other description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         other_report_2.full_clean()
         other_report_2.save()
@@ -316,10 +285,7 @@ class ReportListTests(TestCase):
         self.assertEqual(queryset[2], other_report_2)
 
     def test_custom_report_list_add_project_method_should_register_current_user_as_project_member(self):
-        new_project = Project(
-            name="New Project",
-            start_date=datetime.datetime.now(),
-        )
+        new_project = Project(name="New Project", start_date=datetime.datetime.now())
         new_project.full_clean()
         new_project.save()
         request = APIRequestFactory().get(path=self.url)
@@ -329,13 +295,12 @@ class ReportListTests(TestCase):
         serializer = view._create_serializer()
         view._add_project(serializer, new_project)
         self.assertTrue(self.user in new_project.members.all())
-        self.assertEqual(serializer.fields['project'].initial, new_project)
+        self.assertEqual(serializer.fields["project"].initial, new_project)
 
-    def test_custom_report_list_create_serializer_method_should_return_serializer_with_project_field_options_containing_only_projects_to_which_current_user_belongs(self):
-        new_project = Project(
-            name="New Project",
-            start_date=datetime.datetime.now(),
-        )
+    def test_custom_report_list_create_serializer_method_should_return_serializer_with_project_field_options_containing_only_projects_to_which_current_user_belongs(
+        self
+    ):
+        new_project = Project(name="New Project", start_date=datetime.datetime.now())
         new_project.full_clean()
         new_project.save()
         new_project.members.add(self.user)
@@ -346,42 +311,25 @@ class ReportListTests(TestCase):
         view = ReportList()
         view.request = request
         serializer = view._create_serializer()
-        self.assertTrue(new_project in serializer.fields['project'].queryset)
-        self.assertTrue(self.project not in serializer.fields['project'].queryset)
+        self.assertTrue(new_project in serializer.fields["project"].queryset)
+        self.assertTrue(self.project not in serializer.fields["project"].queryset)
 
     def test_custom_report_list_view_should_add_user_to_project_selected_in_project_join_form_on_join(self):
-        new_project = Project(
-            name="New Project",
-            start_date=datetime.datetime.now(),
-        )
+        new_project = Project(name="New Project", start_date=datetime.datetime.now())
         new_project.full_clean()
         new_project.save()
-        request = APIRequestFactory().post(
-            path=self.url,
-            data={
-                'projects': new_project.id,
-                'join': "join",
-            }
-        )
+        request = APIRequestFactory().post(path=self.url, data={"projects": new_project.id, "join": "join"})
         request.user = self.user
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(self.user in new_project.members.all())
-        self.assertEqual(response.data['serializer'].fields['project'].initial, new_project)
+        self.assertEqual(response.data["serializer"].fields["project"].initial, new_project)
 
     def test_custom_report_list_view_should_not_add_user_to_project_selected_in_project_join_form_on_post(self):
-        new_project = Project(
-            name="New Project",
-            start_date=datetime.datetime.now(),
-        )
+        new_project = Project(name="New Project", start_date=datetime.datetime.now())
         new_project.full_clean()
         new_project.save()
-        request = APIRequestFactory().post(
-            path=self.url,
-            data={
-                'projects': new_project.id,
-            }
-        )
+        request = APIRequestFactory().post(path=self.url, data={"projects": new_project.id})
         request.user = self.user
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
@@ -391,62 +339,55 @@ class ReportListTests(TestCase):
 class ReportDetailTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
-            email="testuser@codepoets.it",
-            password='newuserpasswd',
-            first_name='John',
-            last_name='Doe',
-            country='PL'
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
         self.user.full_clean()
         self.user.save()
 
-        self.project = Project(
-            name="Test Project",
-            start_date=datetime.datetime.now(),
-        )
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
         self.project.full_clean()
         self.project.save()
         self.project.members.add(self.user)
 
         self.report = Report(
             date=datetime.datetime.now().date(),
-            description='Some description',
+            description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         self.report.full_clean()
         self.report.save()
 
     def test_custom_report_detail_view_should_display_report_details_on_get(self):
-        request = APIRequestFactory().get(path=reverse('custom-report-detail', args=(self.report.pk,)))
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(self.report.pk,)))
         request.user = self.user
         response = ReportDetail.as_view()(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.report.description)
-        self.assertEqual(response.data['serializer'].instance, self.report)
+        self.assertEqual(response.data["serializer"].instance, self.report)
 
     def test_custom_report_list_view_should_not_be_accessible_for_unauthenticated_users(self):
-        request = APIRequestFactory().get(path=reverse('custom-report-detail', args=(self.report.pk,)))
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(self.report.pk,)))
         request.user = AnonymousUser()
         response = ReportDetail.as_view()(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 403)
 
     def test_custom_report_detail_view_should_not_render_non_existing_report(self):
-        request = APIRequestFactory().get(path=reverse('custom-report-detail', args=(999,)))
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(999,)))
         request.user = self.user
         response = ReportDetail.as_view()(request, pk=999)
         self.assertEqual(response.status_code, 404)
 
     def test_custom_report_detail_view_should_update_report_on_post(self):
-        new_description = 'Some other description'
+        new_description = "Some other description"
         request = APIRequestFactory().post(
-            path=reverse('custom-report-detail', args=(self.report.pk,)),
+            path=reverse("custom-report-detail", args=(self.report.pk,)),
             data={
-                'date': datetime.datetime.now().date(),
-                'description': new_description,
-                'project': self.project,
-                'work_hours': Decimal('8.00'),
+                "date": datetime.datetime.now().date(),
+                "description": new_description,
+                "project": self.project,
+                "work_hours": Decimal("8.00"),
             },
         )
         request.user = self.user
@@ -456,15 +397,15 @@ class ReportDetailTests(TestCase):
         self.assertEqual(self.report.description, new_description)
 
     def test_custom_report_detail_view_should_not_update_report_on_discard(self):
-        new_description = 'Some other description'
+        new_description = "Some other description"
         request = APIRequestFactory().post(
-            path=reverse('custom-report-detail', args=(self.report.pk,)),
+            path=reverse("custom-report-detail", args=(self.report.pk,)),
             data={
-                'date': datetime.datetime.now().date(),
-                'description': new_description,
-                'project': self.project,
-                'work_hours': Decimal('8.00'),
-                'discard': "Discard"
+                "date": datetime.datetime.now().date(),
+                "description": new_description,
+                "project": self.project,
+                "work_hours": Decimal("8.00"),
+                "discard": "Discard",
             },
         )
         request.user = self.user
@@ -474,92 +415,75 @@ class ReportDetailTests(TestCase):
         self.assertNotEqual(self.report.description, new_description)
 
     def test_custom_report_detail_view_should_not_update_report_on_post_if_form_is_invalid(self):
-        new_description = 'Some other description'
+        new_description = "Some other description"
         request = APIRequestFactory().post(
-            path=reverse('custom-report-detail', args=(self.report.pk,)),
-            data={
-                'description': new_description,
-                'project': self.project,
-                'work_hours': Decimal('8.00'),
-            },
+            path=reverse("custom-report-detail", args=(self.report.pk,)),
+            data={"description": new_description, "project": self.project, "work_hours": Decimal("8.00")},
         )
         request.user = self.user
         response = ReportDetail.as_view()(request, pk=self.report.pk)
         self.report.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.data['errors'])
+        self.assertIsNotNone(response.data["errors"])
         self.assertNotEqual(new_description, self.report.description)
 
     def test_custom_report_detail_view_should_not_update_report_if_author_is_not_a_member_of_selected_project(self):
-        other_project = Project(
-            name="Other Project",
-            start_date=datetime.datetime.now(),
-        )
+        other_project = Project(name="Other Project", start_date=datetime.datetime.now())
         other_project.full_clean()
         other_project.save()
-        new_description = 'Some other description'
+        new_description = "Some other description"
         request = APIRequestFactory().post(
-            path=reverse('custom-report-detail', args=(self.report.pk,)),
+            path=reverse("custom-report-detail", args=(self.report.pk,)),
             data={
-                'date': datetime.datetime.now().date(),
-                'description': new_description,
-                'project': other_project,
-                'work_hours': Decimal('8.00'),
+                "date": datetime.datetime.now().date(),
+                "description": new_description,
+                "project": other_project,
+                "work_hours": Decimal("8.00"),
             },
         )
         request.user = self.user
         response = ReportDetail.as_view()(request, pk=self.report.pk)
         self.report.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['errors']['project'][0].code, 'does_not_exist')
+        self.assertEqual(response.data["errors"]["project"][0].code, "does_not_exist")
         self.assertNotEqual(new_description, self.report.description)
         self.assertNotEqual(other_project, self.report.project)
 
     def test_custom_report_detail_view_project_field_should_not_display_projects_the_author_is_not_a_member_of(self):
-        other_project = Project(
-            name="Other Project",
-            start_date=datetime.datetime.now(),
-        )
+        other_project = Project(name="Other Project", start_date=datetime.datetime.now())
         other_project.full_clean()
         other_project.save()
-        request = APIRequestFactory().get(path=reverse('custom-report-detail', args=(self.report.pk,)))
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(self.report.pk,)))
         request.user = self.user
         response = ReportDetail.as_view()(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(other_project not in response.data['serializer']._fields['project'].queryset)
+        self.assertTrue(other_project not in response.data["serializer"]._fields["project"].queryset)
 
 
 class DeleteReportTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
-            email="testuser@codepoets.it",
-            password='newuserpasswd',
-            first_name='John',
-            last_name='Doe',
-            country='PL'
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
         self.user.full_clean()
         self.user.save()
 
-        self.project = Project(
-            name="Test Project",
-            start_date=datetime.datetime.now(),
-        )
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
         self.project.full_clean()
         self.project.save()
 
         self.report = Report(
             date=datetime.datetime.now().date(),
-            description='Some description',
+            description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         self.report.full_clean()
         self.report.save()
 
     def test_delete_report_view_should_delete_report_on_post(self):
-        request = APIRequestFactory().delete(path=reverse('custom-report-delete', args=(self.report.pk,)))
+        request = APIRequestFactory().delete(path=reverse("custom-report-delete", args=(self.report.pk,)))
         request.user = self.user
         response = delete_report(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 302)

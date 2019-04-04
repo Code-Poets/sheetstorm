@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+
 from django.test import TestCase
 
 from employees.models import Report
@@ -11,48 +12,41 @@ from users.models import CustomUser
 class TestListHelpers(TestCase):
     def setUp(self):
         self.user = CustomUser(
-            email="testuser@codepoets.it",
-            password='newuserpasswd',
-            first_name='John',
-            last_name='Doe',
-            country='PL'
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
         self.user.full_clean()
         self.user.save()
 
-        self.project = Project(
-            name="Test Project",
-            start_date=datetime.datetime.now(),
-        )
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
         self.project.full_clean()
         self.project.save()
 
         report = Report(
             date=datetime.datetime.now().date(),
-            description='Some description',
+            description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         report.full_clean()
         report.save()
 
         report = Report(
             date=datetime.datetime.now().date(),
-            description='Some description',
+            description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         report.full_clean()
         report.save()
 
         report = Report(
             date=datetime.date(2001, 1, 1),
-            description='Some description',
+            description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal('8.00'),
+            work_hours=Decimal("8.00"),
         )
         report.full_clean()
         report.save()
