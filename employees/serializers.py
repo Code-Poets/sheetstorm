@@ -16,45 +16,35 @@ class HoursField(serializers.DecimalField):
             max_digits=ReportModelConstants.MAX_DIGITS.value,
             decimal_places=ReportModelConstants.DECIMAL_PLACES.value,
             validators=[MaxDecimalValueValidator(ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value)],
-            **kwargs)
+            **kwargs
+        )
         self.validators[1].message = MAX_HOURS_VALUE_VALIDATOR_MESSAGE
         self.validators[2].message = MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 
     def to_internal_value(self, data):
-        if isinstance(data, str) and ':' in data:
-            converted = data.replace(':', '.')
+        if isinstance(data, str) and ":" in data:
+            converted = data.replace(":", ".")
             return super().to_internal_value(converted)
         return super().to_internal_value(data)
 
 
 class ReportSerializer(serializers.HyperlinkedModelSerializer):
 
-    project = serializers.SlugRelatedField(
-        queryset=Project.objects.all(),
-        slug_field='name',
-    )
+    project = serializers.SlugRelatedField(queryset=Project.objects.all(), slug_field="name")
     author = serializers.StringRelatedField()
 
     description = serializers.CharField(
-        style={'base_template': 'textarea.html'},
-        max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value
+        style={"base_template": "textarea.html"}, max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value
     )
 
     work_hours = HoursField()
 
     class Meta:
         model = Report
-        fields = (
-            'url',
-            'date',
-            'project',
-            'author',
-            'description',
-            'work_hours',
-        )
+        fields = ("url", "date", "project", "author", "description", "work_hours")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if isinstance(self.instance, Report):
-            data['work_hours'] = self.instance.work_hours_str
+            data["work_hours"] = self.instance.work_hours_str
         return data

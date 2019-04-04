@@ -21,14 +21,7 @@ from users.common.validators import PhoneRegexValidator
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(
-        self,
-        email,
-        password,
-        is_staff,
-        is_superuser,
-        user_type,
-    ):
+    def _create_user(self, email, password, is_staff, is_superuser, user_type):
         """
         Creates and saves a user with the given email and password.
         Returns created user.
@@ -36,40 +29,26 @@ class CustomUserManager(BaseUserManager):
 
         if email is None:
             raise CustomValidationError(
-                CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE,
-                ErrorCode.CREATE_USER_EMAIL_MISSING,
+                CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, ErrorCode.CREATE_USER_EMAIL_MISSING
             )
         else:
             custom_validate_email_function(self, email)
 
         if not password:
             raise CustomValidationError(
-                CustomValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE,
-                ErrorCode.CREATE_USER_PASSWORD_MISSING,
+                CustomValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, ErrorCode.CREATE_USER_PASSWORD_MISSING
             )
         email = self.normalize_email(email)
         user = self.model(
-            email=email,
-            is_staff=is_staff,
-            is_active=True,
-            is_superuser=is_superuser,
-            user_type=user_type,
+            email=email, is_staff=is_staff, is_active=True, is_superuser=is_superuser, user_type=user_type
         )
         user.set_password(password)
         user.save()
         return user
 
-    def create_superuser(
-        self,
-        email,
-        password,
-    ):
+    def create_superuser(self, email, password):
         return self._create_user(
-            email,
-            password,
-            is_staff=True,
-            is_superuser=True,
-            user_type=CustomUser.UserType.ADMIN.name,
+            email, password, is_staff=True, is_superuser=True, user_type=CustomUser.UserType.ADMIN.name
         )
 
 
@@ -86,65 +65,36 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         MANAGER = CustomUserUserTypeText.MANAGER
         ADMIN = CustomUserUserTypeText.ADMIN
 
-    email = models.EmailField(
-        CustomUserModelText.EMAIL_ADDRESS,
-        max_length=constants.EMAIL_MAX_LENGTH,
-        unique=True,
-    )
+    email = models.EmailField(CustomUserModelText.EMAIL_ADDRESS, max_length=constants.EMAIL_MAX_LENGTH, unique=True)
     first_name = models.CharField(
-        CustomUserModelText.FIRST_NAME,
-        max_length=constants.FIRST_NAME_MAX_LENGTH,
-        blank=True,
+        CustomUserModelText.FIRST_NAME, max_length=constants.FIRST_NAME_MAX_LENGTH, blank=True
     )
-    last_name = models.CharField(
-        CustomUserModelText.LAST_NAME,
-        max_length=constants.LAST_NAME_MAX_LENGTH,
-        blank=True,
-    )
+    last_name = models.CharField(CustomUserModelText.LAST_NAME, max_length=constants.LAST_NAME_MAX_LENGTH, blank=True)
     is_staff = models.BooleanField(
-        CustomUserModelText.IS_STAFF,
-        default=False,
-        help_text=CustomUserModelText.STAFF_HELP_TEXT,
+        CustomUserModelText.IS_STAFF, default=False, help_text=CustomUserModelText.STAFF_HELP_TEXT
     )
     is_active = models.BooleanField(
-        CustomUserModelText.IS_ACTIVE,
-        default=True,
-        help_text=CustomUserModelText.ACTIVE_HELP_TEXT,
+        CustomUserModelText.IS_ACTIVE, default=True, help_text=CustomUserModelText.ACTIVE_HELP_TEXT
     )
-    date_joined = models.DateTimeField(
-        CustomUserModelText.DATE_JOINED,
-        auto_now_add=True,
-    )
-    date_of_birth = models.DateField(
-        CustomUserModelText.DATE_OF_BIRTH,
-        blank=True,
-        null=True,
-    )
-    updated_at = models.DateTimeField(
-        CustomUserModelText.UPDATED_AT,
-        auto_now=True,
-    )
+    date_joined = models.DateTimeField(CustomUserModelText.DATE_JOINED, auto_now_add=True)
+    date_of_birth = models.DateField(CustomUserModelText.DATE_OF_BIRTH, blank=True, null=True)
+    updated_at = models.DateTimeField(CustomUserModelText.UPDATED_AT, auto_now=True)
     phone_number = models.CharField(
-        validators=[PhoneRegexValidator],
-        max_length=constants.PHONE_NUMBER_MAX_LENGTH,
-        blank=True,
-        null=True,
+        validators=[PhoneRegexValidator], max_length=constants.PHONE_NUMBER_MAX_LENGTH, blank=True, null=True
     )
     country = CountryField(blank=True)
     user_type = models.CharField(
-        max_length=constants.USER_TYPE_MAX_LENGTH,
-        choices=UserType.choices(),
-        default=UserType.EMPLOYEE.name,
+        max_length=constants.USER_TYPE_MAX_LENGTH, choices=UserType.choices(), default=UserType.EMPLOYEE.name
     )
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
 
     class Meta:
         verbose_name = CustomUserModelText.VERBOSE_NAME_USER
         verbose_name_plural = CustomUserModelText.VERBOSE_NAME_PLURAL_USERS
-        ordering = ('id',)
+        ordering = ("id",)
 
     def clean(self):
         custom_validate_email_function(self, self.email)
@@ -177,6 +127,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 @receiver(post_save, sender=CustomUser)
 def update_from_manager_to_employee(sender, **kwargs):
-    user = kwargs['instance']
+    user = kwargs["instance"]
     if user.user_type == CustomUser.UserType.EMPLOYEE.name:
         user.manager_projects.clear()

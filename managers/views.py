@@ -13,35 +13,36 @@ from users.models import CustomUser
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all().order_by(Lower('name'))
+    queryset = Project.objects.all().order_by(Lower("name"))
     serializer_class = ProjectSerializer
 
 
 class ProjectsList(ListView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
-    template_name = 'managers/projects_list.html'
+    template_name = "managers/projects_list.html"
 
     def get_queryset(self):
         if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
-            projects_queryset = Project.objects.all().order_by('id')
+            projects_queryset = Project.objects.all().order_by("id")
         elif self.request.user.user_type == CustomUser.UserType.MANAGER.name:
             projects_queryset = Project.objects.filter(managers__id=self.request.user.pk)
         else:
             projects_queryset = Project.objects.none()
-        if self.request.GET.get('sort'):
-            if 'members' in self.request.GET.get('sort'):
-                projects_queryset = Project.objects.annotate(members_count=Count('members')) \
-                    .order_by(self.request.GET.get('sort'))
+        if self.request.GET.get("sort"):
+            if "members" in self.request.GET.get("sort"):
+                projects_queryset = Project.objects.annotate(members_count=Count("members")).order_by(
+                    self.request.GET.get("sort")
+                )
             else:
-                projects_queryset = projects_queryset.order_by(self.request.GET.get('sort'))
+                projects_queryset = projects_queryset.order_by(self.request.GET.get("sort"))
 
         return projects_queryset
 
 
 class ProjectDetail(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
-    template_name = 'managers/project_detail.html'
+    template_name = "managers/project_detail.html"
 
     def get(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
-        return Response({'project': project})
+        return Response({"project": project})

@@ -9,4 +9,4 @@ class ProjectJoinForm(forms.Form):
     def __init__(self, queryset, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert isinstance(queryset, QuerySet)
-        self.fields['projects'].choices = [(project.id, project.name) for project in queryset]
+        self.fields["projects"].choices = [(project.id, project.name) for project in queryset]
