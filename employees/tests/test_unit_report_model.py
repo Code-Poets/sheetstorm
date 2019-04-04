@@ -157,3 +157,13 @@ class TestReportWorkHoursParameterFails(DataSetUpToTests):
     ):
         report = self.initiate_model("work_hours", Decimal("8.00"))
         self.assertEqual(report.work_hours_str, "8:00")
+
+    def test_report_model_should_accept_correct_input(self):
+        self.field_should_accept_input("task_activities", Report.TaskType.OTHER.name)
+
+    def test_report_model_should_not_accept_incorrect_input(self):
+        self.field_should_not_accept_input("task_activities", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+
+    def test_report_model_should_be_create_with_default_value(self):
+        report = Report()
+        self.assertEqual(Report.TaskType.OTHER.name, report.task_activities)
