@@ -14,71 +14,64 @@ class TestReportModel(BaseModelTestCase):
 
     model_class = Report
     required_input = {
-        'date': datetime.datetime.now().date(),
-        'description': 'Some description',
-        'author': None,
-        'project': None,
-        'work_hours': Decimal('8.00'),
+        "date": datetime.datetime.now().date(),
+        "description": "Some description",
+        "author": None,
+        "project": None,
+        "work_hours": Decimal("8.00"),
     }
 
-    SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = 'This is a string'
+    SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = "This is a string"
 
     def setUp(self):
         self.author = CustomUser(
-            email="testuser@codepoets.it",
-            password='newuserpasswd',
-            first_name='John',
-            last_name='Doe',
-            country='PL',
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
         self.author.full_clean()
         self.author.save()
 
-        self.project = Project(
-            name="Test Project",
-            start_date=datetime.datetime.now(),
-        )
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
         self.project.full_clean()
         self.project.save()
 
-        self.required_input['author'] = self.author
-        self.required_input['project'] = self.project
+        self.required_input["author"] = self.author
+        self.required_input["project"] = self.project
 
         self.REPORT_MODEL_DATA = self.required_input.copy()
 
     # PARAM
     def test_report_model_save_date_field_should_accept_correct_input(self):
-        self.field_should_accept_input('date', datetime.datetime.now().date())
+        self.field_should_accept_input("date", datetime.datetime.now().date())
 
     # PARAM
     def test_report_model_description_field_should_accept_correct_input(self):
-        self.field_should_accept_input('description', 'Example')
+        self.field_should_accept_input("description", "Example")
 
     # PARAM
     def test_report_model_creation_date_field_should_be_filled_on_save(self):
-        self.field_should_have_non_null_default('creation_date')
+        self.field_should_have_non_null_default("creation_date")
 
     # PARAM
     def test_report_model_last_update_field_should_be_filled_on_save(self):
-        self.field_should_have_non_null_default('last_update')
+        self.field_should_have_non_null_default("last_update")
 
     # PARAM
     def test_report_model_author_field_should_accept_correct_input(self):
-        self.field_should_accept_input('author', self.author)
+        self.field_should_accept_input("author", self.author)
 
     # PARAM
     def test_report_model_project_field_should_accept_correct_input(self):
-        self.field_should_accept_input('project', self.project)
+        self.field_should_accept_input("project", self.project)
 
     # PARAM
     def test_report_model_work_hours_field_should_accept_correct_input(self):
-        self.field_should_accept_input('work_hours', Decimal('8.00'))
+        self.field_should_accept_input("work_hours", Decimal("8.00"))
 
     def test_report_model_editable_field_should_have_default_value(self):
-        self.field_should_have_non_null_default(field='editable', value=True)
+        self.field_should_have_non_null_default(field="editable", value=True)
 
     def test_report_model_last_update_field_should_be_changed_on_update(self):
-        self.field_auto_now_test('last_update', 'description', 'Updated')
+        self.field_auto_now_test("last_update", "description", "Updated")
 
     """
     ---------------
@@ -87,11 +80,11 @@ class TestReportModel(BaseModelTestCase):
     """
 
     def test_report_model_date_field_should_not_be_empty(self):
-        self.field_should_not_accept_null('date')
+        self.field_should_not_accept_null("date")
 
     # PARAM
     def test_report_model_date_field_should_not_accept_non_date_value(self):
-        self.field_should_not_accept_input('date', self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+        self.field_should_not_accept_input("date", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
 
     """
     ----------------------
@@ -101,10 +94,10 @@ class TestReportModel(BaseModelTestCase):
 
     # PARAM
     def test_report_model_description_field_should_not_accept_string_longer_than_set_limit(self):
-        self.field_should_not_accept_input('description', 'a' * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1))
+        self.field_should_not_accept_input("description", "a" * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1))
 
     def test_report_model_description_field_should_not_be_empty(self):
-        self.field_should_not_accept_null('description')
+        self.field_should_not_accept_null("description")
 
     """
     ------------------
@@ -113,10 +106,10 @@ class TestReportModel(BaseModelTestCase):
     """
     # PARAM
     def test_report_model_project_field_should_not_accept_non_model_value(self):
-        self.key_should_not_accept_incorrect_input('project', self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+        self.key_should_not_accept_incorrect_input("project", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
 
     def test_report_model_work_project_field_should_not_be_empty(self):
-        self.field_should_not_accept_null('project')
+        self.field_should_not_accept_null("project")
 
     """
     -----------------
@@ -126,10 +119,11 @@ class TestReportModel(BaseModelTestCase):
 
     # PARAM
     def test_report_model_author_field_should_not_accept_non_model_value(self):
-        self.key_should_not_accept_incorrect_input('author', self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+        self.key_should_not_accept_incorrect_input("author", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
 
     def test_report_model_author_field_should_not_be_empty(self):
-        self.field_should_not_accept_null('author')
+        self.field_should_not_accept_null("author")
+
     """
     ---------------------
     WORK_HOURS FAIL TESTS
@@ -138,32 +132,41 @@ class TestReportModel(BaseModelTestCase):
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_non_numeric_value(self):
-        self.field_should_not_accept_input('work_hours', self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+        self.field_should_not_accept_input("work_hours", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
 
     def test_report_model_work_hours_field_should_not_be_empty(self):
-        self.field_should_not_accept_null('work_hours')
+        self.field_should_not_accept_null("work_hours")
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_digits_number(self):
-        self.field_should_not_accept_input('work_hours', generate_decimal_with_digits(digits=ReportModelConstants.MAX_DIGITS.value + 1))
+        self.field_should_not_accept_input(
+            "work_hours", generate_decimal_with_digits(digits=ReportModelConstants.MAX_DIGITS.value + 1)
+        )
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_decimal_places_number(self):
-        self.field_should_not_accept_input('work_hours', generate_decimal_with_decimal_places(decimal_places=ReportModelConstants.DECIMAL_PLACES.value + 1))
+        self.field_should_not_accept_input(
+            "work_hours",
+            generate_decimal_with_decimal_places(decimal_places=ReportModelConstants.DECIMAL_PLACES.value + 1),
+        )
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input('work_hours', ReportModelConstants.MAX_WORK_HOURS.value + Decimal('0.01'))
+        self.field_should_not_accept_input("work_hours", ReportModelConstants.MAX_WORK_HOURS.value + Decimal("0.01"))
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_minimum(self):
-        self.field_should_not_accept_input('work_hours', ReportModelConstants.MIN_WORK_HOURS.value - Decimal('0.01'))
+        self.field_should_not_accept_input("work_hours", ReportModelConstants.MIN_WORK_HOURS.value - Decimal("0.01"))
 
     # PARAM
     def test_report_model_work_hours_field_should_not_accept_decimal_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input('work_hours', ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + Decimal('0.01'))
+        self.field_should_not_accept_input(
+            "work_hours", ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + Decimal("0.01")
+        )
 
     # PARAM
-    def test_report_model_work_hours_str_property_should_return_work_hours_field_value_as_string_with_colon_instead_of_dot(self):
-        report = self.initiate_model('work_hours', Decimal('8.00'))
-        self.assertEqual(report.work_hours_str, '8:00')
+    def test_report_model_work_hours_str_property_should_return_work_hours_field_value_as_string_with_colon_instead_of_dot(
+        self
+    ):
+        report = self.initiate_model("work_hours", Decimal("8.00"))
+        self.assertEqual(report.work_hours_str, "8:00")

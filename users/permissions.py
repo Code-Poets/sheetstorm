@@ -10,7 +10,7 @@ class AuthenticatedAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         is_user_authenticated = request.user and request.user.is_authenticated
         is_user_admin = request.user.user_type == CustomUser.UserType.ADMIN.name
-        return  is_user_authenticated and is_user_admin
+        return is_user_authenticated and is_user_admin
 
 
 class AuthenticatedAdminOrOwnerUser(permissions.BasePermission):

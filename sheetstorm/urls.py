@@ -16,10 +16,10 @@ from django.urls import include
 from django.urls import path
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^', include('users.urls')),
-    url(r'^managers/', include('managers.urls')),
-    path('rest-auth/', include('rest_framework.urls')),
-    path('rest-auth/registration/', include('rest_auth.registration.urls')),
-    url(r'^', include('employees.urls')),
+    url(r"^admin/", admin.site.urls),
+    url(r"^", include("users.urls")),
+    url(r"^managers/", include("managers.urls")),
+    path("rest-auth/", include("rest_framework.urls")),
+    path("rest-auth/registration/", include("rest_auth.registration.urls")),
+    url(r"^", include("employees.urls")),
 ]

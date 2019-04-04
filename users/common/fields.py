@@ -8,7 +8,7 @@ class ChoiceEnum(Enum):
 
 
 class Action(ChoiceEnum):
-    LIST = 'list'
-    RETRIEVE = 'retrieve'
-    CREATE = 'create'
-    UPDATE = 'update'
+    LIST = "list"
+    RETRIEVE = "retrieve"
+    CREATE = "create"
+    UPDATE = "update"
