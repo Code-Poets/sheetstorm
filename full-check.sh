@@ -2,6 +2,10 @@ printf "=================== DJANGO CONFIGURATION CHECKS ====================\n"
 python manage.py check
 printf "\n"
 
+printf "=========================== CODING STYLE ===========================\n"
+./style.sh
+printf "\n"
+
 printf "=============================== LINT ===============================\n"
 ./lint.sh
 printf "\n"
