@@ -1,5 +1,7 @@
 from django.db.models import Count
 from django.db.models.functions import Lower
+from django.db.models.query import QuerySet
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from rest_framework import renderers
@@ -21,7 +23,7 @@ class ProjectsList(ListView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "managers/projects_list.html"
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
             projects_queryset = Project.objects.all().order_by("id")
         elif self.request.user.user_type == CustomUser.UserType.MANAGER.name:
@@ -44,6 +46,6 @@ class ProjectDetail(APIView):
     template_name = "managers/project_detail.html"
 
     @staticmethod
-    def get(_request, pk):
+    def get(_request: HttpRequest, pk: int) -> Response:
         project = get_object_or_404(Project, pk=pk)
         return Response({"project": project})

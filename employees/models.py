@@ -30,9 +30,9 @@ class Report(models.Model):
     editable = models.BooleanField(default=True)
 
     @property
-    def work_hours_str(self):
+    def work_hours_str(self) -> str:
         return self.work_hours.to_eng_string().replace(".", ":")
 
     @property
-    def markdown_description(self):
+    def markdown_description(self) -> markdown:
         return markdown(self.description)

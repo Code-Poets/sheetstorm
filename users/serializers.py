@@ -1,7 +1,12 @@
+from typing import Any
+from typing import Dict
+from typing import Optional  # pylint: disable=unused-import
+
 from allauth.account import app_settings as allauth_settings
 from allauth.account.adapter import get_adapter as allauth_get_adapter
 from allauth.account.utils import setup_user_email
 from allauth.utils import email_address_exists
+from django.http import HttpRequest
 from django_countries.serializers import CountryFieldMixin
 from rest_framework import serializers
 
@@ -15,7 +20,7 @@ class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
         model = CustomUser
         fields = "__all__"
 
-    def validate_email(self, email):
+    def validate_email(self, email: str) -> str:
         if self.instance is not None:
             instance_old_email = self.instance.email
         email = allauth_get_adapter().clean_email(email)
@@ -65,9 +70,9 @@ class UserCreateSerializer(UserSerializer):
 
 
 class CustomRegisterSerializer(serializers.Serializer):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.cleaned_data = None
+        self.cleaned_data = None  # type: Optional[Dict[str, str]]
 
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
     first_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
@@ -77,7 +82,7 @@ class CustomRegisterSerializer(serializers.Serializer):
         label="Password confirmation", required=True, write_only=True, style={"input_type": "password"}
     )
 
-    def validate_email(self, email):
+    def validate_email(self, email: str) -> str:
         email = allauth_get_adapter().clean_email(email)
         custom_validate_email_function(self, email)
         if allauth_settings.UNIQUE_EMAIL:
@@ -86,15 +91,15 @@ class CustomRegisterSerializer(serializers.Serializer):
         return email
 
     @staticmethod
-    def validate_password(password):
+    def validate_password(password: str) -> str:
         return allauth_get_adapter().clean_password(password)
 
-    def validate(self, data):  # pylint: disable=no-self-use
+    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:  # pylint: disable=no-self-use
         if data["password"] != data["password_confirmation"]:
             raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE)
         return data
 
-    def get_cleaned_data(self):
+    def get_cleaned_data(self) -> Dict[str, str]:
         return {
             "first_name": self.validated_data.get("first_name", ""),
             "last_name": self.validated_data.get("last_name", ""),
@@ -102,7 +107,7 @@ class CustomRegisterSerializer(serializers.Serializer):
             "email": self.validated_data.get("email", ""),
         }
 
-    def save(self, request):
+    def save(self, request: HttpRequest) -> "CustomUser":
         adapter = allauth_get_adapter()
         user = adapter.new_user(request)
         self.cleaned_data = self.get_cleaned_data()

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -21,7 +23,9 @@ from users.common.validators import PhoneRegexValidator
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, is_staff, is_superuser, user_type):
+    def _create_user(
+        self, email: str, password: str, is_staff: bool, is_superuser: bool, user_type: str
+    ) -> "CustomUser":
         """
         Creates and saves a user with the given email and password.
         Returns created user.
@@ -46,7 +50,7 @@ class CustomUserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_superuser(self, email, password):
+    def create_superuser(self, email: str, password: str) -> "CustomUser":
         return self._create_user(
             email, password, is_staff=True, is_superuser=True, user_type=CustomUser.UserType.ADMIN.name
         )
@@ -96,29 +100,29 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = CustomUserModelText.VERBOSE_NAME_PLURAL_USERS
         ordering = ("id",)
 
-    def clean(self):
+    def clean(self) -> None:
         custom_validate_email_function(self, self.email)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         """
         Returns the absolute url with user's email.
         example: /users/admin@example.com
         """
         return "/users/%s/" % self.email
 
-    def get_full_name(self):
+    def get_full_name(self) -> str:
         """
         Returns the first_name plus the last_name, with a space in between.
         """
         return f"{self.first_name} {self.last_name}"
 
-    def get_short_name(self):
+    def get_short_name(self) -> str:
         """
         Returns the short name for the user.
         """
         return self.first_name
 
-    def email_user(self, subject, message, from_email=None):
+    def email_user(self, subject: str, message: str, from_email: str = None) -> None:
         """
         Sends an email to this user.
         """
@@ -126,8 +130,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 @receiver(post_save, sender=CustomUser)
-def update_from_manager_to_employee(sender, **kwargs):
+def update_from_manager_to_employee(sender: "CustomUser", **kwargs: Any) -> None:
     user = kwargs["instance"]
     assert sender == CustomUser
     if user.user_type == CustomUser.UserType.EMPLOYEE.name:
         user.manager_projects.clear()
+    else:
+        return

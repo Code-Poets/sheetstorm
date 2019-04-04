@@ -1,5 +1,9 @@
+from typing import Any
+from typing import Set
+
 from django.db import models
 from django.db.models import Q
+from django.db.models.query import QuerySet
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
@@ -8,13 +12,13 @@ from users.models import CustomUser
 
 
 class ProjectQuerySet(models.QuerySet):
-    def filter_terminated(self):
+    def filter_terminated(self) -> QuerySet:
         return self.filter(terminated=True, stop_date=None)
 
-    def filter_active(self):
+    def filter_active(self) -> QuerySet:
         return self.filter(terminated=False, stop_date=None)
 
-    def filter_completed(self):
+    def filter_completed(self) -> QuerySet:
         return self.filter(~Q(stop_date=None))
 
 
@@ -28,12 +32,12 @@ class Project(models.Model):
 
     objects = ProjectQuerySet.as_manager()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 @receiver(m2m_changed, sender=Project.managers.through)
-def update_user_type(sender, action, pk_set, **kwargs):
+def update_user_type(sender: Project, action: str, pk_set: Set, **kwargs: Any) -> None:
     assert sender == Project.managers.through
     project = kwargs["instance"]
     if action in ["pre_remove", "post_remove"]:
@@ -44,7 +48,7 @@ def update_user_type(sender, action, pk_set, **kwargs):
         return
 
 
-def change_user_type_to_manager(project):
+def change_user_type_to_manager(project: Project) -> None:
     for manager in project.managers.all():
         if manager.user_type != CustomUser.UserType.MANAGER.name:
             manager.user_type = CustomUser.UserType.MANAGER.name
@@ -54,7 +58,7 @@ def change_user_type_to_manager(project):
             return
 
 
-def change_user_type_to_employee(pk_set):
+def change_user_type_to_employee(pk_set: Set) -> None:
     for user_id in pk_set:
         user = CustomUser.objects.get(pk=user_id)
         if not user.manager_projects.exists():
