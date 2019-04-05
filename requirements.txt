@@ -3,8 +3,10 @@ certifi
 chardet
 defusedxml
 Django >= 2.1, < 2.2
-django-countries
 django-allauth
+django-bootstrap-datepicker-plus
+django-countries
+django-crispy-forms
 django-markdown-deux
 django-mock-queries
 django-rest-auth
