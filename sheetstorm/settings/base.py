@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'bootstrap_datepicker_plus',
     'crispy_forms',
-    'markdown_deux',
     'raven.contrib.django.raven_compat',
     'rest_framework',
     'rest_framework.authtoken',
