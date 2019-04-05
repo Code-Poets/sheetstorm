@@ -3,13 +3,15 @@ from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
-from django.shortcuts import redirect
+from django.shortcuts import reverse
 from django.views.generic import ListView
+from django.views.generic import UpdateView
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from managers.forms import ProjectForm
 from managers.models import Project
 from managers.serializers import ProjectSerializer
 from users.models import CustomUser
@@ -52,30 +54,10 @@ class ProjectDetail(APIView):
         return Response({"project": project})
 
 
-class ProjectUpdate(APIView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
-    template_name = 'managers/project_update.html'
+class ProjectUpdateView(UpdateView):
+    form_class = ProjectForm
+    model = Project
+    template_name = "managers/project_update.html"
 
-    def get(self, request, pk):
-        project = get_object_or_404(Project, pk=pk)
-        project_serializer = ProjectSerializer(
-            project,
-            context={'request': request},
-        )
-        return Response({'serializer': project_serializer, 'project': project})
-
-    def post(self, request, pk):
-        project = get_object_or_404(Project, pk=pk)
-        project_serializer = ProjectSerializer(
-            project,
-            data=request.data,
-            context={'request': request},
-        )
-        if not project_serializer.is_valid():
-            return Response({
-                'serializer': project_serializer,
-                'project': project,
-                'errors': project_serializer.errors,
-            })
-        project_serializer.save()
-        return redirect('custom-project-detail', pk=pk)
+    def get_success_url(self) -> None:
+        return reverse("custom-project-detail", kwargs={"pk": self.kwargs["pk"]})
