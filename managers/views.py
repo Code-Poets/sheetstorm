@@ -4,10 +4,13 @@ from django.db.models import Count
 from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.shortcuts import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
+from django.views.generic import DeleteView
 from django.views.generic import ListView
 from django.views.generic import UpdateView
 from rest_framework import renderers
@@ -89,10 +92,14 @@ class ProjectUpdateView(UpdateView):
         return reverse("custom-project-detail", kwargs={"pk": self.kwargs["pk"]})
 
 
-def delete_project(request, pk):
-    if request.user.user_type == CustomUser.UserType.ADMIN.name:
-        project = get_object_or_404(Project, pk=pk)
-        project.delete()
-        return redirect('custom-projects-list')
-    else:
-        return redirect('home')
+class ProjectDeleteView(DeleteView):
+    model = Project
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if not request.user.is_admin:
+            return redirect(reverse("home"))
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self) -> str:
+        return reverse("custom-projects-list")

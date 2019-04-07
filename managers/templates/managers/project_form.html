@@ -6,7 +6,6 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-
 <h2>
   <small>
     <a href="{{ back_url }}">
@@ -23,8 +22,26 @@
     <button type="submit" class="btn btn-default">{{ button_text }}</button>
   </form>
 </div>
+
+{% if request.user.is_admin and object %}
+<br/>
+<button type="button" id="opener" class="btn btn btn-danger">
+  <span class="glyphicon glyphicon-remove"></span> Delete
+</button>
+
+<div id="dialog" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
+  {% trans 'Do you want to delete' %} <br/>
+  <b>{{object.name}}</b> {% trans 'project' %}?
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_script %}
 {{ form.media }}
+{% if request.user.is_admin and object %}
+  <script type="text/javascript">
+    var delete_project_path = "{% url 'custom-project-delete' pk=object.pk %}";
+  </script>
+  <script type="text/javascript" src="{% static 'managers/scripts/delete_project_popup.js' %}"></script>
+{% endif %}
 {% endblock %}
