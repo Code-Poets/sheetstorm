@@ -3,12 +3,15 @@ from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
+from django.shortcuts import reverse
 from django.views.generic import ListView
+from django.views.generic import UpdateView
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from managers.forms import ProjectForm
 from managers.models import Project
 from managers.serializers import ProjectSerializer
 from users.models import CustomUser
@@ -49,3 +52,12 @@ class ProjectDetail(APIView):
     def get(_request: HttpRequest, pk: int) -> Response:
         project = get_object_or_404(Project, pk=pk)
         return Response({"project": project})
+
+
+class ProjectUpdateView(UpdateView):
+    form_class = ProjectForm
+    model = Project
+    template_name = "managers/project_update.html"
+
+    def get_success_url(self) -> None:
+        return reverse("custom-project-detail", kwargs={"pk": self.kwargs["pk"]})

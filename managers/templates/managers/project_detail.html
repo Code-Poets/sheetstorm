@@ -11,7 +11,7 @@
   </small>
   &nbsp;{{ project.name }}&nbsp;
   <small>
-    <a href="#">
+    <a href="{% url 'custom-project-update' pk=project.id %}">
       <span class="glyphicon glyphicon-pencil"></span>
     </a>
   </small>

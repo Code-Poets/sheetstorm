@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_countries',
+    'bootstrap_datepicker_plus',
+    'crispy_forms',
     'users',
     'markdown_deux',
     'rest_framework',
@@ -182,3 +184,5 @@ COUNTRIES_FIRST = [
     'FR',
     'US',
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
