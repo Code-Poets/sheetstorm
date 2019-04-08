@@ -1,4 +1,5 @@
 from enum import Enum
+from utils.decorators import do_not_call_in_templates
 
 from django.utils.translation import ugettext_lazy
 
@@ -7,6 +8,7 @@ MAX_HOURS_VALUE_VALIDATOR_MESSAGE = ugettext_lazy("This value cannot be greater 
 MIN_HOURS_VALUE_VALIDATOR_MESSAGE = ugettext_lazy("This value must be greater than 0.")
 
 
+@do_not_call_in_templates
 class ReportListStrings(Enum):
     PAGE_TITLE = ugettext_lazy("Reports")
     CREATE_REPORT_BUTTON = ugettext_lazy("Create")
@@ -21,6 +23,7 @@ class ReportListStrings(Enum):
     EDIT_REPORT_BUTTON = ugettext_lazy("Edit")
 
 
+@do_not_call_in_templates
 class ReportDetailStrings(Enum):
     PAGE_TITLE = ugettext_lazy("Report - ")
     UPDATE_REPORT_BUTTON = ugettext_lazy("Update")
