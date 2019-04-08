@@ -152,7 +152,7 @@ disable=print-statement,
         locally-enabled,
         similarities,
         design,
-        elif,
+        no-else-raise,
         logging,
         no-else-return,
         len-as-condition,
@@ -162,6 +162,10 @@ disable=print-statement,
         parse-error,
         import-error,
         line-too-long,
+        no-member,
+        abstract-method,
+        arguments-differ
+
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
