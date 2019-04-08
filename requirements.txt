@@ -14,8 +14,10 @@ djangorestframework
 factory-boy
 freezegun
 idna
+mypy
 oauthlib
 psycopg2
+pylint
 pytest
 pytest-cov
 pytest-django
