@@ -1,5 +1,3 @@
-import datetime
-
 from django.test import TestCase
 from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
@@ -72,21 +70,11 @@ class ProjectTest(TestCase):
         self.user.save()
         self.client.force_login(self.user)
 
-        self.project = Project(
-            name="Example Project",
-            start_date=datetime.datetime.now().date() - datetime.timedelta(days=30),
-            stop_date=datetime.datetime.now().date(),
-            terminated=False,
-        )
-        self.project.full_clean()
-        self.project.save()
-        self.project.managers.add(self.user)
-        self.project.members.add(self.user)
-
 
 class CustomProjectsListTests(ProjectTest):
     def setUp(self):
         super().setUp()
+        self.project = ProjectFactory()
         self.url = reverse("custom-projects-list")
 
     def test_project_list_view_should_display_projects_list_on_get(self):
@@ -100,6 +88,7 @@ class CustomProjectsListTests(ProjectTest):
 
     def test_projects_list_view_should_show_for_managers_only_own_projects(self):
         self.user.user_type = CustomUser.UserType.MANAGER.name
+        self.project.managers.add(self.user)
         manager_project_list = Project.objects.filter(managers__id=self.user.pk)
         request = APIRequestFactory().get(path=self.url)
         request.user = self.user
@@ -177,6 +166,7 @@ class CustomProjectsListTests(ProjectTest):
 class ProjectDetailTests(ProjectTest):
     def setUp(self):
         super().setUp()
+        self.project = ProjectFactory()
         self.url = reverse("custom-project-detail", args=(self.project.pk,))
 
     def test_project_detail_view_should_display_project_details_on_get(self):

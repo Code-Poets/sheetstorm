@@ -3,10 +3,14 @@
 {% block content %}
 {% load rest_framework %}
 
-<h1>{% trans "Projects list" %}
+<h1>
   <button type="button" class="btn btn-default btn-sm" data-toggle="collapse" data-target="#collapseSort" aria-expanded="false" aria-controls="collapseSort">
     <span class="glyphicon glyphicon-th-list"></span>
   </button>
+  &nbsp; {% trans 'Projects list' %} &nbsp;
+  <a href="{% url 'custom-project-create' %}" class="btn btn-default btn-sm">
+    <span class="glyphicon glyphicon-plus"></span>
+  </a>
 </h1>
 
 <div class="collapse" id="collapseSort">
