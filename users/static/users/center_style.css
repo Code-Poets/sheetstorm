@@ -59,14 +59,15 @@ span {
 }
 
 #sidebar .sidebar-header {
-    padding: 20px;
+    text-align: center;
+    padding: 15px;
 }
 
 #sidebar .sidebar-header strong {
     font-size: 1.6em;
 }
 #sidebar ul.components {
-    padding: 20px 0;
+    padding: 10px 0;
 }
 
 #sidebar ul li a {
@@ -79,8 +80,12 @@ span {
     color: white;
 }
 
-#sidebar ul li a i {
-    margin-right: 10px;
+#sidebar ul li a img {
+    margin-left: 10%;
+}
+#sidebar ul li a span {
+    position: absolute;
+    left: 115px;
 }
 
 ul ul a {

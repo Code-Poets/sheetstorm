@@ -27,41 +27,47 @@
     <!-- Sidebar Holder -->
     <nav id="sidebar">
         <div class="sidebar-header">
-            <h3>AVATAR</h3>
-            <strong>{{ user.user_type }}</strong>
+            <img src="{% static 'users/images/white/iko-33.png' %}"/>
+            <p><strong>{{ user.user_type }}</strong></p>
         </div>
 
         <ul class="list-unstyled components">
             <li>
                 <a href="{% url 'home' %}">
-                    {% trans 'Home' %}
+                    <img src="{% static 'users/images/grey/ico-02.png' %}">
+                    <span>{% trans 'Home' %}</span>
                 </a>
             </li>
-            {% if user.user_type == admin %}
             <li>
                 <a href="{% url 'custom-user-update' user.id %}">
-                    {% trans 'Account' %}
+                    <img src="{% static 'users/images/grey/ico-01.png' %}">
+                    <span>{% trans 'Account' %}</span>
                 </a>
+            {% if user.user_type == admin %}
                 <a href="{% url 'custom-users-list' %}">
-                    {% trans 'Employees' %}
+                    <img src="{% static 'users/images/grey/ico-03.png' %}">
+                    <span>{% trans 'Employees' %}</span>
                 </a>
             </li>
             {% endif %}
-            {% if user.user_type == manager %}
+            {% if user.user_type == manager or user.user_type == admin%}
             <li>
                 <a href="{% url 'custom-projects-list' %}">
-                    {% trans 'Projects list' %}
+                    <img src="{% static 'users/images/grey/ico-04.png' %}">
+                    <span>{% trans 'Projects' %}</span>
                 </a>
             </li>
             {% endif %}
             <li>
                 <a href="{% url 'custom-report-list' %}">
-                    {% trans 'Reports' %}
+                    <img src="{% static 'users/images/grey/ico-05.png' %}">
+                    <span>{% trans 'Reports' %}</span>
                 </a>
             </li>
             <li>
                 <a href="{% url 'logout' %}">
-                    {% trans 'Logout' %}
+                    <img src="{% static 'users/images/grey/ico-23.png' %}">
+                    <span>{% trans 'Logout' %}</span>
                 </a>
             </li>
         </ul>
