@@ -7,53 +7,82 @@
 <head>
     <title>{% block title %}Sheet storm{% endblock %}</title>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="{% static 'users/center_style.css' %}" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'users/center_style.css' %}"/>
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <header>
-    {% if user.is_authenticated %}
-      {% get_admin_user_type as admin %}
-      {% get_manager_user_type as manager %}
-      <table>
-        <tr><br /></tr>
-        <tr>
-          <td class="padding"><a href="{% url 'home' %}">{% trans 'Home' %}</a></td>
-          <td class="padding"><a href="{% url 'custom-user-update' user.id %}">{% trans 'Account' %}</a></td>
+{% if user.is_authenticated %}
+{% get_admin_user_type as admin %}
+{% get_manager_user_type as manager %}
+<div class="wrapper">
+    <!-- Sidebar Holder -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h3>AVATAR</h3>
+            <strong>IMG</strong>
+        </div>
+
+        <ul class="list-unstyled components">
+            <li>
+                <a href="{% url 'home' %}">
+                    {% trans 'Home' %}
+                </a>
+            </li>
             {% if user.user_type == admin %}
-          <td class="padding"><a href="{% url 'custom-users-list' %}">{% trans 'Employees' %}</a></td>
-          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
+            <li>
+                <a href="{% url 'custom-user-update' user.id %}">
+                    {% trans 'Account' %}
+                </a>
+                <a href="{% url 'custom-users-list' %}">
+                    {% trans 'Employees' %}
+                </a>
+            </li>
             {% endif %}
             {% if user.user_type == manager %}
-          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
+            <li>
+                <a href="{% url 'custom-projects-list' %}">
+                    {% trans 'Projects list' %}
+                </a>
+            </li>
             {% endif %}
-          <td class="padding"><a href="{% url 'custom-report-list' %}">{% trans 'Reports' %}</a></td>
-          <td class="padding"><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></td>
-        </tr>
-      </table>
-
-    {% else %}
-
-      <table>
-        <tr><br /></tr>
-        <tr>
-        </tr>
-      </table>
-
+            <li>
+                <a href="{% url 'custom-report-list' %}">
+                    {% trans 'Reports' %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'logout' %}">
+                    {% trans 'Logout' %}
+                </a>
+            </li>
+        </ul>
+    </nav>
     {% endif %}
-
-  </header>
-  <hr>
-  <main>
-<div>
+    <!-- Page Content Holder -->
+    <div id="content">
+        <nav style="text-align: left">
+            <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
+                <span>Toggle Sidebar</span>
+            </button>
+        </nav>
+    {% endif %}
+    <!-- Page Content Holder -->
+        <main>
+            <div>
     {% block content %}
     {% endblock %}
+            </div>
+        </main>
+    </div>
 </div>
-  </main>
+<script src="{% static 'users/scripts/float_menu.js' %}"></script>
 </body>
 </html>
