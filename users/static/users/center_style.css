@@ -82,6 +82,7 @@ span {
     margin-left: 10%;
 }
 #sidebar ul li a span {
+    margin-top: 5px;
     position: absolute;
     left: 115px;
 }
@@ -133,4 +134,9 @@ span {
 
 #sidebar.active #logo-nav #logo-bottom #name-logo {
     display: none;
+}
+
+/*Active*/
+.active span {
+    color: white;
 }

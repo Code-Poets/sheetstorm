@@ -23,6 +23,11 @@
 {% if user.is_authenticated %}
 {% get_admin_user_type as admin %}
 {% get_manager_user_type as manager %}
+{% url 'home' as home_url %}
+{% url 'custom-user-update' user.id as account_url %}
+{% url 'custom-users-list' as custom_users_list_url %}
+{% url 'custom-projects-list' as custom_projects_list_url %}
+{% url 'custom-report-list' as custom_report_list_url %}
 <div class="wrapper">
     <!-- Sidebar Holder -->
     <nav id="sidebar">
@@ -30,41 +35,75 @@
             <img src="{% static 'users/images/white/iko-33.png' %}"/>
             <p><strong>{{ user.user_type }}</strong></p>
         </div>
-
         <ul class="list-unstyled components">
             <li>
+                {% if request.path == home_url %}
+                <a class="active" href="{% url 'home' %}">
+                    <img src="{% static 'users/images/white/iko-02.png' %}">
+                    <span>{% trans 'Home' %}</span>
+                </a>
+                {% else %}
                 <a href="{% url 'home' %}">
                     <img src="{% static 'users/images/grey/ico-02.png' %}">
                     <span>{% trans 'Home' %}</span>
                 </a>
+                {% endif %}
             </li>
             <li>
+                {% if request.path == account_url %}
+                <a class="active" href="{% url 'custom-user-update' user.id %}">
+                    <img src="{% static 'users/images/white/iko-01.png' %}">
+                    <span>{% trans 'Account' %}</span>
+                </a>
+                {% else %}
                 <a href="{% url 'custom-user-update' user.id %}">
                     <img src="{% static 'users/images/grey/ico-01.png' %}">
                     <span>{% trans 'Account' %}</span>
                 </a>
+                {% endif %}
             </li>
+            {% if user.user_type == admin %}
             <li>
-                {% if user.user_type == admin %}
+                {% if request.path == custom_users_list_url %}
+                <a class="active" href="{% url 'custom-users-list' %}">
+                    <img src="{% static 'users/images/white/iko-03.png' %}">
+                    <span>{% trans 'Employees' %}</span>
+                </a>
+                {% else %}
                 <a href="{% url 'custom-users-list' %}">
                     <img src="{% static 'users/images/grey/ico-03.png' %}">
                     <span>{% trans 'Employees' %}</span>
                 </a>
+                {% endif %}
             </li>
             {% endif %}
-            {% if user.user_type == manager or user.user_type == admin%}
+            {% if user.user_type == manager or user.user_type == admin %}
             <li>
+                {% if request.path == custom_projects_list_url %}
+                <a class="active" href="{% url 'custom-projects-list' %}">
+                    <img src="{% static 'users/images/white/iko-04.png' %}">
+                    <span>{% trans 'Projects' %}</span>
+                </a>
+                {% else %}
                 <a href="{% url 'custom-projects-list' %}">
                     <img src="{% static 'users/images/grey/ico-04.png' %}">
                     <span>{% trans 'Projects' %}</span>
                 </a>
+                {% endif %}
             </li>
             {% endif %}
             <li>
+                {% if request.path == custom_report_list_url %}
+                <a class="active" href="{% url 'custom-report-list' %}">
+                    <img src="{% static 'users/images/white/iko-05.png' %}">
+                    <span>{% trans 'Reports' %}</span>
+                </a>
+                {% else %}
                 <a href="{% url 'custom-report-list' %}">
                     <img src="{% static 'users/images/grey/ico-05.png' %}">
                     <span>{% trans 'Reports' %}</span>
                 </a>
+                {% endif %}
             </li>
             <li id="logout">
                 <a href="{% url 'logout' %}">
