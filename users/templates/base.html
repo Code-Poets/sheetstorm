@@ -43,6 +43,8 @@
                     <img src="{% static 'users/images/grey/ico-01.png' %}">
                     <span>{% trans 'Account' %}</span>
                 </a>
+            </li>
+            <li>
                 {% if user.user_type == admin %}
                 <a href="{% url 'custom-users-list' %}">
                     <img src="{% static 'users/images/grey/ico-03.png' %}">
