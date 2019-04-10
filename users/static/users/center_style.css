@@ -41,6 +41,7 @@ span {
 }
 
 #sidebar {
+    position: relative;
     min-width: 250px;
     max-width: 250px;
     background: #2c77bc;
@@ -99,4 +100,18 @@ ul ul a {
     padding: 20px;
     min-height: 100vh;
     transition: all 0.3s;
+}
+
+#logo-nav {
+    position: absolute;
+    width: 100%;
+    height: 115px;
+    bottom: 0;
+    background-color: #e9efff;
+}
+
+#logo-bottom {
+    text-align: left;
+    margin-top: 20px;
+    margin-left: 20px;
 }

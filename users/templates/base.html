@@ -43,7 +43,7 @@
                     <img src="{% static 'users/images/grey/ico-01.png' %}">
                     <span>{% trans 'Account' %}</span>
                 </a>
-            {% if user.user_type == admin %}
+                {% if user.user_type == admin %}
                 <a href="{% url 'custom-users-list' %}">
                     <img src="{% static 'users/images/grey/ico-03.png' %}">
                     <span>{% trans 'Employees' %}</span>
@@ -64,16 +64,20 @@
                     <span>{% trans 'Reports' %}</span>
                 </a>
             </li>
-            <li>
+            <li id="logout">
                 <a href="{% url 'logout' %}">
                     <img src="{% static 'users/images/grey/ico-23.png' %}">
                     <span>{% trans 'Logout' %}</span>
                 </a>
             </li>
         </ul>
+         <div id="logo-nav">
+             <div id="logo-bottom">
+                <img src="{% static 'users/images/logo.png' %}"/>
+                <img id="name-logo" src="{% static 'users/images/ico-32.png' %}"/>
+             </div>
+        </div>
     </nav>
-    {% endif %}
-    <!-- Page Content Holder -->
     <div id="content">
         <nav style="text-align: left">
             <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
