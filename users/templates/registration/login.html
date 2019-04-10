@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load i18n %}
+{% load static %}
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -12,13 +13,14 @@
 <div id="login-page" class="wrapper fadeInDown">
   <div id="formContent">
 
-    <div class="fadeIn first">
-      <img src="http://danielzawadzki.com/codepen/01/icon.svg" id="icon" alt="User Icon" />
+    <div class="fadeIn first" id="login-header">
+      <img src="{% static 'users/images/logo-login.png' %}" alt="Logo icon" />
+      <img src="{% static 'users/images/name-login.png' %}" alt="Name brand Icon" />
     </div>
     <form method="post" class="login">
         {% csrf_token %}
-      <input type="text" id="username" class="fadeIn second" name="username" placeholder="login">
-      <input type="password" id="password" class="fadeIn third" name="password" placeholder="password">
+      <input type="text" id="username" class="fadeIn second" name="username" placeholder="Email" required>
+      <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
       <input type="submit" class="fadeIn fourth" value="{% trans 'Login' %}">
     </form>
 
