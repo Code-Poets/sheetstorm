@@ -25,6 +25,7 @@ python-dateutil
 python3-openid
 pytz
 PyYAML
+raven
 requests
 requests-oauthlib
 six
