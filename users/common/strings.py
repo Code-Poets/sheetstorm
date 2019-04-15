@@ -5,9 +5,9 @@ from users.common import constants
 
 
 class ConfirmationMessages:
-    SUCCESSFUL_UPDATE_USER_MESSAGE = ugettext_lazy('Account has been successfully updated!')
-    SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy('Your password has been successfully updated!')
-    FAILED_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy('Please correct the error below.')
+    SUCCESSFUL_UPDATE_USER_MESSAGE = ugettext_lazy("Account has been successfully updated!")
+    SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy("Your password has been successfully updated!")
+    FAILED_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy("Please correct the error below.")
 
 
 class PermissionsMessage:
@@ -55,7 +55,6 @@ class CustomValidationErrorText:
     VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN_SHORT = "Please enter an e-mail address with a valid domain"
     VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = ugettext_lazy("A user is already registered with this e-mail address.")
     VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE = ugettext_lazy("The two password fields didn't match.")
-    VALIDATION_ERROR_CHANGE_PASSWORD_MESSAGE = 'Your old password was entered incorrectly. Please enter it again.'
 
 
 class CustomUserCountryText:

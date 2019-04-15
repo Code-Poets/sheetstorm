@@ -17,13 +17,22 @@ user_account_detail = views.UserViewSet.as_view(
 
 urlpatterns = format_suffix_patterns(
     [
+        path("accounts/password_reset/", views.CustomPasswordResetView.as_view(), name="password_reset"),
+        path("accounts/password_reset/done/", views.CustomPasswordResetDoneView.as_view(), name="password_reset_done"),
+        path(
+            "accounts/reset/<uidb64>/<token>/",
+            views.CustomPasswordResetConfirmView.as_view(),
+            name="password_reset_confirm",
+        ),
+        path("accounts/reset/done/", views.CustomPasswordResetCompleteView.as_view(), name="password_reset_complete"),
+        path("accounts/password_change/", views.CustomPasswordChangeView.as_view(), name="password_change"),
+        # TODO: Use only `django.contrib.auth.urls` that are needed, otherwise security issue.
+        path("accounts/", include("django.contrib.auth.urls")),
         url(r"^api/$", views.api_root),
         url(r"^api/users/$", users_list, name="users-list"),
         url(r"^api/users/(?P<pk>[0-9]+)/$", users_detail, name="users-detail"),
         url(r"^api/account/(?P<pk>[0-9]+)/$", user_account_detail, name="user-account-detail"),
         url(r"^$", views.index, name="home"),
-        path("accounts/", include("django.contrib.auth.urls")),
-        url(r'^user/password/$', views.change_password, name='change_password'),
         url(r"^signup/$", views.SignUp.as_view(), name="signup"),
         url(r"^user/(?P<pk>[0-9]+)/$", views.UserUpdate.as_view(), name="custom-user-update"),
         url(r"^user/create/$", views.UserCreate.as_view(), name="custom-user-create"),
