@@ -1,12 +1,14 @@
 import datetime
 
 from django.shortcuts import reverse
+from parameterized import parameterized
 
 from managers.factories import ProjectFactory
 from managers.models import Project
 from managers.tests.test_api import ProjectTest
 from managers.views import ProjectCreateView
 from managers.views import ProjectUpdateView
+from users.models import CustomUser
 
 
 class ProjectCreateTests(ProjectTest):
@@ -74,3 +76,24 @@ class ProjectUpdateViewTestCase(ProjectTest):
         self.assertEqual(response.status_code, 200)
         self.project.refresh_from_db()
         self.assertFormError(response, "form", "name", "This field is required.")
+
+
+class DeleteProjectTests(ProjectTest):
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+        self.url = reverse("custom-project-delete", kwargs={"pk": self.project.pk})
+
+    def test_delete_project_function_view_should_delete_project_on_admin_type_user_post(self):
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Project.objects.all().count(), 0)
+
+    @parameterized.expand([(CustomUser.UserType.EMPLOYEE.name,), (CustomUser.UserType.MANAGER.name,)])
+    def test_delete_project_function_view_should_not_delete_project_on_non_admin_request(self, user_type):
+        self.user.user_type = user_type
+        self.user.full_clean()
+        self.user.save()
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Project.objects.all().count(), 1)

@@ -128,6 +128,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         """
         send_mail(subject, message, from_email, [self.email])
 
+    @property
+    def is_admin(self) -> bool:
+        return self.user_type == CustomUser.UserType.ADMIN.name
+
 
 @receiver(post_save, sender=CustomUser)
 def update_from_manager_to_employee(sender: "CustomUser", **kwargs: Any) -> None:

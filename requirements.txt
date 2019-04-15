@@ -18,6 +18,7 @@ mypy
 oauthlib
 psycopg2
 pylint
+parameterized
 pytest
 pytest-cov
 pytest-django
