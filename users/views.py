@@ -3,12 +3,18 @@ from typing import Union
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.views import PasswordResetCompleteView
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.contrib.auth.views import PasswordResetDoneView
+from django.contrib.auth.views import PasswordResetView
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
@@ -211,3 +217,39 @@ class UserList(APIView):
         users_queryset = cls.get_queryset()
         users_serializer = UserListSerializer(context={"request": request})
         return Response({"serializer": users_serializer, "users_list": users_queryset})
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+
+    template_name = "accounts/change_password.html"
+    success_url = reverse_lazy("password_change")
+
+    def form_valid(self, form: PasswordChangeView.form_class) -> HttpRequest:
+        messages.success(self.request, ConfirmationMessages.SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE)
+        return super().form_valid(form)
+
+    def form_invalid(self, form: PasswordChangeView.form_class) -> str:
+        messages.error(self.request, ConfirmationMessages.FAILED_USER_PASSWORD_CHANGE_MESSAGE)
+        return super().form_invalid(form)
+
+
+class CustomPasswordResetView(PasswordResetView):
+
+    email_template_name = "emails/password_reset_email.html"
+    subject_template_name = "emails/password_reset_subject.txt"
+    template_name = "accounts/password_reset_form.html"
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+
+    template_name = "accounts/password_reset_done.html"
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+
+    template_name = "accounts/password_reset_confirm.html"
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+
+    template_name = "accounts/password_reset_complete.html"
