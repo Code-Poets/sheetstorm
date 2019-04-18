@@ -1,24 +1,30 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
-{% load rest_framework %}
 
 {% block content %}
 <h2>{% trans 'Sign up' %}</h2>
 
 <div class="modal-dialog" style="margin-bottom:0">
-  <form action="{% url 'signup' %}" method="post">
-      {% csrf_token %}
-      {% render_form serializer template_pack='rest_framework/vertical' %}
-
-      {% if non_field_errors %}
-      <div class="form-group has-error">
-          {% for error in non_field_errors %}
-            <span class="help-block">{{ error }}</span><br>
-          {% endfor %}
+    <form action="{% url 'signup' %}" method="post">
+        {% csrf_token %}
+        <div class="fieldWrapper">
+            <label for="{{ form.email.label }}">{% trans 'Email' %}</label>
+                {{ form.email }}
+                {% include 'partials/errors_in_field.html' with errors=form.email.errors %}
+                {% include 'partials/errors_in_field.html' with errors=form.non_field_errors %}
         </div>
-      {% endif %}
-      <button type="submit" class="btn btn-default">Sign in</button>
-  </form>
+        <div class="fieldWrapper">
+            <label for="{{ form.password1.label }}">{% trans 'Password' %}</label>
+                {{ form.password1 }}
+        </div>
+        <div class="fieldWrapper">
+            <label for="{{ form.password2.label }}">{% trans 'Password confirmation' %}</label>
+                {{ form.password2 }}
+                {% include 'partials/errors_in_field.html' with errors=form.password2.errors %}
+
+        </div>
+        <button type="submit" class="btn btn-default">{% trans 'Sign in' %}</button>
+    </form>
 </div>
 {% endblock %}
