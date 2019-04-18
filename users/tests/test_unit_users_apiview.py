@@ -157,10 +157,10 @@ class SignUpTests(TestCase):
                 "email": self.user.email,
                 "first_name": self.user.first_name,
                 "last_name": self.user.last_name,
-                "password": self.user.password,
-                "password_confirmation": self.user.password,
+                "password1": self.user.password,
+                "password2": self.user.password,
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/accounts/login/")
+        self.assertEqual(response.url, reverse("success-signup"))
         self.assertEqual(CustomUser.objects.all().count(), 1)
