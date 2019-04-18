@@ -1,7 +1,8 @@
 from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db import models
-from markdown_deux import markdown
+from markdown import markdown
+from markdown_checklists.extension import ChecklistsExtension
 
 from employees.common.constants import ReportModelConstants
 from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
@@ -34,5 +35,8 @@ class Report(models.Model):
         return self.work_hours.to_eng_string().replace(".", ":")
 
     @property
-    def markdown_description(self) -> markdown:
-        return markdown(self.description)
+    def markdown_description(self) -> str:
+        return markdown(
+            self.description,
+            extensions=["extra", "sane_lists", "wikilinks", "nl2br", "legacy_em", ChecklistsExtension()],
+        )

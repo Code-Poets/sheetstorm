@@ -3,7 +3,6 @@
 {% block content %}
 {% load rest_framework %}
 {% load static %}
-
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
@@ -23,7 +22,8 @@
     <form action="{% url 'custom-report-list' %}" method="POST">
         {% csrf_token %}
         {% render_form serializer template_pack='rest_framework/vertical' %}
-        <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+        <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown is supported</a><br/>
+       <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
     </form>
 </div>
 
@@ -62,7 +62,7 @@
                     {{ report.work_hours_str }}
                 </td>
                 <td class="description-column">
-                    {{ report.markdown_description|safe|linebreaksbr }}
+                {{ report.markdown_description|safe }}
                 <td>
                 <td class="edit-button-column Invisible">
                     {% if report.editable %}
