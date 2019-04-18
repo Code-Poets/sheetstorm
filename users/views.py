@@ -18,6 +18,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
+from django.views.generic import FormView
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -25,10 +26,10 @@ from rest_framework.views import APIView
 
 from users.common.fields import Action
 from users.common.strings import ConfirmationMessages
+from users.forms import CustomUserSignUpForm
 from users.models import CustomUser
 from users.permissions import AuthenticatedAdmin
 from users.permissions import AuthenticatedAdminOrOwnerUser
-from users.serializers import CustomRegisterSerializer
 from users.serializers import UserCreateSerializer
 from users.serializers import UserListSerializer
 from users.serializers import UserSerializer
@@ -75,33 +76,13 @@ def index(request: HttpRequest) -> HttpResponse:
     return render(request, "home.html")
 
 
-class SignUp(APIView):
-    serializer_class = CustomRegisterSerializer
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+class SignUp(FormView):
+    form_class = CustomUserSignUpForm
     template_name = "signup.html"
 
-    @classmethod
-    def get(cls, request: HttpRequest) -> Response:
-        logger.info(f"User get to the SignUp view with id: {request.user.pk}")
-        serializer = CustomRegisterSerializer(context={"request": request})
-        return Response({"serializer": serializer})
-
-    @classmethod
-    def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
-        logger.info(f"User with id: {request.user.pk} sent post to the SignUp view")
-        serializer = CustomRegisterSerializer(data=request.data)
-        if not serializer.is_valid():
-            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
-            return Response(
-                {
-                    "serializer": serializer,
-                    "errors": serializer.errors,
-                    "non_field_errors": serializer.errors.get("non_field_errors"),
-                }
-            )
-        else:
-            serializer.save(request)
-            return redirect("login")
+    def form_valid(self, form: CustomUserSignUpForm) -> Union[Response, HttpResponseRedirectBase]:
+        form.save()
+        return redirect("home")
 
 
 class UserCreate(APIView):
