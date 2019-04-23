@@ -19,6 +19,7 @@ class ReportListStrings(NotCallableMixin, Enum):
     DATE_COLUMN_HEADER = ugettext_lazy("Date")
     PROJECT_COLUMN_HEADER = ugettext_lazy("Project")
     WORK_HOURS_COLUMN_HEADER = ugettext_lazy("Work hours")
+    TASK_ACTIVITIES_COLUMN_HEADER = ugettext_lazy("Task Activity")
     DESCRIPTION_COLUMN_HEADER = ugettext_lazy("Description")
     EDIT_REPORT_BUTTON = ugettext_lazy("Edit")
 
