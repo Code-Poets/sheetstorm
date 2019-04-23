@@ -5,42 +5,26 @@ from markdown import markdown
 from markdown_checklists.extension import ChecklistsExtension
 
 from employees.common.constants import ReportModelConstants
+from employees.common.constants import TaskActivityTypeConstans
 from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
-from employees.common.strings import TaskActivitiesStrings
 from employees.common.validators import MaxDecimalValueValidator
 from managers.models import Project
-from users.common.fields import ChoiceEnum
 from users.models import CustomUser
 
 
+class TaskActivityType(models.Model):
+    name = models.CharField(max_length=TaskActivityTypeConstans.TASK_ACTIVITIES_MAX_LENGTH.value, default="Other")
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Report(models.Model):
-    class TaskType(ChoiceEnum):
-        PROJECT_MANAGEMENT = TaskActivitiesStrings.PROJECT_MANAGEMENT.value
-        MEETING = TaskActivitiesStrings.MEETING.value
-        SPEC_AND_DOCS = TaskActivitiesStrings.SPEC_AND_DOCS.value
-        DESING_AND_RESEARCH = TaskActivitiesStrings.DESING_AND_RESEARCH.value
-        FRONTED_DEVELOPMENT = TaskActivitiesStrings.FRONTED_DEVELOPMENT.value
-        BACKEND_DEVELOPMENT = TaskActivitiesStrings.BACKEND_DEVELOPMENT.value
-        QUALITY_ASSURANCE_TESTING = TaskActivitiesStrings.QUALITY_ASSURANCE_TESTING.value
-        TRAVEL = TaskActivitiesStrings.TRAVEL.value
-        DEVOPS = TaskActivitiesStrings.DEVOPS.value
-        REVIEW = TaskActivitiesStrings.REVIEW.value
-        CONFERENCE = TaskActivitiesStrings.CONFERENCE.value
-        OTHER = TaskActivitiesStrings.OTHER.value
-        ADMINISTRATIVE = TaskActivitiesStrings.ADMINISTRATIVE.value
-        MARKETING = TaskActivitiesStrings.MARKETING.value
-        TRAINING = TaskActivitiesStrings.TRAINING.value
-        MENTORSHIP = TaskActivitiesStrings.MENTORSHIP.value
-        GRAPHIC_DESIGN = TaskActivitiesStrings.GRAPHIC_DESIGN.value
 
     date = models.DateField()
     description = models.CharField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
-    task_activities = models.CharField(
-        max_length=ReportModelConstants.TASK_ACTIVITIES_MAX_LENGTH.value,
-        choices=TaskType.choices(),
-        default=TaskType.OTHER.name,
-    )
+    task_activities = models.ForeignKey(TaskActivityType, on_delete=models.SET_DEFAULT, default=1)
     creation_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
