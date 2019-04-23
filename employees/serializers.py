@@ -8,6 +8,7 @@ from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.validators import MaxDecimalValueValidator
 from employees.models import Report
+from employees.models import TaskActivityType
 from managers.models import Project
 
 
@@ -36,7 +37,7 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
 
     project = serializers.SlugRelatedField(queryset=Project.objects.all(), slug_field="name")
     author = serializers.StringRelatedField()
-
+    task_activities = serializers.SlugRelatedField(queryset=TaskActivityType.objects.all(), slug_field="name")
     description = serializers.CharField(
         style={"base_template": "textarea.html"}, max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value
     )
