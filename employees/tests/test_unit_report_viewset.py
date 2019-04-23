@@ -7,6 +7,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
 from employees.models import Report
+from employees.models import TaskActivityType
 from employees.views import ReportDetail
 from employees.views import ReportList
 from employees.views import ReportViewSet
@@ -33,6 +34,7 @@ class DataSetUpToTests(TestCase):
             author=self.user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
         self.report.save()
@@ -65,6 +67,7 @@ class ReportListTests(DataSetUpToTests):
             author=other_user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report.full_clean()
         other_report.save()
@@ -83,6 +86,7 @@ class ReportListTests(DataSetUpToTests):
                 "description": "Some description",
                 "project": self.project,
                 "work_hours": Decimal("8.00"),
+                "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
         request.user = self.user
@@ -120,6 +124,7 @@ class ReportDetailTests(DataSetUpToTests):
                 "description": new_description,
                 "project": self.project,
                 "work_hours": Decimal("8.00"),
+                "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
         request.user = self.user
@@ -154,6 +159,7 @@ class ReportCustomListTests(TestCase):
             author=self.user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
         self.report.save()
@@ -188,6 +194,7 @@ class ReportCustomListTests(TestCase):
             author=other_user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report.full_clean()
         other_report.save()
@@ -206,6 +213,7 @@ class ReportCustomListTests(TestCase):
                 "description": "Some description",
                 "project": self.project,
                 "work_hours": Decimal("8.00"),
+                "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
         request.user = self.user
@@ -241,6 +249,7 @@ class ReportCustomListTests(TestCase):
             author=other_user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_user_report.full_clean()
         other_user_report.save()
@@ -251,6 +260,7 @@ class ReportCustomListTests(TestCase):
             author=self.user,
             project=other_project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report_1.full_clean()
         other_report_1.save()
@@ -261,6 +271,7 @@ class ReportCustomListTests(TestCase):
             author=self.user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report_2.full_clean()
         other_report_2.save()
@@ -347,6 +358,7 @@ class ReportCustomDetailTests(TestCase):
             author=self.user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
         self.report.save()
@@ -380,6 +392,7 @@ class ReportCustomDetailTests(TestCase):
                 "description": new_description,
                 "project": self.project,
                 "work_hours": Decimal("8.00"),
+                "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
         request.user = self.user
@@ -398,6 +411,7 @@ class ReportCustomDetailTests(TestCase):
                 "project": self.project,
                 "work_hours": Decimal("8.00"),
                 "discard": "Discard",
+                "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
         request.user = self.user
@@ -431,6 +445,7 @@ class ReportCustomDetailTests(TestCase):
                 "description": new_description,
                 "project": other_project,
                 "work_hours": Decimal("8.00"),
+                "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
         request.user = self.user
@@ -470,6 +485,7 @@ class DeleteReportTests(TestCase):
             author=self.user,
             project=self.project,
             work_hours=Decimal("8.00"),
+            task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
         self.report.save()

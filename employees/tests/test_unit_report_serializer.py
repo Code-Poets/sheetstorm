@@ -10,6 +10,7 @@ from employees.common.strings import MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.models import Report
+from employees.models import TaskActivityType
 from employees.serializers import HoursField
 from employees.serializers import ReportSerializer
 from managers.models import Project
@@ -44,6 +45,7 @@ class DataSetUpToTests(BaseSerializerTestCase):
 
         self.required_input["author"] = author
         self.required_input["project"] = project
+        self.required_input["task_activities"] = TaskActivityType.objects.get(name="Other")
 
 
 class ReportSerializerTests(DataSetUpToTests):

@@ -1,0 +1,64 @@
+- model: employees.TaskActivityType
+  pk: 2
+  fields:
+    name: Project Management
+- model: employees.TaskActivityType
+  pk: 3
+  fields:
+    name: Meeting
+- model: employees.TaskActivityType
+  pk: 4
+  fields:
+    name: Spec & Docs
+- model: employees.TaskActivityType
+  pk: 5
+  fields:
+    name: Design & Research
+- model: employees.TaskActivityType
+  pk: 6
+  fields:
+    name: Frontend Development
+- model: employees.TaskActivityType
+  pk: 7
+  fields:
+    name: Backend Development
+- model: employees.TaskActivityType
+  pk: 8
+  fields:
+    name: Quality Assurance / Testing
+- model: employees.TaskActivityType
+  pk: 9
+  fields:
+    name: Travel
+- model: employees.TaskActivityType
+  pk: 10
+  fields:
+    name: DevOps
+- model: employees.TaskActivityType
+  pk: 11
+  fields:
+    name: Review
+- model: employees.TaskActivityType
+  pk: 12
+  fields:
+    name: Conference
+- model: employees.TaskActivityType
+  pk: 13
+  fields:
+    name: Administrative
+- model: employees.TaskActivityType
+  pk: 14
+  fields:
+    name: Marketing
+- model: employees.TaskActivityType
+  pk: 15
+  fields:
+    name: Training
+- model: employees.TaskActivityType
+  pk: 16
+  fields:
+    name: Mentorship
+- model: employees.TaskActivityType
+  pk: 17
+  fields:
+    name: Graphic design

@@ -17,6 +17,7 @@ from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
 from employees.forms import ProjectJoinForm
 from employees.models import Report
+from employees.models import TaskActivityType
 from employees.serializers import ReportSerializer
 from managers.models import Project
 
@@ -62,6 +63,7 @@ class ReportList(APIView):
         reports_serializer.fields["project"].queryset = Project.objects.filter(
             members__id=self.request.user.id
         ).order_by("name")
+        reports_serializer.fields["task_activities"].queryset = TaskActivityType.objects.order_by("name")
         return reports_serializer
 
     def initial(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:

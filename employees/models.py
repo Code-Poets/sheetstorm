@@ -5,6 +5,7 @@ from markdown import markdown
 from markdown_checklists.extension import ChecklistsExtension
 
 from employees.common.constants import ReportModelConstants
+from employees.common.constants import TaskActivityTypeConstans
 from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.validators import MaxDecimalValueValidator
@@ -12,9 +13,18 @@ from managers.models import Project
 from users.models import CustomUser
 
 
+class TaskActivityType(models.Model):
+    name = models.CharField(max_length=TaskActivityTypeConstans.TASK_ACTIVITIES_MAX_LENGTH.value, default="Other")
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Report(models.Model):
+
     date = models.DateField()
     description = models.CharField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
+    task_activities = models.ForeignKey(TaskActivityType, on_delete=models.SET_DEFAULT, default=1)
     creation_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
