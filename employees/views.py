@@ -1,3 +1,4 @@
+import datetime
 from typing import Any
 from typing import Dict
 from typing import Union
@@ -43,6 +44,7 @@ def query_as_dict(query_set: QuerySet) -> Dict[str, Any]:
 
 
 class ReportList(APIView):
+    serializer_class = ReportSerializer
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_list.html"
     reports_dict = {}  # type: Dict[str, Any]
@@ -64,6 +66,7 @@ class ReportList(APIView):
             members__id=self.request.user.id
         ).order_by("name")
         reports_serializer.fields["task_activities"].queryset = TaskActivityType.objects.order_by("name")
+        reports_serializer.fields["date"].initial = str(datetime.datetime.now().date())
         return reports_serializer
 
     def initial(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
@@ -126,28 +129,30 @@ class ReportList(APIView):
 
 
 class ReportDetail(APIView):
+    serializer_class = ReportSerializer
+    model_class = Report
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_detail.html"
     permission_classes = (permissions.IsAuthenticated,)
 
     def _create_serializer(self, report: Report, data: Any = None) -> ReportSerializer:
         if data is None:
-            reports_serializer = ReportSerializer(report, context={"request": self.request})
+            reports_serializer = self.serializer_class(report, context={"request": self.request})
         else:
-            reports_serializer = ReportSerializer(report, data=data, context={"request": self.request})
+            reports_serializer = self.serializer_class(report, data=data, context={"request": self.request})
         reports_serializer.fields["project"].queryset = Project.objects.filter(members__id=report.author.pk).order_by(
             "name"
         )
         return reports_serializer
 
     def get(self, _request: HttpRequest, pk: int) -> Response:
-        report = get_object_or_404(Report, pk=pk)
+        report = get_object_or_404(self.model_class, pk=pk)
         serializer = self._create_serializer(report)
         return Response({"serializer": serializer, "report": report, "UI_text": ReportDetailStrings})
 
     def post(self, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
         if "discard" not in request.POST:
-            report = get_object_or_404(Report, pk=pk)
+            report = get_object_or_404(self.model_class, pk=pk)
             serializer = self._create_serializer(report, request.data)
             if not serializer.is_valid():
                 return Response(
