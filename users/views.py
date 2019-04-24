@@ -1,3 +1,4 @@
+import logging
 from typing import Type
 from typing import Union
 
@@ -35,9 +36,12 @@ from users.serializers import UserSerializer
 from users.serializers import UserUpdateByAdminSerializer
 from users.serializers import UserUpdateSerializer
 
+logger = logging.getLogger(__name__)
+
 
 @api_view()
 def api_root(request: HttpRequest, _format: str = None) -> Response:
+    logger.debug(f"User with id: {request.user.pk} entered to api_root view")
     if request.user.is_authenticated and request.user.user_type == CustomUser.UserType.ADMIN.name:
         return Response(
             {
@@ -85,6 +89,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
+    logger.info(f"User with id: {request.user.pk} is on home page")
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get("num_visits", 0)
     request.session["num_visits"] = num_visits + 1
@@ -130,7 +135,6 @@ class UserCreate(APIView):
     @classmethod
     def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
         serializer = UserCreateSerializer(data=request.data)
-
         if not serializer.is_valid():
             return Response({"serializer": serializer, "errors": serializer.errors})
         email = serializer.validated_data.get("email")
