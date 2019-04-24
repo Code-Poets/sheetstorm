@@ -177,17 +177,21 @@ class UserUpdate(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest, pk: int) -> Response:
+        logger.info(f"User with id: {request.user.pk} get to the UserUpdateView")
         user = get_object_or_404(CustomUser, pk=pk)
         serializer = cls.return_suitable_serializer_for_get_method(request, user)
         return Response({"serializer": serializer, "user": user})
 
     @classmethod
     def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
+        logger.info(f"User with id: {request.user.pk} sent post to the UserUpdateView")
         user = get_object_or_404(CustomUser, pk=pk)
         serializer = cls.return_suitable_serializer_for_post_method(request, user)
         if not serializer.is_valid():
+            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
             return Response({"serializer": serializer, "user": user, "errors": serializer.errors})
-        serializer.save()
+        user = serializer.save()
+        logger.info(f"User with id: {user.pk} has been updated")
         messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
         return redirect("custom-user-update", pk=pk)
 
@@ -198,17 +202,23 @@ class UserUpdateByAdmin(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest, pk: int) -> Response:
+        logger.info(
+            f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view with data from user with id: {pk}"
+        )
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserUpdateByAdminSerializer(user_detail, context={"request": request})
         return Response({"serializer": serializer, "user_detail": user_detail})
 
     @classmethod
     def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
+        logger.info(f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view to update user with id: {pk}")
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserUpdateByAdminSerializer(user_detail, data=request.data, context={"request": request})
         if not serializer.is_valid():
+            logger.debug(f"Serializer is not valid with those errors: {serializer.errors}")
             return Response({"serializer": serializer, "user_detail": user_detail, "errors": serializer.errors})
-        serializer.save()
+        user = serializer.save()
+        logger.info(f"User with id: {user.pk} has been updated by admin with id {request.user.pk}")
         messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
         return redirect("custom-user-update-by-admin", pk=pk)
 
