@@ -104,13 +104,16 @@ class SignUp(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest) -> Response:
+        logger.info(f"User get to the SignUp view with id: {request.user.pk}")
         serializer = CustomRegisterSerializer(context={"request": request})
         return Response({"serializer": serializer})
 
     @classmethod
     def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
+        logger.info(f"User with id: {request.user.pk} sent post to the SignUp view")
         serializer = CustomRegisterSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
             return Response(
                 {
                     "serializer": serializer,
@@ -129,13 +132,16 @@ class UserCreate(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest) -> Response:
+        logger.info(f"User with id: {request.user.pk} entered UserCreate View")
         serializer = UserCreateSerializer(context={"request": request})
         return Response({"serializer": serializer})
 
     @classmethod
     def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
+        logger.debug(f"User with id: {request.user.pk} sent post on UserCreate View")
         serializer = UserCreateSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
             return Response({"serializer": serializer, "errors": serializer.errors})
         email = serializer.validated_data.get("email")
         serializer.save()
@@ -143,6 +149,7 @@ class UserCreate(APIView):
         user.set_password("passwduser")
         user.full_clean()
         user.save()
+        logger.info(f"New user with id {user.pk} has been created")
         return redirect("custom-users-list")
 
 

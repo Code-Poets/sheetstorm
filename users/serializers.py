@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from typing import Dict
 from typing import Optional  # pylint: disable=unused-import
@@ -13,6 +14,8 @@ from rest_framework import serializers
 from users.common.strings import CustomValidationErrorText
 from users.common.utils import custom_validate_email_function
 from users.models import CustomUser
+
+logger = logging.getLogger(__name__)
 
 
 class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
@@ -87,6 +90,7 @@ class CustomRegisterSerializer(serializers.Serializer):
         custom_validate_email_function(self, email)
         if allauth_settings.UNIQUE_EMAIL:
             if email and email_address_exists(email):
+                logger.warning(f"Email: {email} already exist")
                 raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
         return email
 
@@ -100,6 +104,7 @@ class CustomRegisterSerializer(serializers.Serializer):
         return data
 
     def get_cleaned_data(self) -> Dict[str, str]:
+        logger.debug("Get cleaned data method in CustomRegisterSerializer")
         return {
             "first_name": self.validated_data.get("first_name", ""),
             "last_name": self.validated_data.get("last_name", ""),
@@ -108,10 +113,12 @@ class CustomRegisterSerializer(serializers.Serializer):
         }
 
     def save(self, request: HttpRequest) -> "CustomUser":
+        logger.debug("Save method for CustomRegisterSerializer")
         adapter = allauth_get_adapter()
         user = adapter.new_user(request)
         self.cleaned_data = self.get_cleaned_data()
         adapter.save_user(request, user, self)
         setup_user_email(request, user, [])
         user.save()
+        logger.info(f"New user with id: {user.pk} has been created")
         return user
