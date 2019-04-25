@@ -6,10 +6,11 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
 
-<h1>{{ user_name }}{{ UI_text.PAGE_TITLE.value }}</h1>
+<h1>{{ object.email }}{{ UI_text.PAGE_TITLE.value }}</h1>
 <div class="container">
     <div class="table-responsive">
         <table class="table">
+          <thead>
             <tr>
                 <th class="author-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
                 <th class="author-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
@@ -20,15 +21,18 @@
                 <th class="author-reports-editable-header">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
                 <td class="author-reports-edit-button-header Invisible"></td>
             </tr>
-            {% for date, reports in reports_dict.items %}
-            <tr>
-                <td class="author-reports-date-column" rowspan={{ reports|length }}>
-                    {{ date }}
+          </thead>
+          <tbody>
+            {% regroup object.get_reports_created by date as reports_created_by_date %}
+            {% for date in reports_created_by_date %}
+            {% for report in date.list %}
+                {% if forloop.first %}
+                <td class="author-reports-date-column" rowspan={{ date.list|length }}>
+                    <strong>{{ date.grouper }}</strong>
                 </td>
-                {% for report in reports %}
-                    {% if forloop.counter > 1 %}
-                    <tr>
-                    {% endif %}
+                {% else %}
+                <tr>
+                {% endif %}
                 <td class="author-reports-project-column" >{{ report.project }}</td>
                 <td class="author-reports-work-hours-column">{{ report.work_hours_str }}</td>
                 <td class="author-reports-description-column">{{ report.description }}</td>
@@ -41,10 +45,11 @@
                     </a>
                 </td>
             </tr>
-                {% endfor %}
             {% endfor %}
+            {% endfor %}
+          </tbody>
         </table>
-        {% if not reports_dict.items %}
+        {% if object.get_reports_created.count == 0 %}
             <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
         {% endif %}
     </div>

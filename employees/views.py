@@ -3,11 +3,14 @@ from typing import Any
 from typing import Dict
 from typing import Union
 
+from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from django.views.generic import DetailView
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
@@ -176,17 +179,13 @@ def delete_report(_request: HttpRequest, pk: int) -> HttpResponseRedirectBase:
     return redirect("custom-report-list")
 
 
-class AuthorReportList(APIView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+@method_decorator(login_required, name="dispatch")
+class AuthorReportView(DetailView):
     template_name = "employees/author_report_list.html"
-    user_interface_text = AuthorReportListStrings
-    permission_classes = (permissions.IsAuthenticated,)
+    model = CustomUser
+    queryset = CustomUser.objects.prefetch_related("report_set")
 
-    def get_queryset(self, pk):
-        return Report.objects.filter(author=pk).order_by("-date", "project__name")
-
-    def get(self, _request, pk):
-        user = get_object_or_404(CustomUser, pk=pk)
-        queryset = self.get_queryset(user.pk)
-        reports_dict = query_as_dict(queryset)
-        return Response({"user_name": user.email, "reports_dict": reports_dict, "UI_text": self.user_interface_text})
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["UI_text"] = AuthorReportListStrings
+        return context
