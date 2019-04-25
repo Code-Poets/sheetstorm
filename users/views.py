@@ -231,10 +231,12 @@ class UserList(APIView):
 
     @classmethod
     def get_queryset(cls) -> CustomUser:
+        logger.info("Get user list in queryset")
         return CustomUser.objects.order_by("id")
 
     @classmethod
     def get(cls, request: HttpRequest) -> Response:
+        logger.info(f"User with id: {request.user.pk} get to the UserList view")
         users_queryset = cls.get_queryset()
         users_serializer = UserListSerializer(context={"request": request})
         return Response({"serializer": users_serializer, "users_list": users_queryset})
@@ -247,9 +249,11 @@ class CustomPasswordChangeView(PasswordChangeView):
 
     def form_valid(self, form: PasswordChangeView.form_class) -> HttpRequest:
         messages.success(self.request, ConfirmationMessages.SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE)
+        logger.info(f"User with id: {self.request.user.pk} has changed his password")
         return super().form_valid(form)
 
     def form_invalid(self, form: PasswordChangeView.form_class) -> str:
+        logger.info(f"User with id: {self.request.user.pk} sent invalid form to CustomPasswordChange view")
         messages.error(self.request, ConfirmationMessages.FAILED_USER_PASSWORD_CHANGE_MESSAGE)
         return super().form_invalid(form)
 
