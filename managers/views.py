@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
@@ -8,6 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import reverse
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
@@ -29,6 +31,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
 
 
+@method_decorator(login_required, name="dispatch")
 class ProjectsList(ListView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "managers/projects_list.html"
@@ -51,6 +54,7 @@ class ProjectsList(ListView):
         return projects_queryset
 
 
+@method_decorator(login_required, name="dispatch")
 class ProjectDetail(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "managers/project_detail.html"
@@ -61,6 +65,7 @@ class ProjectDetail(APIView):
         return Response({"project": project})
 
 
+@method_decorator(login_required, name="dispatch")
 class ProjectCreateView(CreateView):
     extra_context = {"button_text": _("Create"), "title": _("Create new project")}
     form_class = ProjectForm
@@ -76,6 +81,7 @@ class ProjectCreateView(CreateView):
         return reverse("custom-projects-list")
 
 
+@method_decorator(login_required, name="dispatch")
 class ProjectUpdateView(UpdateView):
     extra_context = {"button_text": _("Update")}
     form_class = ProjectForm
@@ -92,6 +98,7 @@ class ProjectUpdateView(UpdateView):
         return reverse("custom-project-detail", kwargs={"pk": self.kwargs["pk"]})
 
 
+@method_decorator(login_required, name="dispatch")
 class ProjectDeleteView(DeleteView):
     model = Project
 
