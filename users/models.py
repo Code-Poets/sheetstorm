@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from django.contrib.auth.models import AbstractBaseUser
@@ -18,6 +19,8 @@ from users.common.strings import CustomUserUserTypeText
 from users.common.strings import CustomValidationErrorText
 from users.common.utils import custom_validate_email_function
 from users.common.validators import PhoneRegexValidator
+
+logger = logging.getLogger(__name__)
 
 
 class CustomUserManager(BaseUserManager):
@@ -139,8 +142,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 @receiver(post_save, sender=CustomUser)
 def update_from_manager_to_employee(sender: "CustomUser", **kwargs: Any) -> None:
     user = kwargs["instance"]
+    logger.debug(f"Update user: {user.pk} from manager to employee")
     assert sender == CustomUser
     if user.user_type == CustomUser.UserType.EMPLOYEE.name:
+        logger.debug(f"User: {user.pk} has been deleted from all projects")
         user.manager_projects.clear()
     else:
         return
