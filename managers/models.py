@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from typing import Set
 
@@ -11,6 +12,8 @@ from django.utils.translation import gettext_lazy as _
 from managers.commons.constants import MAX_NAME_LENGTH
 from managers.commons.constants import MESSAGE_FOR_CORRECT_DATE_FORMAT
 from users.models import CustomUser
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectQuerySet(models.QuerySet):
@@ -47,6 +50,7 @@ class Project(models.Model):
 def update_user_type(sender: Project, action: str, pk_set: Set, **kwargs: Any) -> None:
     assert sender == Project.managers.through
     project = kwargs["instance"]
+    logger.debug(f"Updates on project with id: {sender.pk} for users with id: {pk_set}")
     if action in ["pre_remove", "post_remove"]:
         change_user_type_to_employee(pk_set)
     elif action in ["pre_add", "post_add"]:
@@ -57,10 +61,15 @@ def update_user_type(sender: Project, action: str, pk_set: Set, **kwargs: Any) -
 
 def change_user_type_to_manager(project: Project) -> None:
     for manager in project.managers.all():
+        logger.debug(f"User with user type: {manager.user_type} with id: {manager.pk} in managers")
         if manager.user_type == CustomUser.UserType.EMPLOYEE.name:
+            logger.debug(
+                f"User with user type: {manager.user_type} and id: {manager.pk} is in managers for project with id: {project.pk}"
+            )
             manager.user_type = CustomUser.UserType.MANAGER.name
             manager.full_clean()
             manager.save()
+            logger.debug(f"User with id: {manager.pk} have changed user type to manager")
         else:
             continue
 
@@ -69,8 +78,11 @@ def change_user_type_to_employee(pk_set: Set) -> None:
     for user_id in pk_set:
         user = CustomUser.objects.get(pk=user_id)
         if not user.manager_projects.exists() and user.user_type != CustomUser.UserType.ADMIN.name:
+            logger.info(f"User: {user} user type change to employee")
             user.user_type = CustomUser.UserType.EMPLOYEE.name
             user.full_clean()
             user.save()
+            logger.info(f"User with id: {user.pk} have changed user type to employee")
         else:
+            logger.debug(f"User with id: {user.pk} has not changed to employee")
             continue
