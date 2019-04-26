@@ -17,6 +17,7 @@ from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import UpdateView
+from django.views.generic.edit import ModelFormMixin
 
 from managers.forms import ProjectAdminForm
 from managers.forms import ProjectManagerForm
@@ -93,7 +94,7 @@ class ProjectCreateView(CreateView):
     def form_valid(self, form: ProjectForm) -> HttpRequest:
         project = form.save()
         logger.info(f"New project with id: {project.pk} has been created")
-        return super(ModelFormMixin, self).form_valid(form)
+        return super(ModelFormMixin, self).form_valid(form) # pylint: disable=bad-super-call
 
 
 @method_decorator(login_required, name="dispatch")
@@ -110,12 +111,20 @@ class ProjectUpdateView(UpdateView):
         return context_data
 
     def get_success_url(self) -> str:
+        logger.info(
+            f"User with id: {self.request.user.pk} is in ProjectUpdate view for project with id: {self.kwargs['pk']}"
+        )
         return reverse("custom-project-detail", kwargs={"pk": self.kwargs["pk"]})
 
     def get_form_class(self) -> Union[Type[ProjectAdminForm], Type[ProjectManagerForm]]:
         if self.request.user.is_admin:
             return ProjectAdminForm
         return self.form_class
+
+    def form_valid(self, form: ProjectAdminForm) -> HttpRequest:
+        project = form.save()
+        logger.info(f"Project with id: {project.pk} has been updated by user with id: {self.request.user.pk}")
+        return super(ModelFormMixin, self).form_valid(form)  # pylint: disable=bad-super-call
 
 
 @method_decorator(login_required, name="dispatch")
