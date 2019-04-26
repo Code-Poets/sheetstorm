@@ -94,7 +94,7 @@ class ProjectCreateView(CreateView):
     def form_valid(self, form: ProjectForm) -> HttpRequest:
         project = form.save()
         logger.info(f"New project with id: {project.pk} has been created")
-        return super(ModelFormMixin, self).form_valid(form) # pylint: disable=bad-super-call
+        return super(ModelFormMixin, self).form_valid(form)  # pylint: disable=bad-super-call
 
 
 @method_decorator(login_required, name="dispatch")
@@ -133,9 +133,15 @@ class ProjectDeleteView(DeleteView):
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if not request.user.is_admin:
+            logger.debug(f"User with id: {request.user.pk} want to delete project")
             return redirect(reverse("home"))
 
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self) -> str:
         return reverse("custom-projects-list")
+
+    def delete(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        response = super().delete(request, args, kwargs)
+        logger.info(f"Project with id: {kwargs['pk']} has been deleted by user with id: {self.request.user.pk}")
+        return response
