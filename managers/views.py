@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from typing import Type
 from typing import Union
@@ -23,6 +24,13 @@ from managers.models import Project
 from users.models import CustomUser
 from utils.decorators import check_permissions
 
+logger = logging.getLogger(__name__)
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all().order_by(Lower("name"))
+    serializer_class = ProjectSerializer
+
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(
@@ -44,6 +52,7 @@ class ProjectsListView(ListView):
     queryset = Project.objects.all()
 
     def get_queryset(self) -> QuerySet:
+        logger.debug(f"Get project query set for user with id: {self.request.user.pk}")
         if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
             projects_queryset = self.queryset
         elif self.request.user.user_type == CustomUser.UserType.MANAGER.name:
