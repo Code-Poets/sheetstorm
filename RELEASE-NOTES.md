@@ -1,5 +1,11 @@
 
+### v0.1.1
+ - Chore adding favicon to app (#146)
+ - Feature default date input (#129)
+
+
 ### v0.1.0
+ - User can pick task activity type (#111)
  - Description field is ready to prepare reports. (#106)
  - Admin is allow to see projects and manage them. (#85, #86, #87, #88, #89)
  - Manager is allow to see projects and manage his project. (#85, #86, #87, #88, #89)
