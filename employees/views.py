@@ -9,8 +9,10 @@ from django.http import HttpRequest
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
+from django.shortcuts import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
+from django.views.generic import UpdateView
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
@@ -21,10 +23,10 @@ from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
+from employees.forms import AdminReportForm
 from employees.forms import ProjectJoinForm
 from employees.models import Report
 from employees.models import TaskActivityType
-from employees.serializers import AdminReportSerializer
 from employees.serializers import ReportSerializer
 from managers.models import Project
 from users.models import CustomUser
@@ -195,23 +197,22 @@ class AuthorReportView(DetailView):
         return context
 
 
-class AdminReportDetail(ReportDetail):
+@method_decorator(login_required, name="dispatch")
+class AdminReportView(UpdateView):
     template_name = "employees/admin_report_detail.html"
-    user_interface_text = AdminReportDetailStrings
-    serializer_class = AdminReportSerializer
+    form_class = AdminReportForm
+    model = Report
 
-    def post(self, request, pk):
-        report = get_object_or_404(Report, pk=pk)
-        if "discard" not in request.POST:
-            serializer = self.serializer_class(report, data=request.data, context={"request": request})
-            if not serializer.is_valid():
-                return Response(
-                    {
-                        "serializer": serializer,
-                        "report": report,
-                        "errors": serializer.errors,
-                        "UI_text": ReportDetailStrings,
-                    }
-                )
-            serializer.save()
-        return redirect("author-report-list", report.author.id)
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = AdminReportDetailStrings
+        return context_data
+
+    def get_success_url(self) -> str:
+        return reverse("author-report-list", kwargs={"pk": self.object.author.id})
+
+    def form_valid(self, form: AdminReportForm) -> HttpResponseRedirectBase:
+        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
+        self.object.editable = True
+        self.object.save()
+        return super().form_valid(form)

@@ -1,22 +1,21 @@
 {% extends 'base.html' %}
+
 {% load i18n %}
-{% block content %}
-{% load rest_framework %}
 {% load static %}
+{% load crispy_forms_tags %}
 
-<head>
-    <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
-</head>
-
-
+{% block content %}
 <h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
-</br>
 <div class="modal-dialog">
     <form action="{% url 'admin-report-detail' pk=report.pk %}" method="POST">
         {% csrf_token %}
-        {% render_form serializer template_pack='rest_framework/vertical' %}
-        <input type="submit" value="{{ UI_text.UPDATE_REPORT_BUTTON.value }}">
-        <input type="submit" name="discard" value="{{ UI_text.DISCARD_CHANGES_BUTTON.value }}">
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-default">{{ UI_text.UPDATE_REPORT_BUTTON.value }}</button>
     </form>
 </div>
+{% endblock %}
+
+
+{% block extra_script %}
+{{ form.media }}
 {% endblock %}
