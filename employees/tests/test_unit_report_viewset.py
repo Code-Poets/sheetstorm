@@ -9,7 +9,6 @@ from rest_framework.test import APIRequestFactory
 
 from employees.models import Report
 from employees.models import TaskActivityType
-from employees.views import AdminReportDetail
 from employees.views import ReportDetail
 from employees.views import ReportList
 from employees.views import ReportViewSet
@@ -509,100 +508,3 @@ class DeleteReportTests(TestCase):
         response = delete_report(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Report.objects.all().count(), 0)
-
-
-class AdminReportDetailTests(TestCase):
-    def setUp(self):
-        self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
-        )
-        self.user.full_clean()
-        self.user.save()
-
-        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
-        self.project.full_clean()
-        self.project.save()
-
-        self.report = Report(
-            date=datetime.datetime.now().date(),
-            description="Some description",
-            author=self.user,
-            project=self.project,
-            work_hours=Decimal("8.00"),
-        )
-        self.report.full_clean()
-        self.report.save()
-
-    def test_admin_report_detail_view_should_display_report_details(self):
-        request = APIRequestFactory().get(path=reverse("admin-report-detail", args=(self.report.pk,)))
-        request.user = self.user
-        response = AdminReportDetail.as_view()(request, pk=self.report.pk)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.report.description)
-        self.assertEqual(response.data["serializer"].instance, self.report)
-
-    def test_admin_report_detail_view_should_not_be_accessible_for_unauthenticated_users(self):
-        request = APIRequestFactory().get(path=reverse("admin-report-detail", args=(self.report.pk,)))
-        request.user = AnonymousUser()
-        response = AdminReportDetail.as_view()(request, pk=self.report.pk)
-        self.assertEqual(response.status_code, 403)
-
-    def test_admin_report_detail_view_should_not_render_non_existing_report(self):
-        request = APIRequestFactory().get(path=reverse("admin-report-detail", args=(999,)))
-        request.user = self.user
-        response = AdminReportDetail.as_view()(request, pk=999)
-        self.assertEqual(response.status_code, 404)
-
-    def test_admin_report_detail_view_should_update_report_on_post(self):
-        new_description = "Some other description"
-        request = APIRequestFactory().post(
-            path=reverse("admin-report-detail", args=(self.report.pk,)),
-            data={
-                "date": datetime.datetime.now().date(),
-                "description": new_description,
-                "project": self.project,
-                "work_hours": Decimal("8.00"),
-            },
-        )
-        request.user = self.user
-        response = AdminReportDetail.as_view()(request, pk=self.report.pk)
-        self.report.refresh_from_db()
-        current_description = self.report.description
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(current_description, new_description)
-        self.assertTrue(self.report.editable)
-
-    def test_admin_report_detail_view_should_not_update_report_on_discard(self):
-        new_description = "Some other description"
-        request = APIRequestFactory().post(
-            path=reverse("admin-report-detail", args=(self.report.pk,)),
-            data={
-                "date": datetime.datetime.now().date(),
-                "description": new_description,
-                "project": self.project,
-                "work_hours": Decimal("8.00"),
-                "discard": "Discard",
-            },
-        )
-        request.user = self.user
-        response = AdminReportDetail.as_view()(request, pk=self.report.pk)
-        self.report.refresh_from_db()
-        current_description = self.report.description
-        self.assertEqual(response.status_code, 302)
-        self.assertNotEqual(current_description, new_description)
-        self.assertTrue(self.report.editable)
-
-    def test_admin_report_detail_view_should_not_update_report_on_post_if_form_is_invalid(self):
-        new_description = "Some other description"
-        request = APIRequestFactory().post(
-            path=reverse("admin-report-detail", args=(self.report.pk,)),
-            data={"description": new_description, "project": self.project, "work_hours": Decimal("8.00")},
-        )
-        request.user = self.user
-        response = AdminReportDetail.as_view()(request, pk=self.report.pk)
-        self.report.refresh_from_db()
-        current_description = self.report.description
-        self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.data["errors"])
-        self.assertNotEqual(new_description, current_description)
-        self.assertTrue(self.report.editable)
