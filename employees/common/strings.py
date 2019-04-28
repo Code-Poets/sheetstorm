@@ -64,4 +64,5 @@ class AuthorReportListStrings(NotCallableMixin, Enum):
     CREATION_DATE_COLUMN_HEADER = ugettext_lazy("Created")
     LAST_UPDATE_COLUMN_HEADER = ugettext_lazy("Last update")
     EDITED_COLUMN_HEADER = ugettext_lazy("Edited")
+    TASK_ACTIVITY_HEADER = ugettext_lazy("Task Activity")
     NO_REPORTS_MESSAGE = ugettext_lazy("This employee has no reports to display.")

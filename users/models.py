@@ -133,7 +133,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.user_type == CustomUser.UserType.ADMIN.name
 
     def get_reports_created(self) -> bool:
-        return self.report_set.order_by("-date", "project__name")
+        return self.report_set.select_related("task_activities").order_by("-date", "project__name")
 
 
 @receiver(post_save, sender=CustomUser)

@@ -19,6 +19,7 @@
                 <th class="author-reports-creation-date-header">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
                 <th class="author-reports-last-update-header">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
                 <th class="author-reports-editable-header">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-editable-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
                 <td class="author-reports-edit-button-header Invisible"></td>
             </tr>
           </thead>
@@ -39,6 +40,7 @@
                 <td class="author-reports-creation-date-column">{{ report.creation_date }}</td>
                 <td class="author-reports-last-update-column">{{ report.last_update }}</td>
                 <td class="author-reports-editable-column">{{ report.editable|yesno:"False,True" }}</td>
+                <td class="author-reports-last-update-column">{{ report.task_activities.name }}</td>
                 <td class="author-reports-edit-button-column Invisible">
                     <a class="btn btn-info">
                         <span class="glyphicon glyphicon-pencil"></span>
