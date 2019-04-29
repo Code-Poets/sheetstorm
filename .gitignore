@@ -124,3 +124,6 @@ Desktop.ini
 
 # PyCharm files
 .idea/
+
+# SheetStorm static files
+/sheetstorm/static/*
