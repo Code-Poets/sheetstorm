@@ -66,3 +66,9 @@ class AuthorReportListStrings(NotCallableMixin, Enum):
     EDITED_COLUMN_HEADER = ugettext_lazy("Edited")
     TASK_ACTIVITY_HEADER = ugettext_lazy("Task Activity")
     NO_REPORTS_MESSAGE = ugettext_lazy("This employee has no reports to display.")
+
+
+class AdminReportDetailStrings(NotCallableMixin, Enum):
+    PAGE_TITLE = ugettext_lazy("Report - ")
+    UPDATE_REPORT_BUTTON = ugettext_lazy("Update")
+    DISCARD_CHANGES_BUTTON = ugettext_lazy("Discard")

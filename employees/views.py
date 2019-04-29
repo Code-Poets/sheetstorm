@@ -9,17 +9,21 @@ from django.http import HttpRequest
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
+from django.shortcuts import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
+from django.views.generic import UpdateView
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
+from employees.forms import AdminReportForm
 from employees.forms import ProjectJoinForm
 from employees.models import Report
 from employees.models import TaskActivityType
@@ -138,6 +142,8 @@ class ReportDetail(APIView):
     model_class = Report
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_detail.html"
+    user_interface_text = ReportDetailStrings
+    serializer_class = ReportSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def _create_serializer(self, report: Report, data: Any = None) -> ReportSerializer:
@@ -189,3 +195,24 @@ class AuthorReportView(DetailView):
         context = super().get_context_data(**kwargs)
         context["UI_text"] = AuthorReportListStrings
         return context
+
+
+@method_decorator(login_required, name="dispatch")
+class AdminReportView(UpdateView):
+    template_name = "employees/admin_report_detail.html"
+    form_class = AdminReportForm
+    model = Report
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = AdminReportDetailStrings
+        return context_data
+
+    def get_success_url(self) -> str:
+        return reverse("author-report-list", kwargs={"pk": self.object.author.id})
+
+    def form_valid(self, form: AdminReportForm) -> HttpResponseRedirectBase:
+        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
+        self.object.editable = True
+        self.object.save()
+        return super().form_valid(form)

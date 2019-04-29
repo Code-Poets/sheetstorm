@@ -42,7 +42,7 @@
                 <td class="author-reports-editable-column">{{ report.editable|yesno:"False,True" }}</td>
                 <td class="author-reports-last-update-column">{{ report.task_activities.name }}</td>
                 <td class="author-reports-edit-button-column Invisible">
-                    <a class="btn btn-info">
+                    <a href="{% url 'admin-report-detail' pk=report.id %}" class="btn btn-info">
                         <span class="glyphicon glyphicon-pencil"></span>
                     </a>
                 </td>
