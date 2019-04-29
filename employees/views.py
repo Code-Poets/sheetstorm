@@ -3,17 +3,21 @@ from typing import Any
 from typing import Dict
 from typing import Union
 
+from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from django.views.generic import DetailView
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
 from employees.forms import ProjectJoinForm
@@ -21,6 +25,7 @@ from employees.models import Report
 from employees.models import TaskActivityType
 from employees.serializers import ReportSerializer
 from managers.models import Project
+from users.models import CustomUser
 
 
 class ReportViewSet(viewsets.ModelViewSet):
@@ -170,4 +175,17 @@ class ReportDetail(APIView):
 def delete_report(_request: HttpRequest, pk: int) -> HttpResponseRedirectBase:
     report = get_object_or_404(Report, pk=pk)
     report.delete()
+
     return redirect("custom-report-list")
+
+
+@method_decorator(login_required, name="dispatch")
+class AuthorReportView(DetailView):
+    template_name = "employees/author_report_list.html"
+    model = CustomUser
+    queryset = CustomUser.objects.prefetch_related("report_set")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["UI_text"] = AuthorReportListStrings
+        return context

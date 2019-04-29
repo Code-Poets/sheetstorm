@@ -1,0 +1,1 @@
+python manage.py loaddata users/fixtures/initial_data.yaml managers/fixtures/initial_data.yaml employees/fixtures/initial_data.yaml

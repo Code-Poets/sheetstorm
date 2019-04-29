@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+{% load rest_framework %}
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+
+<h1>{{ object.email }}{{ UI_text.PAGE_TITLE.value }}</h1>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+                <th class="author-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-description-header">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-creation-date-header">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-last-update-header">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-editable-header">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
+                <th class="author-reports-editable-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
+                <td class="author-reports-edit-button-header Invisible"></td>
+            </tr>
+          </thead>
+          <tbody>
+            {% regroup object.get_reports_created by date as reports_created_by_date %}
+            {% for date in reports_created_by_date %}
+            {% for report in date.list %}
+                {% if forloop.first %}
+                <td class="author-reports-date-column" rowspan={{ date.list|length }}>
+                    <strong>{{ date.grouper }}</strong>
+                </td>
+                {% else %}
+                <tr>
+                {% endif %}
+                <td class="author-reports-project-column" >{{ report.project }}</td>
+                <td class="author-reports-work-hours-column">{{ report.work_hours_str }}</td>
+                <td class="author-reports-description-column">{{ report.description }}</td>
+                <td class="author-reports-creation-date-column">{{ report.creation_date }}</td>
+                <td class="author-reports-last-update-column">{{ report.last_update }}</td>
+                <td class="author-reports-editable-column">{{ report.editable|yesno:"False,True" }}</td>
+                <td class="author-reports-last-update-column">{{ report.task_activities.name }}</td>
+                <td class="author-reports-edit-button-column Invisible">
+                    <a class="btn btn-info">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if object.get_reports_created.count == 0 %}
+            <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

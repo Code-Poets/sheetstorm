@@ -121,7 +121,7 @@ class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
     ):
         report = Report(
             date=datetime.datetime.now().date(),
-            description="Some description",
+            description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
             work_hours=Decimal("8.00"),
