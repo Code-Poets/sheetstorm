@@ -1,19 +1,14 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block content %}
 {% load rest_framework %}
 {% load static %}
-<head>
+
+{% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script type="text/javascript">
-        var join_discard_text = "{{ UI_text.JOIN_POPUP_NO.value }}";
-    </script>
-    <script src="{% static 'employees/scripts/join_popup_window.js' %}"></script>
-</head>
+{% endblock %}
 
+{% block content %}
 <h1>{{ UI_text.PAGE_TITLE.value }}</h1>
 
 <input type="button" id="opener" value="{{ UI_text.JOIN_PROJECT_BUTTON.value }}"/>
@@ -81,4 +76,13 @@
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript">
+        var join_discard_text = "{{ UI_text.JOIN_POPUP_NO.value }}";
+    </script>
+    <script src="{% static 'employees/scripts/join_popup_window.js' %}"></script>
 {% endblock %}

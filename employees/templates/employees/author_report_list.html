@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
+
 {% load i18n %}
-{% block content %}
 {% load rest_framework %}
 {% load static %}
 
+{% block extra_head %}
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+{% endblock %}
 
+{% block content %}
 <h1>{{ object.email }}{{ UI_text.PAGE_TITLE.value }}</h1>
 <div class="container">
     <div class="table-responsive">
