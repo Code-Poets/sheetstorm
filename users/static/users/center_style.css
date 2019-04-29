@@ -144,6 +144,12 @@ span {
     display: none;
 }
 
+#content > nav > .btn {
+    background-color: #f2f2f2;
+    font-size: 150%;
+    color: #2c77bc;
+}
+
 /*Active*/
 .active span {
     color: white;
