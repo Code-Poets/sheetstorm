@@ -3,3 +3,7 @@ $(document).ready(function () {
         $('#sidebar').toggleClass('active');
     });
 });
+
+$('.btn').on("click", function () {
+    $('.glyphicon').toggleClass('glyphicon-chevron-left glyphicon-chevron-right');
+});
