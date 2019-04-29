@@ -7,53 +7,134 @@
 <head>
     <title>{% block title %}Sheet storm{% endblock %}</title>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="{% static 'users/center_style.css' %}" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'users/center_style.css' %}"/>
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <header>
-    {% if user.is_authenticated %}
-      {% get_admin_user_type as admin %}
-      {% get_manager_user_type as manager %}
-      <table>
-        <tr><br /></tr>
-        <tr>
-          <td class="padding"><a href="{% url 'home' %}">{% trans 'Home' %}</a></td>
-          <td class="padding"><a href="{% url 'custom-user-update' user.id %}">{% trans 'Account' %}</a></td>
+{% if user.is_authenticated %}
+{% get_admin_user_type as admin %}
+{% get_manager_user_type as manager %}
+{% url 'home' as home_url %}
+{% url 'custom-user-update' user.id as account_url %}
+{% url 'custom-users-list' as custom_users_list_url %}
+{% url 'custom-projects-list' as custom_projects_list_url %}
+{% url 'custom-report-list' as custom_report_list_url %}
+<div class="wrapper">
+    <!-- Sidebar Holder -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <img src="{% static 'users/images/white/iko-33.png' %}"/>
+            <p><strong>{{ user.user_type }}</strong></p>
+        </div>
+        <ul class="list-unstyled components">
+            <li>
+                {% if request.path == home_url %}
+                <a class="active" href="{% url 'home' %}">
+                    <img src="{% static 'users/images/white/iko-02.png' %}">
+                    <span>{% trans 'Home' %}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'users/images/grey/ico-02.png' %}">
+                    <span>{% trans 'Home' %}</span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if request.path == account_url %}
+                <a class="active" href="{% url 'custom-user-update' user.id %}">
+                    <img src="{% static 'users/images/white/iko-01.png' %}">
+                    <span>{% trans 'Account' %}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'custom-user-update' user.id %}">
+                    <img src="{% static 'users/images/grey/ico-01.png' %}">
+                    <span>{% trans 'Account' %}</span>
+                </a>
+                {% endif %}
+            </li>
             {% if user.user_type == admin %}
-          <td class="padding"><a href="{% url 'custom-users-list' %}">{% trans 'Employees' %}</a></td>
-          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
+            <li>
+                {% if request.path == custom_users_list_url %}
+                <a class="active" href="{% url 'custom-users-list' %}">
+                    <img src="{% static 'users/images/white/iko-03.png' %}">
+                    <span>{% trans 'Employees' %}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'custom-users-list' %}">
+                    <img src="{% static 'users/images/grey/ico-03.png' %}">
+                    <span>{% trans 'Employees' %}</span>
+                </a>
+                {% endif %}
+            </li>
             {% endif %}
-            {% if user.user_type == manager %}
-          <td class="padding"><a href="{% url 'custom-projects-list' %}">{% trans 'Projects list' %}</a></td>
+            {% if user.user_type == manager or user.user_type == admin %}
+            <li>
+                {% if request.path == custom_projects_list_url %}
+                <a class="active" href="{% url 'custom-projects-list' %}">
+                    <img src="{% static 'users/images/white/iko-04.png' %}">
+                    <span>{% trans 'Projects' %}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'custom-projects-list' %}">
+                    <img src="{% static 'users/images/grey/ico-04.png' %}">
+                    <span>{% trans 'Projects' %}</span>
+                </a>
+                {% endif %}
+            </li>
             {% endif %}
-          <td class="padding"><a href="{% url 'custom-report-list' %}">{% trans 'Reports' %}</a></td>
-          <td class="padding"><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></td>
-        </tr>
-      </table>
-
-    {% else %}
-
-      <table>
-        <tr><br /></tr>
-        <tr>
-        </tr>
-      </table>
-
+            <li>
+                {% if request.path == custom_report_list_url %}
+                <a class="active" href="{% url 'custom-report-list' %}">
+                    <img src="{% static 'users/images/white/iko-05.png' %}">
+                    <span>{% trans 'Reports' %}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'custom-report-list' %}">
+                    <img src="{% static 'users/images/grey/ico-05.png' %}">
+                    <span>{% trans 'Reports' %}</span>
+                </a>
+                {% endif %}
+            </li>
+            <li id="logout">
+                <a href="{% url 'logout' %}">
+                    <img src="{% static 'users/images/grey/ico-23.png' %}">
+                    <span>{% trans 'Logout' %}</span>
+                </a>
+            </li>
+        </ul>
+         <div id="logo-nav">
+             <div id="logo-bottom">
+                <img src="{% static 'users/images/logo.png' %}"/>
+                <img id="name-logo" src="{% static 'users/images/ico-32.png' %}"/>
+             </div>
+        </div>
+    </nav>
+    <div id="content">
+        <nav style="text-align: left">
+            <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
+                <span>Toggle Sidebar</span>
+            </button>
+        </nav>
     {% endif %}
-
-  </header>
-  <hr>
-  <main>
-<div>
+    <!-- Page Content Holder -->
+        <main>
+            <div>
     {% block content %}
     {% endblock %}
+            </div>
+        </main>
+    </div>
 </div>
-  </main>
+<script src="{% static 'users/scripts/float_menu.js' %}"></script>
 </body>
 </html>
