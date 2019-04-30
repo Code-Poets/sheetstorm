@@ -17,8 +17,8 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView
 from django.views.generic import FormView
+from django.views.generic import ListView
 from django.views.generic import TemplateView
 from rest_framework import renderers
 from rest_framework import viewsets
@@ -83,7 +83,8 @@ class SignUp(FormView):
     template_name = "signup.html"
 
     def form_valid(self, form: CustomUserSignUpForm) -> Union[Response, HttpResponseRedirectBase]:
-        form.save()
+        user = form.save()
+        logger.info(f"New user with id: {user.pk} has been created")
         return redirect("success-signup")
 
 
