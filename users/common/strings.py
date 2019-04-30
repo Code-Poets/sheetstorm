@@ -1,7 +1,10 @@
 # pylint: disable=line-too-long
+from enum import Enum
+
 from django.utils.translation import ugettext_lazy
 
 from users.common import constants
+from utils.mixins import NotCallableMixin
 
 
 class ConfirmationMessages:
@@ -69,3 +72,12 @@ class CustomUserUserTypeText:
     EMPLOYEE = ugettext_lazy("Employee")
     MANAGER = ugettext_lazy("Manager")
     ADMIN = ugettext_lazy("Admin")
+
+
+class SuccessInfoAfterRegistrationText(NotCallableMixin, Enum):
+    CONGRATULATIONS = ugettext_lazy("Congratulations!")
+    ACCOUNT_CREATED = ugettext_lazy("Your account has been successfully created! Now you can sign in!")
+    REDIRECTION_INFO = ugettext_lazy(
+        "You will be redirected in few seconds to the login site or press a button to make it faster."
+    )
+    OKAY_BUTTON = ugettext_lazy("Okay!")

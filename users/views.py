@@ -19,6 +19,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from django.views.generic import FormView
+from django.views.generic import TemplateView
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -26,6 +27,7 @@ from rest_framework.views import APIView
 
 from users.common.fields import Action
 from users.common.strings import ConfirmationMessages
+from users.common.strings import SuccessInfoAfterRegistrationText
 from users.forms import CustomUserSignUpForm
 from users.models import CustomUser
 from users.permissions import AuthenticatedAdmin
@@ -82,7 +84,12 @@ class SignUp(FormView):
 
     def form_valid(self, form: CustomUserSignUpForm) -> Union[Response, HttpResponseRedirectBase]:
         form.save()
-        return redirect("home")
+        return redirect("success-signup")
+
+
+class UserSignUpSuccess(TemplateView):
+    template_name = "accounts/success-registration.html"
+    extra_context = {"MESSAGES": SuccessInfoAfterRegistrationText}
 
 
 class UserCreate(APIView):
