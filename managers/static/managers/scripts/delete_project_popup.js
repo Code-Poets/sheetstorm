@@ -12,7 +12,7 @@ $(function () {
           {
             text: "Yes",
             click: function () {
-              window.location.href = delete_project_path;
+              $("#form").submit();
             }
           }
         ]
