@@ -57,17 +57,16 @@ class ReportList(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_list.html"
     reports_dict = {}  # type: Dict[str, Any]
-    project_form = ""
     permission_classes = (permissions.IsAuthenticated,)
+    hide_join = False
 
     def get_queryset(self) -> QuerySet:
         return Report.objects.filter(author=self.request.user).order_by("-date", "project__name")
 
-    def _add_project(self, serializer: ReportSerializer, project: Project) -> None:
+    def _add_project(self, project: Project) -> None:
         project.members.add(self.request.user)
         project.full_clean()
         project.save()
-        serializer.fields["project"].initial = project
 
     def _create_serializer(self) -> ReportSerializer:
         reports_serializer = ReportSerializer(context={"request": self.request})
@@ -78,12 +77,14 @@ class ReportList(APIView):
         reports_serializer.fields["date"].initial = str(datetime.datetime.now().date())
         return reports_serializer
 
+    def _create_project_join_form(self) -> ProjectJoinForm:
+        project_form_queryset = Project.objects.exclude(members__id=self.request.user.id).order_by("name")
+        self.hide_join = not project_form_queryset.exists()
+        return ProjectJoinForm(queryset=project_form_queryset)
+
     def initial(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
         super().initial(request, *args, **kwargs)
         self.reports_dict = query_as_dict(self.get_queryset())
-        self.project_form = ProjectJoinForm(
-            queryset=Project.objects.exclude(members__id=self.request.user.id).order_by("name")
-        )
 
     def get(self, _request: HttpRequest) -> Response:
         return Response(
@@ -91,27 +92,29 @@ class ReportList(APIView):
                 "serializer": self._create_serializer(),
                 "reports_dict": self.reports_dict,
                 "UI_text": ReportListStrings,
-                "project_form": self.project_form,
+                "project_form": self._create_project_join_form(),
+                "hide_join": self.hide_join,
             }
         )
 
     def post(self, request: HttpRequest) -> Response:
         reports_serializer = ReportSerializer(data=request.data, context={"request": request})
         if "join" in request.POST:
-            project_id = request.POST["projects"]
-            project = Project.objects.get(id=int(project_id))
-            self._add_project(serializer=reports_serializer, project=project)
-            self.project_form = ProjectJoinForm(
-                queryset=Project.objects.exclude(members__id=self.request.user.id).order_by("name")
-            )
-            reports_serializer = self._create_serializer()
-            reports_serializer.fields["project"].initial = project
+            if "projects" in request.POST.keys():
+                project_id = request.POST["projects"]
+                project = Project.objects.get(id=int(project_id))
+                self._add_project(project=project)
+                reports_serializer = self._create_serializer()
+                reports_serializer.fields["project"].initial = project
+            else:
+                reports_serializer = self._create_serializer()
             return Response(
                 {
                     "serializer": reports_serializer,
                     "reports_dict": self.reports_dict,
                     "UI_text": ReportListStrings,
-                    "project_form": self.project_form,
+                    "project_form": self._create_project_join_form(),
+                    "hide_join": self.hide_join,
                 }
             )
 
@@ -122,7 +125,8 @@ class ReportList(APIView):
                     "reports_dict": self.reports_dict,
                     "errors": reports_serializer.errors,
                     "UI_text": ReportListStrings,
-                    "project_form": self.project_form,
+                    "project_form": self._create_project_join_form(),
+                    "hide_join": self.hide_join,
                 }
             )
         reports_serializer.save(author=self.request.user)
@@ -131,7 +135,8 @@ class ReportList(APIView):
                 "serializer": self._create_serializer(),
                 "reports_dict": query_as_dict(self.get_queryset()),
                 "UI_text": ReportListStrings,
-                "project_form": self.project_form,
+                "project_form": self._create_project_join_form(),
+                "hide_join": self.hide_join,
             },
             status=201,
         )
@@ -143,7 +148,6 @@ class ReportDetail(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_detail.html"
     user_interface_text = ReportDetailStrings
-    serializer_class = ReportSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def _create_serializer(self, report: Report, data: Any = None) -> ReportSerializer:

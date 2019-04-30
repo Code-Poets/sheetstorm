@@ -24,11 +24,14 @@
 </div>
 
 <div id="dialog" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
-    <form action="{% url 'custom-report-list' %}" method="POST">
+    <form action="{% url 'custom-report-list' %}" id="join_form" method="POST">
         {% csrf_token %}
         {{ project_form }}
         <input type="submit" name="join" value="{{ UI_text.JOIN_POPUP_YES.value }}">
     </form>
+    {% if hide_join %}
+        {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
+    {% endif %}
 </div>
 
 </br>
@@ -86,4 +89,9 @@
         var join_discard_text = "{{ UI_text.JOIN_POPUP_NO.value }}";
     </script>
     <script src="{% static 'employees/scripts/join_popup_window.js' %}"></script>
+    {% if hide_join %}
+        <script type="text/javascript">
+            document.getElementById("join_form").hidden = true;
+        </script>
+    {% endif %}
 {% endblock %}
