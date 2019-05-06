@@ -58,7 +58,7 @@ def change_user_type_to_manager(project: Project) -> None:
             manager.full_clean()
             manager.save()
         else:
-            return
+            continue
 
 
 def change_user_type_to_employee(pk_set: Set) -> None:
@@ -69,4 +69,4 @@ def change_user_type_to_employee(pk_set: Set) -> None:
             user.full_clean()
             user.save()
         else:
-            return
+            continue
