@@ -4,6 +4,6 @@ $(document).ready(function () {
     });
 });
 
-$('.btn').on("click", function () {
-    $('.glyphicon').toggleClass('glyphicon-chevron-left glyphicon-chevron-right');
+$('#sidebarCollapse').on("click", function () {
+    $('.toggle').toggleClass('glyphicon-chevron-right');
 });
