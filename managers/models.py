@@ -53,7 +53,7 @@ def update_user_type(sender: Project, action: str, pk_set: Set, **kwargs: Any) -
 
 def change_user_type_to_manager(project: Project) -> None:
     for manager in project.managers.all():
-        if manager.user_type != CustomUser.UserType.MANAGER.name:
+        if manager.user_type == CustomUser.UserType.EMPLOYEE.name:
             manager.user_type = CustomUser.UserType.MANAGER.name
             manager.full_clean()
             manager.save()
@@ -64,7 +64,7 @@ def change_user_type_to_manager(project: Project) -> None:
 def change_user_type_to_employee(pk_set: Set) -> None:
     for user_id in pk_set:
         user = CustomUser.objects.get(pk=user_id)
-        if not user.manager_projects.exists():
+        if not user.manager_projects.exists() and user.user_type != CustomUser.UserType.ADMIN.name:
             user.user_type = CustomUser.UserType.EMPLOYEE.name
             user.full_clean()
             user.save()
