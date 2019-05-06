@@ -5,6 +5,10 @@
 {% load rest_framework %}
 {% load crispy_forms_tags %}
 
+{% block extra_head %}
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+{% endblock %}
+
 {% block content %}
 <h2>
   <small>
@@ -32,6 +36,9 @@
 <div id="dialog" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
   {% trans 'Do you want to delete' %} <br/>
   <b>{{object.name}}</b> {% trans 'project' %}?
+  <form style="display: hidden" action="{% url 'custom-project-delete' pk=object.pk %}" method="POST" id="form">
+    {% csrf_token %}
+  </form>
 </div>
 {% endif %}
 {% endblock %}
@@ -39,9 +46,8 @@
 {% block extra_script %}
 {{ form.media }}
 {% if request.user.is_admin and object %}
-  <script type="text/javascript">
-    var delete_project_path = "{% url 'custom-project-delete' pk=object.pk %}";
-  </script>
+  <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script type="text/javascript" src="{% static 'managers/scripts/delete_project_popup.js' %}"></script>
 {% endif %}
 {% endblock %}
