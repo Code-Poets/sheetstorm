@@ -15,9 +15,9 @@ class UserFactory(factory.DjangoModelFactory):
     last_name = factory.Faker("last_name")
 
     @factory.post_generation
-    def set_password(
+    def set_password(  # type: ignore
         self, create, extracted, **kwargs
-    ):  # pylint: disable=unused-argument, no-value-for-parameter  # type: ignore
+    ):  # pylint: disable=unused-argument, no-value-for-parameter
         self.set_password("userpasswd")
         if create:
             self.save()
