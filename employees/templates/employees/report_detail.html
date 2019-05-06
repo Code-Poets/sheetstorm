@@ -1,22 +1,17 @@
 {% extends 'base.html' %}
+
 {% load i18n %}
-{% block content %}
 {% load rest_framework %}
 {% load static %}
 
+{% block extra_head %}
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script type="text/javascript">
-      var discard_text = "{{ UI_text.DELETE_POPUP_NO.value }}";
-      var confirmation_text = "{{ UI_text.DELETE_POPUP_YES.value }}";
-      var redirect_url =﻿"{% url 'custom-report-delete' pk=report.pk %}";
-    </script>
-    <script src="{% static 'employees/scripts/basic_popup_window.js' %}"></script>
 </head>
+{% endblock %}
 
+{% block content %}
 <h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
 </br>
 <div class="modal-dialog">
@@ -31,4 +26,15 @@
 <div id="dialog" title="{{ UI_text.DELETE_POPUP_TITLE.value }}">
     {{ UI_text.DELETE_POPUP_MESSAGE.value }}
 </div>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript">
+      var discard_text = "{{ UI_text.DELETE_POPUP_NO.value }}";
+      var confirmation_text = "{{ UI_text.DELETE_POPUP_YES.value }}";
+      var redirect_url =﻿"{% url 'custom-report-delete' pk=report.pk %}";
+    </script>
+    <script src="{% static 'employees/scripts/basic_popup_window.js' %}"></script>
 {% endblock %}

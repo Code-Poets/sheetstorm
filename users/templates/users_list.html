@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+
 {% load i18n %}
-{% block content %}
 {% load rest_framework %}
 
+{% block content %}
 <h1>
     &nbsp; {% trans 'Employees' %} &nbsp;
     <a href="{% url 'custom-user-create' %}" class="btn btn-default btn-sm">
@@ -58,5 +59,4 @@
         </div>
     </div>
 </ul>
-
 {% endblock %}
