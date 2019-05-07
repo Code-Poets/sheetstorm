@@ -23,7 +23,7 @@ class TaskActivityType(models.Model):
 class Report(models.Model):
 
     date = models.DateField()
-    description = models.CharField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
+    description = models.TextField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
     task_activities = models.ForeignKey(TaskActivityType, on_delete=models.SET_DEFAULT, default=1)
     creation_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
