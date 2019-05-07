@@ -22,6 +22,7 @@ class ReportListStrings(NotCallableMixin, Enum):
     TASK_ACTIVITIES_COLUMN_HEADER = ugettext_lazy("Task Activity")
     DESCRIPTION_COLUMN_HEADER = ugettext_lazy("Description")
     EDIT_REPORT_BUTTON = ugettext_lazy("Edit")
+    NO_PROJECTS_TO_JOIN = ugettext_lazy("There are no other projects available.")
 
 
 class ReportDetailStrings(NotCallableMixin, Enum):

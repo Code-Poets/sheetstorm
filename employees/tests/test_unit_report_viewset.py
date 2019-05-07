@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
+from employees.common.strings import ReportListStrings
 from employees.models import Report
 from employees.models import TaskActivityType
 from employees.views import ReportDetail
@@ -153,6 +154,7 @@ class ReportCustomListTests(TestCase):
         self.project = Project(name="Test Project", start_date=datetime.datetime.now())
         self.project.full_clean()
         self.project.save()
+        self.project.members.add(self.user)
 
         self.report = Report(
             date=datetime.datetime.now().date(),
@@ -296,10 +298,8 @@ class ReportCustomListTests(TestCase):
         request.user = self.user
         view = ReportList()
         view.request = request
-        serializer = view._create_serializer()
-        view._add_project(serializer, new_project)
+        view._add_project(new_project)
         self.assertTrue(self.user in new_project.members.all())
-        self.assertEqual(serializer.fields["project"].initial, new_project)
 
     def test_custom_report_list_create_serializer_method_should_return_serializer_with_project_field_options_containing_only_projects_to_which_current_user_belongs(
         self
@@ -307,16 +307,13 @@ class ReportCustomListTests(TestCase):
         new_project = Project(name="New Project", start_date=datetime.datetime.now())
         new_project.full_clean()
         new_project.save()
-        new_project.members.add(self.user)
-        new_project.full_clean()
-        new_project.save()
         request = APIRequestFactory().get(path=self.url)
         request.user = self.user
         view = ReportList()
         view.request = request
         serializer = view._create_serializer()
-        self.assertTrue(new_project in serializer.fields["project"].queryset)
-        self.assertTrue(self.project not in serializer.fields["project"].queryset)
+        self.assertTrue(new_project not in serializer.fields["project"].queryset)
+        self.assertTrue(self.project in serializer.fields["project"].queryset)
 
     def test_custom_report_list_create_serializer_method_should_return_serializer_with_date_field_containing_current_date(
         self
@@ -349,6 +346,23 @@ class ReportCustomListTests(TestCase):
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(self.user in new_project.members.all())
+
+    def test_custom_report_list_view_should_handle_no_project_being_selected_in_project_form_on_post(self):
+        new_project = Project(name="New Project", start_date=datetime.datetime.now())
+        new_project.full_clean()
+        new_project.save()
+        request = APIRequestFactory().post(path=self.url, data={"join": "join"})
+        request.user = self.user
+        response = ReportList.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_custom_report_list_view_should_dipslay_message_if_there_are_no_projects_available_to_join_to(self):
+        request = APIRequestFactory().get(path=self.url)
+        request.user = self.user
+        response = ReportList.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        # from ipdb import set_trace; set_trace()
+        self.assertTrue(str(ReportListStrings.NO_PROJECTS_TO_JOIN.value) in str(response.render().content))
 
 
 class ReportCustomDetailTests(TestCase):
