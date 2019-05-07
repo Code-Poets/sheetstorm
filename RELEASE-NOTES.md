@@ -1,3 +1,19 @@
+### next
+
+
+### v0.2.0
+- Feature expand description fields character limit ([#177](https://github.com/Code-Poets/sheetstorm/pull/177))
+- Bugfix no project selected on join crash ([#168](https://github.com/Code-Poets/sheetstorm/pull/168))
+- Bugfix small changes in manager handlers ([#174](https://github.com/Code-Poets/sheetstorm/pull/174))
+- Bugfix refactor templates for proper javascript usage ([#169](https://github.com/Code-Poets/sheetstorm/pull/169))
+- Fixes to base and js script ([#167](https://github.com/Code-Poets/sheetstorm/pull/167))
+- Bugfix repair handlers for admin in handlers ([#165](https://github.com/Code-Poets/sheetstorm/pull/165))
+- Bugfix delete button doesn't work for project ([#160](https://github.com/Code-Poets/sheetstorm/pull/160))
+- Chore change toggle icon ([#164](https://github.com/Code-Poets/sheetstorm/pull/164))
+- Feature admin report detail ([#132](https://github.com/Code-Poets/sheetstorm/pull/132))
+- Feature rebuild login interface ([#122](https://github.com/Code-Poets/sheetstorm/pull/122))
+- Feature author report list ([#131](https://github.com/Code-Poets/sheetstorm/pull/131))
+
 
 ### v0.1.1
  - Chore adding favicon to app ([#146](https://github.com/Code-Poets/sheetstorm/issues/146))
