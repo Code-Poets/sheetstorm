@@ -87,11 +87,6 @@ class TestReportDataParameterFails(DataSetUpToTests):
 
 
 class TestReportDescriptionParameterFails(DataSetUpToTests):
-
-    # PARAM
-    def test_report_model_description_field_should_not_accept_string_longer_than_set_limit(self):
-        self.field_should_not_accept_input("description", "a" * (ReportModelConstants.MAX_DESCRIPTION_LENGTH.value + 1))
-
     def test_report_model_description_field_should_not_be_empty(self):
         self.field_should_not_accept_null("description")
 
