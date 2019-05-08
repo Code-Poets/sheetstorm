@@ -4,6 +4,10 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+{% endblock %}
+
 {% block content %}
 <h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
 <div class="modal-dialog">
