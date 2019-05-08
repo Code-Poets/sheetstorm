@@ -10,6 +10,9 @@
 
 {% block content %}
 <h1>{{ object.email }}{{ UI_text.PAGE_TITLE.value }}</h1>
+<a href="{% url 'custom-users-list' %}" class="btn btn-primary">
+    {{ UI_text.RETURN_BUTTON_MESSAGE.value }}
+</a>
 <div class="container">
     <div class="table-responsive">
         <table class="table">
