@@ -39,6 +39,9 @@ class Project(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def get_report_ordered(self) -> QuerySet:
+        return self.report_set.select_related("task_activities").order_by("-date", "project__name")
+
 
 @receiver(m2m_changed, sender=Project.managers.through)
 def update_user_type(sender: Project, action: str, pk_set: Set, **kwargs: Any) -> None:

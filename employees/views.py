@@ -223,20 +223,13 @@ class AdminReportView(UpdateView):
         return super().form_valid(form)
 
 
-class ProjectReportList(APIView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+@method_decorator(login_required, name="dispatch")
+class ProjectReportList(DetailView):
     template_name = "employees/project_report_list.html"
-    user_interface_text = ProjectReportListStrings
-    permission_classes = (permissions.IsAuthenticated,)
+    model = Project
+    queryset = Project.objects.prefetch_related("report_set")
 
-    @classmethod
-    def get_queryset(cls, pk: int) -> QuerySet:
-        return Report.objects.filter(project=pk).order_by("-date")
-
-    def get(self, _request: HttpRequest, pk: int) -> Response:
-        project = get_object_or_404(Project, pk=pk)
-        queryset = self.get_queryset(project.pk)
-        reports_dict = query_as_dict(queryset)
-        return Response(
-            {"project_name": project.name, "reports_dict": reports_dict, "UI_text": self.user_interface_text}
-        )
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["UI_text"] = ProjectReportListStrings
+        return context
