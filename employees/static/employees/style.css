@@ -111,7 +111,7 @@
     text-align: right;
 }
 
-textarea.form-control {
-      height: 200px;
-      resize: vertical;
+textarea.form-control, #id_description {
+    height: 200px;
+    resize: none;
 }
