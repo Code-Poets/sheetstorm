@@ -6,7 +6,7 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
 
-<h1>{{ project_name }}{{ UI_text.PAGE_TITLE.value }}</h1>
+<h1>{{ object.name }}{{ UI_text.PAGE_TITLE.value }}</h1>
 <div class="container">
     <div class="table-responsive">
         <table class="table">
@@ -22,33 +22,36 @@
                 <th class="project-reports-editable-header">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
                 <td class="project-reports-edit-button-header Invisible"></td>
             </tr>
-            {% for date, reports in reports_dict.items %}
-            <tr>
-                <td class="project-reports-date-column" rowspan={{ reports|length }}>
-                    {{ date }}
-                </td>
-                {% for report in reports %}
-                    {% if forloop.counter > 1 %}
+            <tbody>
+                {% regroup object.get_report_ordered by date as reports_by_date %}
+                {% for date in reports_by_date %}
+                {% for report in date.list %}
+                    {% if forloop.first %}
+                    <td class="project-reports-date-column" rowspan={{ date.list|length }}>
+                        <strong>{{ report.date }}</strong>
+                    </td>
+                    {% else %}
                     <tr>
                     {% endif %}
-                <td class="project-reports-project-column" >{{ report.project }}</td>
-                <td class="project-reports-task-activity-column">{{ report.task_activities }}</td>
-                <td class="project-reports-author-column">{{ report.author }}</td>
-                <td class="project-reports-work-hours-column">{{ report.work_hours_str }}</td>
-                <td class="project-reports-description-column">{{ report.markdown_description|safe }}</td>
-                <td class="project-reports-creation-date-column">{{ report.creation_date }}</td>
-                <td class="project-reports-last-update-column">{{ report.last_update }}</td>
-                <td class="project-reports-editable-column">{{ report.editable|yesno:"False,True" }}</td>
-                <td class="project-reports-edit-button-column Invisible">
-                    <a class="btn btn-info">
-                        <span class="glyphicon glyphicon-pencil"></span>
-                    </a>
-                </td>
-            </tr>
+                    <td class="project-reports-project-column" >{{ report.project.name }}</td>
+                    <td class="project-reports-task-activity-column">{{ report.task_activities }}</td>
+                    <td class="project-reports-author-column">{{ report.author }}</td>
+                    <td class="project-reports-work-hours-column">{{ report.work_hours_str }}</td>
+                    <td class="project-reports-description-column">{{ report.markdown_description|safe }}</td>
+                    <td class="project-reports-creation-date-column">{{ report.creation_date }}</td>
+                    <td class="project-reports-last-update-column">{{ report.last_update }}</td>
+                    <td class="project-reports-editable-column">{{ report.editable|yesno:"False,True" }}</td>
+                    <td class="project-reports-edit-button-column Invisible">
+                        <a class="btn btn-info">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                    </td>
+                </tr>
                 {% endfor %}
-            {% endfor %}
+                {% endfor %}
+            </tbody>
         </table>
-        {% if not reports_dict.items %}
+        {% if object.get_report_ordered.count == 0 %}
             <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
         {% endif %}
     </div>
