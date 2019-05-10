@@ -361,7 +361,6 @@ class ReportCustomListTests(TestCase):
         request.user = self.user
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
-        # from ipdb import set_trace; set_trace()
         self.assertTrue(str(ReportListStrings.NO_PROJECTS_TO_JOIN.value) in str(response.render().content))
 
 
