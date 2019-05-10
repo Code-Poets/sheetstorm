@@ -526,6 +526,26 @@ class DeleteReportTests(TestCase):
 
 
 class ProjectReportListTests(TestCase):
+    def _assert_response_contain_report(self, response, reports):
+        for report in reports:
+            dates = ["creation_date", "last_update"]
+            other_fields = ["description", "author", "task_activities"]
+            work_hours = str(report.work_hours).replace(".", ":")
+            fields_to_check = [work_hours]
+            for date in dates:
+                fields_to_check.append(
+                    datetime.datetime.strftime(
+                        datetime.datetime.fromtimestamp(int(getattr(report, date).timestamp())), "%B %d, %Y, %-I:%M"
+                    )
+                )
+            for field in other_fields:
+                if field == "author":
+                    fields_to_check.append(getattr(report, field).email)
+                else:
+                    fields_to_check.append(getattr(report, field))
+            for field in fields_to_check:
+                self.assertContains(response, field)
+
     def setUp(self):
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
@@ -547,27 +567,23 @@ class ProjectReportListTests(TestCase):
         )
         self.report.full_clean()
         self.report.save()
+        self.client.force_login(self.user)
+        self.url = reverse("project-report-list", kwargs={"pk": self.project.pk})
 
     def test_project_report_list_view_should_display_projects_report_list_on_get(self):
-        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
-        request.user = self.user
-        response = ProjectReportList.as_view()(request, pk=self.project.pk)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.report.description)
-        dictionary = response.data["reports_dict"]
-        reports = list(dictionary.values())[0]
-        self.assertTrue(self.report in reports)
+        self.assertTemplateUsed(response, ProjectReportList.template_name)
+        self.assertContains(response, self.project.name)
+        self._assert_response_contain_report(response, [self.report])
 
     def test_project_report_list_view_should_not_be_accessible_for_unauthenticated_user(self):
-        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
-        request.user = AnonymousUser()
-        response = ProjectReportList.as_view()(request, pk=self.project.pk)
-        self.assertEqual(response.status_code, 403)
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
 
     def test_project_report_list_view_should_not_display_non_existing_projects_reports(self):
-        request = APIRequestFactory().get(path=reverse("project-report-list", args=(999,)))
-        request.user = self.user
-        response = ProjectReportList.as_view()(request, 999)
+        response = self.client.get(reverse("project-report-list", kwargs={"pk": 999}))
         self.assertEqual(response.status_code, 404)
 
     def test_project_report_list_view_should_not_display_other_projects_reports(self):
@@ -595,13 +611,11 @@ class ProjectReportListTests(TestCase):
         other_project = Project(name="Other Project", start_date=datetime.datetime.now())
         other_project.full_clean()
         other_project.save()
-        request = APIRequestFactory().get(path=reverse("project-report-list", args=(other_project.pk,)))
-        request.user = self.user
-        response = ProjectReportList.as_view()(request, pk=other_project.pk)
+        response = self.client.get(reverse("project-report-list", kwargs={"pk": other_project.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, ProjectReportListStrings.NO_REPORTS_MESSAGE.value)
 
-    def test_project_report_list_get_queryset_method_should_return_queryset_containing_reports_for_project(self):
+    def test_that_project_report_list_should_return_list_of_all_reports_assigned_to_project(self):
         other_user = CustomUser(
             email="otheruser@codepoets.it", password="otheruserpasswd", first_name="Jane", last_name="Doe", country="PL"
         )
@@ -644,14 +658,8 @@ class ProjectReportListTests(TestCase):
         )
         other_report_2.full_clean()
         other_report_2.save()
-
-        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
-        request.user = self.user
-        view = ProjectReportList()
-        view.request = request
-        queryset = view.get_queryset(self.project.pk)
-        self.assertIsNotNone(queryset)
-        self.assertEqual(len(queryset), 3)
-        self.assertFalse(other_project_report in queryset)
-        self.assertEqual(queryset[0], other_report_1)
-        self.assertEqual(queryset[1], self.report)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, ProjectReportList.template_name)
+        self.assertContains(response, self.project.name)
+        self._assert_response_contain_report(response, [self.report, other_report_1, other_report_2])
