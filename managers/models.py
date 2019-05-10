@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 from managers.commons.constants import MAX_NAME_LENGTH
+from managers.commons.constants import MESSAGE_FOR_CORRECT_DATE_FORMAT
 from users.models import CustomUser
 
 
@@ -25,7 +26,7 @@ class ProjectQuerySet(models.QuerySet):
 
 class Project(models.Model):
     name = models.CharField(max_length=MAX_NAME_LENGTH)
-    start_date = models.DateField()
+    start_date = models.DateField(help_text=MESSAGE_FOR_CORRECT_DATE_FORMAT)
     stop_date = models.DateField(null=True, blank=True)
     terminated = models.BooleanField(default=False)
     managers = models.ManyToManyField(CustomUser, related_name="manager_projects")
