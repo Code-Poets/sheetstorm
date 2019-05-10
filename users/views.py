@@ -1,3 +1,4 @@
+import logging
 from typing import Type
 from typing import Union
 
@@ -35,9 +36,12 @@ from users.serializers import UserSerializer
 from users.serializers import UserUpdateByAdminSerializer
 from users.serializers import UserUpdateSerializer
 
+logger = logging.getLogger(__name__)
+
 
 @api_view()
 def api_root(request: HttpRequest, _format: str = None) -> Response:
+    logger.debug(f"User with id: {request.user.pk} entered to api_root view")
     if request.user.is_authenticated and request.user.user_type == CustomUser.UserType.ADMIN.name:
         return Response(
             {
@@ -85,6 +89,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
+    logger.info(f"User with id: {request.user.pk} is on home page")
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get("num_visits", 0)
     request.session["num_visits"] = num_visits + 1
@@ -99,13 +104,16 @@ class SignUp(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest) -> Response:
+        logger.info(f"User get to the SignUp view with id: {request.user.pk}")
         serializer = CustomRegisterSerializer(context={"request": request})
         return Response({"serializer": serializer})
 
     @classmethod
     def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
+        logger.info(f"User with id: {request.user.pk} sent post to the SignUp view")
         serializer = CustomRegisterSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
             return Response(
                 {
                     "serializer": serializer,
@@ -124,14 +132,16 @@ class UserCreate(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest) -> Response:
+        logger.info(f"User with id: {request.user.pk} entered UserCreate View")
         serializer = UserCreateSerializer(context={"request": request})
         return Response({"serializer": serializer})
 
     @classmethod
     def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
+        logger.debug(f"User with id: {request.user.pk} sent post on UserCreate View")
         serializer = UserCreateSerializer(data=request.data)
-
         if not serializer.is_valid():
+            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
             return Response({"serializer": serializer, "errors": serializer.errors})
         email = serializer.validated_data.get("email")
         serializer.save()
@@ -139,6 +149,7 @@ class UserCreate(APIView):
         user.set_password("passwduser")
         user.full_clean()
         user.save()
+        logger.info(f"New user with id {user.pk} has been created")
         return redirect("custom-users-list")
 
 
@@ -166,17 +177,21 @@ class UserUpdate(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest, pk: int) -> Response:
+        logger.info(f"User with id: {request.user.pk} get to the UserUpdateView")
         user = get_object_or_404(CustomUser, pk=pk)
         serializer = cls.return_suitable_serializer_for_get_method(request, user)
         return Response({"serializer": serializer, "user": user})
 
     @classmethod
     def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
+        logger.info(f"User with id: {request.user.pk} sent post to the UserUpdateView")
         user = get_object_or_404(CustomUser, pk=pk)
         serializer = cls.return_suitable_serializer_for_post_method(request, user)
         if not serializer.is_valid():
+            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
             return Response({"serializer": serializer, "user": user, "errors": serializer.errors})
-        serializer.save()
+        user = serializer.save()
+        logger.info(f"User with id: {user.pk} has been updated")
         messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
         return redirect("custom-user-update", pk=pk)
 
@@ -187,17 +202,23 @@ class UserUpdateByAdmin(APIView):
 
     @classmethod
     def get(cls, request: HttpRequest, pk: int) -> Response:
+        logger.info(
+            f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view with data from user with id: {pk}"
+        )
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserUpdateByAdminSerializer(user_detail, context={"request": request})
         return Response({"serializer": serializer, "user_detail": user_detail})
 
     @classmethod
     def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
+        logger.info(f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view to update user with id: {pk}")
         user_detail = get_object_or_404(CustomUser, pk=pk)
         serializer = UserUpdateByAdminSerializer(user_detail, data=request.data, context={"request": request})
         if not serializer.is_valid():
+            logger.debug(f"Serializer is not valid with those errors: {serializer.errors}")
             return Response({"serializer": serializer, "user_detail": user_detail, "errors": serializer.errors})
-        serializer.save()
+        user = serializer.save()
+        logger.info(f"User with id: {user.pk} has been updated by admin with id {request.user.pk}")
         messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
         return redirect("custom-user-update-by-admin", pk=pk)
 
@@ -210,10 +231,12 @@ class UserList(APIView):
 
     @classmethod
     def get_queryset(cls) -> CustomUser:
+        logger.info("Get user list in queryset")
         return CustomUser.objects.order_by("id")
 
     @classmethod
     def get(cls, request: HttpRequest) -> Response:
+        logger.info(f"User with id: {request.user.pk} get to the UserList view")
         users_queryset = cls.get_queryset()
         users_serializer = UserListSerializer(context={"request": request})
         return Response({"serializer": users_serializer, "users_list": users_queryset})
@@ -226,9 +249,11 @@ class CustomPasswordChangeView(PasswordChangeView):
 
     def form_valid(self, form: PasswordChangeView.form_class) -> HttpRequest:
         messages.success(self.request, ConfirmationMessages.SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE)
+        logger.info(f"User with id: {self.request.user.pk} has changed his password")
         return super().form_valid(form)
 
     def form_invalid(self, form: PasswordChangeView.form_class) -> str:
+        logger.info(f"User with id: {self.request.user.pk} sent invalid form to CustomPasswordChange view")
         messages.error(self.request, ConfirmationMessages.FAILED_USER_PASSWORD_CHANGE_MESSAGE)
         return super().form_invalid(form)
 
