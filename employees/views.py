@@ -164,9 +164,12 @@ class ReportDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def _create_serializer(self, report: Report, data: Any = None) -> ReportSerializer:
+        logger.info(f"Create serializer for report with id: {report.pk}")
         if data is None:
+            logger.debug(f"Report data is None")
             reports_serializer = self.serializer_class(report, context={"request": self.request})
         else:
+            logger.debug(f"Data sent from user: {data}")
             reports_serializer = self.serializer_class(report, data=data, context={"request": self.request})
         reports_serializer.fields["project"].queryset = Project.objects.filter(members__id=report.author.pk).order_by(
             "name"
@@ -174,15 +177,19 @@ class ReportDetail(APIView):
         return reports_serializer
 
     def get(self, _request: HttpRequest, pk: int) -> Response:
+        logger.info(f"User with id: {self.request.user.pk} get to the ReportDetail view on report with id: {pk}")
         report = get_object_or_404(self.model_class, pk=pk)
         serializer = self._create_serializer(report)
         return Response({"serializer": serializer, "report": report, "UI_text": ReportDetailStrings})
 
     def post(self, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
+        logger.debug(f"User with id: {request.user.pk} sent post on ReportDetail view")
         if "discard" not in request.POST:
+            logger.debug(f"User with id: {request.user.pk} want to updated report with id {pk}")
             report = get_object_or_404(self.model_class, pk=pk)
             serializer = self._create_serializer(report, request.data)
             if not serializer.is_valid():
+                logger.warning(f"Serializer is not valid with those errors: {serializer.errors}")
                 return Response(
                     {
                         "serializer": serializer,
@@ -192,6 +199,7 @@ class ReportDetail(APIView):
                     }
                 )
             serializer.save()
+            logger.info(f"Report with id: {report.pk} has been updated by user with id: {request.user.pk}")
         return redirect("custom-report-list")
 
 
