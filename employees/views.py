@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Any
 from typing import Union
 
@@ -32,6 +33,8 @@ from employees.serializers import ReportSerializer
 from managers.models import Project
 from users.models import CustomUser
 
+logger = logging.getLogger(__name__)
+
 
 class ReportViewSet(viewsets.ModelViewSet):
     serializer_class = ReportSerializer
@@ -54,14 +57,17 @@ class ReportList(APIView):
     daily_hours_sum = None  # type: QuerySet
 
     def get_queryset(self) -> QuerySet:
+        logger.info(f"User with id: {self.request.user.pk} get reports queryset")
         return Report.objects.filter(author=self.request.user).order_by("-date", "project__name", "-creation_date")
 
     def _add_project(self, project: Project) -> None:
+        logger.info(f"Add project method for user with id: {self.request.user.pk} to project with id {project.pk}")
         project.members.add(self.request.user)
         project.full_clean()
         project.save()
 
     def _create_serializer(self) -> ReportSerializer:
+        logger.info(f"Create serializer for user with id: {self.request.user.pk}")
         reports_serializer = ReportSerializer(context={"request": self.request})
         reports_serializer.fields["project"].queryset = Project.objects.filter(
             members__id=self.request.user.id
@@ -76,11 +82,13 @@ class ReportList(APIView):
         return ProjectJoinForm(queryset=project_form_queryset)
 
     def initial(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        logger.info(f"Initial method for user with id: {self.request.user.pk} in ReportList view")
         super().initial(request, *args, **kwargs)
         self.reports = self.get_queryset()
         self.daily_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_dates()
 
     def get(self, _request: HttpRequest) -> Response:
+        logger.info(f"User with id: {self.request.user.pk} get to the ReportList view")
         return Response(
             {
                 "serializer": self._create_serializer(),
@@ -93,11 +101,13 @@ class ReportList(APIView):
         )
 
     def post(self, request: HttpRequest) -> Response:
+        logger.info(f"User with id: {request.user.pk} sent post to the ReportList view")
         reports_serializer = ReportSerializer(data=request.data, context={"request": request})
         if "join" in request.POST:
             if "projects" in request.POST.keys():
                 project_id = request.POST["projects"]
                 project = Project.objects.get(id=int(project_id))
+                logger.debug(f"User with id: {request.user.pk} join to the project with id: {project.pk}")
                 self._add_project(project=project)
                 reports_serializer = self._create_serializer()
                 reports_serializer.fields["project"].initial = project
@@ -115,6 +125,9 @@ class ReportList(APIView):
             )
 
         elif not reports_serializer.is_valid():
+            logger.warning(
+                f"Serializer sent by user with id: {self.request.user.pk} is not valid with those errors: {reports_serializer.errors}"
+            )
             return Response(
                 {
                     "serializer": reports_serializer,
@@ -126,8 +139,9 @@ class ReportList(APIView):
                     "hide_join": self.hide_join,
                 }
             )
-        reports_serializer.save(author=self.request.user)
         queryset = self.get_queryset()
+        report = reports_serializer.save(author=self.request.user)
+        logger.info(f"User with id: {self.request.user.pk} created new report with id: {report.pk}")
         return Response(
             {
                 "serializer": self._create_serializer(),
