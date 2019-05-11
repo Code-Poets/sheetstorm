@@ -44,6 +44,7 @@ class ReportViewSet(viewsets.ModelViewSet):
         return Report.objects.filter(author=self.request.user).order_by("-date")
 
     def perform_create(self, serializer: ReportSerializer) -> None:
+        logger.info(f"Perform create method for user: {self.request.user}")
         serializer.save(author=self.request.user)
 
 
@@ -206,7 +207,7 @@ class ReportDetail(APIView):
 def delete_report(_request: HttpRequest, pk: int) -> HttpResponseRedirectBase:
     report = get_object_or_404(Report, pk=pk)
     report.delete()
-
+    logger.debug(f"Report with id: {pk} has been deleted")
     return redirect("custom-report-list")
 
 
