@@ -19,9 +19,7 @@ from django.urls import reverse_lazy
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from users.common.fields import Action
@@ -37,24 +35,6 @@ from users.serializers import UserUpdateByAdminSerializer
 from users.serializers import UserUpdateSerializer
 
 logger = logging.getLogger(__name__)
-
-
-@api_view()
-def api_root(request: HttpRequest, _format: str = None) -> Response:
-    logger.debug(f"User with id: {request.user.pk} entered to api_root view")
-    if request.user.is_authenticated and request.user.user_type == CustomUser.UserType.ADMIN.name:
-        return Response(
-            {
-                "users": reverse("users-list", request=request, format=_format),
-                "account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=_format),
-            }
-        )
-    elif request.user.is_authenticated:
-        return Response(
-            {"account": reverse("user-account-detail", args=(request.user.pk,), request=request, format=_format)}
-        )
-    else:
-        return Response({"registration": reverse("rest_register", request=request, format=_format)})
 
 
 class UsersViewSet(viewsets.ModelViewSet):
