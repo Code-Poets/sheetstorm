@@ -1,1 +1,2 @@
-python manage.py loaddata users/fixtures/initial_data.yaml managers/fixtures/initial_data.yaml employees/fixtures/initial_data.yaml
+python manage.py loaddata employees/fixtures/task_activities.yaml
+python manage.py load_initial_data
