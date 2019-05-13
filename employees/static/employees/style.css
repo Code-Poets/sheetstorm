@@ -115,3 +115,87 @@ textarea.form-control, #id_description {
     height: 200px;
     resize: none;
 }
+
+.project-reports-date-header{
+    width: 11.23%;
+}
+
+.project-reports-project-header {
+    width:1%;
+    white-space:nowrap;
+}
+
+
+.project-reports-task-activity-header {
+    width:1%;
+    white-space:nowrap;
+}
+
+.project-reports-author-header {
+    width:1%;
+    white-space:nowrap;
+}
+
+.project-reports-work-hours-header {
+    width: 8.16%;
+}
+
+.project-reports-creation-date-header {
+    width: 10.09%;
+}
+
+.project-reports-last-update-header {
+    width: 10.09%;
+}
+
+.project-reports-editable-header {
+    width: 5.09%;
+}
+
+.project-reports-edit-button-header {
+    width: 4.91%;
+}
+
+.project-reports-date-column{
+    text-align: left;
+}
+
+.project-reports-project-column {
+    width:1%;
+    white-space:nowrap;
+}
+
+.project-reports-task-activity-column {
+    width:1%;
+    white-space:nowrap;
+}
+
+.project-reports-author-column {
+    width:1%;
+    white-space:nowrap;
+    text-align: left;
+}
+
+.project-reports-work-hours-column {
+    text-align: right;
+}
+
+.project-reports-description-column {
+    text-align: left;
+}
+
+.project-reports-creation-date-column {
+    text-align: center;
+}
+
+.project-reports-last-update-column {
+    text-align: center;
+}
+
+.project-reports-editable-column {
+    text-align: center;
+}
+
+.project-reports-edit-button-column {
+    text-align: right;
+}

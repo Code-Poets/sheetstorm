@@ -7,9 +7,11 @@ from freezegun import freeze_time
 from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
+from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportListStrings
 from employees.models import Report
 from employees.models import TaskActivityType
+from employees.views import ProjectReportList
 from employees.views import ReportDetail
 from employees.views import ReportList
 from employees.views import ReportViewSet
@@ -521,3 +523,143 @@ class DeleteReportTests(TestCase):
         response = delete_report(request, pk=self.report.pk)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Report.objects.all().count(), 0)
+
+
+class ProjectReportListTests(TestCase):
+    def _assert_response_contain_report(self, response, reports):
+        for report in reports:
+            dates = ["creation_date", "last_update"]
+            other_fields = ["description", "author", "task_activities"]
+            work_hours = str(report.work_hours).replace(".", ":")
+            fields_to_check = [work_hours]
+            for date in dates:
+                fields_to_check.append(
+                    datetime.datetime.strftime(
+                        datetime.datetime.fromtimestamp(int(getattr(report, date).timestamp())), "%B %d, %Y, %-I:%M"
+                    )
+                )
+            for field in other_fields:
+                if field == "author":
+                    fields_to_check.append(getattr(report, field).email)
+                else:
+                    fields_to_check.append(getattr(report, field))
+            for field in fields_to_check:
+                self.assertContains(response, field)
+
+    def setUp(self):
+        self.user = CustomUser(
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
+        )
+        self.user.full_clean()
+        self.user.save()
+
+        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
+        self.project.full_clean()
+        self.project.save()
+        self.project.members.add(self.user)
+
+        self.report = Report(
+            date=datetime.datetime.now().date(),
+            description="Some description",
+            author=self.user,
+            project=self.project,
+            work_hours=Decimal("8.00"),
+        )
+        self.report.full_clean()
+        self.report.save()
+        self.client.force_login(self.user)
+        self.url = reverse("project-report-list", kwargs={"pk": self.project.pk})
+
+    def test_project_report_list_view_should_display_projects_report_list_on_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, ProjectReportList.template_name)
+        self.assertContains(response, self.project.name)
+        self._assert_response_contain_report(response, [self.report])
+
+    def test_project_report_list_view_should_not_be_accessible_for_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_project_report_list_view_should_not_display_non_existing_projects_reports(self):
+        response = self.client.get(reverse("project-report-list", kwargs={"pk": 999}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_project_report_list_view_should_not_display_other_projects_reports(self):
+        other_project = Project(name="Other Project", start_date=datetime.datetime.now())
+        other_project.full_clean()
+        other_project.save()
+
+        other_report = Report(
+            date=datetime.datetime.now().date(),
+            description="Some other description",
+            author=self.user,
+            project=other_project,
+            work_hours=Decimal("8.00"),
+        )
+        other_report.full_clean()
+        other_report.save()
+
+        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
+        request.user = self.user
+        response = ProjectReportList.as_view()(request, pk=self.project.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, other_report.description)
+
+    def test_project_report_list_view_should_display_message_if_project_has_no_reports(self):
+        other_project = Project(name="Other Project", start_date=datetime.datetime.now())
+        other_project.full_clean()
+        other_project.save()
+        response = self.client.get(reverse("project-report-list", kwargs={"pk": other_project.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, ProjectReportListStrings.NO_REPORTS_MESSAGE.value)
+
+    def test_that_project_report_list_should_return_list_of_all_reports_assigned_to_project(self):
+        other_user = CustomUser(
+            email="otheruser@codepoets.it", password="otheruserpasswd", first_name="Jane", last_name="Doe", country="PL"
+        )
+        other_user.full_clean()
+        other_user.save()
+        self.project.members.add(other_user)
+
+        other_project = Project(name="Project test", start_date=datetime.datetime.now())
+        other_project.full_clean()
+        other_project.save()
+        other_project.members.add(self.user)
+        other_project.members.add(other_user)
+
+        other_project_report = Report(
+            date=datetime.datetime.now().date(),
+            description="Some other description",
+            author=self.user,
+            project=other_project,
+            work_hours=Decimal("8.00"),
+        )
+        other_project_report.full_clean()
+        other_project_report.save()
+
+        other_report_1 = Report(
+            date=datetime.datetime.now().date(),
+            description="Some other description",
+            author=other_user,
+            project=self.project,
+            work_hours=Decimal("8.00"),
+        )
+        other_report_1.full_clean()
+        other_report_1.save()
+
+        other_report_2 = Report(
+            date=datetime.date(2001, 1, 1),
+            description="Some other description",
+            author=self.user,
+            project=self.project,
+            work_hours=Decimal("8.00"),
+        )
+        other_report_2.full_clean()
+        other_report_2.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, ProjectReportList.template_name)
+        self.assertContains(response, self.project.name)
+        self._assert_response_contain_report(response, [self.report, other_report_1, other_report_2])

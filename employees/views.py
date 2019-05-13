@@ -21,6 +21,7 @@ from rest_framework.views import APIView
 
 from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
+from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
 from employees.forms import AdminReportForm
@@ -220,3 +221,15 @@ class AdminReportView(UpdateView):
         self.object.editable = True
         self.object.save()
         return super().form_valid(form)
+
+
+@method_decorator(login_required, name="dispatch")
+class ProjectReportList(DetailView):
+    template_name = "employees/project_report_list.html"
+    model = Project
+    queryset = Project.objects.prefetch_related("report_set")
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["UI_text"] = ProjectReportListStrings
+        return context
