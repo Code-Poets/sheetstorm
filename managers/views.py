@@ -1,4 +1,6 @@
 from typing import Any
+from typing import Type
+from typing import Union
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
@@ -20,7 +22,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from managers.forms import ProjectForm
+from managers.forms import ProjectAdminForm
+from managers.forms import ProjectManagerForm
 from managers.models import Project
 from managers.serializers import ProjectSerializer
 from users.models import CustomUser
@@ -68,7 +71,7 @@ class ProjectDetail(APIView):
 @method_decorator(login_required, name="dispatch")
 class ProjectCreateView(CreateView):
     extra_context = {"button_text": _("Create"), "title": _("Create new project")}
-    form_class = ProjectForm
+    form_class = ProjectAdminForm
     model = Project
     template_name = "managers/project_form.html"
 
@@ -84,7 +87,7 @@ class ProjectCreateView(CreateView):
 @method_decorator(login_required, name="dispatch")
 class ProjectUpdateView(UpdateView):
     extra_context = {"button_text": _("Update")}
-    form_class = ProjectForm
+    form_class = ProjectManagerForm
     model = Project
     template_name = "managers/project_form.html"
 
@@ -96,6 +99,11 @@ class ProjectUpdateView(UpdateView):
 
     def get_success_url(self) -> str:
         return reverse("custom-project-detail", kwargs={"pk": self.kwargs["pk"]})
+
+    def get_form_class(self) -> Union[Type[ProjectAdminForm], Type[ProjectManagerForm]]:
+        if self.request.user.is_admin:
+            return ProjectAdminForm
+        return self.form_class
 
 
 @method_decorator(login_required, name="dispatch")
