@@ -11,7 +11,3 @@ class SheetStormBaseException(Exception):
         self.error_code = error_code
         self.error_message = "" if error_message is None else error_message
         super().__init__(error_message)
-
-
-class CustomValidationError(SheetStormBaseException):
-    pass

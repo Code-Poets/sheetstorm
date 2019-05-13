@@ -11,7 +11,7 @@ from django.http import HttpRequest
 from django_countries.serializers import CountryFieldMixin
 from rest_framework import serializers
 
-from users.common.strings import CustomValidationErrorText
+from users.common.strings import ValidationErrorText
 from users.common.utils import custom_validate_email_function
 from users.models import CustomUser
 
@@ -27,20 +27,20 @@ class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
         if self.instance is not None:
             instance_old_email = self.instance.email
         email = allauth_get_adapter().clean_email(email)
-        custom_validate_email_function(self, email)
+        custom_validate_email_function(email)
         if self.instance is not None and email != instance_old_email:
             try:
                 CustomUser.objects.get(email=email)
             except CustomUser.DoesNotExist:
                 return email
-            raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN)
+            raise serializers.ValidationError(ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN)
         else:
             if self.instance is not None and email != instance_old_email:
                 try:
                     CustomUser.objects.get(email=email)
                 except CustomUser.DoesNotExist:
                     return email
-                raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
+                raise serializers.ValidationError(ValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
         return email
 
 
@@ -85,13 +85,14 @@ class CustomRegisterSerializer(serializers.Serializer):
         label="Password confirmation", required=True, write_only=True, style={"input_type": "password"}
     )
 
-    def validate_email(self, email: str) -> str:
+    @staticmethod
+    def validate_email(email: str) -> str:
         email = allauth_get_adapter().clean_email(email)
-        custom_validate_email_function(self, email)
+        custom_validate_email_function(email)
         if allauth_settings.UNIQUE_EMAIL:
             if email and email_address_exists(email):
                 logger.warning(f"Email: {email} already exist")
-                raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
+                raise serializers.ValidationError(ValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
         return email
 
     @staticmethod
@@ -100,7 +101,7 @@ class CustomRegisterSerializer(serializers.Serializer):
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:  # pylint: disable=no-self-use
         if data["password"] != data["password_confirmation"]:
-            raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE)
+            raise serializers.ValidationError(ValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE)
         return data
 
     def get_cleaned_data(self) -> Dict[str, str]:

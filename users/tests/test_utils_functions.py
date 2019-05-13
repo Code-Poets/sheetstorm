@@ -4,7 +4,7 @@ from parameterized import parameterized
 
 import users.common.utils
 import users.common.validators
-from users.common.strings import CustomValidationErrorText
+from users.common.strings import ValidationErrorText
 
 
 class TestCustomModelEmailValidationFunction(TestCase):

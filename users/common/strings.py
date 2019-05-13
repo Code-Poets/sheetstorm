@@ -46,7 +46,7 @@ class CustomUserModelText:
     )
 
 
-class CustomValidationErrorText:
+class ValidationErrorText:
     VALIDATION_ERROR_EMAIL_MESSAGE = "The given email must be set"
     VALIDATION_ERROR_EMAIL_EXISTING_MESSAGE = "User with this Email address already exists."
     VALIDATION_ERROR_PASSWORD_MESSAGE = "The given password must be set"
