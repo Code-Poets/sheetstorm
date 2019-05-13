@@ -16,7 +16,8 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from rest_framework import permissions
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -33,6 +34,7 @@ from users.serializers import UserListSerializer
 from users.serializers import UserSerializer
 from users.serializers import UserUpdateByAdminSerializer
 from users.serializers import UserUpdateSerializer
+from utils.decorators import check_permissions
 
 logger = logging.getLogger(__name__)
 
@@ -199,23 +201,12 @@ class UserUpdateByAdmin(APIView):
         return redirect("custom-user-update-by-admin", pk=pk)
 
 
-class UserList(APIView):
-    serializer_class = UserListSerializer
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+@method_decorator(login_required, name="dispatch")
+@method_decorator(check_permissions(allowed_user_types=(CustomUser.UserType.ADMIN.name,)), name="dispatch")
+class UserList(ListView):
     template_name = "users_list.html"
-    permission_classes = (permissions.IsAuthenticated,)
-
-    @classmethod
-    def get_queryset(cls) -> CustomUser:
-        logger.info("Get user list in queryset")
-        return CustomUser.objects.order_by("id")
-
-    @classmethod
-    def get(cls, request: HttpRequest) -> Response:
-        logger.info(f"User with id: {request.user.pk} get to the UserList view")
-        users_queryset = cls.get_queryset()
-        users_serializer = UserListSerializer(context={"request": request})
-        return Response({"serializer": users_serializer, "users_list": users_queryset})
+    model = CustomUser
+    queryset = CustomUser.objects.prefetch_related("projects")
 
 
 class CustomPasswordChangeView(PasswordChangeView):

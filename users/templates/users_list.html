@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
-{% load rest_framework %}
 
 {% block content %}
 <h1>
@@ -27,7 +26,7 @@
                     <td class=Invisible></td>
                 </tr>
                 <tr>
-                    {% for user in users_list %}
+                    {% for user in object_list %}
                     <td>{{ forloop.counter }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.user_type }}</td>
