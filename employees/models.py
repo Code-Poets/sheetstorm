@@ -19,6 +19,13 @@ class TaskActivityType(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @staticmethod
+    def get_or_create_default_task_activity_type_pk() -> int:
+        default_task_activity_type, _ = TaskActivityType.objects.get_or_create(name="Other")
+        default_task_activity_type.full_clean()
+        default_task_activity_type.save()
+        return default_task_activity_type.pk
+
 
 class ReportQuerySet(models.QuerySet):
     def get_work_hours_sum_for_all_dates(self) -> dict:
@@ -35,7 +42,11 @@ class Report(models.Model):
 
     date = models.DateField()
     description = models.TextField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
-    task_activities = models.ForeignKey(TaskActivityType, on_delete=models.SET_DEFAULT, default=1)
+    task_activities = models.ForeignKey(
+        TaskActivityType,
+        on_delete=models.SET_DEFAULT,
+        default=TaskActivityType.get_or_create_default_task_activity_type_pk,
+    )
     creation_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
