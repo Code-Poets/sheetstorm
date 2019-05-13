@@ -1,29 +1,36 @@
 {% extends 'base.html' %}
+
 {% load i18n %}
-{% block content %}
 {% load rest_framework %}
 {% load static %}
 
+{% block extra_head %}
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+{% endblock %}
 
+{% block content %}
 <h1>{{ object.name }}{{ UI_text.PAGE_TITLE.value }}</h1>
 <div class="container">
     <div class="table-responsive">
+        {% regroup object.get_report_ordered by author as reports_by_author %}
+        {% for author in reports_by_author %}
+        <h4><strong>{{ author.grouper.email }}</strong></h4>
         <table class="table">
-            <tr>
-                <th class="project-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                <th class="project-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-                <th class="project-reports-task-activity-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
-                <th class="project-reports-author-header">{{ UI_text.AUTHOR_COLUMN_HEADER.value }}</th>
-                <th class="project-reports-work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
-                <th class="project-reports-description-header">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-                <th class="project-reports-creation-date-header">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
-                <th class="project-reports-last-update-header">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
-                <th class="project-reports-editable-header">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
-                <td class="project-reports-edit-button-header Invisible"></td>
-            </tr>
+            <thead>
+                <tr>
+                    <th class="project-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-task-activity-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
+                    <th class="project-reports-work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-description-header">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-creation-date-header">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-last-update-header">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
+                    <th class="project-reports-editable-header">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
+                    <td class="project-reports-edit-button-header Invisible"></td>
+                </tr>
+            </thead>
             <tbody>
-                {% regroup object.get_report_ordered by date as reports_by_date %}
+                {% regroup author.list by date as reports_by_date %}
                 {% for date in reports_by_date %}
                 {% for report in date.list %}
                     {% if forloop.first %}
@@ -35,7 +42,6 @@
                     {% endif %}
                     <td class="project-reports-project-column" >{{ report.project.name }}</td>
                     <td class="project-reports-task-activity-column">{{ report.task_activities }}</td>
-                    <td class="project-reports-author-column">{{ report.author }}</td>
                     <td class="project-reports-work-hours-column">{{ report.work_hours_str }}</td>
                     <td class="project-reports-description-column">{{ report.markdown_description|safe }}</td>
                     <td class="project-reports-creation-date-column">{{ report.creation_date }}</td>
@@ -51,9 +57,9 @@
                 {% endfor %}
             </tbody>
         </table>
-        {% if object.get_report_ordered.count == 0 %}
+        {% empty %}
             <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
-        {% endif %}
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
