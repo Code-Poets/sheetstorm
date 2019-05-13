@@ -5,7 +5,7 @@ from managers.commons.constants import CORRECT_DATE_FORMAT
 from managers.models import Project
 
 
-class ProjectForm(forms.ModelForm):
+class ProjectAdminForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = "__all__"
@@ -13,3 +13,11 @@ class ProjectForm(forms.ModelForm):
             "start_date": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
             "stop_date": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
         }
+
+
+class ProjectManagerForm(ProjectAdminForm):
+    class Meta:
+        model = ProjectAdminForm.Meta.model
+        fields = ProjectAdminForm.Meta.fields
+        exclude = ("managers",)
+        widgets = ProjectAdminForm.Meta.widgets

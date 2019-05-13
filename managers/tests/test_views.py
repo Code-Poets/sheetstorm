@@ -8,6 +8,7 @@ from managers.models import Project
 from managers.tests.test_api import ProjectTest
 from managers.views import ProjectCreateView
 from managers.views import ProjectUpdateView
+from users.factories import UserFactory
 from users.models import CustomUser
 
 
@@ -76,6 +77,16 @@ class ProjectUpdateViewTestCase(ProjectTest):
         self.assertEqual(response.status_code, 200)
         self.project.refresh_from_db()
         self.assertFormError(response, "form", "name", "This field is required.")
+
+    def test_project_update_view_should_not_update_managers_if_user_is_manager(self):
+        assert self.project.managers.count() == 0
+        user_manager = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
+        self.client.force_login(user=user_manager)
+        self.data["managers"] = [self.user.pk, user_manager.pk]
+        response = self.client.post(self.url, self.data)
+        self.assertEqual(response.status_code, 302)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.managers.count(), 0)
 
 
 class DeleteProjectTests(ProjectTest):
