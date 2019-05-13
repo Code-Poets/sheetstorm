@@ -21,6 +21,7 @@ from rest_framework.views import APIView
 
 from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
+from employees.common.strings import ProjectReportDetailStrings
 from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
@@ -233,3 +234,24 @@ class ProjectReportList(DetailView):
         context = super().get_context_data(**kwargs)
         context["UI_text"] = ProjectReportListStrings
         return context
+
+
+@method_decorator(login_required, name="dispatch")
+class ProjectReportDetail(UpdateView):
+    template_name = "employees/project_report_detail.html"
+    form_class = AdminReportForm
+    model = Report
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = ProjectReportDetailStrings
+        return context_data
+
+    def get_success_url(self) -> str:
+        return reverse("project-report-list", kwargs={"pk": self.object.project.id})
+
+    def form_valid(self, form: AdminReportForm) -> HttpResponseRedirectBase:
+        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
+        self.object.editable = True
+        self.object.save()
+        return super().form_valid(form)

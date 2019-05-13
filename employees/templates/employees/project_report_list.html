@@ -42,7 +42,7 @@
                     <td class="project-reports-last-update-column">{{ report.last_update }}</td>
                     <td class="project-reports-editable-column">{{ report.editable|yesno:"False,True" }}</td>
                     <td class="project-reports-edit-button-column Invisible">
-                        <a class="btn btn-info">
+                        <a href="{% url 'project-report-detail' pk=report.id %}" class="btn btn-info">
                             <span class="glyphicon glyphicon-pencil"></span>
                         </a>
                     </td>
