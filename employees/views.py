@@ -1,6 +1,5 @@
 import datetime
 from typing import Any
-from typing import Dict
 from typing import Union
 
 from django.contrib.auth.decorators import login_required
@@ -45,25 +44,17 @@ class ReportViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-def query_as_dict(query_set: QuerySet) -> Dict[str, Any]:
-    dictionary = {}  # type: Dict[str, Any]
-    for record in query_set:
-        key = record.date
-        dictionary.setdefault(key, [])
-        dictionary[key].append(record)
-    return dictionary
-
-
 class ReportList(APIView):
     serializer_class = ReportSerializer
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_list.html"
-    reports_dict = {}  # type: Dict[str, Any]
+    reports = None  # type: QuerySet
     permission_classes = (permissions.IsAuthenticated,)
     hide_join = False
+    daily_hours_sum = None  # type: QuerySet
 
     def get_queryset(self) -> QuerySet:
-        return Report.objects.filter(author=self.request.user).order_by("-date", "project__name")
+        return Report.objects.filter(author=self.request.user).order_by("-date", "project__name", "-creation_date")
 
     def _add_project(self, project: Project) -> None:
         project.members.add(self.request.user)
@@ -86,13 +77,15 @@ class ReportList(APIView):
 
     def initial(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
         super().initial(request, *args, **kwargs)
-        self.reports_dict = query_as_dict(self.get_queryset())
+        self.reports = self.get_queryset()
+        self.daily_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_dates()
 
     def get(self, _request: HttpRequest) -> Response:
         return Response(
             {
                 "serializer": self._create_serializer(),
-                "reports_dict": self.reports_dict,
+                "object_list": self.reports,
+                "daily_hours_sum": self.daily_hours_sum,
                 "UI_text": ReportListStrings,
                 "project_form": self._create_project_join_form(),
                 "hide_join": self.hide_join,
@@ -113,7 +106,8 @@ class ReportList(APIView):
             return Response(
                 {
                     "serializer": reports_serializer,
-                    "reports_dict": self.reports_dict,
+                    "object_list": self.reports,
+                    "daily_hours_sum": self.daily_hours_sum,
                     "UI_text": ReportListStrings,
                     "project_form": self._create_project_join_form(),
                     "hide_join": self.hide_join,
@@ -124,18 +118,21 @@ class ReportList(APIView):
             return Response(
                 {
                     "serializer": reports_serializer,
-                    "reports_dict": self.reports_dict,
+                    "object_list": self.reports,
                     "errors": reports_serializer.errors,
+                    "daily_hours_sum": self.daily_hours_sum,
                     "UI_text": ReportListStrings,
                     "project_form": self._create_project_join_form(),
                     "hide_join": self.hide_join,
                 }
             )
         reports_serializer.save(author=self.request.user)
+        queryset = self.get_queryset()
         return Response(
             {
                 "serializer": self._create_serializer(),
-                "reports_dict": query_as_dict(self.get_queryset()),
+                "object_list": queryset,
+                "daily_hours_sum": queryset.order_by().get_work_hours_sum_for_all_dates(),
                 "UI_text": ReportListStrings,
                 "project_form": self._create_project_join_form(),
                 "hide_join": self.hide_join,
@@ -200,6 +197,7 @@ class AuthorReportView(DetailView):
     def get_context_data(self, **kwargs: Any) -> dict:
         context = super().get_context_data(**kwargs)
         context["UI_text"] = AuthorReportListStrings
+        context["daily_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_dates()
         return context
 
 
