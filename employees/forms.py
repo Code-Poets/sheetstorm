@@ -20,5 +20,5 @@ class ProjectJoinForm(forms.Form):
 class AdminReportForm(forms.ModelForm):
     class Meta:
         model = Report
-        fields = ("date", "description", "task_activities", "author", "project", "work_hours")
+        fields = ("date", "description", "task_activities", "project", "work_hours")
         widgets = {"date": DatePickerInput(format="%Y-%m-%d")}
