@@ -4,6 +4,8 @@
 {% load rest_framework %}
 {% load static %}
 
+{% load data_structure_element_selectors %}
+
 {% block extra_head %}
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
 {% endblock %}
@@ -54,6 +56,12 @@
                 </td>
             </tr>
             {% endfor %}
+            <tr>
+                <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
+                <td class="author-reports-work-hours-column"><strong>{{ daily_hours_sum|get_key_value:date.grouper }}</strong></td>
+                <td colspan ="4"></td>
+                <td class="edit-button-column Invisible hidden-print"></td>
+            </tr>
             {% endfor %}
           </tbody>
         </table>
