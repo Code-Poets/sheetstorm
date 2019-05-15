@@ -4,6 +4,9 @@
 {% load rest_framework %}
 {% load static %}
 
+{% load data_display_filters %}
+{% load data_structure_element_selectors %}
+
 {% block extra_head %}
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
 {% endblock %}
@@ -14,12 +17,11 @@
     <div class="table-responsive">
         {% regroup object.get_report_ordered by author as reports_by_author %}
         {% for author in reports_by_author %}
-        <h4><strong>{{ author.grouper.email }}</strong></h4>
+        <h4><strong>{{ author.grouper }}</strong></h4>
         <table class="table">
             <thead>
                 <tr>
                     <th class="project-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                    <th class="visible-print-block project-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
                     <th class="project-reports-task-activity-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
                     <th class="project-reports-work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
                     <th class="project-reports-description-header">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
@@ -40,7 +42,6 @@
                     {% else %}
                     <tr>
                     {% endif %}
-                    <td class="visible-print-block project-reports-project-column" >{{ report.project.name }}</td>
                     <td class="project-reports-task-activity-column">{{ report.task_activities }}</td>
                     <td class="project-reports-work-hours-column">{{ report.work_hours_str }}</td>
                     <td class="project-reports-description-column">{{ report.markdown_description|safe }}</td>
@@ -55,6 +56,10 @@
                 </tr>
                 {% endfor %}
                 {% endfor %}
+                <tr>
+                    <td colspan="2"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+                    <td class="project-reports-work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:author.grouper.pk|decimal_to_hours }}</strong></td>
+                </tr>
             </tbody>
         </table>
         {% empty %}
