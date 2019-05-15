@@ -121,8 +121,7 @@ textarea.form-control, #id_description {
 }
 
 .project-reports-project-header {
-    width:1%;
-    white-space:nowrap;
+    width: 20.18%;
 }
 
 
@@ -161,8 +160,7 @@ textarea.form-control, #id_description {
 }
 
 .project-reports-project-column {
-    width:1%;
-    white-space:nowrap;
+    text-align: left;
 }
 
 .project-reports-task-activity-column {
