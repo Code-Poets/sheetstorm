@@ -57,6 +57,7 @@ class ReportList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     hide_join = False
     daily_hours_sum = None  # type: QuerySet
+    monthly_hours_sum = None  # type: QuerySet
 
     def get_queryset(self) -> QuerySet:
         logger.info(f"User with id: {self.request.user.pk} get reports queryset")
@@ -92,6 +93,7 @@ class ReportList(APIView):
         super().initial(request, *args, **kwargs)
         self.reports = self.get_queryset()
         self.daily_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_dates()
+        self.monthly_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_authors()
 
     def get(self, _request: HttpRequest) -> Response:
         logger.info(f"User with id: {self.request.user.pk} get to the ReportList view")
@@ -100,6 +102,7 @@ class ReportList(APIView):
                 "serializer": self._create_serializer(),
                 "object_list": self.reports,
                 "daily_hours_sum": self.daily_hours_sum,
+                "monthly_hours_sum": self.monthly_hours_sum,
                 "UI_text": ReportListStrings,
                 "project_form": self._create_project_join_form(),
                 "hide_join": self.hide_join,
@@ -122,6 +125,7 @@ class ReportList(APIView):
                     "serializer": reports_serializer,
                     "object_list": self.reports,
                     "daily_hours_sum": self.daily_hours_sum,
+                    "monthly_hours_sum": self.monthly_hours_sum,
                     "UI_text": ReportListStrings,
                     "project_form": self._create_project_join_form(),
                     "hide_join": self.hide_join,
@@ -138,6 +142,7 @@ class ReportList(APIView):
                     "object_list": self.reports,
                     "errors": reports_serializer.errors,
                     "daily_hours_sum": self.daily_hours_sum,
+                    "monthly_hours_sum": self.monthly_hours_sum,
                     "UI_text": ReportListStrings,
                     "project_form": self._create_project_join_form(),
                     "hide_join": self.hide_join,
@@ -151,6 +156,7 @@ class ReportList(APIView):
                 "serializer": self._create_serializer(),
                 "object_list": queryset,
                 "daily_hours_sum": queryset.order_by().get_work_hours_sum_for_all_dates(),
+                "monthly_hours_sum": queryset.order_by().get_work_hours_sum_for_all_authors(),
                 "UI_text": ReportListStrings,
                 "project_form": self._create_project_join_form(),
                 "hide_join": self.hide_join,
@@ -224,6 +230,7 @@ class AuthorReportView(DetailView):
         context = super().get_context_data(**kwargs)
         context["UI_text"] = AuthorReportListStrings
         context["daily_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_dates()
+        context["monthly_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_authors()
         return context
 
 
@@ -257,6 +264,7 @@ class ProjectReportList(DetailView):
     def get_context_data(self, **kwargs: Any) -> dict:
         context = super().get_context_data(**kwargs)
         context["UI_text"] = ProjectReportListStrings
+        context["monthly_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_authors()
         return context
 
 
