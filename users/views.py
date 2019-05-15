@@ -70,11 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
     logger.info(f"User with id: {request.user.pk} is on home page")
-    # Number of visits to this view, as counted in the session variable.
-    num_visits = request.session.get("num_visits", 0)
-    request.session["num_visits"] = num_visits + 1
-
-    return render(request, "home.html", context={"num_visits": num_visits})
+    return render(request, "home.html")
 
 
 class SignUp(APIView):
