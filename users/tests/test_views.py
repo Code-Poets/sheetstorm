@@ -3,6 +3,7 @@ from rest_framework.reverse import reverse
 
 from users.common.strings import CustomValidationErrorText
 from users.factories import UserFactory
+from users.models import CustomUser
 
 
 class ChangePasswordTests(TestCase):
@@ -44,3 +45,40 @@ class ChangePasswordTests(TestCase):
         )
         self.assertFalse(self.user.check_password(data["new_password1"]))
         self.assertTrue(self.user.check_password(data["old_password"]))
+
+
+class UserListTests(TestCase):
+    def setUp(self):
+        self.user_admin = UserFactory(user_type=CustomUser.UserType.ADMIN.name)
+        self.user_admin.full_clean()
+        self.user_admin.save()
+        self.user_manager = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
+        self.user_manager.full_clean()
+        self.user_manager.save()
+        self.user_employee = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
+        self.user_employee.full_clean()
+        self.user_employee.save()
+        self.url = reverse("custom-users-list")
+
+    def test_user_list_view_should_display_users_list_on_get(self):
+        self.client.force_login(self.user_admin)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.user_admin.user_type)
+        self.assertContains(response, self.user_admin.email)
+        self.assertContains(response, self.user_admin.first_name)
+        self.assertContains(response, self.user_admin.last_name)
+
+    def test_user_list_view_should_not_be_accessible_for_unauthenticated_user(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_user_employee_should_not_get_list_of_all_employees(self):
+        self.client.force_login(self.user_employee)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_user_manager_should_not_get_list_of_all_employees(self):
+        self.client.force_login(self.user_manager)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)

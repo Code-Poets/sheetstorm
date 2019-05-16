@@ -9,31 +9,6 @@ from users.common.utils import generate_random_phone_number
 from users.models import CustomUser
 
 
-class UserListTests(TestCase):
-    def setUp(self):
-        self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
-        )
-        self.user.full_clean()
-        self.user.save()
-        self.url = reverse("custom-users-list")
-
-    def test_user_list_view_should_display_users_list_on_get(self):
-        request = APIRequestFactory().get(path=self.url)
-        request.user = self.user
-        response = views.UserList.as_view()(request)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.user.user_type)
-        users_list = response.data["users_list"]
-        self.assertTrue(self.user in users_list)
-
-    def test_user_list_view_should_not_be_accessible_for_unauthenticated_user(self):
-        request = APIRequestFactory().get(path=self.url)
-        request.user = AnonymousUser()
-        response = views.UserList.as_view()(request)
-        self.assertEqual(response.status_code, 403)
-
-
 class UserUpdateByAdminTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
