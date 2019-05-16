@@ -7,12 +7,26 @@ from managers.factories import ProjectFactory
 from managers.models import Project
 from managers.tests.test_api import ProjectTest
 from managers.views import ProjectCreateView
+from managers.views import ProjectDetailView
 from managers.views import ProjectUpdateView
 from users.factories import UserFactory
 from users.models import CustomUser
 
 
-class ProjectCreateTests(ProjectTest):
+class ProjectDetailViewTests(ProjectTest):
+    def setUp(self):
+        super().setUp()
+        self.project = ProjectFactory()
+        self.url = reverse("custom-project-detail", kwargs={"pk": self.project.pk})
+
+    def test_project_detail_view_should_display_project_details_on_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.project.name)
+        self.assertTemplateUsed(response, ProjectDetailView.template_name)
+
+
+class ProjectCreateViewTests(ProjectTest):
     def setUp(self):
         super().setUp()
         self.url = reverse("custom-project-create")
@@ -89,7 +103,7 @@ class ProjectUpdateViewTestCase(ProjectTest):
         self.assertEqual(self.project.managers.count(), 0)
 
 
-class DeleteProjectTests(ProjectTest):
+class ProjectDeleteViewTests(ProjectTest):
     def setUp(self):
         super().setUp()
         self.project = ProjectFactory()
