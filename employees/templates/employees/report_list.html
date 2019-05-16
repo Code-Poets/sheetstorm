@@ -4,6 +4,7 @@
 {% load rest_framework %}
 {% load static %}
 
+{% load data_display_filters %}
 {% load data_structure_element_selectors %}
 
 {% block extra_head %}
@@ -74,7 +75,7 @@
                 {% endfor %}
                 <tr>
                     <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
-                    <td class="work-hours-column"><strong>{{ daily_hours_sum|get_key_value:reports.grouper }}</strong></td>
+                    <td class="work-hours-column"><strong>{{ daily_hours_sum|get_key_value:reports.grouper|decimal_to_hours }}</strong></td>
                     <td></td>
                     <td class="edit-button-column Invisible hidden-print"></td>
                 </tr>
