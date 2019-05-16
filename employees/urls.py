@@ -18,4 +18,5 @@ urlpatterns = [
     url(r"^reports/management/(?P<pk>[0-9]+)/$", views.AdminReportView.as_view(), name="admin-report-detail"),
     url(r"^reports/project/(?P<pk>[0-9]+)/$", views.ProjectReportList.as_view(), name="project-report-list"),
     url(r"^reports/project/report/(?P<pk>[0-9]+)/$", views.ProjectReportDetail.as_view(), name="project-report-detail"),
+    url("^export/user-reports/(?P<pk>[0-9]+)/$", views.ExportUserReportView.as_view(), name="export-data-xlsx"),
 ]

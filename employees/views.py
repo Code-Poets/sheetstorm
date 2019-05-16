@@ -4,9 +4,11 @@ from typing import Any
 from typing import Union
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import QueryDict
+from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
@@ -20,6 +22,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ProjectReportDetailStrings
@@ -275,3 +278,18 @@ class ProjectReportDetail(UpdateView):
         self.object.editable = True
         self.object.save()
         return super().form_valid(form)
+
+
+@method_decorator(login_required, name="dispatch")
+class ExportUserReportView(LoginRequiredMixin, DetailView):
+    model = CustomUser
+
+    def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
+        author = super().get_object()
+        response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CONTENT_TYPE_FORMAT.value)
+        response["Content-Disposition"] = ExcelGeneratorSettingsConstants.EXPORTED_FILE_NAME.value.format(
+            author.email, datetime.date.today()
+        )
+        work_book = generate_xlsx_for_single_user(author)
+        work_book.save(response)
+        return response
