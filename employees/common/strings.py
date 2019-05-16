@@ -97,3 +97,8 @@ class ProjectReportDetailStrings(NotCallableMixin, Enum):
     UPDATE_REPORT_BUTTON = _("Update")
     DISCARD_CHANGES_BUTTON = _("Discard")
 
+
+class ReportValidationStrings(NotCallableMixin, Enum):
+    WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED = _(
+        "Sum of work hours of all reports from a given day for single author must not exceed 24."
+    )
