@@ -8,19 +8,17 @@ from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
+from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import UpdateView
 from rest_framework import renderers
 from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from managers.forms import ProjectAdminForm
 from managers.forms import ProjectManagerForm
@@ -58,14 +56,9 @@ class ProjectsList(ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ProjectDetail(APIView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+class ProjectDetailView(DetailView):
     template_name = "managers/project_detail.html"
-
-    @staticmethod
-    def get(_request: HttpRequest, pk: int) -> Response:
-        project = get_object_or_404(Project, pk=pk)
-        return Response({"project": project})
+    model = Project
 
 
 @method_decorator(login_required, name="dispatch")
