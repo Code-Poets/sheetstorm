@@ -73,3 +73,12 @@ class UserListTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
+    def test_user_employee_should_not_get_list_of_all_employees(self):
+        self.client.force_login(self.user_employee)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_user_manager_should_not_get_list_of_all_employees(self):
+        self.client.force_login(self.user_manager)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
