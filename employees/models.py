@@ -42,6 +42,11 @@ class ReportQuerySet(models.QuerySet):
             .values_list("date_created", "created_count")
         )
 
+    def get_report_work_hours_sum_for_date(self, for_date: date) -> Decimal:
+        return self.filter(date=for_date).aggregate(work_hours_sum=Coalesce(models.Sum("work_hours"), 0))[
+            "work_hours_sum"
+        ]
+
 
 class Report(models.Model):
     objects = ReportQuerySet.as_manager()
