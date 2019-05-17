@@ -6,6 +6,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
 from employees.common.constants import ExcelGeneratorSettingsConstants
+from managers.models import Project
 from users.models import CustomUser
 
 
@@ -17,7 +18,7 @@ def set_format_styles_for_main_cells(cell: Cell):
 def set_columns_width(worksheet: Worksheet, col_num: int, width_settings: list):
     column_letter = get_column_letter(col_num)
     column_dimensions = worksheet.column_dimensions[column_letter]
-    column_dimensions.width = ExcelGeneratorSettingsConstants.COLUMNS_WIDTH_FOR_SINGLE_USER.value[col_num - 1]
+    column_dimensions.width = width_settings[col_num - 1]
 
 
 def fill_headers(worksheet: Worksheet, headers: list, width_settings: list):
