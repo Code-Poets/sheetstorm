@@ -52,6 +52,13 @@ class ReportQuerySet(models.QuerySet):
 
         return queryset.aggregate(work_hours_sum=Coalesce(models.Sum("work_hours"), 0))["work_hours_sum"]
 
+    def get_work_hours_sum_for_all_authors(self) -> dict:
+        return dict(
+            self.values("author")
+            .annotate(monthly_hours_sum=models.Sum("work_hours"))
+            .values_list("author", "monthly_hours_sum")
+        )
+
 
 class Report(models.Model):
     objects = ReportQuerySet.as_manager()
