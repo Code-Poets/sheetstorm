@@ -22,6 +22,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from employees.common.constants import ExcelGeneratorSettingsConstants
+from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
@@ -291,5 +293,20 @@ class ExportUserReportView(LoginRequiredMixin, DetailView):
             author.email, datetime.date.today()
         )
         work_book = generate_xlsx_for_single_user(author)
+        work_book.save(response)
+        return response
+
+
+@method_decorator(login_required, name="dispatch")
+class ExportReportsInProjectView(LoginRequiredMixin, DetailView):
+    model = Project
+
+    def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
+        project = super().get_object()
+        response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CONTENT_TYPE_FORMAT.value)
+        response["Content-Disposition"] = ExcelGeneratorSettingsConstants.EXPORTED_FILE_NAME.value.format(
+            project.name, datetime.date.today()
+        )
+        work_book = generate_xlsx_for_project(project)
         work_book.save(response)
         return response
