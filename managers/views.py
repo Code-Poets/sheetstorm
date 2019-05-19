@@ -4,7 +4,6 @@ from typing import Union
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-from django.db.models.functions import Lower
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -17,40 +16,45 @@ from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import UpdateView
-from rest_framework import renderers
-from rest_framework import viewsets
 
 from managers.forms import ProjectAdminForm
 from managers.forms import ProjectManagerForm
 from managers.models import Project
-from managers.serializers import ProjectSerializer
 from users.models import CustomUser
-
-
-class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all().order_by(Lower("name"))
-    serializer_class = ProjectSerializer
+from utils.decorators import check_permissions
 
 
 @method_decorator(login_required, name="dispatch")
-class ProjectsList(ListView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+@method_decorator(
+    check_permissions(allowed_user_types=(CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name)),
+    name="dispatch",
+)
+class ProjectsListView(ListView):
     template_name = "managers/projects_list.html"
+    allowed_sort_values = [
+        "name",
+        "-name",
+        "start_date",
+        "-start_date",
+        "stop_date",
+        "-stop_date",
+        "members_count",
+        "-members_count",
+    ]
+    queryset = Project.objects.all()
 
     def get_queryset(self) -> QuerySet:
         if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
-            projects_queryset = Project.objects.all().order_by("id")
+            projects_queryset = self.queryset
         elif self.request.user.user_type == CustomUser.UserType.MANAGER.name:
-            projects_queryset = Project.objects.filter(managers__id=self.request.user.pk)
+            projects_queryset = self.queryset.filter(managers__id=self.request.user.pk)
         else:
-            projects_queryset = Project.objects.none()
-        if self.request.GET.get("sort"):
-            if "members" in self.request.GET.get("sort"):
-                projects_queryset = Project.objects.annotate(members_count=Count("members")).order_by(
-                    self.request.GET.get("sort")
-                )
-            else:
-                projects_queryset = projects_queryset.order_by(self.request.GET.get("sort"))
+            assert False
+
+        if self.request.GET.get("sort") in self.allowed_sort_values:
+            if "members_count" in self.request.GET.get("sort"):
+                projects_queryset = projects_queryset.annotate(members_count=Count("members", distinct=True))
+            projects_queryset = projects_queryset.order_by(self.request.GET.get("sort"))
 
         return projects_queryset
 
