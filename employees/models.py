@@ -1,6 +1,11 @@
+from datetime import date
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.functions import Coalesce
 from markdown import markdown
 from markdown_checklists.extension import ChecklistsExtension
 
@@ -8,6 +13,7 @@ from employees.common.constants import ReportModelConstants
 from employees.common.constants import TaskActivityTypeConstans
 from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
+from employees.common.strings import ReportValidationStrings
 from employees.common.validators import MaxDecimalValueValidator
 from managers.models import Project
 from users.models import CustomUser
@@ -36,8 +42,15 @@ class ReportQuerySet(models.QuerySet):
             .values_list("date_created", "created_count")
         )
 
+    def get_report_work_hours_sum_for_date(self, for_date: date) -> Decimal:
+        return self.filter(date=for_date).aggregate(work_hours_sum=Coalesce(models.Sum("work_hours"), 0))[
+            "work_hours_sum"
+        ]
+
 
 class Report(models.Model):
+    objects = ReportQuerySet.as_manager()
+
     objects = ReportQuerySet.as_manager()
 
     date = models.DateField()
@@ -72,3 +85,15 @@ class Report(models.Model):
             self.description,
             extensions=["extra", "sane_lists", "wikilinks", "nl2br", "legacy_em", ChecklistsExtension()],
         )
+
+    def clean(self) -> None:
+        super().clean()
+
+        if (
+            hasattr(self, "author")
+            and isinstance(self.work_hours, Decimal)
+            and self.author.report_set.get_report_work_hours_sum_for_date(self.date) + self.work_hours > 24
+        ):
+            raise ValidationError(
+                message=ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value
+            )

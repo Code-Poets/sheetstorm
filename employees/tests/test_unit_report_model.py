@@ -1,13 +1,17 @@
 import datetime
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
 from employees.common.constants import ReportModelConstants
+from employees.common.strings import ReportValidationStrings
 from employees.factories import ReportFactory
 from employees.models import Report
 from employees.models import TaskActivityType
 from managers.models import Project
+from users.factories import UserFactory
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase
 from utils.sample_data_generators import generate_decimal_with_decimal_places
@@ -171,6 +175,33 @@ class TestReportQuerySet(TestCase):
         result = Report.objects.get_work_hours_sum_for_all_dates()
         self.assertEqual(result[self.date_1], Decimal("13.00"))
         self.assertEqual(result[self.date_2], Decimal("5.00"))
+
+
+class TestReportWorkHoursSumForGivenDayForSingleUser(TestCase):
+    def test_that_work_hours_sum_for_given_day_for_single_user_can_be_24(self):
+        user = UserFactory()
+        today = timezone.now().date()
+        report = ReportFactory(work_hours=23, date=today, author=user)
+
+        new_report = Report(work_hours=1, date=today, author=user, project=report.project, description="test")
+        new_report.full_clean()
+        new_report.save()
+
+        self.assertEqual(user.report_set.get_report_work_hours_sum_for_date(today), 24)
+
+    def test_that_work_hours_sum_for_given_day_for_single_user_should_not_exceed_24(self):
+        user = UserFactory()
+        today = timezone.now().date()
+        report = ReportFactory(work_hours=23, date=today, author=user)
+
+        with self.assertRaises(ValidationError) as exception:
+            new_report = Report(work_hours=2, date=today, author=user, project=report.project, description="test")
+            new_report.full_clean()
+
+        self.assertEqual(
+            exception.exception.messages[0],
+            ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value,
+        )
 
 
 class TestReportTaskActivitiesParameter(DataSetUpToTests):
