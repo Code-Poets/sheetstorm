@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 printf "=================== DJANGO CONFIGURATION CHECKS ====================\n"
 python manage.py check
 printf "\n"
