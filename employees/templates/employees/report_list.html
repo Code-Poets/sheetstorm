@@ -4,6 +4,9 @@
 {% load rest_framework %}
 {% load static %}
 
+{% load data_display_filters %}
+{% load data_structure_element_selectors %}
+
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
@@ -38,45 +41,46 @@
 <div class="container">
     <div class="table-responsive">
         <table class="table">
-            <tr>
-                <th class="date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                <th class="project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-                <th class="task-activities-header">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
-                <th class="work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
-                <th>{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-                <td class="edit-button-header Invisible"></td>
-            </tr>
-            {% for date, reports in reports_dict.items %}
-            <tr>
-                <td class="date-column" rowspan={{ reports|length }}>
-                    {{ date }}
-                </td>
-                {% for report in reports %}
-                    {% if forloop.counter > 1 %}
+            <thead>
+                <tr>
+                    <th class="date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+                    <th class="project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+                    <th class="task-activities-header">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
+                    <th class="work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+                    <th>{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+                    <td class="edit-button-header Invisible"></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% regroup object_list by date as date %}
+                {% for reports in date %}
+                {% for report in reports.list %}
+                {% if forloop.first %}
+                    <td class="date-column" rowspan={{ reports.list|length }}><strong>{{ reports.grouper }}</strong></td>
+                    {% else %}
                     <tr>
                     {% endif %}
-                <td class="project-column">
-                    {{ report.project }}
-                </td>
-                <td class="task-activities-column">
-                    {{ report.task_activities }}
-                </td>
-                <td class="work-hours-column">
-                    {{ report.work_hours_str }}
-                </td>
-                <td class="description-column">
-                {{ report.markdown_description|safe }}
-                <td>
-                <td class="edit-button-column Invisible hidden-print">
-                    {% if report.editable %}
-                    <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">
-                        <span class="glyphicon glyphicon-pencil"></span>
-                    </a>
-                    {% endif %}
-                </td>
-            </tr>
+                    <td class="project-column">{{ report.project }}</td>
+    ﻿               <td class="task-activities-column">{{ report.task_activities }}</td>
+                    <td class="work-hours-column">{{ report.work_hours_str }}</td>
+                    <td class="description-column">{{ report.markdown_description|safe }}<td>
+                    <td class="edit-button-column Invisible hidden-print">
+                        {% if report.editable %}
+                        <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
                 {% endfor %}
-            {% endfor %}
+                <tr>
+                    <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
+                    <td class="work-hours-column"><strong>{{ daily_hours_sum|get_key_value:reports.grouper|decimal_to_hours }}</strong></td>
+                    <td></td>
+                    <td class="edit-button-column Invisible hidden-print"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </div>

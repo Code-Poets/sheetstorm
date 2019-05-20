@@ -20,7 +20,18 @@ class TaskActivityType(models.Model):
         return self.name
 
 
+class ReportQuerySet(models.QuerySet):
+    def get_work_hours_sum_for_all_dates(self) -> dict:
+        return dict(
+            self.extra({"date_created": "date(date)"})
+            .values("date_created")
+            .annotate(created_count=models.Sum("work_hours"))
+            .values_list("date_created", "created_count")
+        )
+
+
 class Report(models.Model):
+    objects = ReportQuerySet.as_manager()
 
     date = models.DateField()
     description = models.TextField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)

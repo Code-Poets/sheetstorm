@@ -21,6 +21,7 @@ class ReportListStrings(NotCallableMixin, Enum):
     WORK_HOURS_COLUMN_HEADER = ugettext_lazy("Work hours")
     TASK_ACTIVITIES_COLUMN_HEADER = ugettext_lazy("Task Activity")
     DESCRIPTION_COLUMN_HEADER = ugettext_lazy("Description")
+    HOURS_PER_DAY_LABEL = ugettext_lazy("Total hours")
     EDIT_REPORT_BUTTON = ugettext_lazy("Edit")
     NO_PROJECTS_TO_JOIN = ugettext_lazy("There are no other projects available.")
 
@@ -66,6 +67,7 @@ class AuthorReportListStrings(NotCallableMixin, Enum):
     LAST_UPDATE_COLUMN_HEADER = ugettext_lazy("Last update")
     EDITED_COLUMN_HEADER = ugettext_lazy("Edited")
     TASK_ACTIVITY_HEADER = ugettext_lazy("Task Activity")
+    HOURS_PER_DAY_LABEL = ugettext_lazy("Total hours")
     NO_REPORTS_MESSAGE = ugettext_lazy("This employee has no reports to display.")
     RETURN_BUTTON_MESSAGE = ugettext_lazy("Back to employee list")
 

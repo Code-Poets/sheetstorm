@@ -176,8 +176,7 @@ class ReportCustomListTests(TestCase):
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.report.description)
-        dictionary = response.data["reports_dict"]
-        reports = list(dictionary.values())[0]
+        reports = response.data["object_list"]
         self.assertTrue(self.report in reports)
 
     def test_custom_list_view_should_not_be_accessible_for_unauthenticated_user(self):

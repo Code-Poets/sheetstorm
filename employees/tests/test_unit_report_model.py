@@ -1,7 +1,10 @@
 import datetime
 from decimal import Decimal
 
+from django.test import TestCase
+
 from employees.common.constants import ReportModelConstants
+from employees.factories import ReportFactory
 from employees.models import Report
 from employees.models import TaskActivityType
 from managers.models import Project
@@ -153,6 +156,21 @@ class TestReportWorkHoursParameterFails(DataSetUpToTests):
     ):
         report = self.initiate_model("work_hours", Decimal("8.00"))
         self.assertEqual(report.work_hours_str, "8:00")
+
+
+class TestReportQuerySet(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.date_1 = datetime.datetime.now().date()
+        self.date_2 = self.date_1 - datetime.timedelta(days=1)
+        ReportFactory(work_hours=Decimal("6.00"), date=self.date_1)
+        ReportFactory(work_hours=Decimal("7.00"), date=self.date_1)
+        ReportFactory(work_hours=Decimal("5.00"), date=self.date_2)
+
+    def test_get_work_hours_sum_for_all_dates_should_return_dict_with_sum_total_of_work_hours_for_each_day(self):
+        result = Report.objects.get_work_hours_sum_for_all_dates()
+        self.assertEqual(result[self.date_1], Decimal("13.00"))
+        self.assertEqual(result[self.date_2], Decimal("5.00"))
 
 
 class TestReportTaskActivitiesParameter(DataSetUpToTests):
