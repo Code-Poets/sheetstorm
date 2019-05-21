@@ -26,7 +26,7 @@ from utils.decorators import check_permissions
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(
-    check_permissions(allowed_user_types=(CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name)),
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
     name="dispatch",
 )
 class ProjectsListView(ListView):
