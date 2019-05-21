@@ -202,7 +202,7 @@ class UserUpdateByAdmin(APIView):
 
 
 @method_decorator(login_required, name="dispatch")
-@method_decorator(check_permissions(allowed_user_types=(CustomUser.UserType.ADMIN.name,)), name="dispatch")
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class UserList(ListView):
     template_name = "users_list.html"
     model = CustomUser

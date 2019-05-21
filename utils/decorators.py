@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Callable
+from typing import List
 from typing import Optional
-from typing import Tuple
 
 from django.contrib.auth.views import redirect_to_login
 from django.core.handlers.wsgi import WSGIRequest
@@ -10,7 +10,7 @@ from django.shortcuts import reverse
 from users.models import CustomUser
 
 
-def check_permissions(allowed_user_types: Tuple[str], redirect_path: Optional[str] = None) -> Callable:
+def check_permissions(allowed_user_types: List[str], redirect_path: Optional[str] = None) -> Callable:
     """
     Decorator that will validate if user have correct user type to get to resources.
 
