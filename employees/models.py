@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+from typing import Optional
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
@@ -42,10 +43,14 @@ class ReportQuerySet(models.QuerySet):
             .values_list("date_created", "created_count")
         )
 
-    def get_report_work_hours_sum_for_date(self, for_date: date) -> Decimal:
-        return self.filter(date=for_date).aggregate(work_hours_sum=Coalesce(models.Sum("work_hours"), 0))[
-            "work_hours_sum"
-        ]
+    def get_report_work_hours_sum_for_date(self, for_date: date, excluded_id: Optional[int] = None) -> Decimal:
+        queryset = self.filter(date=for_date)
+
+        # Don't add currently edited report work hours.
+        if excluded_id is not None:
+            queryset = queryset.exclude(pk=excluded_id)
+
+        return queryset.aggregate(work_hours_sum=Coalesce(models.Sum("work_hours"), 0))["work_hours_sum"]
 
 
 class Report(models.Model):
@@ -92,7 +97,7 @@ class Report(models.Model):
         if (
             hasattr(self, "author")
             and isinstance(self.work_hours, Decimal)
-            and self.author.report_set.get_report_work_hours_sum_for_date(self.date) + self.work_hours > 24
+            and self.author.report_set.get_report_work_hours_sum_for_date(self.date, self.pk) + self.work_hours > 24
         ):
             raise ValidationError(
                 message=ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value
