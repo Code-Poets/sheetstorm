@@ -28,11 +28,6 @@ from utils.decorators import check_permissions
 logger = logging.getLogger(__name__)
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all().order_by(Lower("name"))
-    serializer_class = ProjectSerializer
-
-
 @method_decorator(login_required, name="dispatch")
 @method_decorator(
     check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
@@ -91,7 +86,7 @@ class ProjectCreateView(CreateView):
     def get_success_url(self) -> str:  # pylint: disable=no-self-use
         return reverse("custom-projects-list")
 
-    def form_valid(self, form: ProjectForm) -> HttpRequest:
+    def form_valid(self, form: ProjectAdminForm) -> HttpRequest:
         project = form.save()
         logger.info(f"New project with id: {project.pk} has been created")
         return super(ModelFormMixin, self).form_valid(form)  # pylint: disable=bad-super-call
