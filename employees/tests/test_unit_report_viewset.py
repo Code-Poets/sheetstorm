@@ -327,6 +327,25 @@ class ReportCustomListTests(TestCase):
             serializer = view._create_serializer()
             self.assertEqual(serializer.fields["date"].initial, "2010-01-21")
 
+    def test_custom_report_list_create_serializer_method_should_return_serializer_filled_with_data_that_was_provided(
+        self
+    ):
+        request = APIRequestFactory().post(
+            path=self.url,
+            data={
+                "date": datetime.datetime.now().date(),
+                "description": "Some description",
+                "project": self.project,
+                "work_hours": Decimal("8.00"),
+                "task_activities": TaskActivityType.objects.get(name="Other"),
+            },
+        )
+        request.user = self.user
+        view = ReportList()
+        view.request = request
+        serializer = view._create_serializer(data=request.POST)
+        self.assertTrue(serializer.is_valid())
+
     def test_custom_report_list_view_should_add_user_to_project_selected_in_project_join_form_on_join(self):
         new_project = Project(name="New Project", start_date=datetime.datetime.now())
         new_project.full_clean()
@@ -363,6 +382,50 @@ class ReportCustomListTests(TestCase):
         response = ReportList.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(str(ReportListStrings.NO_PROJECTS_TO_JOIN.value) in str(response.render().content))
+
+    def test_serializer_project_field_queryset_should_contain_only_projects_user_is_assigned_to_after_failed_post(self):
+        new_project = Project(name="New Project", start_date=datetime.datetime.now())
+        new_project.full_clean()
+        new_project.save()
+        request = APIRequestFactory().post(
+            path=self.url,
+            data={"description": "Some description", "project": self.project, "work_hours": Decimal("8.00")},
+        )
+        request.user = self.user
+        response = ReportList.as_view()(request)
+        project_field_choices = response.data["serializer"].fields["project"].choices.values()
+        self.assertTrue(self.project.name in project_field_choices)
+        self.assertFalse(new_project.name in project_field_choices)
+
+    def test_serializer_project_field_queryset_should_contain_only_projects_user_is_assigned_to_after_project_join(
+        self
+    ):
+        new_project_1 = Project(name="New Project", start_date=datetime.datetime.now())
+        new_project_1.full_clean()
+        new_project_1.save()
+        new_project_2 = Project(name="New new Project", start_date=datetime.datetime.now())
+        new_project_2.full_clean()
+        new_project_2.save()
+        request = APIRequestFactory().post(path=self.url, data={"projects": new_project_1.id, "join": "join"})
+        request.user = self.user
+        response = ReportList.as_view()(request)
+        project_field_choices = response.data["serializer"].fields["project"].choices.values()
+        self.assertTrue(self.project.name in project_field_choices)
+        self.assertTrue(new_project_1.name in project_field_choices)
+        self.assertFalse(new_project_2.name in project_field_choices)
+
+    def test_serializer_project_field_queryset_should_contain_only_projects_user_is_assigned_to_after_failed_project_join(
+        self
+    ):
+        new_project = Project(name="New Project", start_date=datetime.datetime.now())
+        new_project.full_clean()
+        new_project.save()
+        request = APIRequestFactory().post(path=self.url, data={"join": "join"})
+        request.user = self.user
+        response = ReportList.as_view()(request)
+        project_field_choices = response.data["serializer"].fields["project"].choices.values()
+        self.assertTrue(self.project.name in project_field_choices)
+        self.assertFalse(new_project.name in project_field_choices)
 
 
 class ReportCustomDetailTests(TestCase):
