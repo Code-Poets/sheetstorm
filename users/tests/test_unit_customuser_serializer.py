@@ -9,16 +9,19 @@ from utils.base_tests import BaseSerializerTestCase
 
 class TestUserSerializerField(BaseSerializerTestCase):
     serializer_class = UserSerializer
-    required_input = {
-        "email": "example@codepoets.it",
-        "first_name": "Jan",
-        "last_name": "Kowalski",
-        "date_of_birth": datetime.datetime.now().date(),
-        "phone_number": "123456789",
-        "country": "PL",
-        "user_type": "EMPLOYEE",
-        "password": "passwduser",
-    }
+
+    def setUp(self):
+        super().setUp()
+        self.required_input = {
+            "email": "example@codepoets.it",
+            "first_name": "Jan",
+            "last_name": "Kowalski",
+            "date_of_birth": datetime.datetime.strptime("2001-04-19", "%Y-%m-%d").date(),
+            "phone_number": "123456789",
+            "country": "PL",
+            "user_type": "EMPLOYEE",
+            "password": "passwduser",
+        }
 
     def test_user_serializer_email_field_should_accept_correct_input(self):
         self.field_should_accept_input("email", "testuser@codepoets.it")
@@ -70,13 +73,16 @@ class TestUserSerializerField(BaseSerializerTestCase):
 
 class TestCustomRegisterSerializerField(BaseSerializerTestCase):
     serializer_class = CustomRegisterSerializer
-    required_input = {
-        "email": "example@codepoets.it",
-        "first_name": "Jan",
-        "last_name": "Kowalski",
-        "password": "passwduser",
-        "password_confirmation": "passwduser",
-    }
+
+    def setUp(self):
+        super().setUp()
+        self.required_input = {
+            "email": "example@codepoets.it",
+            "first_name": "Jan",
+            "last_name": "Kowalski",
+            "password": "passwduser",
+            "password_confirmation": "passwduser",
+        }
 
     def test_register_serializer_email_field_should_accept_correct_input(self):
         self.field_should_accept_input("email", "testuser@codepoets.it")
