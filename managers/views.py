@@ -8,7 +8,6 @@ from django.db.models import Count
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import HttpResponse
-from django.shortcuts import redirect
 from django.shortcuts import reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
@@ -24,6 +23,7 @@ from managers.forms import ProjectManagerForm
 from managers.models import Project
 from users.models import CustomUser
 from utils.decorators import check_permissions
+from utils.mixins import UserIsManagerOfCurrentProjectMixin
 
 logger = logging.getLogger(__name__)
 
@@ -65,12 +65,20 @@ class ProjectsListView(ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ProjectDetailView(DetailView):
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
+class ProjectDetailView(UserIsManagerOfCurrentProjectMixin, DetailView):
     template_name = "managers/project_detail.html"
     model = Project
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
 class ProjectCreateView(CreateView):
     extra_context = {"button_text": _("Create"), "title": _("Create new project")}
     form_class = ProjectAdminForm
@@ -93,7 +101,11 @@ class ProjectCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ProjectUpdateView(UpdateView):
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
+class ProjectUpdateView(UserIsManagerOfCurrentProjectMixin, UpdateView):
     extra_context = {"button_text": _("Update")}
     form_class = ProjectManagerForm
     model = Project
@@ -123,15 +135,9 @@ class ProjectUpdateView(UpdateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class ProjectDeleteView(DeleteView):
     model = Project
-
-    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if not request.user.is_admin:
-            logger.debug(f"User with id: {request.user.pk} want to delete project")
-            return redirect(reverse("home"))
-
-        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self) -> str:
         return reverse("custom-projects-list")

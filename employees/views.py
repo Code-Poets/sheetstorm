@@ -3,13 +3,11 @@ import logging
 from typing import Any
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import QueryDict
 from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirectBase
-from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import reverse
 from django.utils.decorators import method_decorator
@@ -38,6 +36,10 @@ from employees.models import TaskActivityType
 from employees.serializers import ReportSerializer
 from managers.models import Project
 from users.models import CustomUser
+from utils.decorators import check_permissions
+from utils.mixins import UserIsAuthorOfCurrentReportMixin
+from utils.mixins import UserIsManagerOfCurrentProjectMixin
+from utils.mixins import UserIsManagerOfCurrentReportProjectMixin
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +56,18 @@ class ReportViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class ReportList(APIView):
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.EMPLOYEE.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.ADMIN.name,
+        ]
+    ),
+    name="dispatch",
+)
+class ReportList(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrentReportMixin, APIView):
     serializer_class = ReportSerializer
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_list.html"
@@ -159,7 +172,17 @@ class ReportList(APIView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ReportDetailView(UpdateView):
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.EMPLOYEE.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.ADMIN.name,
+        ]
+    ),
+    name="dispatch",
+)
+class ReportDetailView(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrentReportMixin, UpdateView):
     template_name = "employees/report_detail.html"
     form_class = ReportForm
     model = Report
@@ -173,18 +196,24 @@ class ReportDetailView(UpdateView):
         return reverse("custom-report-list")
 
     def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
-        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
-        self.object.editable = True
-        self.object.save()
+        instance = form.save(commit=False)
+        instance.editable = True
+        instance.save()
         return super().form_valid(form)
 
 
-def delete_report(_request: HttpRequest, pk: int) -> HttpResponseRedirectBase:
-    report = get_object_or_404(Report, pk=pk)
-    report.delete()
-    logger.debug(f"Report with id: {pk} has been deleted")
-    return redirect("custom-report-list")
-class ReportDeleteView(DeleteView, UserIsAuthorOfCurrentReportMixin):
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.EMPLOYEE.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.ADMIN.name,
+        ]
+    ),
+    name="dispatch",
+)
+class ReportDeleteView(UserIsAuthorOfCurrentReportMixin, DeleteView):
     model = Report
 
     def get_success_url(self) -> str:
@@ -193,6 +222,7 @@ class ReportDeleteView(DeleteView, UserIsAuthorOfCurrentReportMixin):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class AuthorReportView(DetailView):
     template_name = "employees/author_report_list.html"
     model = CustomUser
@@ -207,6 +237,7 @@ class AuthorReportView(DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class AdminReportView(UpdateView):
     template_name = "employees/admin_report_detail.html"
     form_class = ReportForm
@@ -228,7 +259,11 @@ class AdminReportView(UpdateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ProjectReportList(DetailView):
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name]),
+    name="dispatch",
+)
+class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView):
     template_name = "employees/project_report_list.html"
     model = Project
     queryset = Project.objects.prefetch_related("report_set")
@@ -241,7 +276,11 @@ class ProjectReportList(DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ProjectReportDetail(UpdateView):
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name]),
+    name="dispatch",
+)
+class ProjectReportDetail(UserIsManagerOfCurrentReportProjectMixin, UpdateView):
     template_name = "employees/project_report_detail.html"
     form_class = ReportForm
     model = Report
@@ -262,7 +301,8 @@ class ProjectReportDetail(UpdateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ExportUserReportView(LoginRequiredMixin, DetailView):
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
+class ExportUserReportView(DetailView):
     model = CustomUser
 
     def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
@@ -277,7 +317,8 @@ class ExportUserReportView(LoginRequiredMixin, DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-class ExportReportsInProjectView(LoginRequiredMixin, DetailView):
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
+class ExportReportsInProjectView(DetailView):
     model = Project
 
     def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:

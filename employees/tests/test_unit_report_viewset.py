@@ -16,10 +16,9 @@ from employees.models import TaskActivityType
 from employees.views import ProjectReportList
 from employees.views import ReportList
 from employees.views import ReportViewSet
-from employees.views import delete_report
 from managers.factories import ProjectFactory
 from managers.models import Project
-from users.factories import UserFactory
+from users.factories import AdminUserFactory
 from users.models import CustomUser
 
 
@@ -192,7 +191,7 @@ class ReportCustomListTests(TestCase):
         request = APIRequestFactory().get(path=self.url)
         request.user = AnonymousUser()
         response = ReportList.as_view()(request)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
 
     def test_custom_list_view_should_not_display_other_users_reports(self):
         other_user = CustomUser(
@@ -437,40 +436,6 @@ class ReportCustomListTests(TestCase):
         self.assertFalse(new_project.name in project_field_choices)
 
 
-class DeleteReportTests(TestCase):
-    def setUp(self):
-        task_type = TaskActivityType(pk=1, name="Other")
-        task_type.full_clean()
-        task_type.save()
-        self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
-        )
-        self.user.full_clean()
-        self.user.save()
-
-        self.project = Project(name="Test Project", start_date=datetime.datetime.now())
-        self.project.full_clean()
-        self.project.save()
-
-        self.report = Report(
-            date=datetime.datetime.now().date(),
-            description="Some description",
-            author=self.user,
-            project=self.project,
-            work_hours=datetime.timedelta(hours=8),
-            task_activities=TaskActivityType.objects.get(name="Other"),
-        )
-        self.report.full_clean()
-        self.report.save()
-
-    def test_delete_report_view_should_delete_report_on_post(self):
-        request = APIRequestFactory().delete(path=reverse("custom-report-delete", args=(self.report.pk,)))
-        request.user = self.user
-        response = delete_report(request, pk=self.report.pk)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Report.objects.all().count(), 0)
-
-
 class ProjectReportListTests(TestCase):
     def _assert_response_contain_report(self, response, reports):
         for report in reports:
@@ -497,7 +462,7 @@ class ProjectReportListTests(TestCase):
         self.task_type = TaskActivityType(pk=1, name="Other")
         self.task_type.full_clean()
         self.task_type.save()
-        self.user = UserFactory()
+        self.user = AdminUserFactory()
         self.project = ProjectFactory()
         self.project.members.add(self.user)
         self.client.force_login(self.user)

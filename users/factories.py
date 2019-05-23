@@ -22,3 +22,8 @@ class UserFactory(factory.DjangoModelFactory):
         self.set_password("userpasswd")
         if create:
             self.save()
+
+
+class AdminUserFactory(UserFactory):
+
+    user_type = CustomUser.UserType.ADMIN.name

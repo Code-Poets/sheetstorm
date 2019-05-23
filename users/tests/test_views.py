@@ -4,6 +4,7 @@ from rest_framework.reverse import reverse
 from users.common import constants
 from users.common.strings import ValidationErrorText
 from users.common.utils import generate_random_phone_number
+from users.factories import AdminUserFactory
 from users.factories import UserFactory
 from users.models import CustomUser
 
@@ -88,11 +89,7 @@ class UserListTests(TestCase):
 
 class UserCreateTests(TestCase):
     def setUp(self):
-        self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
-        )
-        self.user.full_clean()
-        self.user.save()
+        self.user = AdminUserFactory()
         self.url = reverse("custom-user-create")
         self.client.force_login(self.user)
 
@@ -155,9 +152,7 @@ class UserUpdateTests(TestCase):
     def test_user_update_view_should_not_update_user_on_post_if_form_is_invalid(self):
         phone_number_before_request = self.user.phone_number
         new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH - 1)
-        response = self.client.post(
-            path=reverse("custom-user-update"), data={"phone_number": new_phone_number}
-        )
+        response = self.client.post(path=reverse("custom-user-update"), data={"phone_number": new_phone_number})
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(phone_number_before_request, self.user.phone_number)

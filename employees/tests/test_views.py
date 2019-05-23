@@ -6,12 +6,13 @@ from django.utils import timezone
 
 from employees.common.strings import AuthorReportListStrings
 from employees.factories import ReportFactory
-from employees.models import TaskActivityType
 from employees.models import Report
+from employees.models import TaskActivityType
 from employees.views import AdminReportView
 from employees.views import AuthorReportView
 from managers.factories import ProjectFactory
 from managers.models import Project
+from users.factories import AdminUserFactory
 from users.factories import UserFactory
 
 
@@ -25,7 +26,7 @@ class InitTaskTypeTestCase(TestCase):
 class AuthorReportViewTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
-        self.user = UserFactory()
+        self.user = AdminUserFactory()
         self.client.force_login(self.user)
         self.url = reverse("author-report-list", kwargs={"pk": self.user.pk})
 
@@ -53,7 +54,7 @@ class AuthorReportViewTests(InitTaskTypeTestCase):
 class AdminReportViewTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
-        self.user = UserFactory()
+        self.user = AdminUserFactory()
         self.project = ProjectFactory()
         self.project.members.add(self.user)
         self.client.force_login(self.user)
@@ -86,7 +87,7 @@ class AdminReportViewTests(InitTaskTypeTestCase):
 class ProjectReportDetailTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
-        self.user = UserFactory()
+        self.user = AdminUserFactory()
         self.project = ProjectFactory()
         self.project.members.add(self.user)
         self.client.force_login(self.user)
