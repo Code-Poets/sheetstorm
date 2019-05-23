@@ -58,6 +58,98 @@ class ReportSerializerTests(DataSetUpToTests):
     def test_report_serializer_work_hours_field_should_accept_correct_value(self):
         self.field_should_accept_input(field="work_hours", value=Decimal("8.00"))
 
+    def test_report_serializer_should_be_valid_total_sum_of_hours_from_single_day_for_single_author_is_24(self):
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("12.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("custom-report-list"))
+        data = self.required_input.copy()
+        data["work_hours"] = Decimal("12.00")
+        request.user = data["author"]
+        serializer = ReportSerializer(data=data, context={"request": request})
+        self.assertTrue(serializer.is_valid())
+
+    def test_report_serializer_should_raise_error_if_total_sum_of_hours_from_single_day_for_single_author_exceeds_24(
+        self
+    ):
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("12.00"),
+        )
+        report.full_clean()
+        report.save()
+        request = APIRequestFactory().get(path=reverse("custom-report-list"))
+        data = self.required_input.copy()
+        data["work_hours"] = Decimal("12.01")
+        request.user = data["author"]
+        serializer = ReportSerializer(data=data, context={"request": request})
+        self.assertFalse(serializer.is_valid())
+
+    def test_report_serializer_based_on_instance_should_be_valid_total_sum_of_hours_from_single_day_for_single_author_is_24(
+        self
+    ):
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("10.00"),
+        )
+        report.full_clean()
+        report.save()
+        other_report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("12.00"),
+        )
+        other_report.full_clean()
+        other_report.save()
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
+        data = self.required_input.copy()
+        data["work_hours"] = Decimal("12.00")
+        request.user = data["author"]
+        serializer = ReportSerializer(instance=report, data=data, context={"request": request})
+        self.assertTrue(serializer.is_valid())
+
+    def test_report_serializer_based_on_instance_should_raise_error_if_total_sum_of_hours_from_single_day_for_single_author_exceeds_24(
+        self
+    ):
+        report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("10.00"),
+        )
+        report.full_clean()
+        report.save()
+        other_report = Report(
+            date=datetime.datetime.now().date(),
+            description=self.required_input["description"],
+            author=self.required_input["author"],
+            project=self.required_input["project"],
+            work_hours=Decimal("12.00"),
+        )
+        other_report.full_clean()
+        other_report.save()
+        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
+        data = self.required_input.copy()
+        data["work_hours"] = Decimal("12.01")
+        request.user = data["author"]
+        serializer = ReportSerializer(instance=report, data=data, context={"request": request})
+        self.assertFalse(serializer.is_valid())
+
 
 class ReportSerializerDateFailTests(DataSetUpToTests):
     def test_report_serializer_date_field_should_not_be_empty(self):
