@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from decimal import Decimal
 from typing import Any
 
@@ -6,6 +7,7 @@ from rest_framework import serializers
 from employees.common.constants import ReportModelConstants
 from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
+from employees.common.strings import ReportValidationStrings
 from employees.common.validators import MaxDecimalValueValidator
 from employees.models import Report
 from employees.models import TaskActivityType
@@ -52,4 +54,24 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
         data = super().to_representation(instance)
         if isinstance(self.instance, Report):
             data["work_hours"] = self.instance.work_hours_str
+        return data
+
+    def validate(self, data: OrderedDict) -> OrderedDict:
+        data = super().validate(data)
+        author = None
+        pk = None
+        if self.instance is not None:
+            author = self.instance.author
+            pk = self.instance.pk
+        elif "request" in self.context:
+            author = self.context["request"].user
+        if (
+            author is not None
+            and author.report_set.get_report_work_hours_sum_for_date(for_date=data["date"], excluded_id=pk)
+            + data["work_hours"]
+            > 24
+        ):
+            raise serializers.ValidationError(
+                detail=ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value
+            )
         return data
