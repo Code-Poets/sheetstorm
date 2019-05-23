@@ -1,7 +1,9 @@
 from openpyxl import Workbook
 from openpyxl.cell import Cell
 from openpyxl.styles import Alignment
+from openpyxl.styles import Border
 from openpyxl.styles import Font
+from openpyxl.styles import Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
@@ -10,9 +12,14 @@ from managers.models import Project
 from users.models import CustomUser
 
 
-def set_format_styles_for_main_cells(cell: Cell):
+def set_format_styles_for_main_cells(cell: Cell, is_header: bool):
     cell.font = Font(name=ExcelGeneratorSettingsConstants.FONT.value, bold=True)
     cell.alignment = Alignment(horizontal=ExcelGeneratorSettingsConstants.CENTER_ALINGMENT.value)
+    cell.border = (
+        Border(bottom=Side(style=ExcelGeneratorSettingsConstants.BORDER.value))
+        if is_header
+        else Border(top=Side(style=ExcelGeneratorSettingsConstants.BORDER.value))
+    )
 
 
 def set_columns_width(worksheet: Worksheet, col_num: int, width_settings: list):
@@ -25,7 +32,7 @@ def fill_headers(worksheet: Worksheet, headers: list, width_settings: list):
     for col_num, column_title in enumerate(headers, 1):
         cell = worksheet.cell(row=ExcelGeneratorSettingsConstants.HEADERS_ROW.value, column=col_num)
         cell.value = column_title
-        set_format_styles_for_main_cells(cell)
+        set_format_styles_for_main_cells(cell, is_header=True)
         set_columns_width(worksheet, col_num, width_settings)
 
 
@@ -54,11 +61,11 @@ def fill_current_report_data(storage_data: dict):
 def summarizing_reports(worksheet: Worksheet, last_row: int, hours_column: int, formula: str):
     total_cell = worksheet.cell(row=last_row, column=ExcelGeneratorSettingsConstants.TOTAL_COLUMN.value)
     total_cell.value = ExcelGeneratorSettingsConstants.TOTAL.value
-    set_format_styles_for_main_cells(total_cell)
+    set_format_styles_for_main_cells(total_cell, is_header=False)
     total_hours_cell = worksheet.cell(row=last_row, column=hours_column)
     total_hours_cell.value = formula.format(last_row - 1)
     total_hours_cell.number_format = ExcelGeneratorSettingsConstants.TOTAL_HOURS_FORMAT.value
-    set_format_styles_for_main_cells(total_hours_cell)
+    set_format_styles_for_main_cells(total_hours_cell, is_header=False)
 
 
 def set_active_worksheet_name(workbook: Workbook, author: CustomUser) -> Worksheet:
