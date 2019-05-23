@@ -121,13 +121,16 @@ class UserUpdate(UpdateView):
     admins_form_class = AdminUserChangeForm
     model = CustomUser
 
+    def get_object(self, queryset=None):
+        return self.request.user
+
     def get_form_class(self) -> Type[ModelForm]:
         if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
             return self.admins_form_class
         return self.form_class
 
     def get_success_url(self) -> str:
-        return reverse("custom-user-update", kwargs={"pk": self.object.pk})
+        return reverse("custom-user-update")
 
     def form_valid(self, form: SimpleUserChangeForm) -> HttpResponse:
         super().form_valid(form)

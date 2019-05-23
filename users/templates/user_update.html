@@ -24,13 +24,13 @@
     <br>
 
   </div>
-  <form class="form-horizonal" action="{% url 'custom-user-update' pk=user.pk %}" method="POST">
+  <form class="form-horizonal" action="{% url 'custom-user-update' %}" method="POST">
     {% csrf_token %}
     {{ form|crispy }}
     <button type="submit" class="btn btn-success">
       <span class="glyphicon glyphicon-ok"></span> Update
     </button>
-    <a href="{% url 'custom-user-update' pk=user.pk %}" class="btn btn btn-default">
+    <a href="{% url 'custom-user-update' %}" class="btn btn btn-default">
       <span class="glyphicon glyphicon-repeat"></span> Discard
     </a>
   </form>

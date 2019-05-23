@@ -135,19 +135,14 @@ class UserUpdateTests(TestCase):
         self.client.force_login(self.user)
 
     def test_user_update_view_should_display_user_details_on_get(self):
-        response = self.client.get(path=reverse("custom-user-update", kwargs={"pk": self.user.pk}))
+        response = self.client.get(path=reverse("custom-user-update"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.user.last_name)
-
-    def test_user_update_view_should_not_render_non_existing_user(self):
-        not_existing_pk = 1000
-        response = self.client.get(path=reverse("custom-user-update", kwargs={"pk": not_existing_pk}))
-        self.assertEqual(response.status_code, 404)
 
     def test_user_update_view_should_update_user_on_post(self):
         old_phone_number = self.user.phone_number
         new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH)
-        response = self.client.get(path=reverse("custom-user-update", args=(self.user.pk,)))
+        response = self.client.get(path=reverse("custom-user-update"))
         self.assertContains(response, old_phone_number)
 
         response = self.client.post(
@@ -161,7 +156,7 @@ class UserUpdateTests(TestCase):
         phone_number_before_request = self.user.phone_number
         new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH - 1)
         response = self.client.post(
-            path=reverse("custom-user-update", args=(self.user.pk,)), data={"phone_number": new_phone_number}
+            path=reverse("custom-user-update"), data={"phone_number": new_phone_number}
         )
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
