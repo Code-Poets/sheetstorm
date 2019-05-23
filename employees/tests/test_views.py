@@ -7,6 +7,7 @@ from django.utils import timezone
 from employees.common.strings import AuthorReportListStrings
 from employees.factories import ReportFactory
 from employees.models import TaskActivityType
+from employees.models import Report
 from employees.views import AdminReportView
 from employees.views import AuthorReportView
 from managers.factories import ProjectFactory
@@ -128,7 +129,7 @@ class ProjectReportDetailTests(InitTaskTypeTestCase):
         self.assertTrue(self.report.editable)
 
 
-class ReportCustomDetailTests(TestCase):
+class ReportDetailViewTests(TestCase):
     def setUp(self):
         super().setUp()
         self.task_type = TaskActivityType(pk=1, name="Other")
@@ -202,3 +203,16 @@ class ReportCustomDetailTests(TestCase):
         response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(other_project not in response.context_data["form"].fields["project"].queryset)
+
+
+class ReportDeleteViewTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.client.force_login(self.user)
+        self.report = ReportFactory(author=self.user)
+        self.url = reverse("custom-report-delete", args=(self.report.pk,))
+
+    def test_delete_report_view_should_delete_report_on_post(self):
+        response = self.client.post(path=self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Report.objects.filter(pk=self.report.pk).exists())

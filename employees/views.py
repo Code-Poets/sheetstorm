@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import reverse
 from django.utils.decorators import method_decorator
+from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from rest_framework import permissions
@@ -183,6 +184,12 @@ def delete_report(_request: HttpRequest, pk: int) -> HttpResponseRedirectBase:
     report.delete()
     logger.debug(f"Report with id: {pk} has been deleted")
     return redirect("custom-report-list")
+class ReportDeleteView(DeleteView, UserIsAuthorOfCurrentReportMixin):
+    model = Report
+
+    def get_success_url(self) -> str:
+        logger.debug(f"Report with id: {self.kwargs['pk']} has been deleted")
+        return reverse("custom-report-list")
 
 
 @method_decorator(login_required, name="dispatch")
