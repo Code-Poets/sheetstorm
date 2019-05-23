@@ -13,6 +13,9 @@
 <h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
 </br>
 <div class="modal-dialog">
+    {% for error in errors.non_field_errors %}
+    <h4><font color="red">{{ error }}</font></h4>
+    {% endfor %}
     <form action="{% url 'custom-report-detail' pk=report.pk %}" method="POST">
         {% csrf_token %}
         {% render_form serializer template_pack='rest_framework/vertical' %}

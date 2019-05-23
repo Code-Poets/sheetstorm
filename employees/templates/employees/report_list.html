@@ -18,6 +18,9 @@
 <input class="hidden-print" type="button" id="opener" value="{{ UI_text.JOIN_PROJECT_BUTTON.value }}"/>
 
 <div class="modal-dialog hidden-print">
+    {% for error in errors.non_field_errors %}
+    <h4><font color="red">{{ error }}</font></h4>
+    {% endfor %}
     <form action="{% url 'custom-report-list' %}" method="POST">
         {% csrf_token %}
         {% render_form serializer template_pack='rest_framework/vertical' %}
