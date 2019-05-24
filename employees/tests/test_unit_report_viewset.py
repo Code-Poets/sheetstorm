@@ -222,7 +222,7 @@ class ReportCustomListTests(TestCase):
         )
         request.user = self.user
         response = ReportList.as_view()(request)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(Report.objects.all().count(), 2)
 
     def test_custom_report_list_view_should_not_add_new_report_on_post_if_form_is_invalid(self):

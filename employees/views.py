@@ -148,21 +148,9 @@ class ReportList(APIView):
                     "hide_join": self.hide_join,
                 }
             )
-        queryset = self.get_queryset()
         report = reports_serializer.save(author=self.request.user)
         logger.info(f"User with id: {self.request.user.pk} created new report with id: {report.pk}")
-        return Response(
-            {
-                "serializer": self._create_serializer(),
-                "object_list": queryset,
-                "daily_hours_sum": queryset.order_by().get_work_hours_sum_for_all_dates(),
-                "monthly_hours_sum": queryset.order_by().get_work_hours_sum_for_all_authors(),
-                "UI_text": ReportListStrings,
-                "project_form": self._create_project_join_form(),
-                "hide_join": self.hide_join,
-            },
-            status=201,
-        )
+        return redirect("custom-report-list")
 
 
 class ReportDetail(APIView):
