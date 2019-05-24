@@ -6,6 +6,7 @@ from typing import Union
 from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
+from django.http import QueryDict
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
@@ -67,14 +68,18 @@ class ReportList(APIView):
         project.full_clean()
         project.save()
 
-    def _create_serializer(self) -> ReportSerializer:
+    def _create_serializer(self, data: QueryDict = None) -> ReportSerializer:
         logger.info(f"Create serializer for user with id: {self.request.user.pk}")
-        reports_serializer = ReportSerializer(context={"request": self.request})
+        if data is not None:
+            reports_serializer = ReportSerializer(data=data, context={"request": self.request})
+            reports_serializer.is_valid()
+        else:
+            reports_serializer = ReportSerializer(context={"request": self.request})
+            reports_serializer.fields["date"].initial = str(datetime.datetime.now().date())
         reports_serializer.fields["project"].queryset = Project.objects.filter(
             members__id=self.request.user.id
         ).order_by("name")
         reports_serializer.fields["task_activities"].queryset = TaskActivityType.objects.order_by("name")
-        reports_serializer.fields["date"].initial = str(datetime.datetime.now().date())
         return reports_serializer
 
     def _create_project_join_form(self) -> ProjectJoinForm:
@@ -103,7 +108,7 @@ class ReportList(APIView):
 
     def post(self, request: HttpRequest) -> Response:
         logger.info(f"User with id: {request.user.pk} sent post to the ReportList view")
-        reports_serializer = ReportSerializer(data=request.data, context={"request": request})
+        reports_serializer = self._create_serializer(data=request.data)
         if "join" in request.POST:
             if "projects" in request.POST.keys():
                 project_id = request.POST["projects"]
@@ -112,8 +117,6 @@ class ReportList(APIView):
                 self._add_project(project=project)
                 reports_serializer = self._create_serializer()
                 reports_serializer.fields["project"].initial = project
-            else:
-                reports_serializer = self._create_serializer()
             return Response(
                 {
                     "serializer": reports_serializer,
