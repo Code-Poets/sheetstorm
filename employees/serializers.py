@@ -50,7 +50,7 @@ class ReportSerializer(serializers.HyperlinkedModelSerializer):
         model = Report
         fields = ("url", "date", "project", "author", "task_activities", "description", "work_hours")
 
-    def to_representation(self, instance: Report) -> Report:
+    def to_representation(self, instance: Report) -> OrderedDict:
         data = super().to_representation(instance)
         if isinstance(self.instance, Report):
             data["work_hours"] = self.instance.work_hours_str
