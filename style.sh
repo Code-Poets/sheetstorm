@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 printf "[ISORT: sheetstorm]\n"
-./find-files-to-refactor.sh | xargs isort -sl
+./find-files-to-refactor.sh | xargs isort -sl -l 120
 printf "\n"
 
 printf "[BLACK: sheetstorm]\n"
