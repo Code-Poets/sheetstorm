@@ -45,14 +45,14 @@ class ProjectsListView(ListView):
         "members_count",
         "-members_count",
     ]
-    queryset = Project.objects.all()
+    model = Project
 
     def get_queryset(self) -> QuerySet:
         logger.debug(f"Get project query set for user with id: {self.request.user.pk}")
         if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
-            projects_queryset = self.queryset
+            projects_queryset = super().get_queryset()
         elif self.request.user.user_type == CustomUser.UserType.MANAGER.name:
-            projects_queryset = self.queryset.filter(managers__id=self.request.user.pk)
+            projects_queryset = super().get_queryset().filter(managers__id=self.request.user.pk)
         else:
             assert False
 
