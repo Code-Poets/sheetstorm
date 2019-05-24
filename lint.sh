@@ -5,7 +5,7 @@ flake8                                                                          
     --exclude=sheetstorm/settings/,manage.py,employees/migrations,users/migrations,managers/migrations,     \
     --jobs=4                                                                                                \
     --max-line-length=120                                                                                   \
-    --ignore=E124,E126,E128,E131,E156,E201,E221,E222,E241,E265,E271,E272,E701,F405,E501                     \
+    --ignore=E124,E126,E128,E131,E156,E201,E221,E222,E241,E265,E271,E272,E701,F405,E501,W503                \
     --per-file-ignores=users/common/strings.py:E501
 printf "\n"
 
