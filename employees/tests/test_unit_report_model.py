@@ -203,6 +203,32 @@ class TestReportWorkHoursSumForGivenDayForSingleUser(TestCase):
             ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value,
         )
 
+    def test_that_editing_report_work_hours_sum_for_given_day_for_single_user_should_not_exceed_24(self):
+        user = UserFactory()
+        today = timezone.now().date()
+        ReportFactory(work_hours=23, date=today, author=user)
+        edited_report = ReportFactory(work_hours=1, date=today, author=user)
+
+        with self.assertRaises(ValidationError) as exception:
+            edited_report.work_hours = 2
+            edited_report.full_clean()
+
+        self.assertEqual(
+            exception.exception.messages[0],
+            ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value,
+        )
+
+    def test_that_edited_report_would_not_be_summed_twice_for_work_hours_sum(self):
+        user = UserFactory()
+        today = timezone.now().date()
+        ReportFactory(work_hours=20, date=today, author=user)
+        edited_report = ReportFactory(work_hours=3, date=today, author=user)
+        edited_report.work_hours = 4
+        edited_report.full_clean()
+        edited_report.save()
+
+        self.assertEqual(user.report_set.get_report_work_hours_sum_for_date(today), 24)
+
 
 class TestReportTaskActivitiesParameter(DataSetUpToTests):
     def test_report_model_should_accept_correct_input(self):
