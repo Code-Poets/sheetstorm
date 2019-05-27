@@ -6,6 +6,7 @@ from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_countries.fields import CountryField
@@ -135,7 +136,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def is_admin(self) -> bool:
         return self.user_type == CustomUser.UserType.ADMIN.name
 
-    def get_reports_created(self) -> bool:
+    def get_reports_created(self) -> QuerySet:
         return self.report_set.select_related("task_activities").order_by("-date", "project__name")
 
 
