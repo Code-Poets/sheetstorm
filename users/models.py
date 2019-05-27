@@ -20,6 +20,7 @@ from users.common.strings import CustomUserUserTypeText
 from users.common.strings import ValidationErrorText
 from users.common.utils import custom_validate_email_function
 from users.common.validators import PhoneRegexValidator
+from users.validators import UserAgeValidator
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         CustomUserModelText.IS_ACTIVE, default=True, help_text=CustomUserModelText.ACTIVE_HELP_TEXT
     )
     date_joined = models.DateTimeField(CustomUserModelText.DATE_JOINED, auto_now_add=True)
-    date_of_birth = models.DateField(CustomUserModelText.DATE_OF_BIRTH, blank=True, null=True)
+    date_of_birth = models.DateField(
+        CustomUserModelText.DATE_OF_BIRTH,
+        blank=True,
+        null=True,
+        validators=[UserAgeValidator(UserAgeValidator.MINIMAL_ACCETABLE_AGLE, UserAgeValidator.MAXIMAL_ACCEPTABLE_AGE)],
+    )
     updated_at = models.DateTimeField(CustomUserModelText.UPDATED_AT, auto_now=True)
     phone_number = models.CharField(
         validators=[PhoneRegexValidator], max_length=constants.PHONE_NUMBER_MAX_LENGTH, blank=True, null=True

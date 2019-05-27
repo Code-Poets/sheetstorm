@@ -1,9 +1,9 @@
 import datetime
-from django.utils.deconstruct import deconstructible
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
+from django.utils.deconstruct import deconstructible
 
 from users.common.strings import ValidationErrorText
 

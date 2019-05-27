@@ -1,4 +1,5 @@
 import datetime
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from freezegun import freeze_time
@@ -10,8 +11,7 @@ from users.validators import UserAgeValidator
 class TestUserAgeValidator(TestCase):
     def setUp(self):
         self.user_age_validator = UserAgeValidator(
-            UserAgeValidator.MINIMAL_ACCETABLE_AGLE,
-            UserAgeValidator.MAXIMAL_ACCEPTABLE_AGE,
+            UserAgeValidator.MINIMAL_ACCETABLE_AGLE, UserAgeValidator.MAXIMAL_ACCEPTABLE_AGE
         )
 
     def test_that_users_age_can_be_none(self):
@@ -42,5 +42,5 @@ class TestUserAgeValidator(TestCase):
     def _assert_date_of_birth_is_valid(self, date_of_birth):
         try:
             self.user_age_validator(date_of_birth)
-        except Exception as e:
+        except Exception as e:  # pylint:disable=broad-except
             self.fail(f"Unexpected exception {str(e)} has occurred!")

@@ -74,14 +74,6 @@ class TestUserSerializerField(BaseSerializerTestCase):
     def test_user_serializer_password_field_should_accept_correct_input(self):
         self.field_should_accept_input("password", "password")
 
-    def test_user_serializer_users_age_cannot_be_below_18(self):
-        date_of_birth = datetime.datetime.strptime("2011-04-19", "%Y-%m-%d").date()
-        self.field_should_not_accept_input("date_of_birth", date_of_birth)
-
-    def test_user_serializer_users_age_cannot_be_above_100(self):
-        date_of_birth = datetime.datetime.strptime("1919-04-19", "%Y-%m-%d").date()
-        self.field_should_not_accept_input("date_of_birth", date_of_birth)
-
 
 class TestCustomRegisterSerializerField(BaseSerializerTestCase):
     serializer_class = CustomRegisterSerializer
