@@ -6,10 +6,9 @@ from django.core.validators import MaxLengthValidator
 from django.test import TestCase
 
 from users.common import constants
-from users.common.exceptions import CustomValidationError
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.strings import CustomUserModelText
-from users.common.strings import CustomValidationErrorText
+from users.common.strings import ValidationErrorText
 from users.common.utils import generate_random_string_from_letters_and_digits
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase
@@ -17,16 +16,16 @@ from utils.base_tests import BaseModelTestCase
 
 class TestCustomUserModel(TestCase):
     def test_that_create_user_method_should_raise_custom_validation_error_when_email_is_none(self):
-        with self.assertRaises(CustomValidationError) as custom_exception:
+        with self.assertRaises(ValidationError) as custom_exception:
             CustomUser.objects._create_user(None, "testuserpasswd", False, False, CustomUser.UserType.EMPLOYEE.name)
-        self.assertEqual(CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, str(custom_exception.exception))
+        self.assertEqual(ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, custom_exception.exception.message)
 
     def test_that_create_user_method_should_raise_custom_validation_error_when_password_is_none(self):
-        with self.assertRaises(CustomValidationError) as custom_exception:
+        with self.assertRaises(ValidationError) as custom_exception:
             CustomUser.objects._create_user(
                 "testuser@codepoets.it", None, False, False, CustomUser.UserType.EMPLOYEE.name
             )
-        self.assertEqual(CustomValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, str(custom_exception.exception))
+        self.assertEqual(ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, custom_exception.exception.message)
 
     def test_user_create_superuser_method_should_create_user_with_admin_attributes(self):
         user = CustomUser.objects.create_superuser("testadminuser@codepoets.it", "testadminuserpasswd")
@@ -38,14 +37,12 @@ class TestCustomUserModel(TestCase):
         create_user_using_full_clean_and_save("testuser@codepoets.it", "", "", "", "newuserpasswd")
         with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save("testuser@codepoets.it", "", "", "", "newuserpasswd")
-        self.assertTrue(CustomValidationErrorText.VALIDATION_ERROR_EMAIL_EXISTING_MESSAGE in str(exception.exception))
+        self.assertTrue(ValidationErrorText.VALIDATION_ERROR_EMAIL_EXISTING_MESSAGE in str(exception.exception))
 
-    def test_user_with_email_without_at_least_one_at_sign_full_clean_should_raise_custom_validation_error(self):
-        with self.assertRaises(CustomValidationError) as custom_exception:
+    def test_user_with_email_without_at_least_one_at_sign_full_clean_should_raise_validation_error(self):
+        with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save("wrongtestusercodepoets.it", "", "", "", "newuserpasswd")
-        self.assertEqual(
-            CustomValidationErrorText.VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE, str(custom_exception.exception)
-        )
+        self.assertTrue(ValidationErrorText.VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE in exception.exception.messages)
 
     def test_user_with_first_name_longer_than_FIRST_NAME_MAX_LENGTH_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:

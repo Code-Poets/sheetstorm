@@ -1,7 +1,7 @@
 from django.test import TestCase
 from rest_framework.reverse import reverse
 
-from users.common.strings import CustomValidationErrorText
+from users.common.strings import ValidationErrorText
 from users.factories import UserFactory
 from users.models import CustomUser
 
@@ -40,7 +40,7 @@ class ChangePasswordTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
-            CustomValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE
+            ValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE
             in response.context["form"].errors.get("new_password2")
         )
         self.assertFalse(self.user.check_password(data["new_password1"]))

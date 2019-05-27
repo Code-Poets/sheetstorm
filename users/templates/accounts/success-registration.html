@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{% static 'users/scripts/redirect_to_home_page.js' %}"></script>
+</head>
+<h1>{{ MESSAGES.CONGRATULATIONS.value }}</h1>
+<p>{{ MESSAGES.ACCOUNT_CREATED.value }}</p>
+<p>{{ MESSAGES.REDIRECTION_INFO.value }}</p>
+<a href="{% url 'home' %}" class="btn btn-default">{{ MESSAGES.OKAY_BUTTON.value }}</a>
+{% endblock %}

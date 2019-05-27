@@ -4,6 +4,7 @@ from typing import Any
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import QuerySet
@@ -13,11 +14,10 @@ from django_countries.fields import CountryField
 
 from users.common import constants
 from users.common.constants import ErrorCode
-from users.common.exceptions import CustomValidationError
 from users.common.fields import ChoiceEnum
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomUserUserTypeText
-from users.common.strings import CustomValidationErrorText
+from users.common.strings import ValidationErrorText
 from users.common.utils import custom_validate_email_function
 from users.common.validators import PhoneRegexValidator
 
@@ -36,15 +36,15 @@ class CustomUserManager(BaseUserManager):
         """
 
         if email is None:
-            raise CustomValidationError(
-                CustomValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, ErrorCode.CREATE_USER_EMAIL_MISSING
+            raise ValidationError(
+                ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, ErrorCode.CREATE_USER_EMAIL_MISSING
             )
         else:
-            custom_validate_email_function(self, email)
+            custom_validate_email_function(email)
 
         if not password:
-            raise CustomValidationError(
-                CustomValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, ErrorCode.CREATE_USER_PASSWORD_MISSING
+            raise ValidationError(
+                ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, ErrorCode.CREATE_USER_PASSWORD_MISSING
             )
         email = self.normalize_email(email)
         user = self.model(
@@ -105,7 +105,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ordering = ("id",)
 
     def clean(self) -> None:
-        custom_validate_email_function(self, self.email)
+        custom_validate_email_function(self.email)
 
     def get_absolute_url(self) -> str:
         """

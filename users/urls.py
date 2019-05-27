@@ -37,5 +37,6 @@ urlpatterns = format_suffix_patterns(
         url(r"^user/create/$", views.UserCreate.as_view(), name="custom-user-create"),
         url(r"^users/$", views.UserList.as_view(), name="custom-users-list"),
         url(r"^users/(?P<pk>[0-9]+)/$", views.UserUpdateByAdmin.as_view(), name="custom-user-update-by-admin"),
+        url(r"^accounts/success/$", views.UserSignUpSuccess.as_view(), name="success-signup"),
     ]
 )
