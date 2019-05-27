@@ -1,5 +1,7 @@
 import datetime
 
+from freezegun import freeze_time
+
 from users.common import constants
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.serializers import CustomRegisterSerializer
@@ -7,6 +9,7 @@ from users.serializers import UserSerializer
 from utils.base_tests import BaseSerializerTestCase
 
 
+@freeze_time("2019-05-23 11:00")
 class TestUserSerializerField(BaseSerializerTestCase):
     serializer_class = UserSerializer
 
@@ -44,7 +47,8 @@ class TestUserSerializerField(BaseSerializerTestCase):
         self.field_should_not_accept_input("last_name", "a" * (constants.LAST_NAME_MAX_LENGTH + 1))
 
     def test_user_serializer_date_of_birth_field_should_accept_correct_input(self):
-        self.field_should_accept_input("date_of_birth", datetime.datetime.now().date())
+        date_of_birth = datetime.datetime.strptime("2001-04-19", "%Y-%m-%d").date()
+        self.field_should_accept_input("date_of_birth", date_of_birth)
 
     def test_user_serializer_date_of_birth_field_may_be_empty(self):
         self.field_should_accept_null("date_of_birth")
@@ -69,6 +73,14 @@ class TestUserSerializerField(BaseSerializerTestCase):
 
     def test_user_serializer_password_field_should_accept_correct_input(self):
         self.field_should_accept_input("password", "password")
+
+    def test_user_serializer_users_age_cannot_be_below_18(self):
+        date_of_birth = datetime.datetime.strptime("2011-04-19", "%Y-%m-%d").date()
+        self.field_should_not_accept_input("date_of_birth", date_of_birth)
+
+    def test_user_serializer_users_age_cannot_be_above_100(self):
+        date_of_birth = datetime.datetime.strptime("1919-04-19", "%Y-%m-%d").date()
+        self.field_should_not_accept_input("date_of_birth", date_of_birth)
 
 
 class TestCustomRegisterSerializerField(BaseSerializerTestCase):

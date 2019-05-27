@@ -42,7 +42,7 @@ class DataSetUpToTests(BaseSerializerTestCase):
             "author": author,
             "project": project,
             "work_hours": Decimal("8.00"),
-            "task_activities": TaskActivityType.objects.get(name="Other")
+            "task_activities": TaskActivityType.objects.get(name="Other"),
         }
 
 

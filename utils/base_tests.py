@@ -3,7 +3,6 @@ from django.db.models.base import Model
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
-from rest_framework.serializers import BaseSerializer
 
 
 class BaseModelTestCase(TestCase):
@@ -141,7 +140,7 @@ class BaseSerializerTestCase(TestCase):
         self.assertEqual(
             is_valid,
             should_be_valid,
-            msg=f"Serializer is {is_valid}, but should be {should_be_valid} for {field} = {value}"
+            msg=f"Serializer is {is_valid}, but should be {should_be_valid} for {field} = {value}",
         )
         if error_message is not None:
             self.assertEqual(str(serializer.errors[field][0]), error_message)

@@ -1,3 +1,4 @@
+import datetime
 import logging
 from typing import Any
 from typing import Dict
@@ -7,6 +8,7 @@ from allauth.account import app_settings as allauth_settings
 from allauth.account.adapter import get_adapter as allauth_get_adapter
 from allauth.account.utils import setup_user_email
 from allauth.utils import email_address_exists
+from dateutil.relativedelta import relativedelta
 from django.http import HttpRequest
 from django_countries.serializers import CountryFieldMixin
 from rest_framework import serializers
@@ -42,6 +44,13 @@ class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
                     return email
                 raise serializers.ValidationError(ValidationErrorText.VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE)
         return email
+
+    def validate_date_of_birth(self, date_of_birth: datetime.date) -> datetime.date:  # pylint: disable=no-self-use
+        if date_of_birth is not None:
+            age = relativedelta(datetime.datetime.now(), date_of_birth).years
+            if not 18 <= age <= 99:
+                raise serializers.ValidationError(CustomValidationErrorText.VALIDATION_ERROR_AGE_NOT_ACCEPTED)
+        return date_of_birth
 
 
 class UserListSerializer(UserSerializer):
