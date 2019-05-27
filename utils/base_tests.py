@@ -3,7 +3,6 @@ from django.db.models.base import Model
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
-from rest_framework.serializers import BaseSerializer
 
 
 class BaseModelTestCase(TestCase):
@@ -119,39 +118,40 @@ class BaseModelTestCase(TestCase):
 
 
 class BaseSerializerTestCase(TestCase):
-
     serializer_class = None
-    required_input = {}  # dict containing fields and values for successful validation
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        assert issubclass(self.serializer_class, BaseSerializer)
-        assert isinstance(self.required_input, dict)
+    def setUp(self):
+        super().setUp()
+        self.required_input = {}
 
     def initiate_serializer(self, field, value):
         # Create serializer with one field altered from required_input
-        values = self.required_input.copy()
-        values[field] = value
-        return self.serializer_class(data=values)  # pylint: disable=not-callable
+        self.required_input[field] = value
+        return self.serializer_class(data=self.required_input)  # pylint: disable=not-callable
 
     def default_serializer(self):
         # Create serializer from required_input
         return self.serializer_class(data=self.required_input)  # pylint: disable=not-callable
 
-    def _field_input_acceptance_test(self, field, value, is_valid, error_message=None):
+    def _field_input_acceptance_test(self, field, value, should_be_valid, error_message=None):
         # Private method containing base code for running serializer validation tests
         serializer = self.initiate_serializer(field, value)
-        self.assertEqual(serializer.is_valid(), is_valid)
+        is_valid = serializer.is_valid()
+        self.assertEqual(
+            is_valid,
+            should_be_valid,
+            msg=f"Serializer is {is_valid}, but should be {should_be_valid} for {field} = {value}",
+        )
         if error_message is not None:
             self.assertEqual(str(serializer.errors[field][0]), error_message)
 
     def field_should_accept_input(self, field, value):
         # Test that putting specified value in specified field should result in successful serializer validation
-        self._field_input_acceptance_test(field=field, value=value, is_valid=True)
+        self._field_input_acceptance_test(field=field, value=value, should_be_valid=True)
 
     def field_should_not_accept_input(self, field, value, error_message=None):
         # Test that putting value in specified field should not result in successful serializer validation
-        self._field_input_acceptance_test(field=field, value=value, is_valid=False, error_message=error_message)
+        self._field_input_acceptance_test(field=field, value=value, should_be_valid=False, error_message=error_message)
 
     def field_should_accept_null(self, field):
         # Test that leaving specified field empty should result in successful serializer validation

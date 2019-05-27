@@ -23,6 +23,7 @@
 - Bugfix disable possibility to change report's author by Admin user ([#201](https://github.com/Code-Poets/sheetstorm/pull/201))
 - Bugfix for access to editing managers list and update tests ([#197](https://github.com/Code-Poets/sheetstorm/pull/197))
 - Bugfix show all project list ([#237](https://github.com/Code-Poets/sheetstorm/pull/237))
+- Bugfix user birth day has no limit ([#231](https://github.com/Code-Poets/sheetstorm/pull/231))
 - Bugfix wrong projects displayed after report creation fail ([#228](https://github.com/Code-Poets/sheetstorm/pull/228))
 
 

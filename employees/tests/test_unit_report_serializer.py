@@ -22,16 +22,9 @@ from utils.sample_data_generators import generate_decimal_with_digits
 
 class DataSetUpToTests(BaseSerializerTestCase):
     serializer_class = ReportSerializer
-    required_input = {
-        "date": datetime.datetime.now().date(),
-        "description": "Some description",
-        "author": None,
-        "project": None,
-        "work_hours": Decimal("8.00"),
-    }
 
     def setUp(self):
-
+        super().setUp()
         self.sample_string_for_type_validation_tests = "This is a string"
         author = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
@@ -43,9 +36,14 @@ class DataSetUpToTests(BaseSerializerTestCase):
         project.full_clean()
         project.save()
 
-        self.required_input["author"] = author
-        self.required_input["project"] = project
-        self.required_input["task_activities"] = TaskActivityType.objects.get(name="Other")
+        self.required_input = {
+            "date": datetime.datetime.now().date(),
+            "description": "Some description",
+            "author": author,
+            "project": project,
+            "work_hours": Decimal("8.00"),
+            "task_activities": TaskActivityType.objects.get(name="Other"),
+        }
 
 
 class ReportSerializerTests(DataSetUpToTests):

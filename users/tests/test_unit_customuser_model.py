@@ -4,6 +4,7 @@ import mock
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator
 from django.test import TestCase
+from freezegun import freeze_time
 
 from users.common import constants
 from users.common.model_helpers import create_user_using_full_clean_and_save
@@ -117,18 +118,22 @@ class TestCustomUserModelMethods(TestCase):
         self.assertEqual(mocked_method(), "Email has been sent successfully")
 
 
+@freeze_time("2019-05-27")
 class TestCustomUserModelField(BaseModelTestCase):
     model_class = CustomUser
-    required_input = {
-        "email": "example@codepoets.it",
-        "first_name": "Jan",
-        "last_name": "Kowalski",
-        "date_of_birth": datetime.datetime.now().date(),
-        "phone_number": "123456789",
-        "country": "PL",
-        "user_type": "EMPLOYEE",
-        "password": "passwduser",
-    }
+
+    def setUp(self):
+        super().setUp()
+        self.required_input = {
+            "email": "example@codepoets.it",
+            "first_name": "Jan",
+            "last_name": "Kowalski",
+            "date_of_birth": datetime.datetime.strptime("2000-05-13", "%Y-%m-%d").date(),
+            "phone_number": "123456789",
+            "country": "PL",
+            "user_type": "EMPLOYEE",
+            "password": "passwduser",
+        }
 
     def test_customuser_model_email_field_should_accept_correct_input(self):
         self.field_should_accept_input("email", "user@codepoets.it")
@@ -166,7 +171,8 @@ class TestCustomUserModelField(BaseModelTestCase):
         self.field_should_have_non_null_default("date_joined")
 
     def test_customuser_model_date_of_birth_field_should_accept_correct_input(self):
-        self.field_should_accept_input("date_of_birth", datetime.datetime.now().date())
+        date_of_birth = datetime.datetime.strptime("2001-05-26", "%Y-%m-%d").date()
+        self.field_should_accept_input("date_of_birth", date_of_birth)
 
     def test_customuser_model_date_of_birth_field_may_be_empty(self):
         self.field_should_accept_null("date_of_birth")
