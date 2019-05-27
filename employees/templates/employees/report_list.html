@@ -83,6 +83,10 @@
                     <td class="edit-button-column Invisible hidden-print"></td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <td colspan="3"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+                    <td class="work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:user.pk|decimal_to_hours }}</strong></td>
+                </tr>
             </tbody>
         </table>
     </div>

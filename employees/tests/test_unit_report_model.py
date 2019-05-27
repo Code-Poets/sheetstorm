@@ -162,7 +162,7 @@ class TestReportWorkHoursParameterFails(DataSetUpToTests):
         self.assertEqual(report.work_hours_str, "8:00")
 
 
-class TestReportQuerySet(TestCase):
+class TestReportQuerySetWorkHoursSumForAllDates(TestCase):
     def setUp(self):
         super().setUp()
         self.date_1 = datetime.datetime.now().date()
@@ -228,6 +228,21 @@ class TestReportWorkHoursSumForGivenDayForSingleUser(TestCase):
         edited_report.save()
 
         self.assertEqual(user.report_set.get_report_work_hours_sum_for_date(today), 24)
+
+
+class TestReportQuerySetWorkHoursSumForAllAuthors(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.author_1 = UserFactory()
+        self.author_2 = UserFactory()
+        ReportFactory(work_hours=Decimal("6.00"), author=self.author_1)
+        ReportFactory(work_hours=Decimal("7.00"), author=self.author_2)
+        ReportFactory(work_hours=Decimal("5.00"), author=self.author_2)
+
+    def test_monthly_hours_sum_should_return_dict_with_sum_total_of_all_work_hours_for_each_author(self):
+        result = Report.objects.get_work_hours_sum_for_all_authors()
+        self.assertEqual(result[self.author_1.pk], Decimal("6.00"))
+        self.assertEqual(result[self.author_2.pk], Decimal("12.00"))
 
 
 class TestReportTaskActivitiesParameter(DataSetUpToTests):
