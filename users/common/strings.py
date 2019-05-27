@@ -1,49 +1,47 @@
 # pylint: disable=line-too-long
 from enum import Enum
 
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import ugettext_lazy as _
 
 from users.common import constants
 from utils.mixins import NotCallableMixin
 
 
 class ConfirmationMessages:
-    SUCCESSFUL_UPDATE_USER_MESSAGE = ugettext_lazy("Account has been successfully updated!")
-    SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy("Your password has been successfully updated!")
-    FAILED_USER_PASSWORD_CHANGE_MESSAGE = ugettext_lazy("Please correct the error below.")
+    SUCCESSFUL_UPDATE_USER_MESSAGE = _("Account has been successfully updated!")
+    SUCCESSFUL_USER_PASSWORD_CHANGE_MESSAGE = _("Your password has been successfully updated!")
+    FAILED_USER_PASSWORD_CHANGE_MESSAGE = _("Please correct the error below.")
 
 
 class PermissionsMessage:
-    NONE_ADMIN_USER = ugettext_lazy("You are not allowed to enter - for administration only.")
-    NONE_ADMIN_OR_OWNER_USER = ugettext_lazy("It's none of your business.")
+    NONE_ADMIN_USER = _("You are not allowed to enter - for administration only.")
+    NONE_ADMIN_OR_OWNER_USER = _("It's none of your business.")
 
 
 class CustomUserAdminText:
-    PERSONAL_INFO = ugettext_lazy("Personal info")
-    STATUS = ugettext_lazy("Status")
-    PERMISSIONS = ugettext_lazy("Permissions")
-    IMPORTANT_DATES = ugettext_lazy("Important dates")
+    PERSONAL_INFO = _("Personal info")
+    STATUS = _("Status")
+    PERMISSIONS = _("Permissions")
+    IMPORTANT_DATES = _("Important dates")
 
 
 class CustomUserModelText:
-    VERBOSE_NAME_USER = ugettext_lazy("user")
-    VERBOSE_NAME_PLURAL_USERS = ugettext_lazy("users")
+    VERBOSE_NAME_USER = _("user")
+    VERBOSE_NAME_PLURAL_USERS = _("users")
 
-    EMAIL_ADDRESS = ugettext_lazy("email address")
-    FIRST_NAME = ugettext_lazy("first name")
-    LAST_NAME = ugettext_lazy("last name")
-    IS_STAFF = ugettext_lazy("staff status")
-    STAFF_HELP_TEXT = ugettext_lazy("Designates whether the user can log into this admin site.")
-    IS_ACTIVE = ugettext_lazy("active")
-    ACTIVE_HELP_TEXT = ugettext_lazy(
+    EMAIL_ADDRESS = _("email address")
+    FIRST_NAME = _("first name")
+    LAST_NAME = _("last name")
+    IS_STAFF = _("staff status")
+    STAFF_HELP_TEXT = _("Designates whether the user can log into this admin site.")
+    IS_ACTIVE = _("active")
+    ACTIVE_HELP_TEXT = _(
         "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
     )
-    DATE_JOINED = ugettext_lazy("date joined")
-    DATE_OF_BIRTH = ugettext_lazy("date of birth")
-    UPDATED_AT = ugettext_lazy("updated at")
-    PHONE_REGEX_MESSAGE = ugettext_lazy(
-        "Phone number must be entered in the format: '999999999'. Up to 15 digits allowed."
-    )
+    DATE_JOINED = _("date joined")
+    DATE_OF_BIRTH = _("date of birth")
+    UPDATED_AT = _("updated at")
+    PHONE_REGEX_MESSAGE = _("Phone number must be entered in the format: '999999999'. Up to 15 digits allowed.")
 
 
 class ValidationErrorText:
@@ -56,28 +54,27 @@ class ValidationErrorText:
         "Please enter an e-mail address with a valid domain (" + ", ".join(constants.VALID_EMAIL_DOMAIN_LIST) + ")"
     )
     VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN_SHORT = "Please enter an e-mail address with a valid domain"
-    VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = ugettext_lazy("A user is already registered with this e-mail address.")
-    VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE = ugettext_lazy("The two password fields didn't match.")
+    VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = _("A user is already registered with this e-mail address.")
+    VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE = _("The two password fields didn't match.")
+    VALIDATION_ERROR_AGE_NOT_ACCEPTED = _("User can't be below 18 or above 99 years old.")
 
 
 class CustomUserCountryText:
-    POLAND = ugettext_lazy("Poland")
-    UNITED_STATES = ugettext_lazy("United States")
-    UNITED_KINGDOM = ugettext_lazy("United Kingdom")
-    GERMANY = ugettext_lazy("Germany")
-    FRANCE = ugettext_lazy("France")
+    POLAND = _("Poland")
+    UNITED_STATES = _("United States")
+    UNITED_KINGDOM = _("United Kingdom")
+    GERMANY = _("Germany")
+    FRANCE = _("France")
 
 
 class CustomUserUserTypeText:
-    EMPLOYEE = ugettext_lazy("Employee")
-    MANAGER = ugettext_lazy("Manager")
-    ADMIN = ugettext_lazy("Admin")
+    EMPLOYEE = _("Employee")
+    MANAGER = _("Manager")
+    ADMIN = _("Admin")
 
 
 class SuccessInfoAfterRegistrationText(NotCallableMixin, Enum):
-    CONGRATULATIONS = ugettext_lazy("Congratulations!")
-    ACCOUNT_CREATED = ugettext_lazy("Your account has been successfully created! Now you can sign in!")
-    REDIRECTION_INFO = ugettext_lazy(
-        "You will be redirected in few seconds to the login site or press a button to make it faster."
-    )
-    OKAY_BUTTON = ugettext_lazy("Okay!")
+    CONGRATULATIONS = _("Congratulations!")
+    ACCOUNT_CREATED = _("Your account has been successfully created! Now you can sign in!")
+    REDIRECTION_INFO = _("You will be redirected in few seconds to the login site or press a button to make it faster.")
+    OKAY_BUTTON = _("Okay!")
