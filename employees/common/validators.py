@@ -1,14 +1,11 @@
 from django.core.validators import BaseValidator
 
-from employees.common.strings import MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE
-
 
 class MaxDecimalValueValidator(BaseValidator):
-    message = MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE
-    code = "max_decimal_value"
-
-    def compare(self, a, b):  # pylint: disable=no-self-use
-        return a > b
-
-    def clean(self, x):  # pylint: disable=no-self-use
-        return x % 1
+    # class which need to stay because of dependency
+    # with 0001_initial.py migration from employees model
+    def compare(self, a, b):  # type: ignore
+        # this method need to stay overwritten
+        # because of check work_hours field during data migrations
+        # from DecimalField into DurationField
+        pass
