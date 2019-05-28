@@ -122,7 +122,12 @@ class UserCreateTests(TestCase):
 
     def test_user_create_view_should_add_new_user_on_post(self):
         request = APIRequestFactory().post(
-            path=reverse("custom-user-create"), data={"email": "anothertestuser@codepoets.it"}
+            path=reverse("custom-user-create"),
+            data={
+                "email": "anothertestuser@codepoets.it",
+                "password1": "this_is_a_pass",
+                "password2": "this_is_a_pass",
+            },
         )
         request.user = self.user
         response = views.UserCreate.as_view()(request)
