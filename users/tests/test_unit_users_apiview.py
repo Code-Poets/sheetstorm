@@ -55,56 +55,6 @@ class UserUpdateByAdminTests(TestCase):
         self.assertEqual(phone_number_before_request, self.user.phone_number)
 
 
-class UserUpdateTests(TestCase):
-    def setUp(self):
-        self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
-        )
-        self.user.full_clean()
-        self.user.save()
-
-    def test_user_update_view_should_display_user_details_on_get(self):
-        request = APIRequestFactory().get(path=reverse("custom-user-update", args=(self.user.pk,)))
-        request.user = self.user
-        response = views.UserUpdate.as_view()(request, pk=self.user.pk)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.user.last_name)
-        self.assertEqual(response.data["serializer"].instance, self.user)
-
-    def test_user_update_view_should_not_render_non_existing_user(self):
-        not_existing_pk = 1000
-        request = APIRequestFactory().get(path=reverse("custom-user-update", args=(not_existing_pk,)))
-        request.user = self.user
-        response = views.UserUpdate.as_view()(request, pk=not_existing_pk)
-        self.assertEqual(response.status_code, 404)
-
-    def test_user_update_view_should_update_user_on_post(self):
-        old_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH)
-        self.user.set_password(self.user.password)
-        self.user.save()
-        self.client.login(email=self.user.email, password="newuserpasswd")
-        request = self.client.get(path=reverse("custom-user-update", args=(self.user.pk,)))
-        request.user = self.user
-        response = self.client.post(
-            path=reverse("custom-user-update", args=(self.user.pk,)), data={"phone_number": old_phone_number}
-        )
-        self.user.refresh_from_db()
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(old_phone_number, self.user.phone_number)
-
-    def test_user_update_view_should_not_update_user_on_post_if_form_is_invalid(self):
-        phone_number_before_request = self.user.phone_number
-        old_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH - 1)
-        request = APIRequestFactory().post(
-            path=reverse("custom-user-update", args=(self.user.pk,)), data={"phone_number": old_phone_number}
-        )
-        request.user = self.user
-        response = views.UserUpdate.as_view()(request, pk=self.user.pk)
-        self.user.refresh_from_db()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(phone_number_before_request, self.user.phone_number)
-
-
 class SignUpTests(TestCase):
     def setUp(self):
         self.user = CustomUser(email="testuser@codepoets.it", first_name="John", last_name="Doe", password="passwduser")

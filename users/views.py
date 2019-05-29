@@ -9,6 +9,7 @@ from django.contrib.auth.views import PasswordResetCompleteView
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.auth.views import PasswordResetDoneView
 from django.contrib.auth.views import PasswordResetView
+from django.forms import ModelForm
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
@@ -23,6 +24,7 @@ from django.views.generic import CreateView
 from django.views.generic import FormView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
+from django.views.generic import UpdateView
 from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -31,8 +33,10 @@ from rest_framework.views import APIView
 from users.common.fields import Action
 from users.common.strings import ConfirmationMessages
 from users.common.strings import SuccessInfoAfterRegistrationText
+from users.forms import AdminUserChangeForm
 from users.forms import CustomUserCreationForm
 from users.forms import CustomUserSignUpForm
+from users.forms import SimpleUserChangeForm
 from users.models import CustomUser
 from users.permissions import AuthenticatedAdmin
 from users.permissions import AuthenticatedAdminOrOwnerUser
@@ -110,47 +114,25 @@ class UserCreate(CreateView):
         return redirect(self.get_success_url())
 
 
-class UserUpdate(APIView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+@method_decorator(login_required, name="dispatch")
+class UserUpdate(UpdateView):
     template_name = "user_update.html"
+    form_class = SimpleUserChangeForm
+    admins_form_class = AdminUserChangeForm
+    model = CustomUser
 
-    @classmethod
-    def return_suitable_serializer_for_get_method(
-        cls, request: HttpRequest, user: CustomUser
-    ) -> Union[UserUpdateByAdminSerializer, UserUpdateSerializer]:
-        if request.user.user_type == CustomUser.UserType.ADMIN.name:
-            return UserUpdateByAdminSerializer(user, context={"request": request})
-        else:
-            return UserUpdateSerializer(user, context={"request": request})
+    def get_form_class(self) -> Type[ModelForm]:
+        if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
+            return self.admins_form_class
+        return self.form_class
 
-    @classmethod
-    def return_suitable_serializer_for_post_method(
-        cls, request: HttpRequest, user: CustomUser
-    ) -> Union[UserUpdateByAdminSerializer, UserUpdateSerializer]:
-        if request.user.user_type == CustomUser.UserType.ADMIN.name:
-            return UserUpdateByAdminSerializer(user, data=request.data, context={"request": request})
-        else:
-            return UserUpdateSerializer(user, data=request.data, context={"request": request})
+    def get_success_url(self) -> str:
+        return reverse("custom-user-update", kwargs={"pk": self.object.pk})
 
-    @classmethod
-    def get(cls, request: HttpRequest, pk: int) -> Response:
-        logger.info(f"User with id: {request.user.pk} get to the UserUpdateView")
-        user = get_object_or_404(CustomUser, pk=pk)
-        serializer = cls.return_suitable_serializer_for_get_method(request, user)
-        return Response({"serializer": serializer, "user": user})
-
-    @classmethod
-    def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
-        logger.info(f"User with id: {request.user.pk} sent post to the UserUpdateView")
-        user = get_object_or_404(CustomUser, pk=pk)
-        serializer = cls.return_suitable_serializer_for_post_method(request, user)
-        if not serializer.is_valid():
-            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
-            return Response({"serializer": serializer, "user": user, "errors": serializer.errors})
-        user = serializer.save()
-        logger.info(f"User with id: {user.pk} has been updated")
-        messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
-        return redirect("custom-user-update", pk=pk)
+    def form_valid(self, form: SimpleUserChangeForm) -> HttpResponse:
+        super().form_valid(form)
+        messages.success(self.request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
+        return redirect(self.get_success_url())
 
 
 class UserUpdateByAdmin(APIView):

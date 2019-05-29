@@ -1,7 +1,9 @@
 from django.test import TestCase
 from rest_framework.reverse import reverse
 
+from users.common import constants
 from users.common.strings import ValidationErrorText
+from users.common.utils import generate_random_phone_number
 from users.factories import UserFactory
 from users.models import CustomUser
 
@@ -116,3 +118,51 @@ class UserCreateTests(TestCase):
         response = self.client.post(path=reverse("custom-user-create"), data={"email": "testuser@codepoets.it"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(CustomUser.objects.all().count(), 1)
+
+
+class UserUpdateTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser(
+            email="testuser@codepoets.it",
+            password="newuserpasswd",
+            first_name="John",
+            last_name="Doe",
+            country="PL",
+            phone_number="123456789",
+        )
+        self.user.full_clean()
+        self.user.save()
+        self.client.force_login(self.user)
+
+    def test_user_update_view_should_display_user_details_on_get(self):
+        response = self.client.get(path=reverse("custom-user-update", kwargs={"pk": self.user.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.user.last_name)
+
+    def test_user_update_view_should_not_render_non_existing_user(self):
+        not_existing_pk = 1000
+        response = self.client.get(path=reverse("custom-user-update", kwargs={"pk": not_existing_pk}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_user_update_view_should_update_user_on_post(self):
+        old_phone_number = self.user.phone_number
+        new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH)
+        response = self.client.get(path=reverse("custom-user-update", args=(self.user.pk,)))
+        self.assertContains(response, old_phone_number)
+
+        response = self.client.post(
+            path=reverse("custom-user-update", args=(self.user.pk,)), data={"phone_number": new_phone_number}
+        )
+        self.user.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(new_phone_number, self.user.phone_number)
+
+    def test_user_update_view_should_not_update_user_on_post_if_form_is_invalid(self):
+        phone_number_before_request = self.user.phone_number
+        new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH - 1)
+        response = self.client.post(
+            path=reverse("custom-user-update", args=(self.user.pk,)), data={"phone_number": new_phone_number}
+        )
+        self.user.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(phone_number_before_request, self.user.phone_number)
