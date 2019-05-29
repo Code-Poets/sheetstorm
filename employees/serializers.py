@@ -22,8 +22,10 @@ class HoursField(serializers.DurationField):
 
     def to_internal_value(self, data: str) -> timedelta:
         if str(data).count(":") != 1:
-            raise ValidationError()
+            raise ValidationError(detail=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
         hours, minutes = str(data).split(":")
+        if not hours.isdigit() or not minutes.isdigit():
+            raise ValidationError(detail=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
         return timedelta(hours=int(hours), minutes=int(minutes))
 
 

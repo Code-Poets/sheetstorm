@@ -1,6 +1,7 @@
 import datetime
 
 from django.test import TestCase
+from parameterized import parameterized
 from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
@@ -165,11 +166,12 @@ class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
     def test_report_serializer_work_hours_should_not_accept_non_numeric_value(self):
         self.field_should_not_accept_input(field="work_hours", value=self.sample_string_for_type_validation_tests)
 
+    @parameterized.expand(["08.00", ":", ".", "08:", ":60"])
+    def test_report_serializer_work_hours_field_should_not_accept_invalid_value(self, value):
+        self.field_should_not_accept_input(field="work_hours", value=value)
+
     def test_report_serializer_work_hours_field_should_not_be_empty(self):
         self.field_should_not_accept_null(field="work_hours")
-
-    def test_report_serializer_work_hours_field_should_not_accept_work_hours_value_with_dot(self):
-        self.field_should_not_accept_input(field="work_hours", value="08.00")
 
 
 class HoursFieldTests(TestCase):
