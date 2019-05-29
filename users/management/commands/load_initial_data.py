@@ -136,7 +136,7 @@ class Command(BaseCommand):
             description="Some report\r\ncontaining multiple lines\r\\nin description.",
             author=user_employee_1,
             project=project_pending,
-            work_hours="8.00",
+            work_hours=timezone.timedelta(hours=8),
             editable=True,
         )
 
@@ -145,7 +145,7 @@ class Command(BaseCommand):
             description="Some report",
             author=user_employee_1,
             project=project_pending,
-            work_hours="4.00",
+            work_hours=timezone.timedelta(hours=4),
             editable=True,
         )
 
@@ -154,7 +154,7 @@ class Command(BaseCommand):
             description="Some report on the same day as other.",
             author=user_employee_1,
             project=project_stopped,
-            work_hours="4.00",
+            work_hours=timezone.timedelta(hours=4),
             editable=True,
         )
 
@@ -163,7 +163,7 @@ class Command(BaseCommand):
             description="Some report",
             author=user_employee_2,
             project=project_pending,
-            work_hours="6.00",
+            work_hours=timezone.timedelta(hours=6),
             editable=True,
         )
 
@@ -172,7 +172,7 @@ class Command(BaseCommand):
             description="Some report containing hours with fraction",
             author=user_employee_2,
             project=project_terminated,
-            work_hours="8.30",
+            work_hours=timezone.timedelta(hours=8, minutes=30),
             editable=True,
         )
 
@@ -181,7 +181,7 @@ class Command(BaseCommand):
             description="Some report containing:\r\n- multiple lines\\ in description\r\n- time with fraction",
             author=user_manager_1,
             project=project_pending,
-            work_hours="7.59",
+            work_hours=timezone.timedelta(hours=7, minutes=59),
             editable=True,
         )
 
@@ -190,7 +190,7 @@ class Command(BaseCommand):
             description="Some report",
             author=user_manager_1,
             project=project_pending,
-            work_hours="2.00",
+            work_hours=timezone.timedelta(hours=2),
             editable=True,
         )
 
@@ -199,7 +199,7 @@ class Command(BaseCommand):
             description="Some report containing time with fraction.",
             author=user_manager_2,
             project=project_stopped,
-            work_hours="7.01",
+            work_hours=timezone.timedelta(hours=7, minutes=1),
             editable=True,
         )
 
@@ -208,7 +208,7 @@ class Command(BaseCommand):
             description="Some report",
             author=user_manager_2,
             project=project_terminated,
-            work_hours="8.00",
+            work_hours=timezone.timedelta(hours=8),
             editable=True,
         )
 
@@ -217,7 +217,7 @@ class Command(BaseCommand):
             description="Some report on the same day as other",
             author=user_manager_1,
             project=project_stopped,
-            work_hours="2.00",
+            work_hours=timezone.timedelta(hours=2),
             editable=True,
         )
 
@@ -226,7 +226,7 @@ class Command(BaseCommand):
             description="Some report on the same day as other two",
             author=user_manager_1,
             project=project_terminated,
-            work_hours="4.00",
+            work_hours=timezone.timedelta(hours=4),
             editable=True,
         )
 
@@ -235,7 +235,7 @@ class Command(BaseCommand):
             description="Some report",
             author=user_employee_3,
             project=project_terminated,
-            work_hours="8.00",
+            work_hours=timezone.timedelta(hours=8),
             editable=True,
         )
 
