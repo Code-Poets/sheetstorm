@@ -343,10 +343,18 @@ class ReportDeleteView(UserIsAuthorOfCurrentReportMixin, UserIsManagerOfCurrentR
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
-class AuthorReportView(DetailView):
+class AuthorReportView(DetailView, MonthNavigationMixin):
     template_name = "employees/author_report_list.html"
     model = CustomUser
-    queryset = CustomUser.objects.prefetch_related("report_set")
+    url_name = "author-report-list"
+
+    def get_queryset(self) -> QuerySet:
+        return CustomUser.objects.prefetch_related(
+            Prefetch(
+                "report_set",
+                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+            )
+        )
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context = super().get_context_data(**kwargs)
@@ -354,6 +362,16 @@ class AuthorReportView(DetailView):
         context["daily_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_dates()
         context["monthly_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_authors()
         return context
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Union[Response, HttpResponseRedirectBase]:
+        if self._date_out_of_bounds():
+            return self.redirect_to_current_month()
+        return super().get(request, *args, **kwargs)
+
+    def post(  # pylint: disable=unused-argument
+        self, request: HttpRequest, pk: int, year: int, month: int
+    ) -> HttpResponseRedirectBase:
+        return self.redirect_to_another_month(request)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -369,7 +387,10 @@ class AdminReportView(UpdateView):
         return context_data
 
     def get_success_url(self) -> str:
-        return reverse("author-report-list", kwargs={"pk": self.object.author.id})
+        return reverse(
+            "author-report-list",
+            kwargs={"pk": self.object.author.id, "year": self.object.date.year, "month": self.object.date.month},
+        )
 
     def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
         self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init

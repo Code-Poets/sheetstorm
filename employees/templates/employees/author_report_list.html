@@ -8,11 +8,13 @@
 {% load data_structure_element_selectors %}
 
 {% block extra_head %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
 {% endblock %}
 
 {% block content %}
-<h1>{{ object.email }}{{ UI_text.PAGE_TITLE.value }}</h1>
+{% include "employees/month_navigation_bar.html" %}
+<h1>{{ object.email }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}</h1>
 <a href="{% url 'custom-users-list' %}" class="btn btn-primary hidden-print">
     {{ UI_text.RETURN_BUTTON_MESSAGE.value }}
     <a href="{% url 'export-data-xlsx' pk=object.id %}" class="btn btn-info">
@@ -80,4 +82,10 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_script %}
+{{ month_form.media }}
+<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 {% endblock %}
