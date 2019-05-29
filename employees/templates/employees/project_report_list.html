@@ -58,7 +58,7 @@
                 {% endfor %}
                 <tr>
                     <td colspan="2"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
-                    <td class="project-reports-work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:author.grouper.pk|decimal_to_hours }}</strong></td>
+                    <td class="project-reports-work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:author.grouper.pk|duration_field_to_string }}</strong></td>
                 </tr>
             </tbody>
         </table>

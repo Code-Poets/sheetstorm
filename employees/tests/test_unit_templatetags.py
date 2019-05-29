@@ -1,8 +1,8 @@
-from decimal import Decimal
+import datetime
 
 from django.test import TestCase
 
-from employees.templatetags.data_display_filters import decimal_to_hours
+from employees.templatetags.data_display_filters import duration_field_to_string
 from employees.templatetags.data_structure_element_selectors import get_key_value
 
 
@@ -19,6 +19,6 @@ class GetKeyValueTests(TestCase):
         self.assertEqual(result, "")
 
 
-class DecimalToHoursTests(TestCase):
-    def test_decimal_to_hours_should_parse_decimal_to_string_and_replace_dot_with_colon(self):
-        self.assertEqual(decimal_to_hours(Decimal("8.00")), "8:00")
+class DurationHoursTests(TestCase):
+    def test_that_duration_field_to_string_should_parse_duration_to_string(self):
+        self.assertEqual(duration_field_to_string(datetime.timedelta(hours=8)), "08:00")

@@ -59,14 +59,16 @@
             {% endfor %}
             <tr>
                 <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
-                <td class="author-reports-work-hours-column"><strong>{{ daily_hours_sum|get_key_value:date.grouper|decimal_to_hours }}</strong></td>
+                <td class="author-reports-work-hours-column"><strong>{{ daily_hours_sum|get_key_value:date.grouper|duration_field_to_string }}</strong></td>
                 <td colspan ="4"></td>
                 <td class="edit-button-column Invisible hidden-print"></td>
             </tr>
             {% endfor %}
             <tr>
-                <td colspan="3"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
-                <td class="author-reports-work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:object.pk|decimal_to_hours }}</strong></td>
+                {% if not reports_created_by_date.list|length == 0 %}
+                    <td colspan="3"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+                    <td class="author-reports-work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:object.pk }}</strong></td>
+                {% endif %}
             </tr>
           </tbody>
         </table>
