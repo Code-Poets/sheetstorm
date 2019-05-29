@@ -1,4 +1,6 @@
+import datetime
 import logging
+from typing import Any
 from typing import Optional
 from typing import Type
 from typing import Union
@@ -180,6 +182,12 @@ class UserList(ListView):
     template_name = "users_list.html"
     model = CustomUser
     queryset = CustomUser.objects.prefetch_related("projects")
+
+    def get_context_data(self, *, _object_list: Any = None, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["year"] = datetime.datetime.now().year
+        context_data["month"] = datetime.datetime.now().month
+        return context_data
 
 
 class CustomPasswordChangeView(PasswordChangeView):
