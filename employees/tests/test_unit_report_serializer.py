@@ -1,14 +1,10 @@
 import datetime
-from decimal import Decimal
 
 from django.test import TestCase
 from rest_framework.reverse import reverse
 from rest_framework.test import APIRequestFactory
 
 from employees.common.constants import ReportModelConstants
-from employees.common.strings import MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE
-from employees.common.strings import MAX_HOURS_VALUE_VALIDATOR_MESSAGE
-from employees.common.strings import MIN_HOURS_VALUE_VALIDATOR_MESSAGE
 from employees.models import Report
 from employees.models import TaskActivityType
 from employees.serializers import HoursField
@@ -16,8 +12,6 @@ from employees.serializers import ReportSerializer
 from managers.models import Project
 from users.models import CustomUser
 from utils.base_tests import BaseSerializerTestCase
-from utils.sample_data_generators import generate_decimal_with_decimal_places
-from utils.sample_data_generators import generate_decimal_with_digits
 
 
 class DataSetUpToTests(BaseSerializerTestCase):
@@ -168,60 +162,12 @@ class ReportSerializerDescriptionFailTests(DataSetUpToTests):
 
 
 class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
-    def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_digits_number(self):
-        self.field_should_not_accept_input(
-            field="work_hours", value=generate_decimal_with_digits(digits=ReportModelConstants.MAX_DIGITS.value + 1)
-        )
-
-    def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_decimal_places_number(self):
-        self.field_should_not_accept_input(
-            field="work_hours",
-            value=generate_decimal_with_decimal_places(decimal_places=ReportModelConstants.DECIMAL_PLACES.value + 1),
-        )
-
-    def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input(
-            field="work_hours",
-            value=ReportModelConstants.MAX_WORK_HOURS.value + Decimal("0.01"),
-            error_message=MAX_HOURS_VALUE_VALIDATOR_MESSAGE,
-        )
-
-    def test_report_serializer_work_hours_field_should_not_accept_value_exceeding_set_minimum(self):
-        self.field_should_not_accept_input(
-            field="work_hours",
-            value=ReportModelConstants.MIN_WORK_HOURS.value - Decimal("0.01"),
-            error_message=MIN_HOURS_VALUE_VALIDATOR_MESSAGE,
-        )
-
-    def test_report_serializer_work_hours_field_should_not_accept_decimal_value_exceeding_set_maximum(self):
-        self.field_should_not_accept_input(
-            field="work_hours",
-            value=ReportModelConstants.MAX_WORK_HOURS_DECIMAL_VALUE.value + Decimal("0.01"),
-            error_message=MAX_DECIMAL_VALUE_VALIDATOR_MESSAGE,
-        )
-
     def test_report_serializer_work_hours_should_not_accept_non_numeric_value(self):
         self.field_should_not_accept_input(field="work_hours", value=self.sample_string_for_type_validation_tests)
 
     def test_report_serializer_work_hours_field_should_not_be_empty(self):
         self.field_should_not_accept_null(field="work_hours")
 
-    def test_report_serializer_to_representation_method_should_replace_work_hours_with_string_containing_colon_instead_of_dot(
-        self
-    ):
-        report = Report(
-            date=datetime.datetime.now().date(),
-            description=self.required_input["description"],
-            author=self.required_input["author"],
-            project=self.required_input["project"],
-            work_hours=Decimal("8.00"),
-        )
-        report.full_clean()
-        report.save()
-        request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
-        serializer = ReportSerializer(report, context={"request": request})
-        data = serializer.to_representation(report)
-        self.assertEqual(data["work_hours"], "8:00")
     def test_report_serializer_work_hours_field_should_not_accept_work_hours_value_with_dot(self):
         self.field_should_not_accept_input(field="work_hours", value="08.00")
 

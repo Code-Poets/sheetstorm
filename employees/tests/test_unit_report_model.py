@@ -1,5 +1,4 @@
 import datetime
-from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -14,8 +13,6 @@ from managers.models import Project
 from users.factories import UserFactory
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase
-from utils.sample_data_generators import generate_decimal_with_decimal_places
-from utils.sample_data_generators import generate_decimal_with_digits
 
 
 class DataSetUpToTests(BaseModelTestCase):
@@ -128,19 +125,6 @@ class TestReportWorkHoursParameterFails(DataSetUpToTests):
         self.field_should_not_accept_null("work_hours")
 
     # PARAM
-    def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_digits_number(self):
-        self.field_should_not_accept_input(
-            "work_hours", generate_decimal_with_digits(digits=ReportModelConstants.MAX_DIGITS.value + 1)
-        )
-
-    # PARAM
-    def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_decimal_places_number(self):
-        self.field_should_not_accept_input(
-            "work_hours",
-            generate_decimal_with_decimal_places(decimal_places=ReportModelConstants.DECIMAL_PLACES.value + 1),
-        )
-
-    # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_maximum(self):
         self.field_should_not_accept_input(
             "work_hours", ReportModelConstants.MAX_WORK_HOURS.value + datetime.timedelta(hours=25)
@@ -151,13 +135,6 @@ class TestReportWorkHoursParameterFails(DataSetUpToTests):
         self.field_should_not_accept_input(
             "work_hours", ReportModelConstants.MIN_WORK_HOURS.value - datetime.timedelta(seconds=1)
         )
-
-    # PARAM
-    def test_report_model_work_hours_str_property_should_return_work_hours_field_value_as_string_with_colon_instead_of_dot(
-        self
-    ):
-        report = self.initiate_model("work_hours", Decimal("8.00"))
-        self.assertEqual(report.work_hours_str, "8:00")
 
 
 class TestReportQuerySetWorkHoursSumForAllDates(TestCase):
