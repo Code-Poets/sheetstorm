@@ -82,3 +82,37 @@ class UserListTests(TestCase):
         self.client.force_login(self.user_manager)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
+
+
+class UserCreateTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser(
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
+        )
+        self.user.full_clean()
+        self.user.save()
+        self.url = reverse("custom-user-create")
+        self.client.force_login(self.user)
+
+    def test_user_create_view_should_display_create_user_form_on_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Create new employee")
+
+    def test_user_create_view_should_add_new_user_on_post(self):
+        response = self.client.post(
+            path=reverse("custom-user-create"),
+            data={
+                "email": "anothertestuser@codepoets.it",
+                "password1": "this_is_a_pass",
+                "password2": "this_is_a_pass",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/users/")
+        self.assertEqual(CustomUser.objects.all().count(), 2)
+
+    def test_user_create_view_should_not_add_new_user_on_post_if_form_is_invalid(self):
+        response = self.client.post(path=reverse("custom-user-create"), data={"email": "testuser@codepoets.it"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CustomUser.objects.all().count(), 1)

@@ -11,12 +11,15 @@ from django.contrib.auth.views import PasswordResetDoneView
 from django.contrib.auth.views import PasswordResetView
 from django.http import HttpRequest
 from django.http import HttpResponse
+from django.http.response import HttpResponseRedirect
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.generic import CreateView
 from django.views.generic import FormView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
@@ -28,6 +31,7 @@ from rest_framework.views import APIView
 from users.common.fields import Action
 from users.common.strings import ConfirmationMessages
 from users.common.strings import SuccessInfoAfterRegistrationText
+from users.forms import CustomUserCreationForm
 from users.forms import CustomUserSignUpForm
 from users.models import CustomUser
 from users.permissions import AuthenticatedAdmin
@@ -93,31 +97,17 @@ class UserSignUpSuccess(TemplateView):
     extra_context = {"MESSAGES": SuccessInfoAfterRegistrationText}
 
 
-class UserCreate(APIView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+@method_decorator(login_required, name="dispatch")
+class UserCreate(CreateView):
     template_name = "user_create.html"
+    form_class = CustomUserCreationForm
 
-    @classmethod
-    def get(cls, request: HttpRequest) -> Response:
-        logger.info(f"User with id: {request.user.pk} entered UserCreate View")
-        serializer = UserCreateSerializer(context={"request": request})
-        return Response({"serializer": serializer})
+    def get_success_url(self) -> str:
+        return reverse("custom-users-list")
 
-    @classmethod
-    def post(cls, request: HttpRequest) -> Union[Response, HttpResponseRedirectBase]:
-        logger.debug(f"User with id: {request.user.pk} sent post on UserCreate View")
-        serializer = UserCreateSerializer(data=request.data)
-        if not serializer.is_valid():
-            logger.debug(f"Sent form is invalid due to those errors: {serializer.errors}")
-            return Response({"serializer": serializer, "errors": serializer.errors})
-        email = serializer.validated_data.get("email")
-        serializer.save()
-        user = CustomUser.objects.get(email=email)
-        user.set_password("passwduser")
-        user.full_clean()
-        user.save()
-        logger.info(f"New user with id {user.pk} has been created")
-        return redirect("custom-users-list")
+    def from_valid(self, form: CustomUserCreationForm) -> HttpResponseRedirect:
+        super().form_valid(form)
+        return redirect(self.get_success_url())
 
 
 class UserUpdate(APIView):
