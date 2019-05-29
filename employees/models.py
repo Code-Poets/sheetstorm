@@ -9,6 +9,7 @@ from django.db.models.functions import Coalesce
 from markdown import markdown
 from markdown_checklists.extension import ChecklistsExtension
 
+from common.convert import timedelta_to_string
 from employees.common.constants import ReportModelConstants
 from employees.common.constants import TaskActivityTypeConstans
 from employees.common.strings import ReportValidationStrings
@@ -77,7 +78,7 @@ class Report(models.Model):
 
     @property
     def work_hours_str(self) -> str:
-        return "{:02d}:{:02d}".format((self.work_hours.seconds // 3600), (self.work_hours.seconds % 3600) // 60)
+        return timedelta_to_string(self.work_hours)
 
     @property
     def markdown_description(self) -> str:
