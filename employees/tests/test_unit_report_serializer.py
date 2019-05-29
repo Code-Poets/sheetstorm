@@ -41,7 +41,7 @@ class DataSetUpToTests(BaseSerializerTestCase):
             "description": "Some description",
             "author": author,
             "project": project,
-            "work_hours": Decimal("8.00"),
+            "work_hours": "08:00",
             "task_activities": TaskActivityType.objects.get(name="Other"),
         }
 
@@ -54,7 +54,7 @@ class ReportSerializerTests(DataSetUpToTests):
         self.field_should_accept_input(field="description", value="Example description")
 
     def test_report_serializer_work_hours_field_should_accept_correct_value(self):
-        self.field_should_accept_input(field="work_hours", value=Decimal("8.00"))
+        self.field_should_accept_input(field="work_hours", value="8:00")
 
     def test_report_serializer_should_be_valid_total_sum_of_hours_from_single_day_for_single_author_is_24(self):
         report = Report(
@@ -62,13 +62,13 @@ class ReportSerializerTests(DataSetUpToTests):
             description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
-            work_hours=Decimal("12.00"),
+            work_hours=datetime.timedelta(hours=12),
         )
         report.full_clean()
         report.save()
         request = APIRequestFactory().get(path=reverse("custom-report-list"))
         data = self.required_input.copy()
-        data["work_hours"] = Decimal("12.00")
+        data["work_hours"] = "12:00"
         request.user = data["author"]
         serializer = ReportSerializer(data=data, context={"request": request})
         self.assertTrue(serializer.is_valid())
@@ -81,13 +81,13 @@ class ReportSerializerTests(DataSetUpToTests):
             description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
-            work_hours=Decimal("12.00"),
+            work_hours=datetime.timedelta(hours=12),
         )
         report.full_clean()
         report.save()
         request = APIRequestFactory().get(path=reverse("custom-report-list"))
         data = self.required_input.copy()
-        data["work_hours"] = Decimal("12.01")
+        data["work_hours"] = "12.01"
         request.user = data["author"]
         serializer = ReportSerializer(data=data, context={"request": request})
         self.assertFalse(serializer.is_valid())
@@ -100,7 +100,7 @@ class ReportSerializerTests(DataSetUpToTests):
             description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
-            work_hours=Decimal("10.00"),
+            work_hours=datetime.timedelta(hours=10),
         )
         report.full_clean()
         report.save()
@@ -109,13 +109,13 @@ class ReportSerializerTests(DataSetUpToTests):
             description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
-            work_hours=Decimal("12.00"),
+            work_hours=datetime.timedelta(hours=12),
         )
         other_report.full_clean()
         other_report.save()
         request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
         data = self.required_input.copy()
-        data["work_hours"] = Decimal("12.00")
+        data["work_hours"] = "12:00"
         request.user = data["author"]
         serializer = ReportSerializer(instance=report, data=data, context={"request": request})
         self.assertTrue(serializer.is_valid())
@@ -128,7 +128,7 @@ class ReportSerializerTests(DataSetUpToTests):
             description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
-            work_hours=Decimal("10.00"),
+            work_hours=datetime.timedelta(hours=10),
         )
         report.full_clean()
         report.save()
@@ -137,13 +137,13 @@ class ReportSerializerTests(DataSetUpToTests):
             description=self.required_input["description"],
             author=self.required_input["author"],
             project=self.required_input["project"],
-            work_hours=Decimal("12.00"),
+            work_hours=datetime.timedelta(hours=12),
         )
         other_report.full_clean()
         other_report.save()
         request = APIRequestFactory().get(path=reverse("custom-report-detail", args=(report.pk,)))
         data = self.required_input.copy()
-        data["work_hours"] = Decimal("12.01")
+        data["work_hours"] = "12:01"
         request.user = data["author"]
         serializer = ReportSerializer(instance=report, data=data, context={"request": request})
         self.assertFalse(serializer.is_valid())
@@ -222,6 +222,8 @@ class ReportSerializerWorkHoursFailTests(DataSetUpToTests):
         serializer = ReportSerializer(report, context={"request": request})
         data = serializer.to_representation(report)
         self.assertEqual(data["work_hours"], "8:00")
+    def test_report_serializer_work_hours_field_should_not_accept_work_hours_value_with_dot(self):
+        self.field_should_not_accept_input(field="work_hours", value="08.00")
 
 
 class HoursFieldTests(TestCase):
@@ -230,4 +232,4 @@ class HoursFieldTests(TestCase):
     ):
         hours_field = HoursField()
         data = hours_field.to_internal_value("8:00")
-        self.assertEqual(data, Decimal("8.00"))
+        self.assertEqual(data, datetime.timedelta(hours=8))

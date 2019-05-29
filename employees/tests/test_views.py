@@ -50,7 +50,7 @@ class AdminReportViewTests(TestCase):
             "project": self.report.project.pk,
             "author": self.user.pk,
             "task_activities": self.report.task_activities.pk,
-            "work_hours": "8.00",
+            "work_hours": "8:00",
         }
 
     def test_admin_report_detail_view_should_display_report_details(self):
