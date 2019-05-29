@@ -105,44 +105,6 @@ class UserUpdateTests(TestCase):
         self.assertEqual(phone_number_before_request, self.user.phone_number)
 
 
-class UserCreateTests(TestCase):
-    def setUp(self):
-        self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
-        )
-        self.user.full_clean()
-        self.user.save()
-
-    def test_user_create_view_should_display_create_user_form_on_get(self):
-        request = APIRequestFactory().get(path=reverse("custom-user-create"))
-        request.user = self.user
-        response = views.UserCreate.as_view()(request)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Create new employee")
-
-    def test_user_create_view_should_add_new_user_on_post(self):
-        request = APIRequestFactory().post(
-            path=reverse("custom-user-create"),
-            data={
-                "email": "anothertestuser@codepoets.it",
-                "password1": "this_is_a_pass",
-                "password2": "this_is_a_pass",
-            },
-        )
-        request.user = self.user
-        response = views.UserCreate.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/users/")
-        self.assertEqual(CustomUser.objects.all().count(), 2)
-
-    def test_user_create_view_should_not_add_new_user_on_post_if_form_is_invalid(self):
-        request = APIRequestFactory().post(path=reverse("custom-user-create"), data={"email": "testuser@codepoets.it"})
-        request.user = self.user
-        response = views.UserCreate.as_view()(request)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(CustomUser.objects.all().count(), 1)
-
-
 class SignUpTests(TestCase):
     def setUp(self):
         self.user = CustomUser(email="testuser@codepoets.it", first_name="John", last_name="Doe", password="passwduser")
