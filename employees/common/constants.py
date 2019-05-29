@@ -1,14 +1,11 @@
-from decimal import Decimal
+from datetime import timedelta
 from enum import Enum
 
 
 class ReportModelConstants(Enum):
     MAX_DESCRIPTION_LENGTH = 4096
-    MAX_DIGITS = 4
-    DECIMAL_PLACES = 2
-    MAX_WORK_HOURS = Decimal("24.00")
-    MIN_WORK_HOURS = Decimal("0.01")
-    MAX_WORK_HOURS_DECIMAL_VALUE = Decimal("0.59")
+    MAX_WORK_HOURS = timedelta(hours=24)
+    MIN_WORK_HOURS = timedelta(minutes=1)
 
 
 class TaskActivityTypeConstans(Enum):

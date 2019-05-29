@@ -37,7 +37,7 @@ class DataSetUpToTests(TestCase):
             description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
@@ -70,7 +70,7 @@ class ReportListTests(DataSetUpToTests):
             description="Some other description",
             author=other_user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report.full_clean()
@@ -89,7 +89,7 @@ class ReportListTests(DataSetUpToTests):
                 "date": datetime.datetime.now().date(),
                 "description": "Some description",
                 "project": self.project,
-                "work_hours": Decimal("8.00"),
+                "work_hours": "8:00",
                 "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
@@ -127,7 +127,7 @@ class ReportDetailTests(DataSetUpToTests):
                 "date": datetime.datetime.now().date(),
                 "description": new_description,
                 "project": self.project,
-                "work_hours": Decimal("8.00"),
+                "work_hours": "8:00",
                 "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
@@ -163,7 +163,7 @@ class ReportCustomListTests(TestCase):
             description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
@@ -197,7 +197,7 @@ class ReportCustomListTests(TestCase):
             description="Some other description",
             author=other_user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report.full_clean()
@@ -216,7 +216,7 @@ class ReportCustomListTests(TestCase):
                 "date": datetime.datetime.now().date(),
                 "description": "Some description",
                 "project": self.project,
-                "work_hours": Decimal("8.00"),
+                "work_hours": "8:00",
                 "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
@@ -252,7 +252,7 @@ class ReportCustomListTests(TestCase):
             description="Some other description",
             author=other_user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_user_report.full_clean()
@@ -263,7 +263,7 @@ class ReportCustomListTests(TestCase):
             description="Some other description",
             author=self.user,
             project=other_project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report_1.full_clean()
@@ -274,7 +274,7 @@ class ReportCustomListTests(TestCase):
             description="Some other description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         other_report_2.full_clean()
@@ -336,7 +336,7 @@ class ReportCustomListTests(TestCase):
                 "date": datetime.datetime.now().date(),
                 "description": "Some description",
                 "project": self.project,
-                "work_hours": Decimal("8.00"),
+                "work_hours": "8:00",
                 "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
@@ -446,7 +446,7 @@ class ReportCustomDetailTests(TestCase):
             description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
@@ -480,7 +480,7 @@ class ReportCustomDetailTests(TestCase):
                 "date": datetime.datetime.now().date(),
                 "description": new_description,
                 "project": self.project,
-                "work_hours": Decimal("8.00"),
+                "work_hours": "8:00",
                 "task_activities": TaskActivityType.objects.get(name="Other"),
             },
         )
@@ -573,7 +573,7 @@ class DeleteReportTests(TestCase):
             description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
             task_activities=TaskActivityType.objects.get(name="Other"),
         )
         self.report.full_clean()
@@ -592,7 +592,7 @@ class ProjectReportListTests(TestCase):
         for report in reports:
             dates = ["creation_date", "last_update"]
             other_fields = ["description", "author", "task_activities"]
-            work_hours = str(report.work_hours).replace(".", ":")
+            work_hours = report.work_hours_str
             fields_to_check = [work_hours]
             for date in dates:
                 fields_to_check.append(
@@ -625,7 +625,7 @@ class ProjectReportListTests(TestCase):
             description="Some description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
         )
         self.report.full_clean()
         self.report.save()
@@ -658,7 +658,7 @@ class ProjectReportListTests(TestCase):
             description="Some other description",
             author=self.user,
             project=other_project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
         )
         other_report.full_clean()
         other_report.save()
@@ -696,7 +696,7 @@ class ProjectReportListTests(TestCase):
             description="Some other description",
             author=self.user,
             project=other_project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
         )
         other_project_report.full_clean()
         other_project_report.save()
@@ -706,7 +706,7 @@ class ProjectReportListTests(TestCase):
             description="Some other description",
             author=other_user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
         )
         other_report_1.full_clean()
         other_report_1.save()
@@ -716,7 +716,7 @@ class ProjectReportListTests(TestCase):
             description="Some other description",
             author=self.user,
             project=self.project,
-            work_hours=Decimal("8.00"),
+            work_hours=datetime.timedelta(hours=8),
         )
         other_report_2.full_clean()
         other_report_2.save()
