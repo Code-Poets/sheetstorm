@@ -41,7 +41,7 @@ class DurationFieldForm(forms.DurationField):
 
 class ReportForm(forms.ModelForm):
     work_hours = DurationFieldForm()
-    
+
     class Meta:
         model = Report
         fields = ("date", "description", "task_activities", "project", "work_hours")

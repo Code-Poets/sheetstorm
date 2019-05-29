@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import reverse
 from django.test import TestCase
 from django.utils import timezone
@@ -7,6 +9,8 @@ from employees.factories import ReportFactory
 from employees.models import TaskActivityType
 from employees.views import AdminReportView
 from employees.views import AuthorReportView
+from managers.factories import ProjectFactory
+from managers.models import Project
 from users.factories import UserFactory
 
 
@@ -49,8 +53,10 @@ class AdminReportViewTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()
+        self.project = ProjectFactory()
+        self.project.members.add(self.user)
         self.client.force_login(self.user)
-        self.report = ReportFactory(author=self.user)
+        self.report = ReportFactory(author=self.user, project=self.project)
         self.url = reverse("admin-report-detail", kwargs={"pk": self.report.pk})
         self.data = {
             "date": timezone.now().date(),
@@ -80,8 +86,10 @@ class ProjectReportDetailTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()
+        self.project = ProjectFactory()
+        self.project.members.add(self.user)
         self.client.force_login(self.user)
-        self.report = ReportFactory()
+        self.report = ReportFactory(author=self.user, project=self.project)
         self.url = reverse("project-report-detail", args=(self.report.pk,))
         self.data = {
             "date": self.report.date,
@@ -118,3 +126,79 @@ class ProjectReportDetailTests(InitTaskTypeTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.context_data["form"]._errors)
         self.assertTrue(self.report.editable)
+
+
+class ReportCustomDetailTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.task_type = TaskActivityType(pk=1, name="Other")
+        self.task_type.full_clean()
+        self.task_type.save()
+        self.user = UserFactory()
+        self.project = ProjectFactory()
+        self.project.members.add(self.user)
+        self.client.force_login(self.user)
+        self.report = ReportFactory(author=self.user, project=self.project)
+        self.url = reverse("custom-report-detail", args=(self.report.pk,))
+        self.data = {
+            "date": self.report.date,
+            "description": self.report.description,
+            "project": self.report.project.pk,
+            "author": self.report.author,
+            "task_activities": self.report.task_activities.pk,
+            "work_hours": self.report.work_hours_str,
+        }
+
+    def test_custom_report_detail_view_should_display_report_details_on_get(self):
+        response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.report.description)
+
+    def test_custom_report_list_view_should_not_be_accessible_for_unauthenticated_users(self):
+        self.client.logout()
+        response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
+        self.assertEqual(response.status_code, 302)
+
+    def test_custom_report_detail_view_should_not_render_non_existing_report(self):
+        response = self.client.get(path=reverse("custom-report-detail", args=(999,)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_custom_report_detail_view_should_update_report_on_post(self):
+        self.data["description"] = "Some other description"
+        response = self.client.post(path=self.url, data=self.data)
+        self.report.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.report.description, self.data["description"])
+
+    def test_custom_report_detail_view_should_not_update_report_on_post_if_form_is_invalid(self):
+        old_description = self.data["description"]
+        self.data["description"] = "Some other description"
+        self.data["project"] = None
+        response = self.client.post(path=self.url, data=self.data)
+        self.report.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context_data["form"].errors)
+        self.assertEqual(old_description, self.report.description)
+
+    def test_custom_report_detail_view_should_not_update_report_if_author_is_not_a_member_of_selected_project(self):
+        other_project = ProjectFactory()
+        other_project.full_clean()
+        other_project.save()
+        old_description = self.data["description"]
+        self.data["description"] = "Some other description"
+        old_project = self.data["project"]
+        self.data["project"] = other_project.pk
+        response = self.client.post(path=self.url, data=self.data)
+        self.report.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context_data["form"].errors)
+        self.assertEqual(old_description, self.report.description)
+        self.assertEqual(old_project, self.report.project.pk)
+
+    def test_custom_report_detail_view_project_field_should_not_display_projects_the_author_is_not_a_member_of(self):
+        other_project = Project(name="Other Project", start_date=datetime.datetime.now())
+        other_project.full_clean()
+        other_project.save()
+        response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(other_project not in response.context_data["form"].fields["project"].queryset)
