@@ -1,0 +1,5 @@
+- model: sites.site
+  pk: 2
+  fields:
+    domain: sheetstorm.codepoets.it
+    name: sheetstorm.codepoets.it
