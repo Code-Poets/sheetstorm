@@ -1,4 +1,8 @@
 - model: employees.TaskActivityType
+  pk: 1
+  fields:
+    name: Other
+- model: employees.TaskActivityType
   pk: 2
   fields:
     name: Project Management
