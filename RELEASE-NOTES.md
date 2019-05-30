@@ -1,5 +1,23 @@
 ### next
 
+
+### v0.4.0
+
+##### Features
+
+- Feature add export reports to xlsx ([#212](https://github.com/Code-Poets/sheetstorm/pull/212))
+
+##### Bugfixes
+
+- Bugfix add restriction for non numeric strings to ReportSerializer ([#255](https://github.com/Code-Poets/sheetstorm/pull/255))
+- Bugfix add site id fixture ([#260](https://github.com/Code-Poets/sheetstorm/pull/260))
+- Bugfix change field type work hours to duration field ([#254](https://github.com/Code-Poets/sheetstorm/pull/254))
+- Bugfix converting timedelta to string ([#257](https://github.com/Code-Poets/sheetstorm/pull/257))
+- Bugfix creating report in `ReportList` view and adapt test ([#233](https://github.com/Code-Poets/sheetstorm/pull/233))
+- Bugfix default creation task activity type during migrations ([#258](https://github.com/Code-Poets/sheetstorm/pull/258))
+- Bugfix psycopg requirements ([#249](https://github.com/Code-Poets/sheetstorm/pull/249))
+
+
 ### v0.3.0
 
 ##### Features
