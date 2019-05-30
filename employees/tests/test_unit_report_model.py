@@ -26,7 +26,9 @@ class DataSetUpToTests(BaseModelTestCase):
     }
 
     def setUp(self):
-
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
         self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = "This is a string"
         self.author = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
@@ -137,7 +139,14 @@ class TestReportWorkHoursParameterFails(DataSetUpToTests):
         )
 
 
-class TestReportQuerySetWorkHoursSumForAllDates(TestCase):
+class InitTaskTypeTestCase(TestCase):
+    def setUp(self):
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
+
+
+class TestReportQuerySetWorkHoursSumForAllDates(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
         self.date_1 = datetime.datetime.now().date()
@@ -152,7 +161,7 @@ class TestReportQuerySetWorkHoursSumForAllDates(TestCase):
         self.assertEqual(result[self.date_2], datetime.timedelta(hours=5))
 
 
-class TestReportWorkHoursSumForGivenDayForSingleUser(TestCase):
+class TestReportWorkHoursSumForGivenDayForSingleUser(InitTaskTypeTestCase):
     def test_that_work_hours_sum_for_given_day_for_single_user_can_be_24(self):
         user = UserFactory()
         today = timezone.now().date()
@@ -214,7 +223,7 @@ class TestReportWorkHoursSumForGivenDayForSingleUser(TestCase):
         self.assertEqual(user.report_set.get_report_work_hours_sum_for_date(today), datetime.timedelta(hours=24))
 
 
-class TestReportQuerySetWorkHoursSumForAllAuthors(TestCase):
+class TestReportQuerySetWorkHoursSumForAllAuthors(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
         self.author_1 = UserFactory()
@@ -242,7 +251,7 @@ class TestReportTaskActivitiesParameter(DataSetUpToTests):
         self.assertEqual(TaskActivityType.objects.get(name="Other").name, report.task_activities.name)
 
     def test_that_added_task_activity_must_be_accepted_as_correct_input(self):
-        test_activity_type = TaskActivityType(name="test")
+        test_activity_type = TaskActivityType(pk=2, name="test")
         test_activity_type.full_clean()
         test_activity_type.save()
         self.field_should_accept_input("task_activities", TaskActivityType.objects.get(name="test"))

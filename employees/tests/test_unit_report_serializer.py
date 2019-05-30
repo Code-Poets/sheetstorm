@@ -20,6 +20,9 @@ class DataSetUpToTests(BaseSerializerTestCase):
 
     def setUp(self):
         super().setUp()
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
         self.sample_string_for_type_validation_tests = "This is a string"
         author = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"

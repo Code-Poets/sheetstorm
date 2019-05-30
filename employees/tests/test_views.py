@@ -4,12 +4,20 @@ from django.utils import timezone
 
 from employees.common.strings import AuthorReportListStrings
 from employees.factories import ReportFactory
+from employees.models import TaskActivityType
 from employees.views import AdminReportView
 from employees.views import AuthorReportView
 from users.factories import UserFactory
 
 
-class AuthorReportViewTests(TestCase):
+class InitTaskTypeTestCase(TestCase):
+    def setUp(self):
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
+
+
+class AuthorReportViewTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()
@@ -37,7 +45,7 @@ class AuthorReportViewTests(TestCase):
         self.assertContains(response, AuthorReportListStrings.NO_REPORTS_MESSAGE.value)
 
 
-class AdminReportViewTests(TestCase):
+class AdminReportViewTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()
@@ -68,7 +76,7 @@ class AdminReportViewTests(TestCase):
         self.assertTrue(self.report.editable)
 
 
-class ProjectReportDetailTests(TestCase):
+class ProjectReportDetailTests(InitTaskTypeTestCase):
     def setUp(self):
         super().setUp()
         self.user = UserFactory()

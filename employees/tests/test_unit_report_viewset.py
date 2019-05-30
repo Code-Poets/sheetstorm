@@ -22,6 +22,9 @@ from users.models import CustomUser
 
 class DataSetUpToTests(TestCase):
     def setUp(self):
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
@@ -147,6 +150,9 @@ class ReportDetailTests(DataSetUpToTests):
 
 class ReportCustomListTests(TestCase):
     def setUp(self):
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
@@ -430,6 +436,9 @@ class ReportCustomListTests(TestCase):
 
 class ReportCustomDetailTests(TestCase):
     def setUp(self):
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
@@ -558,6 +567,9 @@ class ReportCustomDetailTests(TestCase):
 
 class DeleteReportTests(TestCase):
     def setUp(self):
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )
@@ -609,6 +621,9 @@ class ProjectReportListTests(TestCase):
                 self.assertContains(response, field)
 
     def setUp(self):
+        self.task_type = TaskActivityType(pk=1, name="Other")
+        self.task_type.full_clean()
+        self.task_type.save()
         self.user = CustomUser(
             email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
         )

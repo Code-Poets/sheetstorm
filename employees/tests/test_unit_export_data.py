@@ -7,6 +7,7 @@ from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.strings import TaskActivitiesStrings
 from employees.factories import ReportFactory
+from employees.models import TaskActivityType
 from managers.factories import ProjectFactory
 from users.factories import UserFactory
 
@@ -14,6 +15,9 @@ from users.factories import UserFactory
 class DataSetUpToTests(TestCase):
     def setUp(self):
         super().setUp()
+        task_type = TaskActivityType(pk=1, name="Other")
+        task_type.full_clean()
+        task_type.save()
         self.user = UserFactory()
         self.project = ProjectFactory(
             name="aaa",
