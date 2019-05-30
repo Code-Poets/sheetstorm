@@ -18,17 +18,10 @@ from users.models import CustomUser
 
 
 class TaskActivityType(models.Model):
-    name = models.CharField(max_length=TaskActivityTypeConstans.TASK_ACTIVITIES_MAX_LENGTH.value, default="Other")
+    name = models.CharField(max_length=TaskActivityTypeConstans.TASK_ACTIVITIES_MAX_LENGTH.value)
 
     def __str__(self) -> str:
         return self.name
-
-    @staticmethod
-    def get_or_create_default_task_activity_type_pk() -> int:
-        default_task_activity_type, _ = TaskActivityType.objects.get_or_create(name="Other")
-        default_task_activity_type.full_clean()
-        default_task_activity_type.save()
-        return default_task_activity_type.pk
 
 
 class ReportQuerySet(models.QuerySet):
@@ -64,11 +57,7 @@ class Report(models.Model):
 
     date = models.DateField()
     description = models.TextField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
-    task_activities = models.ForeignKey(
-        TaskActivityType,
-        on_delete=models.SET_DEFAULT,
-        default=TaskActivityType.get_or_create_default_task_activity_type_pk,
-    )
+    task_activities = models.ForeignKey(TaskActivityType, on_delete=models.DO_NOTHING, default=1)
     creation_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
