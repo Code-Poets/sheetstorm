@@ -18,6 +18,7 @@ mypy
 Markdown
 markdown-checklists
 oauthlib
+openpyxl
 psycopg2
 pylint
 parameterized

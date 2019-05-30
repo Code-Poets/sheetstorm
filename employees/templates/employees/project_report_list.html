@@ -13,6 +13,9 @@
 
 {% block content %}
 <h1>{{ object.name }}{{ UI_text.PAGE_TITLE.value }}</h1>
+<a href="{% url 'export-project-data-xlsx' pk=object.pk %}" class="btn btn-info">
+        Export Reports
+</a>
 <div class="container">
     <div class="table-responsive">
         {% regroup object.get_report_ordered by author as reports_by_author %}

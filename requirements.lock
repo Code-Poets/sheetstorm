@@ -33,6 +33,7 @@ more-itertools==7.0.0
 mypy==0.701
 mypy-extensions==0.4.1
 oauthlib==3.0.1
+openpyxl==2.6.0
 parameterized==0.7.0
 pluggy==0.11.0
 psycopg2==2.7.5
