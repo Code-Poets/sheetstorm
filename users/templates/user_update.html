@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
-{% load rest_framework %}
+{% load crispy_forms_tags %}
 {% load static %}
 
 {% block extra_head %}
@@ -26,7 +26,7 @@
   </div>
   <form class="form-horizonal" action="{% url 'custom-user-update' pk=user.pk %}" method="POST">
     {% csrf_token %}
-    {% render_form serializer template_pack='rest_framework/vertical' %}
+    {{ form|crispy }}
     <button type="submit" class="btn btn-success">
       <span class="glyphicon glyphicon-ok"></span> Update
     </button>
@@ -63,6 +63,7 @@
 {% endblock %}
 
 {% block extra_script %}
+  {{ form.media }}
   <script src="//code.jquery.com/jquery-1.12.4.js"></script>
   <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script type="text/javascript" src="{% static 'users/scripts/delete_account_popup.js' %}"></script>
