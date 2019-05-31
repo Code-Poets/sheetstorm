@@ -1,3 +1,4 @@
+assertpy
 black
 certifi
 chardet

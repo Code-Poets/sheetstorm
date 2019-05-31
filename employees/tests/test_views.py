@@ -89,7 +89,7 @@ class ProjectReportDetailTests(InitTaskTypeTestCase):
             "project": self.report.project.pk,
             "author": self.report.author.pk,
             "task_activities": self.report.task_activities.pk,
-            "work_hours": self.report.work_hours,
+            "work_hours": self.report.work_hours_str,
         }
 
     def test_project_report_detail_view_should_display_report_details(self):
