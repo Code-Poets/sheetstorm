@@ -4,6 +4,7 @@ import factory
 import factory.fuzzy
 
 from employees.models import Report
+from employees.models import TaskActivityType
 
 
 class ReportFactory(factory.DjangoModelFactory):
@@ -15,3 +16,11 @@ class ReportFactory(factory.DjangoModelFactory):
     project = factory.SubFactory("managers.factories.ProjectFactory")
     work_hours = factory.LazyFunction(lambda: datetime.timedelta(hours=8))
     description = factory.fuzzy.FuzzyText()
+    task_activities = factory.SubFactory("employees.factories.TaskActivityTypeFactory")
+
+
+class TaskActivityTypeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TaskActivityType
+
+    name = factory.fuzzy.FuzzyText()
