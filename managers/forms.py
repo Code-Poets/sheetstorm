@@ -1,7 +1,7 @@
 from bootstrap_datepicker_plus import DatePickerInput
 from django import forms
 
-from managers.commons.constants import CORRECT_DATE_FORMAT
+from common.constants import CORRECT_DATE_FORMAT
 from managers.models import Project
 
 

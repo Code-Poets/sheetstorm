@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
 from django_countries.widgets import CountrySelectWidget
 
+from common.constants import CORRECT_DATE_FORMAT
 from users.common import constants
 from users.models import CustomUser
 
@@ -28,7 +29,10 @@ class SimpleUserChangeForm(ModelForm):
     class Meta:
         model = CustomUser
         fields = ("first_name", "last_name", "date_of_birth", "phone_number", "country")
-        widgets = {"country": CountrySelectWidget(), "date_of_birth": DatePickerInput(options={"format": "YYYY-MM-DD"})}
+        widgets = {
+            "country": CountrySelectWidget(),
+            "date_of_birth": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
+        }
 
 
 class AdminUserChangeForm(ModelForm):
@@ -39,7 +43,10 @@ class AdminUserChangeForm(ModelForm):
     class Meta:
         model = CustomUser
         fields = ("email", "first_name", "last_name", "date_of_birth", "phone_number", "country", "user_type")
-        widgets = {"country": CountrySelectWidget(), "date_of_birth": DatePickerInput(options={"format": "YYYY-MM-DD"})}
+        widgets = {
+            "country": CountrySelectWidget(),
+            "date_of_birth": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
+        }
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -52,7 +59,10 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = "__all__"
-        widgets = {"country": CountrySelectWidget(), "date_of_birth": DatePickerInput(options={"format": "YYYY-MM-DD"})}
+        widgets = {
+            "country": CountrySelectWidget(),
+            "date_of_birth": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
+        }
 
 
 class CustomUserSignUpForm(UserCreationForm):
