@@ -7,6 +7,7 @@ from django.db.models import QuerySet
 from django.forms import TextInput
 from django.utils.dateparse import parse_duration
 
+from common.convert import convert_string_work_hours_field_to_hour_and_minutes
 from common.convert import timedelta_to_string
 from employees.common.strings import ReportValidationStrings
 from employees.models import Report
@@ -31,11 +32,9 @@ class DurationFieldForm(forms.DurationField):
     widget = DurationInput
 
     def clean(self, value: str) -> str:
-        if value.count(":") != 1:
-            raise ValidationError(message=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
-        hours, minutes = value.split(":")
-        if not hours.isdigit() or not minutes.isdigit():
-            raise ValidationError(message=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
+        (hours, minutes) = convert_string_work_hours_field_to_hour_and_minutes(
+            value, ValidationError(message=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
+        )
         return f"{hours}:{minutes}:00"
 
 

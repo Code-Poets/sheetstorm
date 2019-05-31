@@ -5,6 +5,7 @@ from typing import Any
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from common.convert import convert_string_work_hours_field_to_hour_and_minutes
 from employees.common.constants import ReportModelConstants
 from employees.common.strings import ReportValidationStrings
 from employees.models import Report
@@ -21,11 +22,9 @@ class HoursField(serializers.DurationField):
         )
 
     def to_internal_value(self, data: str) -> timedelta:
-        if str(data).count(":") != 1:
-            raise ValidationError(detail=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
-        hours, minutes = str(data).split(":")
-        if not hours.isdigit() or not minutes.isdigit():
-            raise ValidationError(detail=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
+        (hours, minutes) = convert_string_work_hours_field_to_hour_and_minutes(
+            data, ValidationError(detail=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
+        )
         return timedelta(hours=int(hours), minutes=int(minutes))
 
 
