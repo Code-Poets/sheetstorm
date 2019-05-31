@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
-{% load rest_framework %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block extra_head %}
 <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
@@ -13,15 +13,14 @@
 <h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
 </br>
 <div class="modal-dialog">
-    {% for error in errors.non_field_errors %}
-    <h4><font color="red">{{ error }}</font></h4>
-    {% endfor %}
     <form action="{% url 'custom-report-detail' pk=report.pk %}" method="POST">
-        {% csrf_token %}
-        {% render_form serializer template_pack='rest_framework/vertical' %}
-        <input type="submit" value="{{ UI_text.UPDATE_REPORT_BUTTON.value }}">
-        <input type="submit" name="discard" value="{{ UI_text.DISCARD_CHANGES_BUTTON.value }}">
-        <input type="button" id="opener" value="{{ UI_text.DELETE_REPORT_BUTTON.value }}">
+       <div class="modal-dialog">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input type="submit" value="{{ UI_text.UPDATE_REPORT_BUTTON.value }}">
+            <button type="button" name="discard"><a href="{% url 'custom-report-list' %}">{{ UI_text.DISCARD_CHANGES_BUTTON.value }}</a></button>
+            <input type="button" id="opener" value="{{ UI_text.DELETE_REPORT_BUTTON.value }}">
+       </div>
     </form>
 </div>
 <div id="dialog" title="{{ UI_text.DELETE_POPUP_TITLE.value }}">

@@ -1,7 +1,6 @@
 import datetime
 import logging
 from typing import Any
-from typing import Union
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -31,8 +30,8 @@ from employees.common.strings import ProjectReportDetailStrings
 from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportDetailStrings
 from employees.common.strings import ReportListStrings
-from employees.forms import AdminReportForm
 from employees.forms import ProjectJoinForm
+from employees.forms import ReportForm
 from employees.models import Report
 from employees.models import TaskActivityType
 from employees.serializers import ReportSerializer
@@ -158,52 +157,25 @@ class ReportList(APIView):
         return redirect("custom-report-list")
 
 
-class ReportDetail(APIView):
-    serializer_class = ReportSerializer
-    model_class = Report
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+@method_decorator(login_required, name="dispatch")
+class ReportDetailView(UpdateView):
     template_name = "employees/report_detail.html"
-    user_interface_text = ReportDetailStrings
-    permission_classes = (permissions.IsAuthenticated,)
+    form_class = ReportForm
+    model = Report
 
-    def _create_serializer(self, report: Report, data: Any = None) -> ReportSerializer:
-        logger.info(f"Create serializer for report with id: {report.pk}")
-        if data is None:
-            logger.debug(f"Report data is None")
-            reports_serializer = self.serializer_class(report, context={"request": self.request})
-        else:
-            logger.debug(f"Data sent from user: {data}")
-            reports_serializer = self.serializer_class(report, data=data, context={"request": self.request})
-        reports_serializer.fields["project"].queryset = Project.objects.filter(members__id=report.author.pk).order_by(
-            "name"
-        )
-        return reports_serializer
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = ReportDetailStrings
+        return context_data
 
-    def get(self, _request: HttpRequest, pk: int) -> Response:
-        logger.info(f"User with id: {self.request.user.pk} get to the ReportDetail view on report with id: {pk}")
-        report = get_object_or_404(self.model_class, pk=pk)
-        serializer = self._create_serializer(report)
-        return Response({"serializer": serializer, "report": report, "UI_text": ReportDetailStrings})
+    def get_success_url(self) -> str:
+        return reverse("custom-report-list")
 
-    def post(self, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
-        logger.debug(f"User with id: {request.user.pk} sent post on ReportDetail view")
-        if "discard" not in request.POST:
-            logger.debug(f"User with id: {request.user.pk} want to updated report with id {pk}")
-            report = get_object_or_404(self.model_class, pk=pk)
-            serializer = self._create_serializer(report, request.data)
-            if not serializer.is_valid():
-                logger.warning(f"Serializer is not valid with those errors: {serializer.errors}")
-                return Response(
-                    {
-                        "serializer": serializer,
-                        "report": report,
-                        "errors": serializer.errors,
-                        "UI_text": ReportDetailStrings,
-                    }
-                )
-            serializer.save()
-            logger.info(f"Report with id: {report.pk} has been updated by user with id: {request.user.pk}")
-        return redirect("custom-report-list")
+    def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
+        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
+        self.object.editable = True
+        self.object.save()
+        return super().form_valid(form)
 
 
 def delete_report(_request: HttpRequest, pk: int) -> HttpResponseRedirectBase:
@@ -230,7 +202,7 @@ class AuthorReportView(DetailView):
 @method_decorator(login_required, name="dispatch")
 class AdminReportView(UpdateView):
     template_name = "employees/admin_report_detail.html"
-    form_class = AdminReportForm
+    form_class = ReportForm
     model = Report
 
     def get_context_data(self, **kwargs: Any) -> dict:
@@ -241,7 +213,7 @@ class AdminReportView(UpdateView):
     def get_success_url(self) -> str:
         return reverse("author-report-list", kwargs={"pk": self.object.author.id})
 
-    def form_valid(self, form: AdminReportForm) -> HttpResponseRedirectBase:
+    def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
         self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
         self.object.editable = True
         self.object.save()
@@ -264,7 +236,7 @@ class ProjectReportList(DetailView):
 @method_decorator(login_required, name="dispatch")
 class ProjectReportDetail(UpdateView):
     template_name = "employees/project_report_detail.html"
-    form_class = AdminReportForm
+    form_class = ReportForm
     model = Report
 
     def get_context_data(self, **kwargs: Any) -> dict:
@@ -275,7 +247,7 @@ class ProjectReportDetail(UpdateView):
     def get_success_url(self) -> str:
         return reverse("project-report-list", kwargs={"pk": self.object.project.id})
 
-    def form_valid(self, form: AdminReportForm) -> HttpResponseRedirectBase:
+    def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
         self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
         self.object.editable = True
         self.object.save()

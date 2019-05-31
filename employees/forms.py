@@ -39,11 +39,14 @@ class DurationFieldForm(forms.DurationField):
         return f"{hours}:{minutes}:00"
 
 
-class AdminReportForm(forms.ModelForm):
-
+class ReportForm(forms.ModelForm):
     work_hours = DurationFieldForm()
 
     class Meta:
         model = Report
         fields = ("date", "description", "task_activities", "project", "work_hours")
         widgets = {"date": DatePickerInput(format="%Y-%m-%d")}
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super(ReportForm, self).__init__(*args, **kwargs)
+        self.fields["project"].queryset = kwargs["instance"].author.projects.all()
