@@ -1,0 +1,8 @@
+#! /bin/bash -e
+
+DEFAULT_SHEETSTORM_PATH={{ home_dir }}/
+
+source $DEFAULT_SHEETSTORM_PATH/virtualenv/bin/activate
+
+cd $DEFAULT_SHEETSTORM_PATH/sheetstorm/
+python manage.py runserver
