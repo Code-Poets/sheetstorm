@@ -1,0 +1,12 @@
+- hosts:
+    - sheetstorm
+  vars_files:
+    - consts.yml
+    - versions.yml
+    - ../../sheetstorm-config/var.yml
+  vars:
+    server_configuration: remote
+  roles:
+    - { role: maintenance_mode, maintenance_mode: enable }
+    - configure_sheetstorm_environment
+    - { role: maintenance_mode, maintenance_mode: disable }
