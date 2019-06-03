@@ -317,8 +317,11 @@ class ExportUserReportView(DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
-class ExportReportsInProjectView(DetailView):
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
+class ExportReportsInProjectView(DetailView, UserIsManagerOfCurrentReportProjectMixin):
     model = Project
 
     def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
