@@ -1,0 +1,47 @@
+- become:      yes
+  become_user: sheetstorm
+  block:
+    - stat:
+        path:   ~/virtualenv
+      register: result
+
+    - name:  Create virtualenv for sheetstorm
+      command: >
+        virtualenv
+            ~/virtualenv
+            --python "python{{ python_version }}"
+            creates="~/virtualenv"
+      when:    result.stat.exists == False
+
+    - name:  Clone sheetstorm repositories
+      git:
+        repo:    "{{ sheetstorm_repository }}"
+        dest:    "{{ sheetstorm_dir }}"
+        version: "{{ sheetstorm_version | default('master') }}"
+        clone:   yes
+        update:  yes
+
+    - name:  Install requirements for sheetstorm
+      pip:
+        chdir:              "{{ sheetstorm_dir }}"
+        requirements:       requirements.lock
+        virtualenv:         ~/virtualenv
+        virtualenv_python:  "python{{ python_version }}"
+
+    - name:  Install gunicorn for sheetstorm
+      pip:
+        chdir:              "{{ sheetstorm_dir }}"
+        name:               gunicorn
+        virtualenv:         ~/virtualenv
+        virtualenv_python:  "python{{ python_version }}"
+
+    - become:      yes
+      become_user: root
+      block:
+        - name:   Upload configuration file
+          template:
+            src:    "local_settings.py.j2"
+            dest:   "{{ sheetstorm_dir }}/sheetstorm/settings/local_settings.py"
+            mode:   0644
+            owner:  sheetstorm
+            group:  sheetstorm

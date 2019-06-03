@@ -1,0 +1,24 @@
+- become:      yes
+  become_user: root
+  block:
+    - name:  Disable nginx proxy to maintenance page information
+      file:
+        path:  /etc/nginx/sites-enabled/maintenance
+        state: absent
+
+    - name:  Enable nginx proxy to sheetstorm
+      file:
+        src:   /etc/nginx/sites-available/sheetstorm
+        dest:  /etc/nginx/sites-enabled/sheetstorm
+        state: link
+
+    - name:  Start sheetstorm service
+      service:
+        name:  sheetstorm-web
+        state: started
+      when: server_configuration == 'remote'
+
+    - name:  Restart nginx service
+      service:
+        name:  nginx
+        state: restarted

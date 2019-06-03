@@ -1,0 +1,28 @@
+from .production import *
+from .secrets.secrets import (
+    SECRET_KEY,
+    EMAIL_PASSWORD,
+    SENTRY_DATA_SOURCE_NAME,
+)
+
+ALLOWED_HOSTS = [
+    '{{ sheetstorm_ip }}',
+    'sheetstorm.codepoets.it',
+]
+
+RAVEN_CONFIG = {
+    'dsn': SENTRY_DATA_SOURCE_NAME,
+}
+
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_PORT = 2525
+EMAIL_HOST_USER = "apikey"
+EMAIL_HOST_PASSWORD = EMAIL_PASSWORD
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "no-reply@sheetstorm"
+SERVER_EMAIL = "no-reply@sheetstorm"
+
+DATABASES['default']['USER']     = 'postgres'
+DATABASES['default']['PASSWORD'] = ''
+DATABASES['default']['HOST']     = ''
+DATABASES['default']['PORT']     = ''

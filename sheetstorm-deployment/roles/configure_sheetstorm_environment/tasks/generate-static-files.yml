@@ -1,0 +1,16 @@
+- become:      yes
+  become_user: sheetstorm
+  block:
+    - name: Check if sheetstorm repository exist
+      stat:
+        path:   ~/sheetstorm
+      register: result
+
+    - fail: msg="The sheetstorm repository must exist before you can generate static files"
+      when: not result.stat.exists
+
+    - name:   Generate static files
+      django_manage:
+          command:    collectstatic
+          app_path:   "{{ sheetstorm_dir }}"
+          virtualenv: "~/virtualenv"
