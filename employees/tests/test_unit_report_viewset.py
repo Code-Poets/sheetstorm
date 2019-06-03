@@ -481,7 +481,7 @@ class ProjectReportListTests(TestCase):
             for date in dates:
                 fields_to_check.append(
                     datetime.datetime.strftime(
-                        datetime.datetime.fromtimestamp(int(getattr(report, date).timestamp())), "%B %d, %Y, %-I:%M"
+                        datetime.datetime.fromtimestamp(int(getattr(report, date).timestamp())), "%B %-d, %Y, %-I:%M"
                     )
                 )
             for field in other_fields:
