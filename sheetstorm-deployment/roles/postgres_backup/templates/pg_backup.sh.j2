@@ -1,0 +1,40 @@
+#!/bin/bash -e
+
+database_name="$1"
+POSTGRESQL_BACKUP_DIR=~/postgresql_backup
+DATE=$(date +"%Y-%m-%d-%H:%M")
+SHEETSTORM_VERSION="$(cd {{ sheetstorm_dir}}/; git describe --always --abbrev=16)"
+
+if [ ! -d $POSTGRESQL_BACKUP_DIR ]; then
+    mkdir $POSTGRESQL_BACKUP_DIR/
+fi
+if [ -z $database_name ]; then
+    echo "Please supply name of database argument."
+    exit 1
+fi
+
+pg_dump                                             \
+    --username=postgres                             \
+    --data-only                                     \
+    --format plain                                  \
+    --exclude-table auth_group                      \
+    --exclude-table auth_group_permissions          \
+    --exclude-table auth_permission                 \
+    --exclude-table authtoken_token                 \
+    --exclude-table django_admin_log                \
+    --exclude-table django_content_type             \
+    --exclude-table django_migrations               \
+    --exclude-table django_session                  \
+    --exclude-table django_site                     \
+    --exclude-table socialaccount_socialaccount     \
+    --exclude-table socialaccount_socialapp         \
+    --exclude-table socialaccount_socialapp_sites   \
+    --exclude-table socialaccount_socialtoken       \
+    $database_name > $POSTGRESQL_BACKUP_DIR/"$database_name"_${SHEETSTORM_VERSION}_${DATE}.sql
+
+# Cleanup database backups older than 30 days.
+find $POSTGRESQL_BACKUP_DIR          \
+    -name "$database_name*.backup"   \
+    -mtime +30                       \
+    -type f                          \
+    -delete

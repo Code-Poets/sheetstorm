@@ -1,0 +1,33 @@
+- become:      yes
+  become_user: root
+  block:
+    - name:  Create home bin directory
+      file:
+        path:  "{{ home_dir }}/bin/"
+        state: directory
+      become:      yes
+      become_user: sheetstorm
+
+    - name:  Copy scripts for sheetstorm
+      template:
+        src:   pg_backup.sh.j2
+        dest:  "{{ home_dir }}/bin/pg_backup.sh"
+        owner: sheetstorm
+        group: sheetstorm
+        mode:  0555
+
+    - name:  Copy cronjob that runs postgresql backup
+      template:
+        src:   crontab.txt.j2
+        dest:  "{{ home_dir }}/crontab.txt"
+        owner: sheetstorm
+        group: sheetstorm
+        mode:  0444
+      register: result
+
+- become:      yes
+  become_user: sheetstorm
+  block:
+    - name:    Ensure crontab file is active.
+      command: crontab "{{ home_dir }}/crontab.txt"
+      when: result|changed
