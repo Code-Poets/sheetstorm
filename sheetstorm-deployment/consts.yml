@@ -1,0 +1,5 @@
+sheetstorm_repository: https://github.com/Code-Poets/sheetstorm
+home_dir:              /home/sheetstorm
+sheetstorm_dir:        "{{ home_dir }}/sheetstorm"
+sheetstorm_secret_dir: ../../sheetstorm-secret
+static_file_dir:       "{{ sheetstorm_dir }}/sheetstorm/static/"
