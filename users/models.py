@@ -142,6 +142,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def is_admin(self) -> bool:
         return self.user_type == CustomUser.UserType.ADMIN.name
 
+    @property
+    def is_manager(self) -> bool:
+        return self.user_type == CustomUser.UserType.MANAGER.name
+
+    @property
+    def is_employee(self) -> bool:
+        return self.user_type == CustomUser.UserType.EMPLOYEE.name
+
     def get_reports_created(self) -> QuerySet:
         return self.report_set.select_related("task_activities").order_by("-date", "project__name")
 

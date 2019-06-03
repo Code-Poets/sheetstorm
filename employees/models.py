@@ -53,8 +53,6 @@ class ReportQuerySet(models.QuerySet):
 class Report(models.Model):
     objects = ReportQuerySet.as_manager()
 
-    objects = ReportQuerySet.as_manager()
-
     date = models.DateField()
     description = models.TextField(max_length=ReportModelConstants.MAX_DESCRIPTION_LENGTH.value)
     task_activities = models.ForeignKey(TaskActivityType, on_delete=models.DO_NOTHING, default=1)

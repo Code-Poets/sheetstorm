@@ -5,20 +5,15 @@ from django.utils import timezone
 from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
-from employees.common.strings import TaskActivitiesStrings
 from employees.factories import ReportFactory
-from employees.models import TaskActivityType
 from managers.factories import ProjectFactory
-from users.factories import UserFactory
+from users.factories import AdminUserFactory
 
 
 class DataSetUpToTests(TestCase):
     def setUp(self):
         super().setUp()
-        task_type = TaskActivityType(pk=1, name="Other")
-        task_type.full_clean()
-        task_type.save()
-        self.user = UserFactory()
+        self.user = AdminUserFactory()
         self.project = ProjectFactory(
             name="aaa",
             start_date=timezone.now() + timezone.timedelta(days=1),
@@ -64,9 +59,7 @@ class ExportMethodTestForProject(DataSetUpToTests):
         self.assertEqual(self.report.date, str(self.workbook_for_project.active.cell(row=2, column=1).value))
 
     def test_task_activity_should_be_the_same_in_excel(self):
-        self.assertEqual(
-            TaskActivitiesStrings.OTHER.value, self.workbook_for_project.active.cell(row=2, column=2).value
-        )
+        self.assertEqual(self.report.task_activities.name, self.workbook_for_project.active.cell(row=2, column=2).value)
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"
@@ -93,7 +86,7 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
         self.assertEqual(self.report.project.name, str(self.workbook_for_user.active.cell(row=2, column=2).value))
 
     def test_task_activity_should_be_the_same_in_excel(self):
-        self.assertEqual(TaskActivitiesStrings.OTHER.value, self.workbook_for_user.active.cell(row=2, column=3).value)
+        self.assertEqual(self.report.task_activities.name, self.workbook_for_user.active.cell(row=2, column=3).value)
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"

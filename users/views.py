@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from typing import Type
 from typing import Union
 
@@ -9,10 +10,10 @@ from django.contrib.auth.views import PasswordResetCompleteView
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.auth.views import PasswordResetDoneView
 from django.contrib.auth.views import PasswordResetView
+from django.db.models import QuerySet
 from django.forms import ModelForm
 from django.http import HttpRequest
 from django.http import HttpResponse
-from django.http.response import HttpResponseRedirect
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
@@ -102,6 +103,7 @@ class UserSignUpSuccess(TemplateView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class UserCreate(CreateView):
     template_name = "user_create.html"
     form_class = CustomUserCreationForm
@@ -109,17 +111,26 @@ class UserCreate(CreateView):
     def get_success_url(self) -> str:
         return reverse("custom-users-list")
 
-    def from_valid(self, form: CustomUserCreationForm) -> HttpResponseRedirect:
-        super().form_valid(form)
-        return redirect(self.get_success_url())
-
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.EMPLOYEE.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.ADMIN.name,
+        ]
+    ),
+    name="dispatch",
+)
 class UserUpdate(UpdateView):
     template_name = "user_update.html"
     form_class = SimpleUserChangeForm
     admins_form_class = AdminUserChangeForm
     model = CustomUser
+
+    def get_object(self, queryset: Optional[QuerySet] = None) -> CustomUser:
+        return self.request.user
 
     def get_form_class(self) -> Type[ModelForm]:
         if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
@@ -127,7 +138,7 @@ class UserUpdate(UpdateView):
         return self.form_class
 
     def get_success_url(self) -> str:
-        return reverse("custom-user-update", kwargs={"pk": self.object.pk})
+        return reverse("custom-user-update")
 
     def form_valid(self, form: SimpleUserChangeForm) -> HttpResponse:
         super().form_valid(form)
@@ -135,24 +146,25 @@ class UserUpdate(UpdateView):
         return redirect(self.get_success_url())
 
 
+@method_decorator(login_required, name="dispatch")
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class UserUpdateByAdmin(APIView):
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "users_detail.html"
+    serializer_class = UserUpdateByAdminSerializer
 
-    @classmethod
-    def get(cls, request: HttpRequest, pk: int) -> Response:
+    def get(self, request: HttpRequest, pk: int) -> Response:
         logger.info(
             f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view with data from user with id: {pk}"
         )
         user_detail = get_object_or_404(CustomUser, pk=pk)
-        serializer = UserUpdateByAdminSerializer(user_detail, context={"request": request})
+        serializer = self.serializer_class(user_detail, context={"request": request})
         return Response({"serializer": serializer, "user_detail": user_detail})
 
-    @classmethod
-    def post(cls, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
+    def post(self, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
         logger.info(f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view to update user with id: {pk}")
         user_detail = get_object_or_404(CustomUser, pk=pk)
-        serializer = UserUpdateByAdminSerializer(user_detail, data=request.data, context={"request": request})
+        serializer = self.serializer_class(user_detail, data=request.data, context={"request": request})
         if not serializer.is_valid():
             logger.debug(f"Serializer is not valid with those errors: {serializer.errors}")
             return Response({"serializer": serializer, "user_detail": user_detail, "errors": serializer.errors})

@@ -200,7 +200,7 @@ class ProjectUpdateViewTestCase(ProjectBaseTests):
         self.client.force_login(user=user_manager)
         self.data["managers"] = [self.user.pk, user_manager.pk]
         response = self.client.post(self.url, self.data)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 404)
         self.project.refresh_from_db()
         self.assertEqual(self.project.managers.count(), 0)
 
