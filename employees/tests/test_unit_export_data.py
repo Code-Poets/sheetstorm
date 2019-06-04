@@ -6,8 +6,11 @@ from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.factories import ReportFactory
+from employees.models import Report
 from managers.factories import ProjectFactory
 from users.factories import AdminUserFactory
+from users.factories import ManagerUserFactory
+from users.factories import UserFactory
 
 
 class DataSetUpToTests(TestCase):
@@ -97,3 +100,26 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
 
     def test_description_should_be_the_same_in_excel(self):
         self.assertEqual(self.report.description, self.workbook_for_user.active.cell(row=2, column=5).value)
+
+
+class TestExportingFunctions(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.employee = UserFactory()
+        self.manager = ManagerUserFactory()
+        self.project = ProjectFactory()
+        self.project.members.add(self.employee)
+        # creating reports in desc order
+        for i in range(4, 0, -1):
+            ReportFactory(author=self.employee, project=self.project, date=f"2019-06-{i}")
+        self.report_asc = Report.objects.filter(author__id=self.employee.pk).order_by("-date")
+
+    def test_that_unsorted_reported_will_be_sorted_asc_in_project_export(self):
+        project_workbook = generate_xlsx_for_project(self.project)
+        for i, element in enumerate(self.report_asc):
+            self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)
+
+    def test_that_unsorted_reported_will_be_sorted_asc_in_user_export(self):
+        project_workbook = generate_xlsx_for_single_user(self.employee)
+        for i, element in enumerate(self.report_asc):
+            self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)

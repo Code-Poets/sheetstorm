@@ -27,3 +27,8 @@ class UserFactory(factory.DjangoModelFactory):
 class AdminUserFactory(UserFactory):
 
     user_type = CustomUser.UserType.ADMIN.name
+
+
+class ManagerUserFactory(UserFactory):
+
+    user_type = CustomUser.UserType.MANAGER.name

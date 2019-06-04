@@ -27,9 +27,10 @@ class AccessPermissionsTestCase(TestCase):
             ],
             reverse("custom-report-delete", kwargs={"pk": self.report.pk}): [
                 CustomUser.UserType.EMPLOYEE.name,
+                CustomUser.UserType.MANAGER.name,
                 CustomUser.UserType.ADMIN.name,
             ],
-            reverse("author-report-list", kwargs={"pk": self.report.pk}): [CustomUser.UserType.ADMIN.name],
+            reverse("author-report-list", kwargs={"pk": self.user.pk}): [CustomUser.UserType.ADMIN.name],
             reverse("admin-report-detail", kwargs={"pk": self.report.pk}): [CustomUser.UserType.ADMIN.name],
             reverse("project-report-list", kwargs={"pk": self.report.project.pk}): [
                 CustomUser.UserType.MANAGER.name,
@@ -41,7 +42,8 @@ class AccessPermissionsTestCase(TestCase):
             ],
             reverse("export-data-xlsx", kwargs={"pk": self.user.pk}): [CustomUser.UserType.ADMIN.name],
             reverse("export-project-data-xlsx", kwargs={"pk": self.report.project.pk}): [
-                CustomUser.UserType.ADMIN.name
+                CustomUser.UserType.MANAGER.name,
+                CustomUser.UserType.ADMIN.name,
             ],
             # Managers.
             reverse("custom-projects-list"): [CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name],
@@ -66,12 +68,27 @@ class AccessPermissionsTestCase(TestCase):
             for user_type in CustomUser.UserType:
 
                 with self.subTest(user_type=user_type, url=url):
-                    user = UserFactory(user_type=user_type)
+                    user = UserFactory(user_type=user_type.name)
                     self.client.force_login(user)
+
+                    self.report.author = user
+                    self.report.full_clean()
+                    self.report.save()
+                    if user_type == CustomUser.UserType.MANAGER:
+                        self.report.project.managers.set([user])
+
                     response = self.client.get(url)
 
-                    if user_type in allowed_user_types:
-                        self.assertEqual(response.status_code, 200)
+                    if user_type.name in allowed_user_types:
+                        self.assertEqual(
+                            response.status_code,
+                            200,
+                            f'Response for url "{url}" for user type "{user_type.name}" is not 200.',
+                        )
                     else:
-                        self.assertEqual(response.status_code, 302)
+                        self.assertIn(
+                            response.status_code,
+                            [302, 404],
+                            f'Response for url "{url}" for user type "{user_type.name}" is not 302 or 404.',
+                        )
                         self.assertRedirects(response, reverse("login") + f"?next={url}")

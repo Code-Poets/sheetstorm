@@ -116,7 +116,7 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
     workbook = Workbook()
     for author in authors:
         worksheet = set_active_worksheet_name(workbook, author)
-        reports = author.projects.get(pk=project.pk).report_set.filter(author_id=author.pk)
+        reports = author.projects.get(pk=project.pk).report_set.filter(author_id=author.pk).order_by("-date")
         fill_headers(
             worksheet,
             ExcelGeneratorSettingsConstants.HEADERS_FOR_USER_IN_PROJECT.value,
