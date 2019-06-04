@@ -20,24 +20,29 @@ class TaskActivityTypeConstans(Enum):
 class ExcelGeneratorSettingsConstants(Enum):
     TOTAL = "Total"
     HEADERS_ROW = 1
-    FIRST_ROW_FOR_DATA = 2
-    HEADERS_FOR_SINGLE_USER = ["Date", "Project", "Task activity", "Hours", "Description"]
-    COLUMNS_WIDTH_FOR_SINGLE_USER = [12, 20, 30, 6, 100]
-    COLUMNS_WIDTH_FOR_PROJECT = [12, 30, 6, 100]
-    HEADERS_FOR_USER_IN_PROJECT = ["Date", "Task activity", "Hours", "Description"]
-    HOURS_COLUMN_FOR_REPORTS_IN_PROJECT = 3
     TOTAL_COLUMN = 1
-    DESCRIPTION_COLUMN_FOR_SINGLE_USER = 5
-    DESCRIPTION_COLUMN_FOR_REPORTS_IN_PROJECT = 4
-    HOURS_COLUMN_FOR_SINGLE_USER = 4
+    FIRST_ROW_FOR_DATA = 2
+
+    HEADERS_FOR_SINGLE_USER = ["Date", "Daily hours", "Project", "Task activity", "Hours", "Description"]
+    COLUMNS_WIDTH_FOR_SINGLE_USER = [12, 12, 20, 30, 6, 100]
+    DAILY_HOURS_COLUMN_FOR_SINGLE_USER = 2
+    HOURS_COLUMN_FOR_SINGLE_USER = 5
+    DESCRIPTION_COLUMN_FOR_SINGLE_USER = 6
+
+    HEADERS_FOR_USER_IN_PROJECT = ["Date", "Daily hours", "Task activity", "Hours", "Description"]
+    COLUMNS_WIDTH_FOR_PROJECT = [12, 12, 30, 6, 100]
+    DAILY_HOURS_COLUMN_FOR_REPORTS_IN_PROJECT = 2
+    HOURS_COLUMN_FOR_REPORTS_IN_PROJECT = 4
+    DESCRIPTION_COLUMN_FOR_REPORTS_IN_PROJECT = 5
+
     VERCTICAL_TOP = "top"
     CENTER_ALINGMENT = "center"
     FONT = "Calibri"
     HOURS_FORMAT = "h:mm"
     TIMEVALUE_FORMULA = '=timevalue("{}")'
     TOTAL_HOURS_FORMAT = "[h]:mm"
-    TOTAL_HOURS_FORMULA_FOR_SINGLE_USER = "=SUM(D1:D{})"
-    TOTAL_HOURS_FORMULA_REPORTS_IN_PROJECT = "=SUM(C1:C{})"
+    TOTAL_HOURS_FORMULA_FOR_SINGLE_USER = "=SUM(E1:D{})"
+    TOTAL_HOURS_FORMULA_REPORTS_IN_PROJECT = "=SUM(D1:C{})"
     CONTENT_TYPE_FORMAT = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.xlsx"'
     BORDER = "double"

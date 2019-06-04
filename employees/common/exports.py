@@ -1,3 +1,5 @@
+from typing import List
+
 from openpyxl import Workbook
 from openpyxl.cell import Cell
 from openpyxl.styles import Alignment
@@ -8,6 +10,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
 from employees.common.constants import ExcelGeneratorSettingsConstants
+from employees.models import Report
 from managers.models import Project
 from users.models import CustomUser
 
@@ -54,6 +57,8 @@ def fill_current_report_data(storage_data: dict):
             set_and_fill_description_cell(cell, cell_value)
         elif col_num == storage_data["hours_column"]:
             set_and_fill_hours_cell(cell, cell_value)
+        elif col_num == storage_data["daily_hours_column"]:
+            set_and_fill_hours_cell(cell, cell_value)
         else:
             cell.value = cell_value
 
@@ -74,6 +79,29 @@ def set_active_worksheet_name(workbook: Workbook, author: CustomUser) -> Workshe
     return worksheet
 
 
+def get_report_date_and_daily_hours(reports_date: List[str], date: str, reports: Report):
+    # returns report_date and daily_hours
+    # if this is first occurrence of day
+    # other way returns None
+
+    def set_report_date_and_daily_hours(date: str, reports: Report, reports_date: List[str]):
+        # set daily_hours from query method which gives summary of daily hours
+        daily_hours = reports.get_report_work_hours_sum_for_date(date)
+        reports_date.append(date)
+        return (date, daily_hours, reports_date)
+
+    daily_hours = None
+    report_date = reports_date[-1] if len(reports_date) > 0 else None
+    if report_date is not None:
+        if report_date == date:
+            report_date = None
+        else:
+            (report_date, daily_hours, reports_date) = set_report_date_and_daily_hours(date, reports, reports_date)
+    else:
+        (report_date, daily_hours, reports_date) = set_report_date_and_daily_hours(date, reports, reports_date)
+    return (reports_date, report_date, daily_hours)
+
+
 def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
     reports = author.get_reports_created()
     workbook = Workbook()
@@ -85,10 +113,13 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
     )
     current_row = ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value
 
+    reports_date = []
     for report in reports:
+        (reports_date, report_date, daily_hours) = get_report_date_and_daily_hours(reports_date, report.date, reports)
         report_data = {
             "data": [
-                report.date,
+                report_date,
+                daily_hours,
                 report.project.name,
                 report.task_activities.name,
                 report.work_hours_str,
@@ -98,6 +129,7 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
             "current_row": current_row,
             "description_column": ExcelGeneratorSettingsConstants.DESCRIPTION_COLUMN_FOR_SINGLE_USER.value,
             "hours_column": ExcelGeneratorSettingsConstants.HOURS_COLUMN_FOR_SINGLE_USER.value,
+            "daily_hours_column": ExcelGeneratorSettingsConstants.DAILY_HOURS_COLUMN_FOR_REPORTS_IN_PROJECT.value,
         }
         fill_current_report_data(report_data)
         current_row += 1
@@ -124,13 +156,24 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
         )
 
         current_row = ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value
+        reports_date = []
         for report in reports:
+            (reports_date, report_date, daily_hours) = get_report_date_and_daily_hours(
+                reports_date, report.date, reports
+            )
             storage_data = {
-                "data": [report.date, report.task_activities.name, report.work_hours_str, report.description],
+                "data": [
+                    report_date,
+                    daily_hours,
+                    report.task_activities.name,
+                    report.work_hours_str,
+                    report.description,
+                ],
                 "worksheet": worksheet,
                 "current_row": current_row,
                 "description_column": ExcelGeneratorSettingsConstants.DESCRIPTION_COLUMN_FOR_REPORTS_IN_PROJECT.value,
                 "hours_column": ExcelGeneratorSettingsConstants.HOURS_COLUMN_FOR_REPORTS_IN_PROJECT.value,
+                "daily_hours_column": ExcelGeneratorSettingsConstants.DAILY_HOURS_COLUMN_FOR_REPORTS_IN_PROJECT.value,
             }
             fill_current_report_data(storage_data)
             current_row += 1

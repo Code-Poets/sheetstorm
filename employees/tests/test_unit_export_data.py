@@ -62,17 +62,17 @@ class ExportMethodTestForProject(DataSetUpToTests):
         self.assertEqual(self.report.date, str(self.workbook_for_project.active.cell(row=2, column=1).value))
 
     def test_task_activity_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.task_activities.name, self.workbook_for_project.active.cell(row=2, column=2).value)
+        self.assertEqual(self.report.task_activities.name, self.workbook_for_project.active.cell(row=2, column=3).value)
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
             ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(work_hours),
-            self.workbook_for_project.active.cell(row=2, column=3).value,
+            self.workbook_for_project.active.cell(row=2, column=4).value,
         )
 
     def test_description_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.description, self.workbook_for_project.active.cell(row=2, column=4).value)
+        self.assertEqual(self.report.description, self.workbook_for_project.active.cell(row=2, column=5).value)
 
 
 class ExportMethodTestForSingleUser(DataSetUpToTests):
@@ -86,20 +86,20 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
         self.assertEqual(self.report.date, str(self.workbook_for_user.active.cell(row=2, column=1).value))
 
     def test_project_name_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.project.name, str(self.workbook_for_user.active.cell(row=2, column=2).value))
+        self.assertEqual(self.report.project.name, str(self.workbook_for_user.active.cell(row=2, column=3).value))
 
     def test_task_activity_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.task_activities.name, self.workbook_for_user.active.cell(row=2, column=3).value)
+        self.assertEqual(self.report.task_activities.name, self.workbook_for_user.active.cell(row=2, column=4).value)
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
             ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(work_hours),
-            self.workbook_for_user.active.cell(row=2, column=4).value,
+            self.workbook_for_user.active.cell(row=2, column=5).value,
         )
 
     def test_description_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.description, self.workbook_for_user.active.cell(row=2, column=5).value)
+        self.assertEqual(self.report.description, self.workbook_for_user.active.cell(row=2, column=6).value)
 
 
 class TestExportingFunctions(TestCase):
