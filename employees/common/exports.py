@@ -46,7 +46,10 @@ def set_and_fill_description_cell(cell: Cell, cell_value: str):
 
 
 def set_and_fill_hours_cell(cell: Cell, cell_value: str):
-    cell.value = ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(cell_value)
+    if cell_value is not None:
+        cell.value = ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(cell_value)
+    else:
+        cell.value = cell_value
     cell.number_format = ExcelGeneratorSettingsConstants.HOURS_FORMAT.value
 
 
@@ -66,7 +69,9 @@ def fill_current_report_data(storage_data: dict):
 def summarizing_reports(worksheet: Worksheet, last_row: int, hours_column: int, formula: str):
     total_cell = worksheet.cell(row=last_row, column=ExcelGeneratorSettingsConstants.TOTAL_COLUMN.value)
     total_cell.value = ExcelGeneratorSettingsConstants.TOTAL.value
-    set_format_styles_for_main_cells(total_cell, is_header=False)
+    for column_number in range(1, worksheet.max_column + 1):
+        set_format_styles_for_main_cells(worksheet.cell(row=last_row, column=column_number), is_header=False)
+
     total_hours_cell = worksheet.cell(row=last_row, column=hours_column)
     total_hours_cell.value = formula.format(last_row - 1)
     total_hours_cell.number_format = ExcelGeneratorSettingsConstants.TOTAL_HOURS_FORMAT.value
