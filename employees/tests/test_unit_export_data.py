@@ -109,17 +109,25 @@ class TestExportingFunctions(TestCase):
         self.manager = ManagerUserFactory()
         self.project = ProjectFactory()
         self.project.members.add(self.employee)
+        reports_in_day = 2
         # creating reports in desc order
         for i in range(4, 0, -1):
-            ReportFactory(author=self.employee, project=self.project, date=f"2019-06-{i}")
+            for _ in range(reports_in_day):
+                ReportFactory(author=self.employee, project=self.project, date=f"2019-06-{i}")
         self.report_asc = Report.objects.filter(author__id=self.employee.pk).order_by("-date")
 
     def test_that_unsorted_reported_will_be_sorted_asc_in_project_export(self):
         project_workbook = generate_xlsx_for_project(self.project)
         for i, element in enumerate(self.report_asc):
-            self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)
+            if i % 2 == 0:
+                self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)
+            else:
+                self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, None)
 
     def test_that_unsorted_reported_will_be_sorted_asc_in_user_export(self):
         project_workbook = generate_xlsx_for_single_user(self.employee)
         for i, element in enumerate(self.report_asc):
-            self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)
+            if i % 2 == 0:
+                self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)
+            else:
+                self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, None)
