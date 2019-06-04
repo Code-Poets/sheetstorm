@@ -2,6 +2,7 @@ import logging
 from typing import Any
 from typing import Set
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.query import QuerySet
@@ -11,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from managers.commons.constants import MAX_NAME_LENGTH
 from managers.commons.constants import MESSAGE_FOR_CORRECT_DATE_FORMAT
+from managers.commons.constants import STOP_DATE_VALIDATION_ERROR_MESSAGE
 from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
@@ -44,6 +46,11 @@ class Project(models.Model):
 
     def get_report_ordered(self) -> QuerySet:
         return self.report_set.select_related("task_activities").order_by("author__email", "-date", "-creation_date")
+
+    def clean(self) -> None:
+        super().clean()
+        if self.stop_date is not None and self.start_date > self.stop_date:
+            raise ValidationError(message=STOP_DATE_VALIDATION_ERROR_MESSAGE)
 
 
 @receiver(m2m_changed, sender=Project.managers.through)

@@ -1,9 +1,11 @@
 from datetime import datetime
+from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from managers.commons.constants import MAX_NAME_LENGTH
+from managers.commons.constants import STOP_DATE_VALIDATION_ERROR_MESSAGE
 from managers.models import Project
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.utils import generate_random_phone_number
@@ -76,10 +78,6 @@ class TestProjectModelField(BaseModelTestCase):
     def test_project_model_stop_date_field_may_be_empty(self):
         self.field_should_accept_null("stop_date")
 
-    def test_project_model_stop_date_field_should_not_accept_non_date_or_datetime_value(self):
-        self.field_should_not_accept_input("stop_date", generate_random_phone_number(MAX_NAME_LENGTH))
-        self.field_should_not_accept_input("stop_date", generate_random_string_from_letters_and_digits(MAX_NAME_LENGTH))
-
     def test_project_model_terminated_field_should_accept_correct_input(self):
         self.field_should_accept_input("terminated", True)
 
@@ -99,3 +97,12 @@ class TestProjectModelField(BaseModelTestCase):
         project.save()
         project.members.add(self.member)
         self.assertTrue(project.members.all().filter(email=self.member.email).exists())
+
+    def test_project_model_end_date_should_not_be_before_start_day(self):
+        project = self.default_model()
+        project.stop_date = project.start_date - timedelta(1)
+        with self.assertRaises(ValidationError) as exception:
+            project.full_clean()
+            project.save()
+        self.assertEqual(STOP_DATE_VALIDATION_ERROR_MESSAGE, exception.exception.messages.pop())
+        self.assertFalse(Project.objects.all().exists())
