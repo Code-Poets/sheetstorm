@@ -59,20 +59,39 @@ class ExportMethodTestForProject(DataSetUpToTests):
         self.assertEqual(len(authors), 1)
 
     def test_date_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.date, str(self.workbook_for_project.active.cell(row=2, column=1).value))
+        self.assertEqual(
+            self.report.date,
+            str(
+                self.workbook_for_project.active.cell(
+                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=1
+                ).value
+            ),
+        )
 
     def test_task_activity_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.task_activities.name, self.workbook_for_project.active.cell(row=2, column=2).value)
+        self.assertEqual(
+            self.report.task_activities.name,
+            self.workbook_for_project.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=3
+            ).value,
+        )
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
             ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(work_hours),
-            self.workbook_for_project.active.cell(row=2, column=3).value,
+            self.workbook_for_project.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=4
+            ).value,
         )
 
     def test_description_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.description, self.workbook_for_project.active.cell(row=2, column=4).value)
+        self.assertEqual(
+            self.report.description,
+            self.workbook_for_project.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=5
+            ).value,
+        )
 
 
 class ExportMethodTestForSingleUser(DataSetUpToTests):
@@ -83,23 +102,49 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
         self.assertEqual(len(sheet_names), 1)
 
     def test_date_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.date, str(self.workbook_for_user.active.cell(row=2, column=1).value))
+        self.assertEqual(
+            self.report.date,
+            str(
+                self.workbook_for_user.active.cell(
+                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=1
+                ).value
+            ),
+        )
 
     def test_project_name_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.project.name, str(self.workbook_for_user.active.cell(row=2, column=2).value))
+        self.assertEqual(
+            self.report.project.name,
+            str(
+                self.workbook_for_user.active.cell(
+                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=3
+                ).value
+            ),
+        )
 
     def test_task_activity_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.task_activities.name, self.workbook_for_user.active.cell(row=2, column=3).value)
+        self.assertEqual(
+            self.report.task_activities.name,
+            self.workbook_for_user.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=4
+            ).value,
+        )
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
             ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(work_hours),
-            self.workbook_for_user.active.cell(row=2, column=4).value,
+            self.workbook_for_user.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=5
+            ).value,
         )
 
     def test_description_should_be_the_same_in_excel(self):
-        self.assertEqual(self.report.description, self.workbook_for_user.active.cell(row=2, column=5).value)
+        self.assertEqual(
+            self.report.description,
+            self.workbook_for_user.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=6
+            ).value,
+        )
 
 
 class TestExportingFunctions(TestCase):
@@ -109,17 +154,45 @@ class TestExportingFunctions(TestCase):
         self.manager = ManagerUserFactory()
         self.project = ProjectFactory()
         self.project.members.add(self.employee)
+        reports_in_day = 2
         # creating reports in desc order
         for i in range(4, 0, -1):
-            ReportFactory(author=self.employee, project=self.project, date=f"2019-06-{i}")
+            for _ in range(reports_in_day):
+                ReportFactory(author=self.employee, project=self.project, date=f"2019-06-{i}")
         self.report_asc = Report.objects.filter(author__id=self.employee.pk).order_by("-date")
 
     def test_that_unsorted_reported_will_be_sorted_asc_in_project_export(self):
         project_workbook = generate_xlsx_for_project(self.project)
         for i, element in enumerate(self.report_asc):
-            self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)
+            if i % 2 == 0:
+                self.assertEqual(
+                    project_workbook.active.cell(
+                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
+                    ).value,
+                    element.date,
+                )
+            else:
+                self.assertEqual(
+                    project_workbook.active.cell(
+                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
+                    ).value,
+                    None,
+                )
 
     def test_that_unsorted_reported_will_be_sorted_asc_in_user_export(self):
         project_workbook = generate_xlsx_for_single_user(self.employee)
         for i, element in enumerate(self.report_asc):
-            self.assertEqual(project_workbook.active.cell(row=2 + i, column=1).value, element.date)
+            if i % 2 == 0:
+                self.assertEqual(
+                    project_workbook.active.cell(
+                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
+                    ).value,
+                    element.date,
+                )
+            else:
+                self.assertEqual(
+                    project_workbook.active.cell(
+                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
+                    ).value,
+                    None,
+                )
