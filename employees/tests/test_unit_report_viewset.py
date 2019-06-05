@@ -177,12 +177,13 @@ class ReportCustomListTests(TestCase):
         )
         self.report.full_clean()
         self.report.save()
-        self.url = reverse("custom-report-list")
+        self.view_kwargs = {"year": datetime.datetime.now().date().year, "month": datetime.datetime.now().date().month}
+        self.url = reverse("custom-report-list", kwargs=self.view_kwargs)
 
     def test_custom_list_view_should_display_users_report_list_on_get(self):
         request = APIRequestFactory().get(path=self.url)
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.report.description)
         reports = response.data["object_list"]
@@ -191,7 +192,7 @@ class ReportCustomListTests(TestCase):
     def test_custom_list_view_should_not_be_accessible_for_unauthenticated_user(self):
         request = APIRequestFactory().get(path=self.url)
         request.user = AnonymousUser()
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 302)
 
     def test_custom_list_view_should_not_display_other_users_reports(self):
@@ -214,7 +215,7 @@ class ReportCustomListTests(TestCase):
 
         request = APIRequestFactory().get(path=self.url)
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, other_report.description)
 
@@ -230,7 +231,7 @@ class ReportCustomListTests(TestCase):
             },
         )
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Report.objects.all().count(), 2)
 
@@ -240,7 +241,7 @@ class ReportCustomListTests(TestCase):
             data={"description": "Some description", "project": self.project, "work_hours": Decimal("8.00")},
         )
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Report.objects.all().count(), 1)
         self.assertIsNotNone(response.data["errors"])
@@ -292,13 +293,12 @@ class ReportCustomListTests(TestCase):
         request = APIRequestFactory().get(path=self.url)
         request.user = self.user
         view = ReportList()
+        view.kwargs = self.view_kwargs
         view.request = request
         queryset = view.get_queryset()
-        self.assertEqual(len(queryset), 3)
-        self.assertFalse(other_user_report in queryset)
+        self.assertEqual(len(queryset), 2)
         self.assertEqual(queryset[0], other_report_1)
         self.assertEqual(queryset[1], self.report)
-        self.assertEqual(queryset[2], other_report_2)
 
     def test_custom_report_list_add_project_method_should_register_current_user_as_project_member(self):
         new_project = Project(name="New Project", start_date=datetime.datetime.now())
@@ -321,7 +321,7 @@ class ReportCustomListTests(TestCase):
         request.user = self.user
         view = ReportList()
         view.request = request
-        serializer = view._create_serializer()
+        serializer = view._create_serializer(default_date=str(datetime.datetime.now().date()))
         self.assertTrue(new_project not in serializer.fields["project"].queryset)
         self.assertTrue(self.project in serializer.fields["project"].queryset)
 
@@ -333,7 +333,7 @@ class ReportCustomListTests(TestCase):
         view = ReportList()
         view.request = request
         with freeze_time("2010-01-21"):
-            serializer = view._create_serializer()
+            serializer = view._create_serializer(default_date=str(datetime.datetime.now().date()))
             self.assertEqual(serializer.fields["date"].initial, "2010-01-21")
 
     def test_custom_report_list_create_serializer_method_should_return_serializer_filled_with_data_that_was_provided(
@@ -352,7 +352,7 @@ class ReportCustomListTests(TestCase):
         request.user = self.user
         view = ReportList()
         view.request = request
-        serializer = view._create_serializer(data=request.POST)
+        serializer = view._create_serializer(default_date=str(datetime.datetime.now().date()), data=request.POST)
         self.assertTrue(serializer.is_valid())
 
     def test_custom_report_list_view_should_add_user_to_project_selected_in_project_join_form_on_join(self):
@@ -361,7 +361,7 @@ class ReportCustomListTests(TestCase):
         new_project.save()
         request = APIRequestFactory().post(path=self.url, data={"projects": new_project.id, "join": "join"})
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(self.user in new_project.members.all())
         self.assertEqual(response.data["serializer"].fields["project"].initial, new_project)
@@ -372,7 +372,7 @@ class ReportCustomListTests(TestCase):
         new_project.save()
         request = APIRequestFactory().post(path=self.url, data={"projects": new_project.id})
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(self.user in new_project.members.all())
 
@@ -382,13 +382,13 @@ class ReportCustomListTests(TestCase):
         new_project.save()
         request = APIRequestFactory().post(path=self.url, data={"join": "join"})
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 200)
 
     def test_custom_report_list_view_should_dipslay_message_if_there_are_no_projects_available_to_join_to(self):
         request = APIRequestFactory().get(path=self.url)
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(str(ReportListStrings.NO_PROJECTS_TO_JOIN.value) in str(response.render().content))
 
@@ -401,7 +401,7 @@ class ReportCustomListTests(TestCase):
             data={"description": "Some description", "project": self.project, "work_hours": Decimal("8.00")},
         )
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         project_field_choices = response.data["serializer"].fields["project"].choices.values()
         self.assertTrue(self.project.name in project_field_choices)
         self.assertFalse(new_project.name in project_field_choices)
@@ -417,7 +417,7 @@ class ReportCustomListTests(TestCase):
         new_project_2.save()
         request = APIRequestFactory().post(path=self.url, data={"projects": new_project_1.id, "join": "join"})
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         project_field_choices = response.data["serializer"].fields["project"].choices.values()
         self.assertTrue(self.project.name in project_field_choices)
         self.assertTrue(new_project_1.name in project_field_choices)
@@ -431,10 +431,63 @@ class ReportCustomListTests(TestCase):
         new_project.save()
         request = APIRequestFactory().post(path=self.url, data={"join": "join"})
         request.user = self.user
-        response = ReportList.as_view()(request)
+        response = ReportList.as_view()(request, **self.view_kwargs)
         project_field_choices = response.data["serializer"].fields["project"].choices.values()
         self.assertTrue(self.project.name in project_field_choices)
         self.assertFalse(new_project.name in project_field_choices)
+
+    def test_custom_report_list_view_should_redirect_to_another_month_if_month_switch_was_called_on_post(self):
+        request = APIRequestFactory().post(path=self.url, data={"date": "09-2020", "month-switch": "month-switch"})
+        request.user = self.user
+        response = ReportList.as_view()(request, **self.view_kwargs)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/reports/2020/9/")
+
+    def test_custom_report_list_view_should_redirect_to_current_date_if_date_parameters_are_out_of_bonds(self):
+        request = APIRequestFactory().get(path=reverse("custom-report-list", kwargs={"year": 2019, "month": 4}))
+        request.user = self.user
+        self.view_kwargs["year"] = 2019
+        self.view_kwargs["month"] = 4
+        response = ReportList.as_view()(request, **self.view_kwargs)
+        current_date = datetime.datetime.now()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"/reports/{current_date.year}/{current_date.month}/")
+
+    def test_custom_report_list_view_should_not_display_reports_from_different_month_than_selected(self):
+        current_date = datetime.datetime.now().date()
+        other_report = Report(
+            date=current_date + relativedelta(months=+1),
+            description="Some other description",
+            author=self.user,
+            project=self.project,
+            work_hours=datetime.timedelta(hours=8),
+        )
+        other_report.full_clean()
+        other_report.save()
+
+        yet_another_report = Report(
+            date=current_date + relativedelta(years=-1),
+            description="Yet another description",
+            author=self.user,
+            project=self.project,
+            work_hours=datetime.timedelta(hours=8),
+        )
+        yet_another_report.full_clean()
+        yet_another_report.save()
+
+        request = APIRequestFactory().get(path=self.url)
+        request.user = self.user
+        response = ReportList.as_view()(request, **self.view_kwargs)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, other_report.description)
+        self.assertNotContains(response, yet_another_report.description)
+
+    def test_default_date_method_should_return_string_representation_of_current_date_if_current_month_is_provided(self):
+        current_date = datetime.datetime.now().date()
+        self.assertEqual(ReportList._default_date(current_date.year, current_date.month), str(current_date))
+
+    def test_default_date_method_should_return_string_representation_of_first_day_of_provided_month(self):
+        self.assertEqual(ReportList._default_date(2018, 9), str(datetime.date(year=2018, month=9, day=1)))
 
 
 class ProjectReportListTests(TestCase):

@@ -1,6 +1,7 @@
 import datetime
 import logging
 from typing import Any
+from typing import Dict
 from typing import Union
 
 from dateutil.relativedelta import relativedelta
@@ -70,24 +71,30 @@ class MonthNavigationMixin(ContextMixin):
     url_name = ""
     kwargs = {}  # type: dict
 
+    def _get_url_from_date(self, date: datetime.date, pk: int = None) -> str:
+        url_kwargs = {"year": date.year, "month": date.month}
+        if pk is not None:
+            url_kwargs["pk"] = pk
+        return reverse(self.url_name, kwargs=url_kwargs)
+
     def _get_previous_month_url(self, year: int, month: int, pk: int) -> str:
         date = datetime.date(year=year, month=month, day=1) + relativedelta(months=-1)
-        return reverse(self.url_name, kwargs={"pk": pk, "year": date.year, "month": date.month})
+        return self._get_url_from_date(date, pk)
 
     def _get_next_month_url(self, year: int, month: int, pk: int) -> str:
         date = datetime.date(year=year, month=month, day=1) + relativedelta(months=+1)
-        return reverse(self.url_name, kwargs={"pk": pk, "year": date.year, "month": date.month})
+        return self._get_url_from_date(date, pk)
 
     def _get_recent_month_url(self, pk: int) -> str:
         date = datetime.datetime.now().date()
-        return reverse(self.url_name, kwargs={"pk": pk, "year": date.year, "month": date.month})
+        return self._get_url_from_date(date, pk)
 
     @staticmethod
     def _get_title_date(year: int, month: int) -> str:
         date = datetime.date(year=year, month=month, day=1)
         return date.strftime("%m/%y")
 
-    def _date_out_of_bonds(self) -> bool:
+    def _date_out_of_bounds(self) -> bool:
         year_too_old = int(self.kwargs["year"]) < MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
         date_too_old = (
             int(self.kwargs["month"]) < MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
@@ -134,17 +141,18 @@ class MonthNavigationMixin(ContextMixin):
         post_data["date"] = datetime.datetime.strptime(post_data["date"], "%m-%Y")
         form = MonthSwitchForm(data=post_data)
         if form.is_valid():
-            return redirect(
-                reverse(
-                    self.url_name,
-                    kwargs={"pk": self.kwargs["pk"], "year": post_data["date"].year, "month": post_data["date"].month},
-                )
-            )
+            redirect_kwargs = {"year": post_data["date"].year, "month": post_data["date"].month}
+            if self.kwargs.get("pk", None) is not None:
+                redirect_kwargs["pk"] = self.kwargs["pk"]
+            return redirect(reverse(self.url_name, kwargs=redirect_kwargs))
         else:
             return redirect(request.path)
 
     def redirect_to_current_month(self) -> HttpResponseRedirectBase:
-        return redirect(self._get_recent_month_url(int(self.kwargs["pk"])))
+        pk = self.kwargs.get("pk", None)
+        if pk is not None:
+            pk = int(pk)
+        return redirect(self._get_recent_month_url(pk))
 
 
 @method_decorator(login_required, name="dispatch")
@@ -158,19 +166,25 @@ class MonthNavigationMixin(ContextMixin):
     ),
     name="dispatch",
 )
-class ReportList(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrentReportMixin, APIView):
+class ReportList(
+    UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrentReportMixin, APIView, MonthNavigationMixin
+):
     serializer_class = ReportSerializer
     renderer_classes = [renderers.TemplateHTMLRenderer]
     template_name = "employees/report_list.html"
     reports = None  # type: QuerySet
     permission_classes = (permissions.IsAuthenticated,)
+    context_data = {}  # type: Dict[str, Any]
     hide_join = False
     daily_hours_sum = None  # type: QuerySet
     monthly_hours_sum = None  # type: QuerySet
+    url_name = "custom-report-list"
 
     def get_queryset(self) -> QuerySet:
         logger.info(f"User with id: {self.request.user.pk} get reports queryset")
-        return Report.objects.filter(author=self.request.user).order_by("-date", "project__name", "-creation_date")
+        return Report.objects.filter(
+            author=self.request.user, date__year=self.kwargs["year"], date__month=self.kwargs["month"]
+        ).order_by("-date", "project__name", "-creation_date")
 
     def _add_project(self, project: Project) -> None:
         logger.info(f"Add project method for user with id: {self.request.user.pk} to project with id {project.pk}")
@@ -178,14 +192,22 @@ class ReportList(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrent
         project.full_clean()
         project.save()
 
-    def _create_serializer(self, data: QueryDict = None) -> ReportSerializer:
+    @staticmethod
+    def _default_date(year: int, month: int) -> str:
+        current_date = datetime.datetime.now().date()
+        if current_date.month == month and current_date.year == year:
+            return str(current_date)
+        else:
+            return str(datetime.date(year=year, month=month, day=1))
+
+    def _create_serializer(self, default_date: str, data: QueryDict = None) -> ReportSerializer:
         logger.info(f"Create serializer for user with id: {self.request.user.pk}")
         if data is not None:
-            reports_serializer = ReportSerializer(data=data, context={"request": self.request})
+            reports_serializer = self.serializer_class(data=data, context={"request": self.request})
             reports_serializer.is_valid()
         else:
-            reports_serializer = ReportSerializer(context={"request": self.request})
-            reports_serializer.fields["date"].initial = str(datetime.datetime.now().date())
+            reports_serializer = self.serializer_class(context={"request": self.request})
+            reports_serializer.fields["date"].initial = default_date
         reports_serializer.fields["project"].queryset = Project.objects.filter(
             members__id=self.request.user.id
         ).order_by("name")
@@ -197,18 +219,13 @@ class ReportList(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrent
         self.hide_join = not project_form_queryset.exists()
         return ProjectJoinForm(queryset=project_form_queryset)
 
-    def initial(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
-        logger.info(f"Initial method for user with id: {self.request.user.pk} in ReportList view")
-        super().initial(request, *args, **kwargs)
-        self.reports = self.get_queryset()
-        self.daily_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_dates()
-        self.monthly_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_authors()
-
-    def get(self, _request: HttpRequest) -> Response:
-        logger.info(f"User with id: {self.request.user.pk} get to the ReportList view")
-        return Response(
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        year = int(kwargs["year"])
+        month = int(kwargs["month"])
+        context_data.update(
             {
-                "serializer": self._create_serializer(),
+                "serializer": self._create_serializer(self._default_date(year, month)),
                 "object_list": self.reports,
                 "daily_hours_sum": self.daily_hours_sum,
                 "monthly_hours_sum": self.monthly_hours_sum,
@@ -217,49 +234,61 @@ class ReportList(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrent
                 "hide_join": self.hide_join,
             }
         )
+        return context_data
 
-    def post(self, request: HttpRequest) -> Response:
+    def initial(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        logger.info(f"Initial method for user with id: {self.request.user.pk} in ReportList view")
+        super().initial(request, *args, **kwargs)
+        self.reports = self.get_queryset()
+        self.daily_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_dates()
+        self.monthly_hours_sum = self.reports.order_by().get_work_hours_sum_for_all_authors()
+        self.reports = self.get_queryset()
+        self.context_data = self.get_context_data(**kwargs)
+
+    def get(  # pylint: disable=unused-argument
+        self, _request: HttpRequest, year: int, month: int
+    ) -> Union[Response, HttpResponseRedirectBase]:
+        logger.info(f"User with id: {self.request.user.pk} get to the ReportList view")
+        if self._date_out_of_bounds():
+            return self.redirect_to_current_month()
+        return Response(self.context_data)
+
+    def post(self, request: HttpRequest, year: int, month: int) -> Union[Response, HttpResponseRedirectBase]:
         logger.info(f"User with id: {request.user.pk} sent post to the ReportList view")
-        reports_serializer = self._create_serializer(data=request.data)
-        if "join" in request.POST:
+        year = int(year)
+        month = int(month)
+        reports_serializer = self._create_serializer(default_date=self._default_date(year, month), data=request.data)
+
+        if "month-switch" in request.POST:
+            return super().redirect_to_another_month(request)
+
+        elif "join" in request.POST:
             if "projects" in request.POST.keys():
                 project_id = request.POST["projects"]
                 project = Project.objects.get(id=int(project_id))
                 logger.debug(f"User with id: {request.user.pk} join to the project with id: {project.pk}")
                 self._add_project(project=project)
-                reports_serializer = self._create_serializer()
+                self.context_data["project_form"] = ProjectJoinForm(
+                    queryset=Project.objects.exclude(members__id=self.request.user.id).order_by("name")
+                )
+                reports_serializer = self._create_serializer(self._default_date(year, month))
                 reports_serializer.fields["project"].initial = project
-            return Response(
-                {
-                    "serializer": reports_serializer,
-                    "object_list": self.reports,
-                    "daily_hours_sum": self.daily_hours_sum,
-                    "monthly_hours_sum": self.monthly_hours_sum,
-                    "UI_text": ReportListStrings,
-                    "project_form": self._create_project_join_form(),
-                    "hide_join": self.hide_join,
-                }
-            )
+            self.context_data["serializer"] = reports_serializer
+            return Response(self.context_data)
 
         elif not reports_serializer.is_valid():
             logger.warning(
                 f"Serializer sent by user with id: {self.request.user.pk} is not valid with those errors: {reports_serializer.errors}"
             )
-            return Response(
-                {
-                    "serializer": reports_serializer,
-                    "object_list": self.reports,
-                    "errors": reports_serializer.errors,
-                    "daily_hours_sum": self.daily_hours_sum,
-                    "monthly_hours_sum": self.monthly_hours_sum,
-                    "UI_text": ReportListStrings,
-                    "project_form": self._create_project_join_form(),
-                    "hide_join": self.hide_join,
-                }
-            )
-        report = reports_serializer.save(author=self.request.user)
-        logger.info(f"User with id: {self.request.user.pk} created new report with id: {report.pk}")
-        return redirect("custom-report-list")
+            self.context_data["serializer"] = reports_serializer
+            self.context_data["errors"] = reports_serializer.errors
+            return Response(self.context_data)
+
+        else:
+            report = reports_serializer.save(author=self.request.user)
+            logger.info(f"User with id: {self.request.user.pk} created new report with id: {report.pk}")
+            self.context_data["reports_dict"] = self.get_queryset()
+            return redirect("custom-report-list", year, month)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -284,7 +313,7 @@ class ReportDetailView(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfC
         return context_data
 
     def get_success_url(self) -> str:
-        return reverse("custom-report-list")
+        return reverse("custom-report-list", kwargs={"year": self.object.date.year, "month": self.object.date.month})
 
     def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
         instance = form.save(commit=False)
@@ -309,7 +338,7 @@ class ReportDeleteView(UserIsAuthorOfCurrentReportMixin, UserIsManagerOfCurrentR
 
     def get_success_url(self) -> str:
         logger.debug(f"Report with id: {self.kwargs['pk']} has been deleted")
-        return reverse("custom-report-list")
+        return reverse("custom-report-list", kwargs={"year": self.object.date.year, "month": self.object.date.month})
 
 
 @method_decorator(login_required, name="dispatch")
@@ -374,7 +403,7 @@ class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, MonthNav
         return context
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Union[Response, HttpResponseRedirectBase]:
-        if self._date_out_of_bonds():
+        if self._date_out_of_bounds():
             return self.redirect_to_current_month()
         return super().get(request, *args, **kwargs)
 
