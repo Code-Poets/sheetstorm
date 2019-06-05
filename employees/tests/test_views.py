@@ -28,10 +28,13 @@ class AuthorReportViewTests(InitTaskTypeTestCase):
         super().setUp()
         self.user = AdminUserFactory()
         self.client.force_login(self.user)
-        self.url = reverse("author-report-list", kwargs={"pk": self.user.pk})
+        current_time = timezone.now()
+        self.url = reverse(
+            "author-report-list", kwargs={"pk": self.user.pk, "year": current_time.year, "month": current_time.month}
+        )
 
     def test_author_reports_view_should_display_users_report_list_on_get(self):
-        report = ReportFactory(author=self.user)
+        report = ReportFactory(author=self.user, date=timezone.now().date())
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, AuthorReportView.template_name)
@@ -49,6 +52,24 @@ class AuthorReportViewTests(InitTaskTypeTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, AuthorReportView.template_name)
         self.assertContains(response, AuthorReportListStrings.NO_REPORTS_MESSAGE.value)
+
+    def test_author_report_list_view_should_not_display_reports_from_another_month(self):
+        report = ReportFactory(author=self.user, date=timezone.datetime(year=2018, month=9, day=1))
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, AuthorReportView.template_name)
+        self.assertNotContains(response, report.project.name)
+
+    def test_author_report_list_view_should_redirect_to_another_month_on_post(self):
+        response = self.client.post(self.url, data={"date": "09-2020"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"/reports/author/{self.user.pk}/2020/9/")
+
+    def test_author_report_list_view_should_redirect_to_current_date_if_date_parameters_are_out_of_bonds(self):
+        response = self.client.get(reverse("author-report-list", kwargs={"pk": self.user.pk, "year": 2019, "month": 4}))
+        current_date = datetime.datetime.now()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"/reports/author/{self.user.pk}/{current_date.year}/{current_date.month}/")
 
 
 class AdminReportViewTests(InitTaskTypeTestCase):

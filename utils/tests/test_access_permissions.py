@@ -30,7 +30,9 @@ class AccessPermissionsTestCase(TestCase):
                 CustomUser.UserType.MANAGER.name,
                 CustomUser.UserType.ADMIN.name,
             ],
-            reverse("author-report-list", kwargs={"pk": self.user.pk}): [CustomUser.UserType.ADMIN.name],
+            reverse("author-report-list", kwargs={"pk": self.user.pk, "year": 2019, "month": 5}): [
+                CustomUser.UserType.ADMIN.name
+            ],
             reverse("admin-report-detail", kwargs={"pk": self.report.pk}): [CustomUser.UserType.ADMIN.name],
             reverse("project-report-list", kwargs={"pk": self.report.project.pk, "year": 2019, "month": 5}): [
                 CustomUser.UserType.MANAGER.name,
