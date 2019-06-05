@@ -1,0 +1,4 @@
+update_sheetstorm_application: 'yes'
+upload_secret_file: 'no'
+migrate_database: 'no'
+generate_static_files: 'no'

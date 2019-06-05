@@ -1,0 +1,11 @@
+- include_tasks: update-sheetstorm-application.yml
+  when: update_sheetstorm_application == 'yes'
+
+- include_tasks: upload-secret-file.yml
+  when: upload_secret_file == 'yes'
+
+- include_tasks: migrate-database.yml
+  when: migrate_database == 'yes'
+
+- include_tasks: generate-static-files.yml
+  when: generate_static_files == 'yes'

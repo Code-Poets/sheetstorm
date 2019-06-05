@@ -1,0 +1,5 @@
+- include_tasks: enable-maintenance-mode.yml
+  when: maintenance_mode == 'enable'
+
+- include_tasks: disable-maintenance-mode.yml
+  when: maintenance_mode == 'disable'
