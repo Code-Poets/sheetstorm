@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load rest_framework %}
 {% load user_type_tags %}
+{% load url_filter_tags %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -62,7 +63,7 @@
             </li>
             {% if user.user_type == admin %}
             <li>
-                {% if request.path == custom_users_list_url %}
+                {% if request.path == custom_users_list_url or request.path|startswith:'/reports/author/' %}
                 <a class="active" href="{% url 'custom-users-list' %}">
                     <img src="{% static 'users/images/white/iko-03.png' %}">
                     <span>{% trans 'Employees' %}</span>
@@ -77,8 +78,7 @@
             {% endif %}
             {% if user.user_type == manager or user.user_type == admin %}
             <li>
-                {% if request.path == custom_projects_list_url %}
-                <!--highlight won't work now because of date parameters-->
+                {% if request.path|startswith:custom_projects_list_url %}
                 <a class="active" href="{% url 'custom-projects-list' %}">
                     <img src="{% static 'users/images/white/iko-04.png' %}">
                     <span>{% trans 'Projects' %}</span>
@@ -92,7 +92,7 @@
             </li>
             {% endif %}
             <li>
-                {% if request.path == custom_report_list_url %}
+                {% if request.path|startswith:'/reports/' and not request.path|startswith:'/reports/author/'%}
                 <a class="active" href="{% url 'custom-report-list' year month %}">
                     <img src="{% static 'users/images/white/iko-05.png' %}">
                     <span>{% trans 'Reports' %}</span>
