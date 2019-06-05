@@ -17,7 +17,6 @@ from django.forms import ModelForm
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirectBase
-from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -28,10 +27,8 @@ from django.views.generic import FormView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
-from rest_framework import renderers
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from users.common.fields import Action
 from users.common.strings import ConfirmationMessages
@@ -150,30 +147,20 @@ class UserUpdate(UpdateView):
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
-class UserUpdateByAdmin(APIView):
-    renderer_classes = [renderers.TemplateHTMLRenderer]
+class UserUpdateByAdmin(UpdateView):
     template_name = "users_detail.html"
-    serializer_class = UserUpdateByAdminSerializer
+    form_class = AdminUserChangeForm
+    context_object_name = "user_detail"
+    model = CustomUser
 
-    def get(self, request: HttpRequest, pk: int) -> Response:
-        logger.info(
-            f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view with data from user with id: {pk}"
-        )
-        user_detail = get_object_or_404(CustomUser, pk=pk)
-        serializer = self.serializer_class(user_detail, context={"request": request})
-        return Response({"serializer": serializer, "user_detail": user_detail})
+    def get_success_url(self) -> str:
+        return reverse("custom-user-update-by-admin", kwargs={"pk": self.object.pk})
 
-    def post(self, request: HttpRequest, pk: int) -> Union[Response, HttpResponseRedirectBase]:
-        logger.info(f"Admin with id: {request.user.pk} get to the UserUpdateByAdmin view to update user with id: {pk}")
-        user_detail = get_object_or_404(CustomUser, pk=pk)
-        serializer = self.serializer_class(user_detail, data=request.data, context={"request": request})
-        if not serializer.is_valid():
-            logger.debug(f"Serializer is not valid with those errors: {serializer.errors}")
-            return Response({"serializer": serializer, "user_detail": user_detail, "errors": serializer.errors})
-        user = serializer.save()
-        logger.info(f"User with id: {user.pk} has been updated by admin with id {request.user.pk}")
-        messages.success(request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
-        return redirect("custom-user-update-by-admin", pk=pk)
+    def form_valid(self, form: SimpleUserChangeForm) -> HttpResponse:
+        super().form_valid(form)
+        logger.info(f"User with id: {self.object.pk} has been updated by admin with id {self.request.user.pk}")
+        messages.success(self.request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
+        return redirect(self.get_success_url())
 
 
 @method_decorator(login_required, name="dispatch")
