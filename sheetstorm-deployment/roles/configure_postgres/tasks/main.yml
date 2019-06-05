@@ -1,0 +1,21 @@
+- become:      yes
+  become_user: root
+  block:
+    - name:  Configure postgresql to trust 'local' connections without password
+      copy:
+        src:   "pg_hba.conf"
+        dest:  "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
+        owner: postgres
+        group: postgres
+
+    - name:  Restart postgresql service
+      service:
+        enabled: yes
+        name:    postgresql
+        state:   restarted
+
+    - name:  Create sheetstorm database
+      postgresql_db:
+        name:  sheetstorm
+      become:      yes
+      become_user: postgres

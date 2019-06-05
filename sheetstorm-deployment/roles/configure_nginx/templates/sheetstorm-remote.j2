@@ -1,0 +1,41 @@
+server {
+    server_name sheetstorm.codepoets.it s.codepoets.it;
+    if ($host = s.codepoets.it) {
+        return 301 https://sheetstorm.codepoets.it$request_uri;
+    }
+
+    location / {
+        set              $sheetstorm_backend  http://127.0.0.1:8000;
+        proxy_set_header x-real-ip            $remote_addr;
+        proxy_set_header x-forwarded-for      $remote_addr;
+        proxy_set_header host                 $http_host;
+        proxy_pass                            $sheetstorm_backend;
+
+    }
+    location /static/ {
+        alias {{ static_file_dir }};
+    }
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/sheetstorm.codepoets.it/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/sheetstorm.codepoets.it/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = sheetstorm.codepoets.it) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+    if ($host = s.codepoets.it) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen           80 default_server;
+    listen      [::]:80 default_server;
+    server_name sheetstorm.codepoets.it s.codepoets.it;
+    return 404; # managed by Certbot
+
+}

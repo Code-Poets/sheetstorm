@@ -1,0 +1,22 @@
+[Unit]
+Description=Sheetstorm Service
+After=network.target
+Before=nginx.service
+After=postgresql.service
+
+[Service]
+Type=simple
+Restart=on-failure
+WorkingDirectory={{ sheetstorm_dir }}
+ExecStart={{ home_dir }}/virtualenv/bin/gunicorn sheetstorm.wsgi:application    \
+          --name      sheetstorm                                                \
+          --user      sheetstorm                                                \
+          --group     sheetstorm                                                \
+          --workers   5                                                         \
+          --timeout   30                                                        \
+          --bind      127.0.0.1:8000                                            \
+          --log-level debug                                                     \
+          --log-file  -
+
+[Install]
+WantedBy=multi-user.target

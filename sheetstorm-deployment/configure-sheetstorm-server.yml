@@ -1,0 +1,44 @@
+- hosts:
+    - sheetstorm
+  vars_files:
+    - consts.yml
+    - versions.yml
+    - ../../sheetstorm-config/var.yml
+  vars:
+    server_configuration: remote
+  roles:
+    - install_dependencies_and_basic_configuration
+    - configure_postgres
+    - postgres_backup
+  tasks:
+    - become:      yes
+      become_user: root
+      block:
+        - name:  Add systemd services for sheetstorm components
+          template:
+            src:   sheetstorm-web.service.j2
+            dest:  /etc/systemd/system/sheetstorm-web.service
+            mode:  0644
+
+        - name:  Enable sheetstorm service
+          service:
+            daemon_reload: yes
+            enabled:       yes
+            name:          sheetstorm-web
+
+        - name:  Check if nginx is already configure
+          stat:
+            path:  /etc/letsencrypt/options-ssl-nginx.conf
+          register: nginx_configuration
+
+        - name:    Generate ssl certificate for nginx
+          command: >
+            certbot --nginx
+              -d  sheetstorm.codepoets.it
+              -d  s.codepoets.it
+              -m  {{ letsencrypt_email_account }}
+              --agree-tos
+          when: not nginx_configuration.stat.exists
+
+        - include_role:
+            name: configure_nginx
