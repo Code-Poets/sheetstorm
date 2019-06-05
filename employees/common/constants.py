@@ -19,9 +19,13 @@ class TaskActivityTypeConstans(Enum):
 
 class ExcelGeneratorSettingsConstants(Enum):
     TOTAL = "Total"
-    HEADERS_ROW = 1
+    EMPLOYEE_NAME_ROW = 1
+    EMPLOYEE_NAME_START_COLUMN = 1
+    EMPLOYEE_NAME_END_COLUMN = 3
+    EMPLOYEE_NAME = "EMPLOYEE: {}"
+    HEADERS_ROW = 2
     TOTAL_COLUMN = 1
-    FIRST_ROW_FOR_DATA = 2
+    FIRST_ROW_FOR_DATA = 3
 
     HEADERS_FOR_SINGLE_USER = ["Date", "Daily hours", "Project", "Task activity", "Hours", "Description"]
     COLUMNS_WIDTH_FOR_SINGLE_USER = [12, 12, 20, 30, 6, 100]

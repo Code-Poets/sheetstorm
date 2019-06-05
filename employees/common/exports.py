@@ -18,10 +18,11 @@ from users.models import CustomUser
 def set_format_styles_for_main_cells(cell: Cell, is_header: bool):
     cell.font = Font(name=ExcelGeneratorSettingsConstants.FONT.value, bold=True)
     cell.alignment = Alignment(horizontal=ExcelGeneratorSettingsConstants.CENTER_ALINGMENT.value)
+    border_style = Side(style=ExcelGeneratorSettingsConstants.BORDER.value)
     cell.border = (
-        Border(bottom=Side(style=ExcelGeneratorSettingsConstants.BORDER.value))
+        Border(bottom=border_style, top=border_style, right=border_style, left=border_style)
         if is_header
-        else Border(top=Side(style=ExcelGeneratorSettingsConstants.BORDER.value))
+        else Border(top=border_style)
     )
 
 
@@ -31,7 +32,22 @@ def set_columns_width(worksheet: Worksheet, col_num: int, width_settings: list):
     column_dimensions.width = width_settings[col_num - 1]
 
 
-def fill_headers(worksheet: Worksheet, headers: list, width_settings: list):
+def set_employee_name_is_worksheet(worksheet: Worksheet, employee_name: str):
+    worksheet.merge_cells(
+        start_row=ExcelGeneratorSettingsConstants.EMPLOYEE_NAME_ROW.value,
+        end_row=ExcelGeneratorSettingsConstants.EMPLOYEE_NAME_ROW.value,
+        start_column=ExcelGeneratorSettingsConstants.EMPLOYEE_NAME_START_COLUMN.value,
+        end_column=ExcelGeneratorSettingsConstants.EMPLOYEE_NAME_END_COLUMN.value,
+    )
+    cell = worksheet.cell(
+        row=ExcelGeneratorSettingsConstants.EMPLOYEE_NAME_ROW.value,
+        column=ExcelGeneratorSettingsConstants.EMPLOYEE_NAME_START_COLUMN.value,
+    )
+    cell.value = ExcelGeneratorSettingsConstants.EMPLOYEE_NAME.value.format(employee_name)
+
+
+def fill_headers(worksheet: Worksheet, headers: list, width_settings: list, employee_name: str):
+    set_employee_name_is_worksheet(worksheet, employee_name)
     for col_num, column_title in enumerate(headers, 1):
         cell = worksheet.cell(row=ExcelGeneratorSettingsConstants.HEADERS_ROW.value, column=col_num)
         cell.value = column_title
@@ -111,10 +127,12 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
     reports = author.get_reports_created()
     workbook = Workbook()
     worksheet = set_active_worksheet_name(workbook, author)
+    employee_name = f"{author.first_name} {author.last_name}"
     fill_headers(
         worksheet,
         ExcelGeneratorSettingsConstants.HEADERS_FOR_SINGLE_USER.value,
         ExcelGeneratorSettingsConstants.COLUMNS_WIDTH_FOR_SINGLE_USER.value,
+        employee_name,
     )
     current_row = ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value
 
@@ -154,10 +172,12 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
     for author in authors:
         worksheet = set_active_worksheet_name(workbook, author)
         reports = author.projects.get(pk=project.pk).report_set.filter(author_id=author.pk).order_by("-date")
+        employee_name = f"{author.first_name} {author.last_name}"
         fill_headers(
             worksheet,
             ExcelGeneratorSettingsConstants.HEADERS_FOR_USER_IN_PROJECT.value,
             ExcelGeneratorSettingsConstants.COLUMNS_WIDTH_FOR_PROJECT.value,
+            employee_name,
         )
 
         current_row = ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value
