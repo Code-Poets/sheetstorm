@@ -16,7 +16,11 @@ urlpatterns = [
     url(r"^reports/(?P<pk>[0-9]+)/delete/$", views.ReportDeleteView.as_view(), name="custom-report-delete"),
     url(r"^reports/author/(?P<pk>[0-9]+)/$", views.AuthorReportView.as_view(), name="author-report-list"),
     url(r"^reports/management/(?P<pk>[0-9]+)/$", views.AdminReportView.as_view(), name="admin-report-detail"),
-    url(r"^reports/project/(?P<pk>[0-9]+)/$", views.ProjectReportList.as_view(), name="project-report-list"),
+    url(
+        r"^reports/project/(?P<pk>[0-9]+)/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
+        views.ProjectReportList.as_view(),
+        name="project-report-list",
+    ),
     url(r"^reports/project/report/(?P<pk>[0-9]+)/$", views.ProjectReportDetail.as_view(), name="project-report-detail"),
     url(r"^export/user-reports/(?P<pk>[0-9]+)/$", views.ExportUserReportView.as_view(), name="export-data-xlsx"),
     url(

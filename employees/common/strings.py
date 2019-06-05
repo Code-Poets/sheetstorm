@@ -107,3 +107,8 @@ class ReportValidationStrings(NotCallableMixin, Enum):
     WORK_HOURS_FIELD_NOT_TIMEDELTA_INSTANCE = _("Work hours field must be instance of timedelta")
     WORK_HOURS_WRONG_FORMAT = _("Acceptable format for work hours field is: HH:MM and HH")
     USER_NOT_IN_PROJECT_MESSAGE = _("You are not a part of this project ")
+
+
+class MonthNavigationText(NotCallableMixin, Enum):
+    SWITCH_MONTH = _("Go")
+    RECENT_MONTH = _("Recent month")

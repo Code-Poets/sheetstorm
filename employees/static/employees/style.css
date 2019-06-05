@@ -3,6 +3,13 @@
     text-align: center;
 }
 
+#month-navigation-form {
+    width: 15%;
+    margin-top: 0;
+    margin-bottom: 0;
+    display:inline-block;
+}
+
 .modal-dialog {
     margin-bottom: 0;
 }

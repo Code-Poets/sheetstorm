@@ -1,6 +1,7 @@
 import datetime
 from decimal import Decimal
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.utils import timezone
@@ -466,7 +467,8 @@ class ProjectReportListTests(TestCase):
         self.project = ProjectFactory()
         self.project.members.add(self.user)
         self.client.force_login(self.user)
-        self.report = ReportFactory(author=self.user, project=self.project)
+        current_date = datetime.datetime.now().date()
+        self.report = ReportFactory(author=self.user, project=self.project, date=current_date)
         self.data = {
             "date": timezone.now().date(),
             "description": "Some other description",
@@ -475,7 +477,11 @@ class ProjectReportListTests(TestCase):
             "task_activities": self.report.task_activities.pk,
             "work_hours": "8.00",
         }
-        self.url = reverse("project-report-list", kwargs={"pk": self.project.pk})
+        self.year = current_date.year
+        self.month = current_date.month
+        self.url = reverse(
+            "project-report-list", kwargs={"pk": self.project.pk, "year": self.year, "month": self.month}
+        )
 
     def test_project_report_list_view_should_display_projects_report_list_on_get(self):
         response = self.client.get(self.url)
@@ -490,7 +496,9 @@ class ProjectReportListTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_project_report_list_view_should_not_display_non_existing_projects_reports(self):
-        response = self.client.get(reverse("project-report-list", kwargs={"pk": 999}))
+        response = self.client.get(
+            reverse("project-report-list", kwargs={"pk": 999, "year": self.year, "month": self.month})
+        )
         self.assertEqual(response.status_code, 404)
 
     def test_project_report_list_view_should_not_display_other_projects_reports(self):
@@ -508,9 +516,7 @@ class ProjectReportListTests(TestCase):
         other_report.full_clean()
         other_report.save()
 
-        request = APIRequestFactory().get(path=reverse("project-report-list", args=(self.project.pk,)))
-        request.user = self.user
-        response = ProjectReportList.as_view()(request, pk=self.project.pk)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, other_report.description)
 
@@ -518,7 +524,9 @@ class ProjectReportListTests(TestCase):
         other_project = Project(name="Other Project", start_date=datetime.datetime.now())
         other_project.full_clean()
         other_project.save()
-        response = self.client.get(reverse("project-report-list", kwargs={"pk": other_project.pk}))
+        response = self.client.get(
+            reverse("project-report-list", kwargs={"pk": other_project.pk, "year": self.year, "month": self.month})
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, ProjectReportListStrings.NO_REPORTS_MESSAGE.value)
 
@@ -570,3 +578,43 @@ class ProjectReportListTests(TestCase):
         self.assertTemplateUsed(response, ProjectReportList.template_name)
         self.assertContains(response, self.project.name)
         self._assert_response_contain_report(response, [self.report, other_report_1, other_report_2])
+
+    def test_project_report_list_view_should_not_display_reports_from_different_month_than_specified(self):
+        current_date = datetime.datetime.now().date()
+        other_report = Report(
+            date=current_date + relativedelta(years=-1),
+            description="Some other description",
+            author=self.user,
+            project=self.project,
+            work_hours=datetime.timedelta(hours=8),
+        )
+        other_report.full_clean()
+        other_report.save()
+
+        yet_another_report = Report(
+            date=current_date + relativedelta(years=-1),
+            description="Yet another description",
+            author=self.user,
+            project=self.project,
+            work_hours=datetime.timedelta(hours=8),
+        )
+        yet_another_report.full_clean()
+        yet_another_report.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, other_report.description)
+        self.assertNotContains(response, yet_another_report.description)
+
+    def test_project_report_list_view_should_redirect_to_another_month_on_post(self):
+        response = self.client.post(self.url, data={"date": "09-2020"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"/reports/project/{self.project.id}/2020/9/")
+
+    def test_project_report_list_view_should_redirect_to_current_date_if_date_parameters_are_out_of_bonds(self):
+        response = self.client.get(
+            reverse("project-report-list", kwargs={"pk": self.project.pk, "year": 2019, "month": 4})
+        )
+        current_date = datetime.datetime.now()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"/reports/project/{self.project.id}/{current_date.year}/{current_date.month}/")
