@@ -14,7 +14,14 @@
 
 {% block content %}
 {% include "employees/month_navigation_bar.html" %}
-<h1>{{ object.name }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}</h1>
+<h1>
+    <small>
+        <a href="{% url 'custom-project-detail' pk=project.pk %}">
+          <span class="glyphicon glyphicon-chevron-left"></span>
+        </a>
+    </small>
+    {{ object.name }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}
+</h1>
 <a href="{% url 'export-project-data-xlsx' pk=object.pk %}" class="btn btn-info">
         Export Reports
 </a>
