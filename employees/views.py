@@ -32,7 +32,6 @@ from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
 from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
-from employees.common.strings import AdminReportDetailStrings
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import MonthNavigationText
 from employees.common.strings import ProjectReportDetailStrings
@@ -291,6 +290,39 @@ class ReportList(
             return redirect("custom-report-list", year, month)
 
 
+class ReportDetailBase(UpdateView):
+    form_class = ReportForm
+    model = Report
+    template_name = "employees/project_report_detail.html"
+    template_post_url = ""
+    redirect_url = ""
+    url_pk = ""
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = ProjectReportDetailStrings
+        context_data["post_url"] = self.template_post_url
+        context_data["discard_url"] = self.redirect_url
+        context_data["url_pk"] = getattr(self.object, self.url_pk).pk
+        return context_data
+
+    def get_success_url(self) -> str:
+        return reverse(
+            self.redirect_url,
+            kwargs={
+                "pk": getattr(self.object, self.url_pk).id,
+                "year": self.object.date.year,
+                "month": self.object.date.month,
+            },
+        )
+
+    def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
+        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
+        self.object.editable = True
+        self.object.save()
+        return super().form_valid(form)
+
+
 @method_decorator(login_required, name="dispatch")
 @method_decorator(
     check_permissions(
@@ -376,27 +408,10 @@ class AuthorReportView(DetailView, MonthNavigationMixin):
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
-class AdminReportView(UpdateView):
-    template_name = "employees/admin_report_detail.html"
-    form_class = ReportForm
-    model = Report
-
-    def get_context_data(self, **kwargs: Any) -> dict:
-        context_data = super().get_context_data(**kwargs)
-        context_data["UI_text"] = AdminReportDetailStrings
-        return context_data
-
-    def get_success_url(self) -> str:
-        return reverse(
-            "author-report-list",
-            kwargs={"pk": self.object.author.id, "year": self.object.date.year, "month": self.object.date.month},
-        )
-
-    def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
-        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
-        self.object.editable = True
-        self.object.save()
-        return super().form_valid(form)
+class AdminReportView(ReportDetailBase):
+    template_post_url = "admin-report-detail"
+    redirect_url = "author-report-list"
+    url_pk = "author"
 
 
 @method_decorator(login_required, name="dispatch")
@@ -439,27 +454,10 @@ class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, MonthNav
     check_permissions(allowed_user_types=[CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name]),
     name="dispatch",
 )
-class ProjectReportDetail(UserIsManagerOfCurrentReportProjectMixin, UpdateView):
-    template_name = "employees/project_report_detail.html"
-    form_class = ReportForm
-    model = Report
-
-    def get_context_data(self, **kwargs: Any) -> dict:
-        context_data = super().get_context_data(**kwargs)
-        context_data["UI_text"] = ProjectReportDetailStrings
-        return context_data
-
-    def get_success_url(self) -> str:
-        return reverse(
-            "project-report-list",
-            kwargs={"pk": self.object.project.id, "year": self.object.date.year, "month": self.object.date.month},
-        )
-
-    def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
-        self.object = form.save(commit=False)  # pylint: disable=attribute-defined-outside-init
-        self.object.editable = True
-        self.object.save()
-        return super().form_valid(form)
+class ProjectReportDetail(UserIsManagerOfCurrentReportProjectMixin, ReportDetailBase):
+    template_post_url = "project-report-detail"
+    redirect_url = "project-report-list"
+    url_pk = "project"
 
 
 @method_decorator(login_required, name="dispatch")
