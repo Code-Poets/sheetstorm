@@ -3,4 +3,5 @@
 find . -type f                              \
     -not -path "./sheetstorm/settings/*"    \
     -not -path "*/migrations/*"             \
-    -name "*.py"                     \
+    -not -path "*/sheetstorm-deployment/*"  \
+    -name "*.py"                            \
