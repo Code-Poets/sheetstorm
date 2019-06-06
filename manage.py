@@ -8,7 +8,7 @@ if __name__ == "__main__":
         from django.core.management import execute_from_command_line
     except ImportError:
         try:
-            import django
+            import django  # pylint: disable=unused-import
         except ImportError:
             raise ImportError(
                 "Couldn't import Django. Are you sure it's installed and "
