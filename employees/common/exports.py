@@ -167,12 +167,12 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
 
 
 def generate_xlsx_for_project(project: Project) -> Workbook:
-    authors = project.members.all()
+    authors = project.members.order_by("-last_name")
     workbook = Workbook()
     for author in authors:
         worksheet = set_active_worksheet_name(workbook, author)
-        reports = author.projects.get(pk=project.pk).report_set.filter(author_id=author.pk).order_by("-date")
         employee_name = f"{author.first_name} {author.last_name}"
+        reports = project.report_set.filter(author=author.pk).order_by("-date")
         fill_headers(
             worksheet,
             ExcelGeneratorSettingsConstants.HEADERS_FOR_USER_IN_PROJECT.value,

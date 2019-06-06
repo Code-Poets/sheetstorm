@@ -465,6 +465,14 @@ class ProjectReportDetail(UserIsManagerOfCurrentReportProjectMixin, ReportDetail
 class ExportUserReportView(DetailView):
     model = CustomUser
 
+    def get_queryset(self) -> QuerySet:
+        return CustomUser.objects.prefetch_related(
+            Prefetch(
+                "report_set",
+                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+            )
+        )
+
     def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
         author = super().get_object()
         response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CONTENT_TYPE_FORMAT.value)
@@ -483,6 +491,14 @@ class ExportUserReportView(DetailView):
 )
 class ExportReportsInProjectView(UserIsManagerOfCurrentProjectMixin, DetailView):
     model = Project
+
+    def get_queryset(self) -> QuerySet:
+        return Project.objects.prefetch_related(
+            Prefetch(
+                "report_set",
+                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+            )
+        )
 
     def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
         project = super().get_object()
