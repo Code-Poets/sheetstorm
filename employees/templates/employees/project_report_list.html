@@ -22,9 +22,11 @@
     </small>
     {{ object.name }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}
 </h1>
-<a href="{% url 'export-project-data-xlsx' pk=object.pk %}" class="btn btn-info">
+{% with date=path|extract_year_and_month_from_url %}
+<a href="{% url 'export-project-data-xlsx' pk=object.pk year=date.0 month=date.1 %}" class="btn btn-info">
         Export Reports
 </a>
+{% endwith %}
 <div class="container">
     <div class="table-responsive">
         {% regroup object.get_report_ordered by author as reports_by_author %}
