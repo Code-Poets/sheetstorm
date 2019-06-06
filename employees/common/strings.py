@@ -70,12 +70,6 @@ class AuthorReportListStrings(NotCallableMixin, Enum):
     RETURN_BUTTON_MESSAGE = _("Back to employee list")
 
 
-class AdminReportDetailStrings(NotCallableMixin, Enum):
-    PAGE_TITLE = _("Report - ")
-    UPDATE_REPORT_BUTTON = _("Update")
-    DISCARD_CHANGES_BUTTON = _("Discard")
-
-
 class ProjectReportListStrings(NotCallableMixin, Enum):
     PAGE_TITLE = _(": Reports")
     DATE_COLUMN_HEADER = _("Date")

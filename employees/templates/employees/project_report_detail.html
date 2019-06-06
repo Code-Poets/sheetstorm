@@ -12,13 +12,13 @@
 <h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
 </br>
 <div class="modal-dialog">
-    <form action="{% url 'project-report-detail' pk=report.pk %}" method="POST">
+    <form action="{% url post_url pk=report.pk %}" method="POST">
         {% csrf_token %}
         {{ form|crispy }}
         <button type="submit" class="btn btn-success">
             <span class="glyphicon glyphicon-ok"></span> {{ UI_text.UPDATE_REPORT_BUTTON.value }}
         </button>
-        <a href="{% url 'project-report-list' pk=report.project.pk year=report.date.year month=report.date.month %}" class="btn btn btn-default">
+        <a href="{% url discard_url pk=url_pk year=report.date.year month=report.date.month %}" class="btn btn btn-default">
             <span class="glyphicon glyphicon-repeat"></span> {{ UI_text.DISCARD_CHANGES_BUTTON.value }}
         </a>
     </form>

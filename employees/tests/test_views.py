@@ -18,6 +18,7 @@ from users.factories import UserFactory
 
 class InitTaskTypeTestCase(TestCase):
     def setUp(self):
+        super().setUp()
         task_type = TaskActivityType(pk=1, name="Other")
         task_type.full_clean()
         task_type.save()
@@ -105,7 +106,7 @@ class AdminReportViewTests(InitTaskTypeTestCase):
         self.assertTrue(self.report.editable)
 
 
-class ProjectReportDetailTests(InitTaskTypeTestCase):
+class ProjectReportDetailTests(TestCase):
     def setUp(self):
         super().setUp()
         self.user = AdminUserFactory()
