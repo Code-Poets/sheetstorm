@@ -42,11 +42,22 @@ class AccessPermissionsTestCase(TestCase):
                 CustomUser.UserType.MANAGER.name,
                 CustomUser.UserType.ADMIN.name,
             ],
-            reverse("export-data-xlsx", kwargs={"pk": self.user.pk}): [CustomUser.UserType.ADMIN.name],
-            reverse("export-project-data-xlsx", kwargs={"pk": self.report.project.pk}): [
-                CustomUser.UserType.MANAGER.name,
-                CustomUser.UserType.ADMIN.name,
-            ],
+            reverse(
+                "export-data-xlsx",
+                kwargs={
+                    "pk": self.user.pk,
+                    "year": self.report.creation_date.year,
+                    "month": self.report.creation_date.month,
+                },
+            ): [CustomUser.UserType.ADMIN.name],
+            reverse(
+                "export-project-data-xlsx",
+                kwargs={
+                    "pk": self.report.project.pk,
+                    "year": self.report.creation_date.year,
+                    "month": self.report.creation_date.month,
+                },
+            ): [CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name],
             # Managers.
             reverse("custom-projects-list"): [CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name],
             reverse("custom-project-create"): [CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name],

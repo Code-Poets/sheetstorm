@@ -25,8 +25,22 @@ class DataSetUpToTests(TestCase):
         self.report = ReportFactory(author=self.user, project=self.project)
         self.project.members.add(self.user)
         self.data = {"project": self.project.pk, "author": self.user.pk}
-        self.url_single_user = reverse("export-data-xlsx", kwargs={"pk": self.user.pk})
-        self.url_project = reverse("export-project-data-xlsx", kwargs={"pk": self.data["project"]})
+        self.url_single_user = reverse(
+            "export-data-xlsx",
+            kwargs={
+                "pk": self.user.pk,
+                "year": str(self.report.creation_date.year),
+                "month": str(self.report.creation_date.month),
+            },
+        )
+        self.url_project = reverse(
+            "export-project-data-xlsx",
+            kwargs={
+                "pk": self.data["project"],
+                "year": str(self.report.creation_date.year),
+                "month": str(self.report.creation_date.month),
+            },
+        )
         self.workbook_for_project = generate_xlsx_for_project(self.project)
         self.workbook_for_user = generate_xlsx_for_single_user(self.user)
 
@@ -55,7 +69,7 @@ class ExportMethodTestForProject(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
         authors = self.workbook_for_project.get_sheet_names()
         for author in authors:
-            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name[0]}")
+            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name}")
         self.assertEqual(len(authors), 1)
 
     def test_date_should_be_the_same_in_excel(self):
@@ -98,7 +112,7 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
         sheet_names = self.workbook_for_user.get_sheet_names()
         for author in sheet_names:
-            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name[0]}")
+            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name}")
         self.assertEqual(len(sheet_names), 1)
 
     def test_date_should_be_the_same_in_excel(self):
