@@ -1,0 +1,1 @@
+sheetstorm ansible_port=22 ansible_host=172.30.2.3 ansible_ssh_pipelining=true ansible_python_interpreter=/usr/bin/python3

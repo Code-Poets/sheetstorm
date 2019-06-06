@@ -1,0 +1,48 @@
+- hosts:
+    - sheetstorm
+  vars_files:
+    - ../consts.yml
+    - ../versions.yml
+    - ../../../sheetstorm-config/var.yml
+  vars:
+    server_configuration: local
+  roles:
+    - ../roles/install_dependencies_and_basic_configuration
+    - ../roles/configure_postgres
+    - ../roles/postgres_backup
+    - ../roles/configure_nginx
+    - { role: ../roles/maintenance_mode, maintenance_mode: enable }
+    - ../roles/configure_sheetstorm_environment
+    - { role: ../roles/maintenance_mode, maintenance_mode: disable }
+  tasks:
+    - name:  Create home bin directory
+      file:
+        path:  ~/bin/
+        state: directory
+
+    - become:      yes
+      become_user: root
+      block:
+        - name:   Upload script that running sheetstorm
+          template:
+            src:    run-sheetstorm.sh.j2
+            dest:   /home/vagrant/bin/run-sheetstorm.sh
+            mode:   0555
+            owner:  vagrant
+            group:  vagrant
+
+        - name:   Upload sheetstorm configuration file
+          copy:
+            src:    local_settings-local.py
+            dest:   "{{ sheetstorm_dir }}/sheetstorm/settings/local_settings.py"
+            mode:   0644
+            owner:  sheetstorm
+            group:  sheetstorm
+
+        - name: Migrate database and generate static files
+          include_role:
+            name: ../roles/configure_sheetstorm_environment
+          vars:
+            update_sheetstorm_application: 'no'
+            generate_static_files:         'yes'
+            migrate_database:              'yes'
