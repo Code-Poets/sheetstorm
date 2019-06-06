@@ -12,7 +12,7 @@ $(function () {
             {
                 text: confirmation_text,
                 click: function () {
-                    window.location.href = redirect_url;
+                    $('#delete_form').submit();
                 }
             }
         ]
