@@ -29,7 +29,7 @@
                     {% for user in object_list %}
                     <td>{{ forloop.counter }}</td>
                     <td>{{ user.email }}</td>
-                    <td>{{ user.user_type }}</td>
+                    <td>{{ user.get_user_type_display }}</td>
                     <td>{{ user.first_name }}</td>
                     <td>{{ user.last_name }}</td>
                     <td>

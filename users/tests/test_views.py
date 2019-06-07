@@ -67,7 +67,7 @@ class UserListTests(TestCase):
         self.client.force_login(self.user_admin)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.user_admin.user_type)
+        self.assertContains(response, self.user_admin.get_user_type_display())
         self.assertContains(response, self.user_admin.email)
         self.assertContains(response, self.user_admin.first_name)
         self.assertContains(response, self.user_admin.last_name)
