@@ -94,9 +94,16 @@ def summarizing_reports(worksheet: Worksheet, last_row: int, hours_column: int, 
     set_format_styles_for_main_cells(total_hours_cell, is_header=False)
 
 
+def get_employee_name(author: CustomUser) -> str:
+    if author.last_name is not None and author.first_name is not None:
+        return f"{author.first_name} {author.last_name}"
+    else:
+        return f"{author.email}"
+
+
 def set_active_worksheet_name(workbook: Workbook, author: CustomUser) -> Worksheet:
     worksheet = workbook.active
-    worksheet.title = f"{author.first_name} {author.last_name[0]}"
+    worksheet.title = get_employee_name(author)
     return worksheet
 
 
@@ -127,7 +134,7 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
     reports = author.get_reports_created()
     workbook = Workbook()
     worksheet = set_active_worksheet_name(workbook, author)
-    employee_name = f"{author.first_name} {author.last_name}"
+    employee_name = get_employee_name(author)
     fill_headers(
         worksheet,
         ExcelGeneratorSettingsConstants.HEADERS_FOR_SINGLE_USER.value,
@@ -167,12 +174,12 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
 
 
 def generate_xlsx_for_project(project: Project) -> Workbook:
-    authors = project.members.all()
+    authors = project.members.order_by("-last_name")
     workbook = Workbook()
     for author in authors:
         worksheet = set_active_worksheet_name(workbook, author)
-        reports = author.projects.get(pk=project.pk).report_set.filter(author_id=author.pk).order_by("-date")
-        employee_name = f"{author.first_name} {author.last_name}"
+        reports = project.report_set.filter(author=author.pk).order_by("-date")
+        employee_name = get_employee_name(author)
         fill_headers(
             worksheet,
             ExcelGeneratorSettingsConstants.HEADERS_FOR_USER_IN_PROJECT.value,

@@ -26,9 +26,13 @@ urlpatterns = [
         name="project-report-list",
     ),
     url(r"^reports/project/report/(?P<pk>[0-9]+)/$", views.ProjectReportDetail.as_view(), name="project-report-detail"),
-    url(r"^export/user-reports/(?P<pk>[0-9]+)/$", views.ExportUserReportView.as_view(), name="export-data-xlsx"),
     url(
-        r"^export/project-reports/(?P<pk>[0-9]+)/$",
+        r"^export/user-reports/(?P<pk>[0-9]+)/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
+        views.ExportUserReportView.as_view(),
+        name="export-data-xlsx",
+    ),
+    url(
+        r"^export/project-reports/(?P<pk>[0-9]+)/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
         views.ExportReportsInProjectView.as_view(),
         name="export-project-data-xlsx",
     ),

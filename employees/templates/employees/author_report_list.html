@@ -14,12 +14,15 @@
 
 {% block content %}
 {% include "employees/month_navigation_bar.html" %}
+
 <h1>{{ object.email }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}</h1>
 <a href="{% url 'custom-users-list' %}" class="btn btn-primary hidden-print">
     {{ UI_text.RETURN_BUTTON_MESSAGE.value }}
-    <a href="{% url 'export-data-xlsx' pk=object.id %}" class="btn btn-info">
-        Export Reports
-    </a>
+    {% with date=path|extract_year_and_month_from_url %}
+        <a href="{% url 'export-data-xlsx' pk=object.id year=date.0 month=date.1 %}" class="btn btn-info">
+            Export Reports
+        </a>
+    {% endwith %}
 </a>
 <div class="container">
     <div class="table-responsive">
