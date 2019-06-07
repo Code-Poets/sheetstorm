@@ -1,4 +1,24 @@
-### next
+### v0.5.0
+
+##### Features
+
+- Feature access permissions ([#230](https://github.com/Code-Poets/sheetstorm/pull/230))
+- Feature automatic deployment process for Sheet Storm ([#273](https://github.com/Code-Poets/sheetstorm/pull/273), [#269](https://github.com/Code-Poets/sheetstorm/pull/269), [#271](https://github.com/Code-Poets/sheetstorm/pull/271), [#270](https://github.com/Code-Poets/sheetstorm/pull/270))
+- Feature group days and add daily hours to xlsx export ([#276](https://github.com/Code-Poets/sheetstorm/pull/276))
+- Feature month segregation for author report list ([#256](https://github.com/Code-Poets/sheetstorm/pull/256))
+- Feature month segregation for project report list ([#138](https://github.com/Code-Poets/sheetstorm/pull/138))
+- Feature month segregation for report list ([#139](https://github.com/Code-Poets/sheetstorm/pull/139))
+
+##### Bugfixes
+
+- Bugfix add discard button to admin report detail ([#275](https://github.com/Code-Poets/sheetstorm/pull/275))
+- Bugfix add return button in project report list ([#280](https://github.com/Code-Poets/sheetstorm/pull/280))
+- Bugfix add validation to stop_date field in project ([#277](https://github.com/Code-Poets/sheetstorm/pull/277))
+- Bugfix admin report form ([#263](https://github.com/Code-Poets/sheetstorm/pull/263))
+- Bugfix delete button to send it as a post method ([#279](https://github.com/Code-Poets/sheetstorm/pull/279))
+- Bugfix generating xlsx for one month ([#230](https://github.com/Code-Poets/sheetstorm/pull/230))
+- Bugfix show day numer as non-zero padded decimal ([#265](https://github.com/Code-Poets/sheetstorm/pull/265))
+- Bugfix sorting exported reports for project and access permissions ([#266](https://github.com/Code-Poets/sheetstorm/pull/266))
 
 
 ### v0.4.0
