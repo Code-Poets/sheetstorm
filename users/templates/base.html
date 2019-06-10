@@ -32,7 +32,7 @@
     <nav id="sidebar" class="hidden-print">
         <div class="sidebar-header">
             <img src="{% static 'users/images/white/iko-33.png' %}"/>
-            <p><strong>{{ user.user_type }}</strong></p>
+            <p><strong>{{ user.get_user_type_display }}</strong></p>
         </div>
         <ul class="list-unstyled components">
             <li>
