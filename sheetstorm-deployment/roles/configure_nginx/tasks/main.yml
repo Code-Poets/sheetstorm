@@ -13,10 +13,8 @@
 
     - name:  Add nginx config for sheetstorm
       template:
-        src:  sheetstorm-{{ server_configuration | default('remote') }}.j2
-        dest: /etc/nginx/sites-available/sheetstorm
-
-    - name:  Add nginx config for maintenance
-      copy:
-        src:  maintenance-{{ server_configuration | default('remote') }}
-        dest: /etc/nginx/sites-available/maintenance
+        src:  "{{ item }}-{{ server_configuration | default('remote') }}.j2"
+        dest: /etc/nginx/sites-available/{{ item }}
+      with_items:
+        - sheetstorm
+        - maintenance
