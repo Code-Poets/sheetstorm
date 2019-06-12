@@ -1,4 +1,5 @@
 assertpy
+beautifulsoup4
 black
 certifi
 chardet
