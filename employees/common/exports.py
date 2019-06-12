@@ -1,5 +1,6 @@
 from typing import List
 
+from bs4 import BeautifulSoup
 from openpyxl import Workbook
 from openpyxl.cell import Cell
 from openpyxl.styles import Alignment
@@ -153,7 +154,7 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
                 report.project.name,
                 report.task_activities.name,
                 report.work_hours_str,
-                report.description,
+                convert_markdown_html_to_text(report.markdown_description),
             ],
             "worksheet": worksheet,
             "current_row": current_row,
@@ -199,7 +200,7 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
                     daily_hours,
                     report.task_activities.name,
                     report.work_hours_str,
-                    report.description,
+                    convert_markdown_html_to_text(report.markdown_description),
                 ],
                 "worksheet": worksheet,
                 "current_row": current_row,
@@ -218,3 +219,7 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
         if author != authors.last():
             workbook.create_sheet(index=0)
     return workbook
+
+
+def convert_markdown_html_to_text(html: str) -> str:
+    return "".join(BeautifulSoup(html).findAll(text=True))
