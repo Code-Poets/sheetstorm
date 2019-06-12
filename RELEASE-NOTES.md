@@ -1,3 +1,9 @@
+### next
+
+#### Bugfixes
+- Update `Django` to `2.2.2` to mitigate a security issue
+
+
 ### v0.5.0
 
 ##### Features

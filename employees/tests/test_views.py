@@ -197,7 +197,7 @@ class ReportDetailViewTests(TestCase):
     def test_custom_report_detail_view_should_not_update_report_on_post_if_form_is_invalid(self):
         old_description = self.data["description"]
         self.data["description"] = "Some other description"
-        self.data["project"] = None
+        self.data["project"] = ""
         response = self.client.post(path=self.url, data=self.data)
         self.report.refresh_from_db()
         self.assertEqual(response.status_code, 200)

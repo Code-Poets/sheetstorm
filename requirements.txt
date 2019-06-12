@@ -3,7 +3,7 @@ black
 certifi
 chardet
 defusedxml
-Django >= 2.1, < 2.2
+Django
 django-allauth
 django-bootstrap-datepicker-plus
 django-countries
