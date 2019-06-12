@@ -1,7 +1,8 @@
 ### next
 
-#### Bugfixes
+##### Bugfixes
 - Update `Django` to `2.2.2` to mitigate a security issue
+- Bugfix calendar display in user report edit form ([#300](https://github.com/Code-Poets/sheetstorm/issues/300))
 
 
 ### v0.5.0
