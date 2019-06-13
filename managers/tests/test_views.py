@@ -22,6 +22,7 @@ class ProjectBaseTests(TestCase):
             last_name="Doe",
             country="PL",
             user_type=CustomUser.UserType.ADMIN.name,
+            is_active=True,
         )
         self.user.set_password("newuserpasswd")
         self.user.full_clean()

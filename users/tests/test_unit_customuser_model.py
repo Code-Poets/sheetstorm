@@ -165,7 +165,7 @@ class TestCustomUserModelField(BaseModelTestCase):
         self.field_should_have_non_null_default(field="is_staff", value=False)
 
     def test_customuser_model_is_active_field_should_have_default_value(self):
-        self.field_should_have_non_null_default(field="is_active", value=True)
+        self.field_should_have_non_null_default(field="is_active", value=False)
 
     def test_customuser_model_date_joined_field_should_be_filled_on_save(self):
         self.field_should_have_non_null_default("date_joined")

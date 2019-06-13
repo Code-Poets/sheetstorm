@@ -15,6 +15,7 @@ def create_user(user_type):
     user = mommy.prepare(CustomUser, user_type=user_type)
     user.email = user.email.split("@")[0] + "@" + constants.VALID_EMAIL_DOMAIN_LIST[0]
     user.set_password(password)
+    user.is_active = True
     user.full_clean()
     user.save()
     return (user, password)

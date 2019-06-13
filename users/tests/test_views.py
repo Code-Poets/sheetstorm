@@ -126,6 +126,7 @@ class UserUpdateTests(TestCase):
             last_name="Doe",
             country="PL",
             phone_number="123456789",
+            is_active=True,
         )
         self.user.full_clean()
         self.user.save()
