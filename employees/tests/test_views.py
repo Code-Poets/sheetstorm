@@ -165,7 +165,7 @@ class ReportDetailViewTests(TestCase):
             "date": self.report.date,
             "description": self.report.description,
             "project": self.report.project.pk,
-            "author": self.report.author,
+            "author": self.report.author.pk,
             "task_activities": self.report.task_activities.pk,
             "work_hours": self.report.work_hours_str,
         }
@@ -233,7 +233,7 @@ class ReportDetailViewTests(TestCase):
             "date": report_manager.date,
             "description": "report_manager other description",
             "project": report_manager.project.pk,
-            "author": report_manager.author,
+            "author": report_manager.author.pk,
             "task_activities": report_manager.task_activities.pk,
             "work_hours": report_manager.work_hours_str,
         }

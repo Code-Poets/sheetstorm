@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db.models import QuerySet
+from django.forms import HiddenInput
 from django.forms import TextInput
 from django.utils.dateparse import parse_duration
 
@@ -32,8 +33,10 @@ class ProjectJoinForm(forms.Form):
 
 
 class DurationInput(TextInput):
-    def format_value(self, value: str) -> str:
-        return timedelta_to_string(parse_duration(value))
+    def format_value(self, value: Optional[str]) -> str:
+        if value is not None:
+            return timedelta_to_string(parse_duration(value))
+        return ""
 
 
 class DurationFieldForm(forms.DurationField):
@@ -51,12 +54,12 @@ class ReportForm(forms.ModelForm):
 
     class Meta:
         model = Report
-        fields = ("date", "description", "task_activities", "project", "work_hours")
-        widgets = {"date": DatePickerInput(format="%Y-%m-%d")}
+        fields = ("date", "author", "description", "task_activities", "project", "work_hours")
+        widgets = {"date": DatePickerInput(format="%Y-%m-%d"), "author": HiddenInput}
 
     def __init__(self, *args: Any, **kwargs: Any):
         super(ReportForm, self).__init__(*args, **kwargs)
-        self.fields["project"].queryset = kwargs["instance"].author.projects.all()
+        self.fields["project"].queryset = kwargs["initial"]["author"].projects.all()
 
 
 class MonthSwitchForm(forms.Form):
