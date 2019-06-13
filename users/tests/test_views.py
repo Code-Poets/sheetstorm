@@ -1,5 +1,5 @@
 from django.test import TestCase
-from rest_framework.reverse import reverse
+from django.urls import reverse
 
 from users.common import constants
 from users.common.strings import ValidationErrorText
@@ -7,6 +7,7 @@ from users.common.utils import generate_random_phone_number
 from users.factories import AdminUserFactory
 from users.factories import UserFactory
 from users.models import CustomUser
+from users.views import SignUp
 
 
 class ChangePasswordTests(TestCase):
@@ -202,3 +203,34 @@ class UserUpdateByAdminTests(TestCase):
             "phone_number": new_phone_number,
             "user_type": CustomUser.UserType.EMPLOYEE.name,
         }
+
+
+class SignUpTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser(email="testuser@codepoets.it", first_name="John", last_name="Doe", password="passwduser")
+        self.user.full_clean()
+
+    def _register_user_using_signup_view(self):
+        return self.client.post(
+            path=reverse("signup"),
+            data={
+                "email": self.user.email,
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
+                "password1": self.user.password,
+                "password2": self.user.password,
+            },
+        )
+
+    def test_signup_view_should_display_signup_form_on_get(self):
+        response = self.client.get(reverse("signup"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, SignUp.template_name)
+
+    def test_signup_view_should_add_new_user_on_post(self):
+        response = self._register_user_using_signup_view()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("success-signup"))
+        self.assertEqual(CustomUser.objects.all().count(), 1)
+        self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, False)
+
