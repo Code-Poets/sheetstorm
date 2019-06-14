@@ -28,4 +28,5 @@ urlpatterns = [
         views.ActivateAccountView.as_view(),
         name="activate",
     ),
+    url(r"^captcha/", include("captcha.urls")),
 ]

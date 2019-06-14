@@ -1,4 +1,5 @@
 from bootstrap_datepicker_plus import DatePickerInput
+from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.forms import UserCreationForm
@@ -67,7 +68,8 @@ class CustomUserChangeForm(UserChangeForm):
 
 class CustomUserSignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=constants.EMAIL_MAX_LENGTH, required=True, label="id_email")
+    captcha = CaptchaField()
 
     class Meta:
         model = CustomUser
-        fields = ("email", "password1", "password2")
+        fields = ("email", "password1", "password2", "captcha")
