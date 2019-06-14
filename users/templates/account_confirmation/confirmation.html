@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+<head>
+    <script type="text/javascript" src="{% static 'users/scripts/redirect_to_home_page.js' %}"></script>
+</head>
+    {% if is_activated is True %}
+        <p>{{ MESSAGES.SUCCESSFUL.value }}</p>
+    {% else %}
+        <p>{{ MESSAGES.FAIL.value }}</p>
+    {% endif %}
+<p>{{ MESSAGES.REDIRECTION_INFO.value }}</p>
+<a href="{% url 'home' %}" class="btn btn-default">{{ MESSAGES.OKAY_BUTTON.value }}</a>
+{% endblock %}

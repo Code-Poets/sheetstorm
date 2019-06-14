@@ -75,6 +75,15 @@ class CustomUserUserTypeText:
 
 class SuccessInfoAfterRegistrationText(NotCallableMixin, Enum):
     CONGRATULATIONS = _("Congratulations!")
-    ACCOUNT_CREATED = _("Your account has been successfully created! Now you can sign in!")
+    ACCOUNT_CREATED = _(
+        "Your account has been successfully created! Please check your mailbox and activate your account!"
+    )
+    REDIRECTION_INFO = _("You will be redirected in few seconds to the login site or press a button to make it faster.")
+    OKAY_BUTTON = _("Okay!")
+
+
+class AccountConfirmationText(NotCallableMixin, Enum):
+    SUCCESSFUL = _("Your account has been successfully activated! Now you can log in!")
+    FAIL = _("Your account has not been activated! Please contact with contact@codepoets.it.")
     REDIRECTION_INFO = _("You will be redirected in few seconds to the login site or press a button to make it faster.")
     OKAY_BUTTON = _("Okay!")

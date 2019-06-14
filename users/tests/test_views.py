@@ -1,5 +1,8 @@
 from django.test import TestCase
-from rest_framework.reverse import reverse
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from freezegun import freeze_time
 
 from users.common import constants
 from users.common.strings import ValidationErrorText
@@ -7,6 +10,8 @@ from users.common.utils import generate_random_phone_number
 from users.factories import AdminUserFactory
 from users.factories import UserFactory
 from users.models import CustomUser
+from users.tokens import account_activation_token
+from users.views import SignUp
 
 
 class ChangePasswordTests(TestCase):
@@ -126,6 +131,7 @@ class UserUpdateTests(TestCase):
             last_name="Doe",
             country="PL",
             phone_number="123456789",
+            is_active=True,
         )
         self.user.full_clean()
         self.user.save()
@@ -201,3 +207,68 @@ class UserUpdateByAdminTests(TestCase):
             "phone_number": new_phone_number,
             "user_type": CustomUser.UserType.EMPLOYEE.name,
         }
+
+
+class SignUpTests(TestCase):
+    def setUp(self):
+        self.user = CustomUser(email="testuser@codepoets.it", first_name="John", last_name="Doe", password="passwduser")
+        self.user.full_clean()
+        self.non_existent_user_id = 999
+
+    def _register_user_using_signup_view(self):
+        return self.client.post(
+            path=reverse("signup"),
+            data={
+                "email": self.user.email,
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
+                "password1": self.user.password,
+                "password2": self.user.password,
+            },
+        )
+
+    def test_signup_view_should_display_signup_form_on_get(self):
+        response = self.client.get(reverse("signup"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, SignUp.template_name)
+
+    def test_signup_view_should_add_new_user_on_post(self):
+        self.assertEqual(CustomUser.objects.all().count(), 0)
+        response = self._register_user_using_signup_view()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("success-signup"))
+        self.assertEqual(CustomUser.objects.all().count(), 1)
+        self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, False)
+
+    def test_that_registered_user_must_activate_account_by_activation_link(self):
+        with freeze_time("2019-06-07 07:07:07"):
+            self.assertEqual(CustomUser.objects.all().count(), 0)
+            response = self._register_user_using_signup_view()
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, False)
+            user = CustomUser.objects.get(email=self.user.email)
+            url = reverse(
+                "activate",
+                args=(urlsafe_base64_encode(force_bytes(user.pk)), account_activation_token.make_token(user)),
+            )
+            response = self.client.get(path=url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, True)
+
+    def test_that_registered_user_with_wrong_activation_link_will_not_activate_account(self):
+        with freeze_time("2019-06-07 07:07:07"):
+            self.assertEqual(CustomUser.objects.all().count(), 0)
+            response = self._register_user_using_signup_view()
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, False)
+            user = CustomUser.objects.get(email=self.user.email)
+            url = reverse(
+                "activate",
+                args=(
+                    urlsafe_base64_encode(force_bytes(self.non_existent_user_id)),
+                    account_activation_token.make_token(user),
+                ),
+            )
+            response = self.client.get(path=url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, False)

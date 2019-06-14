@@ -83,7 +83,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         CustomUserModelText.IS_STAFF, default=False, help_text=CustomUserModelText.STAFF_HELP_TEXT
     )
     is_active = models.BooleanField(
-        CustomUserModelText.IS_ACTIVE, default=True, help_text=CustomUserModelText.ACTIVE_HELP_TEXT
+        CustomUserModelText.IS_ACTIVE, default=False, help_text=CustomUserModelText.ACTIVE_HELP_TEXT
     )
     date_joined = models.DateTimeField(CustomUserModelText.DATE_JOINED, auto_now_add=True)
     date_of_birth = models.DateField(

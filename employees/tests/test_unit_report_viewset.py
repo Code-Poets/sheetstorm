@@ -29,7 +29,12 @@ class DataSetUpToTests(TestCase):
         task_type.full_clean()
         task_type.save()
         self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
+            email="testuser@codepoets.it",
+            password="newuserpasswd",
+            first_name="John",
+            last_name="Doe",
+            country="PL",
+            is_active=True,
         )
         self.user.full_clean()
         self.user.save()
@@ -157,7 +162,12 @@ class ReportCustomListTests(TestCase):
         task_type.full_clean()
         task_type.save()
         self.user = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
+            email="testuser@codepoets.it",
+            password="newuserpasswd",
+            first_name="John",
+            last_name="Doe",
+            country="PL",
+            is_active=True,
         )
         self.user.full_clean()
         self.user.save()
@@ -521,7 +531,9 @@ class ProjectReportListTests(TestCase):
         self.project.members.add(self.user)
         self.client.force_login(self.user)
         current_date = datetime.datetime.now().date()
-        self.report = ReportFactory(author=self.user, project=self.project, date=current_date)
+        self.report = ReportFactory(
+            author=self.user, project=self.project, date=current_date, task_activities=self.task_type
+        )
         self.data = {
             "date": timezone.now().date(),
             "description": "Some other description",
@@ -585,7 +597,12 @@ class ProjectReportListTests(TestCase):
 
     def test_that_project_report_list_should_return_list_of_all_reports_assigned_to_project(self):
         other_user = CustomUser(
-            email="otheruser@codepoets.it", password="otheruserpasswd", first_name="Jane", last_name="Doe", country="PL"
+            email="otheruser@codepoets.it",
+            password="otheruserpasswd",
+            first_name="Jane",
+            last_name="Doe",
+            country="PL",
+            is_active=True,
         )
         other_user.full_clean()
         other_user.save()

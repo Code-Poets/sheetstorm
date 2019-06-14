@@ -1,0 +1,8 @@
+{% autoescape off %}
+Hi {{ user_name }},
+Please click on the link to confirm your registration,
+http://{{ domain }}{% url 'activate' encoded_user_id=encoded_user_id token=token %}
+
+Sincerely,
+The Sheet Storm Team
+{% endautoescape %}

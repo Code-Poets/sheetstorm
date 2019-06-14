@@ -12,6 +12,7 @@ from django.contrib.auth.views import PasswordResetCompleteView
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.auth.views import PasswordResetDoneView
 from django.contrib.auth.views import PasswordResetView
+from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import QuerySet
 from django.forms import ModelForm
 from django.http import HttpRequest
@@ -22,6 +23,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.encoding import force_text
+from django.utils.http import urlsafe_base64_decode
 from django.views.generic import CreateView
 from django.views.generic import FormView
 from django.views.generic import ListView
@@ -30,7 +33,10 @@ from django.views.generic import UpdateView
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from common.utils import render_confirmation_email
+from common.utils import send_email
 from users.common.fields import Action
+from users.common.strings import AccountConfirmationText
 from users.common.strings import ConfirmationMessages
 from users.common.strings import SuccessInfoAfterRegistrationText
 from users.forms import AdminUserChangeForm
@@ -45,6 +51,7 @@ from users.serializers import UserListSerializer
 from users.serializers import UserSerializer
 from users.serializers import UserUpdateByAdminSerializer
 from users.serializers import UserUpdateSerializer
+from users.tokens import account_activation_token
 from utils.decorators import check_permissions
 
 logger = logging.getLogger(__name__)
@@ -90,8 +97,14 @@ class SignUp(FormView):
     form_class = CustomUserSignUpForm
     template_name = "signup.html"
 
+    def _send_activation_email(self, user: CustomUser) -> None:
+        current_site = get_current_site(self.request)
+        message = render_confirmation_email(user, current_site.domain)
+        send_email(mail_subject="Activate your Sheet Storm account.", message=message, addressee=user.email)
+
     def form_valid(self, form: CustomUserSignUpForm) -> Union[Response, HttpResponseRedirectBase]:
         user = form.save()
+        self._send_activation_email(user)
         logger.info(f"New user with id: {user.pk} has been created")
         return redirect("success-signup")
 
@@ -213,3 +226,28 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 
     template_name = "accounts/password_reset_complete.html"
+
+
+class ActivateAccountView(TemplateView):
+    extra_context = {"MESSAGES": AccountConfirmationText}
+    template_name = "account_confirmation/confirmation.html"
+
+    def activate(self) -> bool:
+        try:
+            user_id = force_text(urlsafe_base64_decode(self.kwargs["encoded_user_id"]))
+            user = CustomUser.objects.get(pk=user_id)
+            is_token_correct = account_activation_token.check_token(user, self.kwargs["token"])
+            if is_token_correct:
+                user.is_active = True
+                user.full_clean()
+                user.save()
+                return True
+            else:
+                return False
+        except CustomUser.DoesNotExist:
+            return False
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["is_activated"] = self.activate()
+        return context
