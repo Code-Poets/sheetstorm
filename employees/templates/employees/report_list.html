@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
-{% load rest_framework %}
+{% load crispy_forms_tags %}
 {% load static %}
 
 {% load data_display_filters %}
@@ -24,7 +24,7 @@
     {% endfor %}
     <form action="{{ path }}" method="POST">
         {% csrf_token %}
-        {% render_form serializer template_pack='rest_framework/vertical' %}
+        {{ form|crispy }}
         <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown is supported</a><br/>
        <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
     </form>

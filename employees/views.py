@@ -14,7 +14,9 @@ from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import redirect
 from django.shortcuts import reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
@@ -165,6 +167,72 @@ class MonthNavigationMixin(ContextMixin):
     ),
     name="dispatch",
 )
+class ReportListCreateProjectJoinView(MonthNavigationMixin, CreateView):
+    template_name = "employees/report_list.html"
+    project_join_form = ProjectJoinForm
+    model = Report
+    form_class = ReportForm
+    url_name = "custom-report-list"
+    object = None
+
+    def get_initial(self) -> dict:
+        initial = super().get_initial()
+        initial.update({"date": timezone.now(), "author": self.request.user})
+        return initial
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .filter(author=self.request.user, date__year=self.kwargs["year"], date__month=self.kwargs["month"])
+            .order_by("-date", "project__name", "-creation_date")
+        )
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = ReportListStrings
+        context_data["object_list"] = self.get_queryset()
+        context_data["daily_hours_sum"] = context_data["object_list"].order_by().get_work_hours_sum_for_all_dates()
+        context_data["monthly_hours_sum"] = context_data["object_list"].order_by().get_work_hours_sum_for_all_authors()
+        project_form_queryset = Project.objects.exclude(members__id=self.request.user.id).order_by("name")
+        context_data["hide_join"] = not project_form_queryset.exists()
+        context_data["project_form"] = ProjectJoinForm(queryset=project_form_queryset)
+        return context_data
+
+    def get_success_url(self) -> str:
+        return reverse("custom-report-list", kwargs={"year": self.kwargs["year"], "month": self.kwargs["month"]})
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if "join" in request.POST:
+            return self._handle_join_request(request)
+        return super().post(request, *args, **kwargs)
+
+    def _handle_join_request(self, request: HttpRequest) -> HttpResponse:
+        form = ProjectJoinForm(
+            queryset=Project.objects.exclude(members__id=self.request.user.id).order_by("name"), data=request.POST
+        )
+        if form.is_valid():
+            project = Project.objects.get(id=int(self.request.POST["projects"]))
+            project.members.add(request.user)
+            project.full_clean()
+            project.save()
+            logger.debug(f"User with id: {request.user.pk} join to the project with id: {project.pk}")
+            return redirect(self.get_success_url())
+        else:
+            return self.render_to_response(context={"form": form})
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.EMPLOYEE.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.ADMIN.name,
+        ]
+    ),
+    name="dispatch",
+)
 class ReportList(
     UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin,
     UserIsAuthorOfCurrentReportMixin,
@@ -301,6 +369,11 @@ class ReportDetailBase(UpdateView):
     redirect_url = ""
     url_pk = ""
 
+    def get_initial(self) -> dict:
+        initial = super().get_initial()
+        initial.update({"author": self.request.user})
+        return initial
+
     def get_context_data(self, **kwargs: Any) -> dict:
         context_data = super().get_context_data(**kwargs)
         context_data["UI_text"] = ProjectReportDetailStrings
@@ -343,6 +416,11 @@ class ReportDetailView(
     template_name = "employees/report_detail.html"
     form_class = ReportForm
     model = Report
+
+    def get_initial(self) -> dict:
+        initial = super().get_initial()
+        initial.update({"author": self.request.user})
+        return initial
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context_data = super().get_context_data(**kwargs)
