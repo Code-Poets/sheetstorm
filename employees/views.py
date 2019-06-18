@@ -49,7 +49,7 @@ from users.models import CustomUser
 from utils.decorators import check_permissions
 from utils.mixins import UserIsAuthorOfCurrentReportMixin
 from utils.mixins import UserIsManagerOfCurrentProjectMixin
-from utils.mixins import UserIsManagerOfCurrentReportProjectMixin
+from utils.mixins import UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +166,10 @@ class MonthNavigationMixin(ContextMixin):
     name="dispatch",
 )
 class ReportList(
-    UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrentReportMixin, APIView, MonthNavigationMixin
+    UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin,
+    UserIsAuthorOfCurrentReportMixin,
+    APIView,
+    MonthNavigationMixin,
 ):
     serializer_class = ReportSerializer
     renderer_classes = [renderers.TemplateHTMLRenderer]
@@ -334,7 +337,9 @@ class ReportDetailBase(UpdateView):
     ),
     name="dispatch",
 )
-class ReportDetailView(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfCurrentReportMixin, UpdateView):
+class ReportDetailView(
+    UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin, UserIsAuthorOfCurrentReportMixin, UpdateView
+):
     template_name = "employees/report_detail.html"
     form_class = ReportForm
     model = Report
@@ -365,7 +370,9 @@ class ReportDetailView(UserIsManagerOfCurrentReportProjectMixin, UserIsAuthorOfC
     ),
     name="dispatch",
 )
-class ReportDeleteView(UserIsAuthorOfCurrentReportMixin, UserIsManagerOfCurrentReportProjectMixin, DeleteView):
+class ReportDeleteView(
+    UserIsAuthorOfCurrentReportMixin, UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin, DeleteView
+):
     model = Report
 
     def get_success_url(self) -> str:
@@ -454,7 +461,7 @@ class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, MonthNav
     check_permissions(allowed_user_types=[CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name]),
     name="dispatch",
 )
-class ProjectReportDetail(UserIsManagerOfCurrentReportProjectMixin, ReportDetailBase):
+class ProjectReportDetail(UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin, ReportDetailBase):
     template_post_url = "project-report-detail"
     redirect_url = "project-report-list"
     url_pk = "project"

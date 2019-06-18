@@ -10,7 +10,7 @@ from users.factories import UserFactory
 from users.models import CustomUser
 from utils.mixins import UserIsAuthorOfCurrentReportMixin
 from utils.mixins import UserIsManagerOfCurrentProjectMixin
-from utils.mixins import UserIsManagerOfCurrentReportProjectMixin
+from utils.mixins import UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin
 
 
 class UserIsAuthorOfCurrentReportMixinTestCase(TestCase):
@@ -103,17 +103,19 @@ class UserIsManagerOfCurrentProjectMixinTestCase(TestCase):
         self.assertEqual(len(response.context_data["object_list"]), 2)
 
 
-class UserIsManagerOfCurrentReportProjectMixinTestCase(TestCase):
+class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixinTestCase(TestCase):
     def setUp(self):
         super().setUp()
 
-        class TestView(UserIsManagerOfCurrentReportProjectMixin, ListView):
+        class TestView(UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin, ListView):
             model = Report
 
         self.view = TestView.as_view()
         self.request_factory = RequestFactory()
 
-    def test_that_user_is_manager_of_current_project_mixin_should_limit_view_project_queryset_if_user_is_manager(self):
+    def test_that_user_is_manager_of_current_project_or_author_of_current_report_mixin_should_limit_view_project_queryset_if_user_is_manager(
+        self
+    ):
         user = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
 
         report = ReportFactory()
@@ -130,7 +132,7 @@ class UserIsManagerOfCurrentReportProjectMixinTestCase(TestCase):
         self.assertEqual(len(response.context_data["object_list"]), 1)
         self.assertEqual(response.context_data["object_list"][0].pk, report.pk)
 
-    def test_that_user_is_manager_of_current_project_mixin_should_not_limit_view_project_queryset_if_user_is_not_manager(
+    def test_that_user_is_manager_of_current_project_or_author_of_current_report_mixin_should_not_limit_view_project_queryset_if_user_is_not_manager(
         self
     ):
         user = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
