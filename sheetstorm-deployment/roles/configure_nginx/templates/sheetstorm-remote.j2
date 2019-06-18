@@ -43,8 +43,13 @@ server {
     listen      [::]:80 default_server;
     server_name sheetstorm.codepoets.it s.codepoets.it;
 
+    # Activate modsecurity module
+    modsecurity            on;
+    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
+
     client_body_timeout   {{ nginx.client_body_timeout }};
     client_header_timeout {{ nginx.client_header_timeout }};
+
     return 404; # managed by Certbot
 
 }

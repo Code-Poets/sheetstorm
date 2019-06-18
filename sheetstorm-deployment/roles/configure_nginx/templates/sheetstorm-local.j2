@@ -6,6 +6,10 @@ server {
     listen           80 default_server;
     listen      [::]:80 default_server;
 
+    # Activate modsecurity module
+    modsecurity            on;
+    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
+
     client_body_timeout   {{ nginx.client_body_timeout }};
     client_header_timeout {{ nginx.client_header_timeout }};
 
