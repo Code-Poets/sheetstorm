@@ -33,12 +33,20 @@
           - git
           - virtualenv
           - python3-setuptools
-          - nginx
+          - wget
 
     - name:  Install dependencies from testing
       apt:
         default_release: testing
         name:
+          - nginx={{ nginx_version }}
+          - libmodsecurity-dev
+          - libgeoip-dev
+          - libgd-dev
+          - libxslt-dev
+          - zlib1g-dev
+          - libpcre++-dev
+          - zlib1g-dev
           - python{{ python_version }}
           - postgresql={{ postgres_package_version }}
           - python3-distutils

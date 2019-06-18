@@ -1,3 +1,7 @@
-postgres_package_version: 11+200+deb10u1
-postgres_version:         11
-python_version:           3.7
+# Before you can change nginx version, you must manually rebuild nginx modsecurity connector with new nginx version
+# and put it in `{{ nginx_modules_dir }}/ngx_http_modsecurity_<nginx_version>_module.so`
+nginx_version:             1.14.2-2
+owasp_modsecurity_version: v3.1.0
+postgres_package_version:  11+200+deb10u1
+postgres_version:          11
+python_version:            3.7
