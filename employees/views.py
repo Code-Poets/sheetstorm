@@ -56,18 +56,6 @@ from utils.mixins import UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentRep
 logger = logging.getLogger(__name__)
 
 
-class ReportViewSet(viewsets.ModelViewSet):
-    serializer_class = ReportSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get_queryset(self) -> QuerySet:
-        return Report.objects.filter(author=self.request.user).order_by("-date")
-
-    def perform_create(self, serializer: ReportSerializer) -> None:
-        logger.info(f"Perform create method for user: {self.request.user}")
-        serializer.save(author=self.request.user)
-
-
 class MonthNavigationMixin(ContextMixin):
     url_name = ""
     kwargs = {}  # type: dict

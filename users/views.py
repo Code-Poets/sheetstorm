@@ -3,7 +3,6 @@ import logging
 from typing import Any
 from typing import Optional
 from typing import Type
-from typing import Union
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -30,12 +29,9 @@ from django.views.generic import FormView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
-from rest_framework import viewsets
-from rest_framework.response import Response
 
 from common.utils import render_confirmation_email
 from common.utils import send_email
-from users.common.fields import Action
 from users.common.strings import AccountConfirmationText
 from users.common.strings import ConfirmationMessages
 from users.common.strings import SuccessInfoAfterRegistrationText
@@ -44,47 +40,10 @@ from users.forms import CustomUserCreationForm
 from users.forms import CustomUserSignUpForm
 from users.forms import SimpleUserChangeForm
 from users.models import CustomUser
-from users.permissions import AuthenticatedAdmin
-from users.permissions import AuthenticatedAdminOrOwnerUser
-from users.serializers import UserCreateSerializer
-from users.serializers import UserListSerializer
-from users.serializers import UserSerializer
-from users.serializers import UserUpdateByAdminSerializer
-from users.serializers import UserUpdateSerializer
 from users.tokens import account_activation_token
 from utils.decorators import check_permissions
 
 logger = logging.getLogger(__name__)
-
-
-class UsersViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
-    permission_classes = (AuthenticatedAdmin,)
-
-    def get_serializer_class(
-        self
-    ) -> Type[Union[UserListSerializer, UserUpdateByAdminSerializer, UserCreateSerializer, UserSerializer]]:
-        if self.action == Action.LIST.value:  # pylint: disable=no-member
-            return UserListSerializer
-        elif self.action == Action.RETRIEVE.value:  # pylint: disable=no-member
-            return UserUpdateByAdminSerializer
-        elif self.action in [Action.CREATE.value, Action.UPDATE.value]:  # pylint: disable=no-member
-            return UserCreateSerializer
-        else:
-            return UserSerializer
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
-    permission_classes = (AuthenticatedAdminOrOwnerUser,)
-
-    def get_serializer_class(self) -> Type[Union[UserUpdateByAdminSerializer, UserUpdateSerializer, UserSerializer]]:
-        if self.action == Action.RETRIEVE.value:  # pylint: disable=no-member
-            return UserUpdateByAdminSerializer
-        elif self.action == Action.UPDATE.value:  # pylint: disable=no-member
-            return UserUpdateSerializer
-        else:
-            return UserSerializer
 
 
 @login_required
@@ -102,7 +61,7 @@ class SignUp(FormView):
         message = render_confirmation_email(user, current_site.domain)
         send_email(mail_subject="Activate your Sheet Storm account.", message=message, addressee=user.email)
 
-    def form_valid(self, form: CustomUserSignUpForm) -> Union[Response, HttpResponseRedirectBase]:
+    def form_valid(self, form: CustomUserSignUpForm) -> HttpResponseRedirectBase:
         user = form.save()
         self._send_activation_email(user)
         logger.info(f"New user with id: {user.pk} has been created")
