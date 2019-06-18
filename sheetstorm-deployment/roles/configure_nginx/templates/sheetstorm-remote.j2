@@ -1,3 +1,6 @@
+limit_req_zone $binary_remote_addr zone=ip_req_limit:10m rate={{ nginx.limit_of_requests_per_second }}r/s;
+limit_conn_zone $binary_remote_addr zone=ip_connection_limit:10m;
+
 server {
     server_name sheetstorm.codepoets.it s.codepoets.it;
     if ($host = s.codepoets.it) {
@@ -5,6 +8,9 @@ server {
     }
 
     location / {
+        limit_req  zone=ip_req_limit   burst={{ nginx.number_of_requests_stored_in_queue }} nodelay;
+        limit_conn ip_connection_limit {{ nginx.number_of_open_connections_per_client }};
+
         set              $sheetstorm_backend  http://127.0.0.1:8000;
         proxy_set_header x-real-ip            $remote_addr;
         proxy_set_header x-forwarded-for      $remote_addr;
@@ -36,6 +42,9 @@ server {
     listen           80 default_server;
     listen      [::]:80 default_server;
     server_name sheetstorm.codepoets.it s.codepoets.it;
+
+    client_body_timeout   {{ nginx.client_body_timeout }};
+    client_header_timeout {{ nginx.client_header_timeout }};
     return 404; # managed by Certbot
 
 }

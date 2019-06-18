@@ -3,26 +3,23 @@ limit_conn_zone $binary_remote_addr zone=ip_connection_limit:10m;
 
 server {
 
-    listen           80 default_server;
-    listen      [::]:80 default_server;
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
     client_body_timeout   {{ nginx.client_body_timeout }};
     client_header_timeout {{ nginx.client_header_timeout }};
+
+    error_page 503 /503.html;
+    location = /503.html {
+        root /var/www/html/;
+        internal;
+    }
 
     location / {
         limit_req  zone=ip_req_limit   burst={{ nginx.number_of_requests_stored_in_queue }} nodelay;
         limit_conn ip_connection_limit {{ nginx.number_of_open_connections_per_client }};
 
-        set              $sheetstorm_backend  http://127.0.0.1:8000;
-        proxy_set_header x-real-ip            $remote_addr;
-        proxy_set_header x-forwarded-for      $remote_addr;
-        proxy_set_header host                 $http_host;
-        proxy_pass                            $sheetstorm_backend;
-
+        return 503;
     }
-
-    location /static/ {
-        alias {{ static_file_dir }};
-    }
-
 }
+
