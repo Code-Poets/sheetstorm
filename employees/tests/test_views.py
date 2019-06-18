@@ -13,6 +13,7 @@ from employees.views import AuthorReportView
 from managers.factories import ProjectFactory
 from managers.models import Project
 from users.factories import AdminUserFactory
+from users.factories import ManagerUserFactory
 from users.factories import UserFactory
 
 
@@ -155,14 +156,10 @@ class ProjectReportDetailTests(TestCase):
 class ReportDetailViewTests(TestCase):
     def setUp(self):
         super().setUp()
-        self.task_type = TaskActivityType(pk=1, name="Other")
-        self.task_type.full_clean()
-        self.task_type.save()
         self.user = UserFactory()
-        self.project = ProjectFactory()
-        self.project.members.add(self.user)
         self.client.force_login(self.user)
-        self.report = ReportFactory(author=self.user, project=self.project)
+        self.report = ReportFactory(author=self.user)
+        self.report.project.members.add(self.user)
         self.url = reverse("custom-report-detail", args=(self.report.pk,))
         self.data = {
             "date": self.report.date,
@@ -226,6 +223,24 @@ class ReportDetailViewTests(TestCase):
         response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(other_project not in response.context_data["form"].fields["project"].queryset)
+
+    def test_manager_should_be_able_to_update_his_reports_in_project_in_which_he_is_not_manager(self):
+        user_manager = ManagerUserFactory()
+        self.client.force_login(user_manager)
+        report_manager = ReportFactory(author=user_manager)
+        report_manager.project.members.add(user_manager)
+        data = {
+            "date": report_manager.date,
+            "description": "report_manager other description",
+            "project": report_manager.project.pk,
+            "author": report_manager.author,
+            "task_activities": report_manager.task_activities.pk,
+            "work_hours": report_manager.work_hours_str,
+        }
+        response = self.client.post(path=reverse("custom-report-detail", args=(report_manager.pk,)), data=data)
+        report_manager.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(report_manager.description, data["description"])
 
 
 class ReportDeleteViewTests(TestCase):

@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.db.models import QuerySet
 
 
@@ -13,10 +14,14 @@ class UserIsManagerOfCurrentProjectMixin:
             return super().get_queryset()  # type: ignore
 
 
-class UserIsManagerOfCurrentReportProjectMixin:
+class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin:
     def get_queryset(self) -> QuerySet:
         if self.request.user.is_manager:  # type: ignore
-            return super().get_queryset().filter(project__managers=self.request.user.pk)  # type: ignore
+            return (
+                super()  # type: ignore
+                .get_queryset()
+                .filter(Q(project__managers=self.request.user.pk) | Q(author=self.request.user.pk))  # type: ignore
+            )
         else:
             return super().get_queryset()  # type: ignore
 
