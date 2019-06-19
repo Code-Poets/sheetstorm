@@ -69,7 +69,7 @@ class ExportMethodTestForProject(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
         authors = self.workbook_for_project.get_sheet_names()
         for author in authors:
-            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name}")
+            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name[0]}.")
         self.assertEqual(len(authors), 1)
 
     def test_date_should_be_the_same_in_excel(self):
@@ -112,7 +112,7 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
         sheet_names = self.workbook_for_user.get_sheet_names()
         for author in sheet_names:
-            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name}")
+            self.assertEqual(author, f"{self.user.first_name} {self.user.last_name[0]}.")
         self.assertEqual(len(sheet_names), 1)
 
     def test_date_should_be_the_same_in_excel(self):

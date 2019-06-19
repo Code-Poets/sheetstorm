@@ -96,8 +96,8 @@ def summarizing_reports(worksheet: Worksheet, last_row: int, hours_column: int, 
 
 
 def get_employee_name(author: CustomUser) -> str:
-    if author.last_name is not None and author.first_name is not None:
-        return f"{author.first_name} {author.last_name}"
+    if author.last_name and author.first_name:
+        return f"{author.first_name} {author.last_name[0]}."
     else:
         return f"{author.email}"
 
