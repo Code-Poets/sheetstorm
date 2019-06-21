@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -7,10 +5,9 @@ from django.utils import timezone
 from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
+from employees.common.exports import get_employee_name
 from employees.factories import ReportFactory
-from employees.factories import TaskActivityTypeFactory
 from employees.models import Report
-from employees.models import TaskActivityType
 from managers.factories import ProjectFactory
 from users.factories import AdminUserFactory
 from users.factories import ManagerUserFactory
@@ -168,48 +165,46 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
 class TestExportingFunctions(TestCase):
     def setUp(self):
         super().setUp()
-        self.employee = UserFactory()
+        self.employee1 = UserFactory(first_name="Cezar", last_name="Goldstein")
+        self.employee2 = UserFactory(first_name="", last_name="", email="bozydar.stolzman@codepots.it")
+        self.employee3 = UserFactory(first_name="Abimelek", last_name="Zuckerberg")
         self.manager = ManagerUserFactory()
         self.project = ProjectFactory()
-        self.project.members.add(self.employee)
+        self.project.members.add(self.employee1)
+        self.project.members.add(self.employee2)
+        self.project.members.add(self.employee3)
         reports_in_day = 2
         # creating reports in desc order
         for i in range(4, 0, -1):
             for _ in range(reports_in_day):
-                ReportFactory(author=self.employee, project=self.project, date=f"2019-06-{i}")
-        self.report_asc = Report.objects.filter(author__id=self.employee.pk).order_by("date")
+                ReportFactory(author=self.employee2, project=self.project, date=f"2019-06-{i}")
+                ReportFactory(author=self.employee3, project=self.project, date=f"2019-06-{i}")
+                ReportFactory(author=self.employee1, project=self.project, date=f"2019-06-{i}")
+        self.report_asc = Report.objects.filter(author__id=self.employee1.pk).order_by("date")
 
-    def test_unsorted_reported_will_be_sorted_asc_in_project_export(self):
+    def test_unsorted_reports_will_be_sorted_asc_by_first_name_and_asc_by_date_in_project_export(self):
         project_workbook = generate_xlsx_for_project(self.project)
-        for i, element in enumerate(self.report_asc):
-            if i % 2 == 0:
-                self.assertEqual(
-                    project_workbook.active.cell(
-                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
-                    ).value,
-                    element.date,
-                )
-            else:
-                self.assertEqual(
-                    project_workbook.active.cell(
-                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
-                    ).value,
-                    None,
-                )
+        for j, sheet in enumerate(project_workbook.worksheets):
+            # Check that sheets are sorted in ascending order, according to employee's first name / user email
+            self.assertEqual(sheet.title, get_employee_name(getattr(self, f"employee{3 - j}")))
+            self._assert_reports_are_sorted_in_ascending_order(project_workbook)
 
-    def test_unsorted_reported_will_be_sorted_asc_in_user_export(self):
-        project_workbook = generate_xlsx_for_single_user(self.employee)
+    def test_unsorted_reports_will_be_sorted_asc_by_date_in_user_export(self):
+        user_workbook = generate_xlsx_for_single_user(self.employee1)
+        self._assert_reports_are_sorted_in_ascending_order(user_workbook)
+
+    def _assert_reports_are_sorted_in_ascending_order(self, workbook):
         for i, element in enumerate(self.report_asc):
             if i % 2 == 0:
                 self.assertEqual(
-                    project_workbook.active.cell(
+                    workbook.active.cell(
                         row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
                     ).value,
                     element.date,
                 )
             else:
                 self.assertEqual(
-                    project_workbook.active.cell(
+                    workbook.active.cell(
                         row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
                     ).value,
                     None,

@@ -186,7 +186,7 @@ def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
 
 
 def generate_xlsx_for_project(project: Project) -> Workbook:
-    authors = project.members.order_by("-last_name")
+    authors = project.members.all()
     workbook = Workbook()
     for author in authors:
         employee_name = get_employee_name(author)
@@ -227,6 +227,7 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
             ExcelGeneratorSettingsConstants.HOURS_COLUMN_FOR_REPORTS_IN_PROJECT.value,
             ExcelGeneratorSettingsConstants.TOTAL_HOURS_FORMULA_REPORTS_IN_PROJECT.value,
         )
+    workbook._sheets.sort(key=lambda w: str.lower(w.title))
     return workbook
 
 
