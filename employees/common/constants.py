@@ -68,6 +68,8 @@ class ExcelGeneratorSettingsConstants(Enum):
     TOTAL_HOURS_FORMAT = "[h]:mm"
     TOTAL_HOURS_FORMULA_FOR_SINGLE_USER = "=SUM(E1:D{})"
     TOTAL_HOURS_FORMULA_REPORTS_IN_PROJECT = "=SUM(D1:C{})"
-    CONTENT_TYPE_FORMAT = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.xlsx"'
+    XLSX_CONTENT_TYPE_FORMAT = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    XLSX_EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.xlsx"'
+    CSV_CONTENT_TYPE_FORMAT = "application/csv"
+    CSV_EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.csv"'
     BORDER = "double"
