@@ -1,5 +1,6 @@
+import csv
+import io
 from datetime import timedelta
-from io import BytesIO
 
 from django.db.models import Sum
 from django.test import TestCase
@@ -12,6 +13,7 @@ from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.exports import get_employee_name
+from employees.common.exports import save_work_book_as_csv
 from employees.factories import ReportFactory
 from employees.models import Report
 from managers.factories import ProjectFactory
@@ -70,6 +72,12 @@ class ExportViewTest(DataSetUpToTests):
     def test_export_reports_for_project_should_not_download_if_user_is_not_logged(self):
         response = self.client.get(self.url_project)
         self.assertEqual(response.status_code, 302)
+
+    def test_export_reports_should_download_for_single_user_csv(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url_single_user + "?format=csv")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response._headers["content-disposition"][1].endswith('csv"'))
 
 
 class ExportMethodTestForProject(DataSetUpToTests):
@@ -346,6 +354,6 @@ class TestExportingFunctions(TestCase):
         self.client.force_login(self.employee1)
         url = reverse("export-data-xlsx", kwargs={"pk": self.employee2.pk, "year": self.year, "month": self.month})
         response = self.client.get(url)
-        received_workbook = load_workbook(filename=BytesIO(response.content))
+        received_workbook = load_workbook(filename=io.BytesIO(response.content))
         self.assertEqual(len(received_workbook.sheetnames), 1)
         self.assertEqual(received_workbook.sheetnames[0], f"{self.employee1.first_name} {self.employee1.last_name[0]}.")
