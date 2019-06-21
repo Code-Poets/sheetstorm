@@ -201,6 +201,59 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
         )
 
 
+class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
+    def setUp(self):
+        super().setUp()
+        self.csv_file = io.StringIO()
+        writer = csv.writer(self.csv_file)
+        save_work_book_as_csv(writer, self.workbook_for_user)
+        self.csv_content = [line for line in csv.reader(self.csv_file.getvalue().split("\n"))]
+
+    def test_date_should_be_the_same_in_excel(self):
+        self.assertEqual(
+            str(
+                self.workbook_for_user.active.cell(
+                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=1
+                ).value
+            ),
+            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][0],
+        )
+
+    def test_project_name_should_be_the_same_in_excel(self):
+        self.assertEqual(
+            str(
+                self.workbook_for_user.active.cell(
+                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=3
+                ).value
+            ),
+            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][2],
+        )
+
+    def test_task_activity_should_be_the_same_in_excel(self):
+        self.assertEqual(
+            self.workbook_for_user.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=4
+            ).value,
+            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][3],
+        )
+
+    def test_hours_should_be_the_same_in_excel(self):
+        self.assertEqual(
+            self.workbook_for_user.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=5
+            ).value,
+            f'=timevalue("{self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][4]}")',
+        )
+
+    def test_description_should_be_the_same_in_excel(self):
+        self.assertEqual(
+            self.workbook_for_user.active.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=6
+            ).value,
+            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][5],
+        )
+
+
 class TestExportingFunctions(TestCase):
     def setUp(self):
         super().setUp()
