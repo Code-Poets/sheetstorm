@@ -143,7 +143,7 @@ def get_report_date_and_daily_hours(reports_date: List[str], date: str, reports:
 
 
 def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
-    reports = author.get_reports_created()
+    reports = author.get_reports_created().order_by("date", "project__name")
     workbook = Workbook()
     employee_name = get_employee_name(author)
     worksheet = set_active_worksheet_name(workbook, employee_name)
@@ -191,7 +191,7 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
     for author in authors:
         employee_name = get_employee_name(author)
         worksheet = set_active_worksheet_name(workbook, employee_name)
-        reports = project.report_set.filter(author=author.pk).order_by("-date")
+        reports = project.report_set.filter(author=author.pk).order_by("date")
         fill_headers(
             worksheet,
             ExcelGeneratorSettingsConstants.HEADERS_FOR_USER_IN_PROJECT.value,

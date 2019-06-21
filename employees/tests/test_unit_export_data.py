@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -6,7 +8,9 @@ from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.factories import ReportFactory
+from employees.factories import TaskActivityTypeFactory
 from employees.models import Report
+from employees.models import TaskActivityType
 from managers.factories import ProjectFactory
 from users.factories import AdminUserFactory
 from users.factories import ManagerUserFactory
@@ -173,7 +177,7 @@ class TestExportingFunctions(TestCase):
         for i in range(4, 0, -1):
             for _ in range(reports_in_day):
                 ReportFactory(author=self.employee, project=self.project, date=f"2019-06-{i}")
-        self.report_asc = Report.objects.filter(author__id=self.employee.pk).order_by("-date")
+        self.report_asc = Report.objects.filter(author__id=self.employee.pk).order_by("date")
 
     def test_unsorted_reported_will_be_sorted_asc_in_project_export(self):
         project_workbook = generate_xlsx_for_project(self.project)
