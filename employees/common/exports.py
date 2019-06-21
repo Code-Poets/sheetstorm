@@ -102,10 +102,21 @@ def get_employee_name(author: CustomUser) -> str:
         return f"{author.email}"
 
 
-def set_active_worksheet_name(workbook: Workbook, author: CustomUser) -> Worksheet:
+def set_active_worksheet_name(workbook: Workbook, employee_name: str) -> Worksheet:
+    if workbook.active.title != "Sheet":
+        _set_employees_worksheet_active(employee_name, workbook)
     worksheet = workbook.active
-    worksheet.title = get_employee_name(author)
+    worksheet.title = employee_name
     return worksheet
+
+
+def _set_employees_worksheet_active(employee_name, workbook):
+    try:
+        employee_sheet_index = workbook.worksheets.index(employee_name)
+    except ValueError:
+        workbook.create_sheet()
+        employee_sheet_index = -1
+    workbook.active = workbook.worksheets[employee_sheet_index]
 
 
 def get_report_date_and_daily_hours(reports_date: List[str], date: str, reports: Report):
@@ -134,8 +145,8 @@ def get_report_date_and_daily_hours(reports_date: List[str], date: str, reports:
 def generate_xlsx_for_single_user(author: CustomUser) -> Workbook:
     reports = author.get_reports_created()
     workbook = Workbook()
-    worksheet = set_active_worksheet_name(workbook, author)
     employee_name = get_employee_name(author)
+    worksheet = set_active_worksheet_name(workbook, employee_name)
     fill_headers(
         worksheet,
         ExcelGeneratorSettingsConstants.HEADERS_FOR_SINGLE_USER.value,
@@ -178,9 +189,9 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
     authors = project.members.order_by("-last_name")
     workbook = Workbook()
     for author in authors:
-        worksheet = set_active_worksheet_name(workbook, author)
-        reports = project.report_set.filter(author=author.pk).order_by("-date")
         employee_name = get_employee_name(author)
+        worksheet = set_active_worksheet_name(workbook, employee_name)
+        reports = project.report_set.filter(author=author.pk).order_by("-date")
         fill_headers(
             worksheet,
             ExcelGeneratorSettingsConstants.HEADERS_FOR_USER_IN_PROJECT.value,
@@ -216,8 +227,6 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
             ExcelGeneratorSettingsConstants.HOURS_COLUMN_FOR_REPORTS_IN_PROJECT.value,
             ExcelGeneratorSettingsConstants.TOTAL_HOURS_FORMULA_REPORTS_IN_PROJECT.value,
         )
-        if author != authors.last():
-            workbook.create_sheet(index=0)
     return workbook
 
 
