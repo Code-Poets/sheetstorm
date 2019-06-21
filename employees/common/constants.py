@@ -1,5 +1,6 @@
 from datetime import timedelta
 from enum import Enum
+from typing import NamedTuple
 
 MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE = 12
 MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE = 5
@@ -17,6 +18,11 @@ class TaskActivityTypeConstans(Enum):
     TASK_ACTIVITIES_MAX_LENGTH = 30
 
 
+class ColumnSettings(NamedTuple):
+    position: int
+    width: int
+
+
 class ExcelGeneratorSettingsConstants(Enum):
     TOTAL = "Total"
     EMPLOYEE_NAME_ROW = 1
@@ -27,17 +33,30 @@ class ExcelGeneratorSettingsConstants(Enum):
     TOTAL_COLUMN = 1
     FIRST_ROW_FOR_DATA = 3
 
-    HEADERS_FOR_SINGLE_USER = ["Date", "Daily hours", "Project", "Task activity", "Hours", "Description"]
-    COLUMNS_WIDTH_FOR_SINGLE_USER = [12, 12, 20, 30, 6, 100]
-    DAILY_HOURS_COLUMN_FOR_SINGLE_USER = 2
-    HOURS_COLUMN_FOR_SINGLE_USER = 5
-    DESCRIPTION_COLUMN_FOR_SINGLE_USER = 6
+    DATE_HEADER_STR = "Date"
+    DAILY_HOURS_HEADER_STR = "Daily hours"
+    PROJECT_HEADER_STR = "Project"
+    TASK_ACTIVITY_HEADER_STR = "Task activity"
+    HOURS_HEADER_STR = "Hours"
+    DESCRIPTION_HEADER_STR = "Description"
 
-    HEADERS_FOR_USER_IN_PROJECT = ["Date", "Daily hours", "Task activity", "Hours", "Description"]
-    COLUMNS_WIDTH_FOR_PROJECT = [12, 12, 30, 6, 100]
-    DAILY_HOURS_COLUMN_FOR_REPORTS_IN_PROJECT = 2
-    HOURS_COLUMN_FOR_REPORTS_IN_PROJECT = 4
-    DESCRIPTION_COLUMN_FOR_REPORTS_IN_PROJECT = 5
+    HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER = {
+        DATE_HEADER_STR: ColumnSettings(position=1, width=12),
+        DAILY_HOURS_HEADER_STR: ColumnSettings(position=2, width=12),
+        PROJECT_HEADER_STR: ColumnSettings(position=3, width=20),
+        TASK_ACTIVITY_HEADER_STR: ColumnSettings(position=4, width=30),
+        HOURS_HEADER_STR: ColumnSettings(position=5, width=6),
+        DESCRIPTION_HEADER_STR: ColumnSettings(position=6, width=100),
+    }
+
+    HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT = {
+        DATE_HEADER_STR: ColumnSettings(position=1, width=12),
+        DAILY_HOURS_HEADER_STR: ColumnSettings(position=2, width=12),
+        PROJECT_HEADER_STR: None,
+        TASK_ACTIVITY_HEADER_STR: ColumnSettings(position=3, width=30),
+        HOURS_HEADER_STR: ColumnSettings(position=4, width=6),
+        DESCRIPTION_HEADER_STR: ColumnSettings(position=5, width=100),
+    }
 
     VERCTICAL_TOP = "top"
     CENTER_ALINGMENT = "center"
