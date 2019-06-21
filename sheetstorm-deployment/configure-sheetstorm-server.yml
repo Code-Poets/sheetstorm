@@ -40,5 +40,13 @@
               --agree-tos
           when: not nginx_configuration.stat.exists
 
+        - name: Add cron job that automatically renew Let's Encrypt Certificate
+          cron:
+            name:   renew certificate
+            minute: "0"
+            hour:   "2"
+            user:   root
+            job:    /usr/bin/certbot renew --quiet
+
         - include_role:
             name: configure_nginx
