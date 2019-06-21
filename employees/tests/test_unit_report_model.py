@@ -317,3 +317,41 @@ class TestGetProjectsWorkPercentage(TestCase):
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result, {self.project_1: 100.0})
+
+
+class TestGetProjectOrderedByLastReportCreationDate(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+
+        self.project_1 = ProjectFactory()
+        self.project_2 = ProjectFactory()
+        self.project_3 = ProjectFactory()
+
+        self.project_1_report_1 = ReportFactory(author=self.user, project=self.project_1)
+        self.project_2_report_1 = ReportFactory(author=self.user, project=self.project_2)
+        self.project_3_report_1 = ReportFactory(author=self.user, project=self.project_3)
+
+        self.project_3_report_2 = ReportFactory(author=self.user, project=self.project_3)
+        self.project_1_report_2 = ReportFactory(author=self.user, project=self.project_1)
+        self.project_2_report_2 = ReportFactory(author=self.user, project=self.project_2)
+
+        self.user.projects.add(self.project_1, self.project_2, self.project_3)
+
+    def test_get_project_ordered_by_last_report_creation_date_should_return_projects_ordered_by_last_report_creation_date_desc(
+        self
+    ):
+        result = list(self.user.get_project_ordered_by_last_report_creation_date())
+        self.assertEqual(result, [self.project_2, self.project_1, self.project_3])
+
+    def test_get_project_ordered_by_last_report_creation_date_should_not_include_other_users_reports(self):
+        # Create report from other user in the same project
+        ReportFactory(project=self.project_3)
+        result = list(self.user.get_project_ordered_by_last_report_creation_date())
+        self.assertEqual(result, [self.project_2, self.project_1, self.project_3])
+
+    def test_get_project_ordered_by_last_report_creation_date_should_put_projects_without_report_at_the_end(self):
+        # Remove reports from project which otherwise should be first
+        self.project_2.report_set.all().delete()
+        result = list(self.user.get_project_ordered_by_last_report_creation_date())
+        self.assertEqual(result, [self.project_1, self.project_3, self.project_2])
