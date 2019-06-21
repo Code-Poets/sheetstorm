@@ -190,8 +190,10 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
     workbook = Workbook()
     for author in authors:
         employee_name = get_employee_name(author)
-        worksheet = set_active_worksheet_name(workbook, employee_name)
         reports = project.report_set.filter(author=author.pk).order_by("date")
+        if not reports:
+            continue
+        worksheet = set_active_worksheet_name(workbook, employee_name)
         fill_headers(
             worksheet,
             ExcelGeneratorSettingsConstants.HEADERS_FOR_USER_IN_PROJECT.value,

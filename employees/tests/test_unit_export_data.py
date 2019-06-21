@@ -189,6 +189,13 @@ class TestExportingFunctions(TestCase):
             self.assertEqual(sheet.title, get_employee_name(getattr(self, f"employee{3 - j}")))
             self._assert_reports_are_sorted_in_ascending_order(project_workbook)
 
+    def test_project_members_with_no_report_will_be_skipped_in_project_export(self):
+        not_a_member = UserFactory(first_name="Asterix", last_name="Longsword")
+        self.project.members.add(not_a_member)
+        project_workbook = generate_xlsx_for_project(self.project)
+        employee_name = get_employee_name(not_a_member)
+        self.assertNotIn(employee_name, [s.title for s in project_workbook.worksheets])
+
     def test_unsorted_reports_will_be_sorted_asc_by_date_in_user_export(self):
         user_workbook = generate_xlsx_for_single_user(self.employee1)
         self._assert_reports_are_sorted_in_ascending_order(user_workbook)
