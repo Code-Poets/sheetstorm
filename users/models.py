@@ -1,5 +1,7 @@
 import logging
+from datetime import date
 from typing import Any
+from typing import Optional
 
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
@@ -7,9 +9,13 @@ from django.contrib.auth.models import PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models import Q
 from django.db.models import QuerySet
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django_countries.fields import CountryField
 
 from users.common import constants
@@ -152,6 +158,28 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def get_reports_created(self) -> QuerySet:
         return self.report_set.select_related("task_activities").order_by("-date", "project__name")
+
+    def get_projects_work_percentage(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> dict:
+        """
+        Returns dict where keys are Project objects and values are percentage amount of work
+        by this user between given dates.
+        """
+        if from_date is None:
+            from_date = timezone.now().date().replace(day=1)
+        if to_date is None:
+            to_date = timezone.now().date()
+
+        work_hours_per_project = self.projects.filter(report__date__range=[from_date, to_date]).annotate(
+            work_hours_sum=Coalesce(Sum("report__work_hours", filter=Q(report__author=self)), timezone.timedelta())
+        )
+        work_hours_sum = work_hours_per_project.aggregate(
+            sum_work_hours_sum=Coalesce(Sum("work_hours_sum"), timezone.timedelta())
+        )["sum_work_hours_sum"]
+
+        return {
+            project: ((project.work_hours_sum / work_hours_sum) * 100 if work_hours_sum.total_seconds() > 0 else 0)
+            for project in work_hours_per_project
+        }
 
 
 @receiver(post_save, sender=CustomUser)
