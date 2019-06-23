@@ -40,6 +40,7 @@ from employees.models import Report
 from managers.models import Project
 from users.models import CustomUser
 from utils.decorators import check_permissions
+from utils.mixins import ProjectsWorkPercentageMixin
 from utils.mixins import UserIsAuthorOfCurrentReportMixin
 from utils.mixins import UserIsManagerOfCurrentProjectMixin
 from utils.mixins import UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin
@@ -146,7 +147,7 @@ class MonthNavigationMixin(ContextMixin):
     ),
     name="dispatch",
 )
-class ReportListCreateProjectJoinView(MonthNavigationMixin, CreateView):
+class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercentageMixin, CreateView):
     template_name = "employees/report_list.html"
     project_join_form = ProjectJoinForm
     model = Report
@@ -302,7 +303,7 @@ class ReportDeleteView(
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
-class AuthorReportView(DetailView, MonthNavigationMixin):
+class AuthorReportView(MonthNavigationMixin, ProjectsWorkPercentageMixin, DetailView):
     template_name = "employees/author_report_list.html"
     model = CustomUser
     url_name = "author-report-list"
