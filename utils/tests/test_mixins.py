@@ -1,6 +1,8 @@
 from django.test import RequestFactory
 from django.test import TestCase
+from django.utils import timezone
 from django.views.generic import ListView
+from mock import patch
 
 from employees.factories import ReportFactory
 from employees.models import Report
@@ -8,6 +10,7 @@ from managers.factories import ProjectFactory
 from managers.models import Project
 from users.factories import UserFactory
 from users.models import CustomUser
+from utils.mixins import ProjectsWorkPercentageMixin
 from utils.mixins import UserIsAuthorOfCurrentReportMixin
 from utils.mixins import UserIsManagerOfCurrentProjectMixin
 from utils.mixins import UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin
@@ -147,3 +150,35 @@ class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixinTestCase(Te
         response = self.view(request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context_data["object_list"]), 2)
+
+
+class ProjectsWorkPercentageMixinTestCase(TestCase):
+    def setUp(self):
+        super().setUp()
+
+        class TestView(ProjectsWorkPercentageMixin, ListView):
+            model = Report
+
+        self.view = TestView.as_view()
+        self.request_factory = RequestFactory()
+        self.request = self.request_factory.get("anything")
+        self.request.user = UserFactory()
+
+    def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_none_parameters(self):
+        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+            response = self.view(self.request)
+
+        self.assertEqual(response.status_code, 200)
+        get_projects_work_percentage.assert_called_once_with(None, None)
+
+    def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_parameters_if_provided_to_view(
+        self
+    ):
+        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+            response = self.view(self.request, year=2000, month=11)
+
+        self.assertEqual(response.status_code, 200)
+        get_projects_work_percentage.assert_called_once_with(
+            timezone.now().date().replace(year=2000, month=11, day=1),
+            timezone.now().date().replace(year=2000, month=11, day=30),
+        )
