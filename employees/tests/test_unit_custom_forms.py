@@ -39,14 +39,14 @@ class TestDurationFieldForm:
     @pytest.mark.parametrize(
         ("initial_value", "input_value", "expected_value"), [("08:00", "8:00", "8:00:00"), ("08:00", "8:0", "8:0:00")]
     )
-    def test_that_correct_work_hours_is_same_as_assumpted(self, initial_value, input_value, expected_value):
+    def test_correct_work_hours_is_same_as_assumpted(self, initial_value, input_value, expected_value):
         assertpy.assert_that(self._test_duration_field_form(initial_value, input_value)).is_equal_to(expected_value)
 
     @pytest.mark.parametrize(
         ("initial_value", "input_value"),
         [("08:00", ":00"), ("08:00", "8:"), ("08:00", ":"), ("08:00", ""), ("08:00", "four:zero"), ("08:00", "8:zero")],
     )
-    def test_that_incorrect_work_hours_will_raise_exception(self, initial_value, input_value):
+    def test_incorrect_work_hours_will_raise_exception(self, initial_value, input_value):
         with pytest.raises(ValidationError) as exception:
             self._test_duration_field_form(initial_value, input_value)
         assertpy.assert_that(exception.value.message).is_equal_to(ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
