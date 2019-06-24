@@ -31,6 +31,14 @@
             owner:  vagrant
             group:  vagrant
 
+        - name:   Upload script that reset sheetstorm database
+          copy:
+            src:    reset-db.sh
+            dest:   /home/vagrant/bin/reset-db.sh
+            mode:   0555
+            owner:  vagrant
+            group:  vagrant
+
         - name:   Upload sheetstorm configuration file
           copy:
             src:    local_settings-local.py
@@ -39,6 +47,13 @@
             owner:  sheetstorm
             group:  sheetstorm
 
+    - become:      yes
+      become_user: vagrant
+      block:
+        - name:    Reset sheetstorm database
+          command: ~/bin/reset-db.sh sheetstorm
+          when:    reset_database|bool
+
         - name: Migrate database and generate static files
           include_role:
             name: ../roles/configure_sheetstorm_environment
@@ -46,3 +61,13 @@
             update_sheetstorm_application: 'no'
             generate_static_files:         'yes'
             migrate_database:              'yes'
+
+        - name: Load django fixtures
+          django_manage:
+            command:    loaddata
+            app_path:   "{{ sheetstorm_dir }}"
+            fixtures:   "{{ item }}"
+            virtualenv: "{{ sheetstorm_virtualenv_dir }}"
+          with_items:
+            - "{{ django_fixtures_dir }}/site.yaml"
+            - "{{ sheetstorm_dir }}/employees/fixtures/task_activities.yaml"

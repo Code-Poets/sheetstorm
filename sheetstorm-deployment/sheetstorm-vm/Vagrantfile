@@ -9,13 +9,24 @@ Vagrant.configure("2") do |config|
         virtualbox.gui    = false
     end
 
+    validate_enum_env_variable('RESET_DATABASE', ['true', 'false'])
+
     extra_vars = {}
     extra_vars['sheetstorm_version'] = ENV['SHEETSTORM_VERSION'] if ENV.key?('SHEETSTORM_VERSION')
+    extra_vars['reset_database']     = ENV['RESET_DATABASE'] || false
+
     config.vm.provision "ansible" do |ansible|
         ansible.compatibility_mode = "2.0"
         ansible.playbook           = "configure-sheetstorm-vm.yml"
         ansible.extra_vars         = extra_vars
         ansible.inventory_path     = "./inventory"
         ansible.limit              = "all"
+    end
+end
+
+def validate_enum_env_variable(option_name, choices)
+    if ENV.key?(option_name) and not choices.include?(ENV[option_name])
+        puts "Environment variable '#{option_name}' must be one of: #{choices}"
+        abort
     end
 end

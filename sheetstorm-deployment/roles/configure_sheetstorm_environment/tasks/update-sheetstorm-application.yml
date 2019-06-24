@@ -8,9 +8,9 @@
     - name:  Create virtualenv for sheetstorm
       command: >
         virtualenv
-            ~/virtualenv
+            "{{ sheetstorm_virtualenv_dir }}"
             --python "python{{ python_version }}"
-            creates="~/virtualenv"
+            creates="{{ sheetstorm_virtualenv_dir }}"
       when:    result.stat.exists == False
 
     - name:  Clone sheetstorm repositories
