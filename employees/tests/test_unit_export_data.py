@@ -175,12 +175,14 @@ class TestExportingFunctions(TestCase):
         self.project.members.add(self.employee3)
         reports_in_day = 2
         # creating reports in desc order
-        for i in range(4, 0, -1):
+        number_of_days = 4
+        for i in range(number_of_days, 0, -1):
             for _ in range(reports_in_day):
                 ReportFactory(author=self.employee2, project=self.project, date=f"2019-06-{i}")
                 ReportFactory(author=self.employee3, project=self.project, date=f"2019-06-{i}")
                 ReportFactory(author=self.employee1, project=self.project, date=f"2019-06-{i}")
         self.report_asc = Report.objects.filter(author__id=self.employee1.pk).order_by("date")
+        self.reports_per_user = reports_in_day * number_of_days
 
     def test_unsorted_reports_will_be_sorted_asc_by_first_name_and_asc_by_date_in_project_export(self):
         project_workbook = generate_xlsx_for_project(self.project)
@@ -188,6 +190,7 @@ class TestExportingFunctions(TestCase):
             # Check that sheets are sorted in ascending order, according to employee's first name / user email
             self.assertEqual(sheet.title, get_employee_name(getattr(self, f"employee{3 - j}")))
             self._assert_reports_are_sorted_in_ascending_order(project_workbook)
+            self._assert_dates_are_unique_in_reports_of_user(project_workbook)
 
     def test_project_members_with_no_report_will_be_skipped_in_project_export(self):
         not_a_member = UserFactory(first_name="Asterix", last_name="Longsword")
@@ -199,15 +202,23 @@ class TestExportingFunctions(TestCase):
     def test_unsorted_reports_will_be_sorted_asc_by_date_in_user_export(self):
         user_workbook = generate_xlsx_for_single_user(self.employee1)
         self._assert_reports_are_sorted_in_ascending_order(user_workbook)
+        self._assert_dates_are_unique_in_reports_of_user(user_workbook)
 
     def _assert_reports_are_sorted_in_ascending_order(self, workbook):
         for i, element in enumerate(self.report_asc):
+            # there are two reports per day, but "Date" and "Daily hours" should occur only once per day
             if i % 2 == 0:
                 self.assertEqual(
                     workbook.active.cell(
                         row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
                     ).value,
                     element.date,
+                )
+                self.assertIn(
+                    "=timevalue",
+                    workbook.active.cell(
+                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=2
+                    ).value,
                 )
             else:
                 self.assertEqual(
@@ -216,3 +227,23 @@ class TestExportingFunctions(TestCase):
                     ).value,
                     None,
                 )
+                self.assertEqual(
+                    workbook.active.cell(
+                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=2
+                    ).value,
+                    None,
+                )
+
+    def _assert_dates_are_unique_in_reports_of_user(self, workbook):
+        for worksheet in workbook.worksheets:
+            dates = []
+            for i in range(self.reports_per_user):
+                cell_value = worksheet.cell(
+                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
+                ).value
+                if cell_value is not None:
+                    dates.append(cell_value)
+            number_of_dates = len(dates)
+            number_of_unique_dates = len(set(dates))
+            self.assertTrue(number_of_dates > 0)
+            self.assertEqual(number_of_dates, number_of_unique_dates)
