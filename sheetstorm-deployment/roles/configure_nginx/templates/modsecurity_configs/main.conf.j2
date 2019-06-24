@@ -1,0 +1,3 @@
+Include {{ modsecurity_configs_dir }}/modsecurity.conf
+Include {{ owasp_modsecurity_dir }}/owasp-modsecurity-crs-{{ owasp_modsecurity_version[1:] }}/crs-setup.conf
+Include {{ owasp_modsecurity_dir }}/owasp-modsecurity-crs-{{ owasp_modsecurity_version[1:] }}/rules/*.conf

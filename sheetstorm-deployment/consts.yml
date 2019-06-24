@@ -1,5 +1,8 @@
-sheetstorm_repository: https://github.com/Code-Poets/sheetstorm
-home_dir:              /home/sheetstorm
-sheetstorm_dir:        "{{ home_dir }}/sheetstorm"
-sheetstorm_secret_dir: ../../sheetstorm-secret
-static_file_dir:       "{{ sheetstorm_dir }}/sheetstorm/static/"
+home_dir:                /home/sheetstorm
+modsecurity_configs_dir: /etc/nginx/modsecurity_configs
+nginx_modules_dir:       ../../nginx-modules
+owasp_modsecurity_dir:   /opt/owasp-modsecurity-crs
+sheetstorm_dir:          "{{ home_dir }}/sheetstorm"
+sheetstorm_repository:   https://github.com/Code-Poets/sheetstorm
+sheetstorm_secret_dir:   ../../sheetstorm-secret
+static_file_dir:         "{{ sheetstorm_dir }}/sheetstorm/static/"
