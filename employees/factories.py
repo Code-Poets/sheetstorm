@@ -23,4 +23,4 @@ class TaskActivityTypeFactory(factory.DjangoModelFactory):
     class Meta:
         model = TaskActivityType
 
-    name = factory.fuzzy.FuzzyText()
+    name = factory.fuzzy.FuzzyChoice(["Review", "Backend Development", "Frontend Development", "Meeting"])
