@@ -1,5 +1,5 @@
+from django.shortcuts import reverse
 from django.test import TestCase
-from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from freezegun import freeze_time
@@ -148,9 +148,7 @@ class UserUpdateTests(TestCase):
         response = self.client.get(path=reverse("custom-user-update"))
         self.assertContains(response, old_phone_number)
 
-        response = self.client.post(
-            path=reverse("custom-user-update", args=(self.user.pk,)), data={"phone_number": new_phone_number}
-        )
+        response = self.client.post(path=reverse("custom-user-update"), data={"phone_number": new_phone_number})
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(new_phone_number, self.user.phone_number)

@@ -1,6 +1,5 @@
 {% load static %}
 {% load i18n %}
-{% load rest_framework %}
 {% load user_type_tags %}
 {% load url_filter_tags %}
 <!DOCTYPE html>
@@ -21,7 +20,7 @@
 {% get_admin_user_type as admin %}
 {% get_manager_user_type as manager %}
 {% url 'home' as home_url %}
-{% url 'custom-user-update' user.id as account_url %}
+{% url 'custom-user-update' as account_url %}
 {% url 'custom-users-list' as custom_users_list_url %}
 {% url 'custom-projects-list' as custom_projects_list_url %}
 {% now "Y" as year %}
@@ -50,12 +49,12 @@
             </li>
             <li>
                 {% if request.path == account_url %}
-                <a class="active" href="{% url 'custom-user-update' user.id %}">
+                <a class="active" href="{% url 'custom-user-update' %}">
                     <img src="{% static 'users/images/white/iko-01.png' %}">
                     <span>{% trans 'Account' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-user-update' user.id %}">
+                <a href="{% url 'custom-user-update' %}">
                     <img src="{% static 'users/images/grey/ico-01.png' %}">
                     <span>{% trans 'Account' %}</span>
                 </a>

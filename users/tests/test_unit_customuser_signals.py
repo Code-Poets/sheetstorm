@@ -1,6 +1,6 @@
+from django.shortcuts import reverse
 from django.test import TestCase
 from django.utils import timezone
-from rest_framework.reverse import reverse
 
 from managers.models import Project
 from users.factories import AdminUserFactory

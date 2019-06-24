@@ -4,7 +4,6 @@ from typing import Optional
 
 from bootstrap_datepicker_plus import DatePickerInput
 from django import forms
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db.models import QuerySet
@@ -18,7 +17,6 @@ from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE
 from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
 from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
 from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
-from employees.common.strings import ReportValidationStrings
 from employees.models import Report
 
 
@@ -43,9 +41,9 @@ class DurationFieldForm(forms.DurationField):
     widget = DurationInput
 
     def clean(self, value: str) -> str:
-        (hours, minutes) = convert_string_work_hours_field_to_hour_and_minutes(
-            value, ValidationError(message=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
-        )
+        if value is None:
+            return ""
+        (hours, minutes) = convert_string_work_hours_field_to_hour_and_minutes(value)
         return f"{hours}:{minutes}:00"
 
 

@@ -1,9 +1,9 @@
 from datetime import timedelta
 from typing import Tuple
-from typing import Union
 
-from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework.exceptions import ValidationError as RestValidationError
+from django.core.exceptions import ValidationError
+
+from employees.common.strings import ReportValidationStrings
 
 
 def timedelta_to_string(data: timedelta) -> str:
@@ -13,19 +13,15 @@ def timedelta_to_string(data: timedelta) -> str:
     return "{:02d}:{:02d}".format((hours + (days * 24)) if days > 0 else hours, minutes)
 
 
-def convert_string_work_hours_field_to_hour_and_minutes(
-    data: str, exception: Union[RestValidationError, DjangoValidationError]
-) -> Tuple[str, str]:
-    # parameter `exception` is only workaround until we get rid of rest_framework views.
-    # After this we will substitute it with django ValidationError
+def convert_string_work_hours_field_to_hour_and_minutes(data: str) -> Tuple[str, str]:
     if str(data).count(":") != 1:
         if not data.isdigit():
-            raise exception
+            raise ValidationError(message=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
         else:
             hours = data
             minutes = "00"
     else:
         hours, minutes = str(data).split(":")
         if not hours.isdigit() or not minutes.isdigit():
-            raise exception
+            raise ValidationError(message=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
     return (hours, minutes)
