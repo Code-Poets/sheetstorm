@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'bootstrap_datepicker_plus',
+    'captcha',
     'crispy_forms',
     'raven.contrib.django.raven_compat',
     # SheetStorm

@@ -10,3 +10,5 @@ DATABASES['default']['USER']     = 'postgres'
 DATABASES['default']['PASSWORD'] = ''
 DATABASES['default']['HOST']     = ''
 DATABASES['default']['PORT']     = ''
+
+CAPTCHA_TEST_MODE = True

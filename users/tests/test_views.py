@@ -222,6 +222,8 @@ class SignUpTests(TestCase):
                 "last_name": self.user.last_name,
                 "password1": self.user.password,
                 "password2": self.user.password,
+                "captcha_0": "PASSED",
+                "captcha_1": "PASSED",
             },
         )
 
