@@ -1,5 +1,4 @@
 import datetime
-from unittest import skip
 
 from dateutil.relativedelta import relativedelta
 from django.shortcuts import reverse
@@ -174,7 +173,6 @@ class ReportCustomListTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, str(ReportListStrings.NO_PROJECTS_TO_JOIN.value))
 
-    @skip("https://github.com/Code-Poets/sheetstorm/issues/321")
     def test_custom_report_list_view_should_redirect_to_another_month_if_month_switch_was_called_on_post(self):
         response = self.client.post(self.url, data={"date": "09-2020", "month-switch": "month-switch"})
         self.assertEqual(response.status_code, 302)

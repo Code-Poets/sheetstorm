@@ -184,6 +184,8 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, CreateView):
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if "join" in request.POST:
             return self._handle_join_request(request)
+        elif "month-switch" in request.POST:
+            return self.redirect_to_another_month(request)
         return super().post(request, *args, **kwargs)
 
     def _handle_join_request(self, request: HttpRequest) -> HttpResponse:
