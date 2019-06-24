@@ -23,7 +23,7 @@ class UserIsAuthorOfCurrentReportMixinTestCase(TestCase):
         self.view = TestView.as_view()
         self.request_factory = RequestFactory()
 
-    def test_that_user_is_author_of_current_report_mixin_should_limit_view_report_queryset_if_user_is_employee(self):
+    def test_user_is_author_of_current_report_mixin_should_limit_view_report_queryset_if_user_is_employee(self):
         user = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
 
         author_report = ReportFactory(author=user)
@@ -39,9 +39,7 @@ class UserIsAuthorOfCurrentReportMixinTestCase(TestCase):
         self.assertEqual(len(response.context_data["object_list"]), 1)
         self.assertEqual(response.context_data["object_list"][0].pk, author_report.pk)
 
-    def test_that_user_is_author_of_current_report_mixin_should_not_limit_view_report_queryset_if_user_is_not_employee(
-        self
-    ):
+    def test_user_is_author_of_current_report_mixin_should_not_limit_view_report_queryset_if_user_is_not_employee(self):
         user = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
 
         ReportFactory(author=user)
@@ -67,7 +65,7 @@ class UserIsManagerOfCurrentProjectMixinTestCase(TestCase):
         self.view = TestView.as_view()
         self.request_factory = RequestFactory()
 
-    def test_that_user_is_manager_of_current_project_mixin_should_limit_view_project_queryset_if_user_is_manager(self):
+    def test_user_is_manager_of_current_project_mixin_should_limit_view_project_queryset_if_user_is_manager(self):
         user = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
 
         manager_project = ProjectFactory()
@@ -84,7 +82,7 @@ class UserIsManagerOfCurrentProjectMixinTestCase(TestCase):
         self.assertEqual(len(response.context_data["object_list"]), 1)
         self.assertEqual(response.context_data["object_list"][0].pk, manager_project.pk)
 
-    def test_that_user_is_manager_of_current_project_mixin_should_not_limit_view_project_queryset_if_user_is_not_manager(
+    def test_user_is_manager_of_current_project_mixin_should_not_limit_view_project_queryset_if_user_is_not_manager(
         self
     ):
         user = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
@@ -113,7 +111,7 @@ class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixinTestCase(Te
         self.view = TestView.as_view()
         self.request_factory = RequestFactory()
 
-    def test_that_user_is_manager_of_current_project_or_author_of_current_report_mixin_should_limit_view_project_queryset_if_user_is_manager(
+    def test_user_is_manager_of_current_project_or_author_of_current_report_mixin_should_limit_view_project_queryset_if_user_is_manager(
         self
     ):
         user = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
@@ -132,7 +130,7 @@ class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixinTestCase(Te
         self.assertEqual(len(response.context_data["object_list"]), 1)
         self.assertEqual(response.context_data["object_list"][0].pk, report.pk)
 
-    def test_that_user_is_manager_of_current_project_or_author_of_current_report_mixin_should_not_limit_view_project_queryset_if_user_is_not_manager(
+    def test_user_is_manager_of_current_project_or_author_of_current_report_mixin_should_not_limit_view_project_queryset_if_user_is_not_manager(
         self
     ):
         user = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)

@@ -24,7 +24,7 @@ class GetKeyValueTests(TestCase):
 
 
 class DurationHoursTests(TestCase):
-    def test_that_duration_field_to_string_should_parse_duration_to_string(self):
+    def test_duration_field_to_string_should_parse_duration_to_string(self):
         self.assertEqual(duration_field_to_string(timedelta(hours=8)), "08:00")
 
 
@@ -37,7 +37,7 @@ class TestExtractionTag:
             ("/kazde/pokolenie/ma/wlasny/2100/1", ["2100", "1"]),
         ],
     )  # pylint: disable=no-self-use
-    def test_that_extract_year_and_month_from_url_function_should_correct_extract_year_and_month(self, url, date):
+    def test_extract_year_and_month_from_url_function_should_correct_extract_year_and_month(self, url, date):
         assert_that(extract_year_and_month_from_url(url)).is_equal_to(date)
 
     @pytest.mark.parametrize(
@@ -48,7 +48,7 @@ class TestExtractionTag:
             "/kazde/pokolenie/ma/2100/1/wlasny",
         ],
     )  # pylint: disable=no-self-use
-    def test_that_if_function_get_incorrect_url_should_return_current_year_and_month(self, url):
+    def test_if_function_get_incorrect_url_should_return_current_year_and_month(self, url):
         assert_that(extract_year_and_month_from_url(url)).is_equal_to(
             [datetime.datetime.now().year, datetime.datetime.now().month]
         )

@@ -240,7 +240,7 @@ class SignUpTests(TestCase):
         self.assertEqual(CustomUser.objects.all().count(), 1)
         self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, False)
 
-    def test_that_registered_user_must_activate_account_by_activation_link(self):
+    def test_registered_user_must_activate_account_by_activation_link(self):
         with freeze_time("2019-06-07 07:07:07"):
             self.assertEqual(CustomUser.objects.all().count(), 0)
             response = self._register_user_using_signup_view()
@@ -255,7 +255,7 @@ class SignUpTests(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, True)
 
-    def test_that_registered_user_with_wrong_activation_link_will_not_activate_account(self):
+    def test_registered_user_with_wrong_activation_link_will_not_activate_account(self):
         with freeze_time("2019-06-07 07:07:07"):
             self.assertEqual(CustomUser.objects.all().count(), 0)
             response = self._register_user_using_signup_view()

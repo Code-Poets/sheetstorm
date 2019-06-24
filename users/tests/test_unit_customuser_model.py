@@ -16,12 +16,12 @@ from utils.base_tests import BaseModelTestCase
 
 
 class TestCustomUserModel(TestCase):
-    def test_that_create_user_method_should_raise_custom_validation_error_when_email_is_none(self):
+    def test_create_user_method_should_raise_custom_validation_error_when_email_is_none(self):
         with self.assertRaises(ValidationError) as custom_exception:
             CustomUser.objects._create_user(None, "testuserpasswd", False, False, CustomUser.UserType.EMPLOYEE.name)
         self.assertEqual(ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, custom_exception.exception.message)
 
-    def test_that_create_user_method_should_raise_custom_validation_error_when_password_is_none(self):
+    def test_create_user_method_should_raise_custom_validation_error_when_password_is_none(self):
         with self.assertRaises(ValidationError) as custom_exception:
             CustomUser.objects._create_user(
                 "testuser@codepoets.it", None, False, False, CustomUser.UserType.EMPLOYEE.name
@@ -91,19 +91,19 @@ class TestCustomUserModelMethods(TestCase):
             "testuser@codepoets.it", "testusername", "testuserlastname", "", "testuserpasswd"
         )
 
-    def test_that_get_absolute_url_method_should_return_absolute_url_with_users_email(self):
+    def test_get_absolute_url_method_should_return_absolute_url_with_users_email(self):
         stored_user = CustomUser.objects.get(email=self.user.email)
         self.assertEqual(stored_user.get_absolute_url(), f"/users/{self.user.email}/")
 
-    def test_that_get_full_name_method_should_return_first_and_last_user_name_with_space_between(self):
+    def test_get_full_name_method_should_return_first_and_last_user_name_with_space_between(self):
         stored_user = CustomUser.objects.get(email=self.user.email)
         self.assertEqual(stored_user.get_full_name(), f"{stored_user.first_name} {stored_user.last_name}")
 
-    def test_that_get_short_name_method_should_return_user_first_name(self):
+    def test_get_short_name_method_should_return_user_first_name(self):
         stored_user = CustomUser.objects.get(email=self.user.email)
         self.assertEqual(stored_user.get_short_name(), stored_user.first_name)
 
-    def test_that_email_user_should_send_email_to_self_user(self):
+    def test_email_user_should_send_email_to_self_user(self):
         stored_user = CustomUser.objects.get(email=self.user.email)
         with mock.patch("users.models.CustomUser.email_user") as mocked_method:
             stored_user.email_user(

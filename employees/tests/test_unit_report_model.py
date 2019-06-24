@@ -162,7 +162,7 @@ class TestReportQuerySetWorkHoursSumForAllDates(InitTaskTypeTestCase):
 
 
 class TestReportWorkHoursSumForGivenDayForSingleUser(InitTaskTypeTestCase):
-    def test_that_work_hours_sum_for_given_day_for_single_user_can_be_24(self):
+    def test_work_hours_sum_for_given_day_for_single_user_can_be_24(self):
         user = UserFactory()
         today = timezone.now().date()
         report = ReportFactory(work_hours=datetime.timedelta(hours=23), date=today, author=user)
@@ -175,7 +175,7 @@ class TestReportWorkHoursSumForGivenDayForSingleUser(InitTaskTypeTestCase):
 
         self.assertEqual(user.report_set.get_report_work_hours_sum_for_date(today), datetime.timedelta(hours=24))
 
-    def test_that_work_hours_sum_for_given_day_for_single_user_should_not_exceed_24(self):
+    def test_work_hours_sum_for_given_day_for_single_user_should_not_exceed_24(self):
         user = UserFactory()
         today = timezone.now().date()
         report = ReportFactory(work_hours=datetime.timedelta(hours=23), date=today, author=user)
@@ -195,7 +195,7 @@ class TestReportWorkHoursSumForGivenDayForSingleUser(InitTaskTypeTestCase):
             ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value,
         )
 
-    def test_that_editing_report_work_hours_sum_for_given_day_for_single_user_should_not_exceed_24(self):
+    def test_editing_report_work_hours_sum_for_given_day_for_single_user_should_not_exceed_24(self):
         user = UserFactory()
         today = timezone.now().date()
         ReportFactory(work_hours=datetime.timedelta(hours=23), date=today, author=user)
@@ -210,7 +210,7 @@ class TestReportWorkHoursSumForGivenDayForSingleUser(InitTaskTypeTestCase):
             ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value,
         )
 
-    def test_that_edited_report_would_not_be_summed_twice_for_work_hours_sum(self):
+    def test_edited_report_would_not_be_summed_twice_for_work_hours_sum(self):
         user = UserFactory()
         today = timezone.now().date()
         work_hours = datetime.timedelta(hours=20)
@@ -250,7 +250,7 @@ class TestReportTaskActivitiesParameter(DataSetUpToTests):
         report = Report()
         self.assertEqual(TaskActivityType.objects.get(name="Other").name, report.task_activities.name)
 
-    def test_that_added_task_activity_must_be_accepted_as_correct_input(self):
+    def test_added_task_activity_must_be_accepted_as_correct_input(self):
         test_activity_type = TaskActivityType(pk=2, name="test")
         test_activity_type.full_clean()
         test_activity_type.save()
