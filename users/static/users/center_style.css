@@ -218,7 +218,7 @@ span {
     background-color: #39ace7;
 }
 
-.login > input[type=button]:active, .signup > input[type=button]:active, .login > input[type=submit]:active, .signup > input[type=submit]:active, .login > input[type=reset]:active, .signup > input[type=reset]:active {
+.login > input[type=button]:active, .signup > input[type=button]:active, .login > input[type=submit]:active, .signup > input[type=submit]:active, .login > input[type=reset]:active, .signup > input[type=reset]:active, #captcha > input[type=text]:active {
     -moz-transform: scale(0.95);
     -webkit-transform: scale(0.95);
     -o-transform: scale(0.95);
@@ -247,7 +247,7 @@ span {
     border-radius: 5px 5px 5px 5px;
 }
 
-.login > input[type=text]:focus, .signup > input[type=email]:focus, .login > input[type=password]:focus, .signup > input[type=password]:focus {
+.login > input[type=text]:focus, .signup > input[type=email]:focus, .login > input[type=password]:focus, .signup > input[type=password]:focus, .signup > input[type=text]:focus, #captcha > input[type=text]:focus {
     background-color: #fff;
     border-bottom: 2px solid #5fbae9;
 }
@@ -395,4 +395,41 @@ span {
 
 #sidebarCollapse {
     visibility: hidden;
+}
+
+/* CAPTCHA */
+#captcha {
+    display: inline-block;
+}
+
+#captcha > input[type=text] {
+    background-color: #f6f6f6;
+    color: #0d0d0d;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin-left: 32px;
+    width: 75%;
+    border: 2px solid #f6f6f6;
+    -webkit-transition: all 0.5s ease-in-out;
+    -moz-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border-radius: 5px 5px 5px 5px;
+    float: left;
+}
+
+#captcha > img {
+    margin: 5px;
+    width: 150px;
+    height: 70px;
+}
+
+#captcha-refresh {
+    text-align: center;
+    font-size: 3rem;
+    padding: 2%;
+    float: left;
 }

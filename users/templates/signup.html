@@ -22,11 +22,11 @@
             <input id="id_password2" type="password" class="fadeIn third" name="password2"
                    placeholder="Password confirmation" required>
                 {% include 'partials/errors_in_field.html' with errors=form.password2.errors %}
-        </div>
-        <div>
-            {{ form.captcha }}
-            <button type=button id='captcha-refresh'>{%  trans 'Refresh captcha' %}</button>
-            {% include 'partials/errors_in_field.html' with errors=form.captcha.errors %}
+            <div id="captcha" class="fadeIn third">
+                {{ form.captcha }}
+                <button type=button id='captcha-refresh' class="glyphicon glyphicon-refresh"></button>
+            </div>
+                {% include 'partials/errors_in_field.html' with errors=form.captcha.errors %}
             <input type="submit" class="fadeIn fourth" value="{% trans 'Sign up' %}">
         </form>
         <div id="formFooter">
