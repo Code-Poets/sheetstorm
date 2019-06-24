@@ -1,6 +1,10 @@
+from datetime import timedelta
+
+from django.db.models import Sum
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from freezegun import freeze_time
 
 from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
@@ -14,14 +18,14 @@ from users.factories import ManagerUserFactory
 from users.factories import UserFactory
 
 
+@freeze_time("2019-06-24")
 class DataSetUpToTests(TestCase):
     def setUp(self):
         super().setUp()
         self.user = AdminUserFactory()
+        self.project_start_date = timezone.now() + timezone.timedelta(days=-1)
         self.project = ProjectFactory(
-            name="aaa",
-            start_date=timezone.now() + timezone.timedelta(days=1),
-            stop_date=timezone.now() + timezone.timedelta(days=6),
+            name="aaa", start_date=self.project_start_date, stop_date=timezone.now() + timezone.timedelta(days=6)
         )
         self.report = ReportFactory(author=self.user, project=self.project)
         self.project.members.add(self.user)
@@ -107,6 +111,39 @@ class ExportMethodTestForProject(DataSetUpToTests):
                 row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=5
             ).value,
         )
+
+    def test_daily_hours_should_be_equal_to_sum_of_hours_from_reports_of_author(self):
+        employee1 = UserFactory()
+        employee2 = UserFactory()
+        self.project.members.add(employee1)
+        self.project.members.add(employee2)
+        employees = [employee1, employee2]
+        for i in range(3):
+            ReportFactory(
+                author=employee1, project=self.project, work_hours=timedelta(hours=i + 1), date=timezone.now()
+            )
+        for i in range(3):
+            ReportFactory(
+                author=employee2, project=self.project, work_hours=timedelta(hours=i + 2), date=timezone.now()
+            )
+
+        project_workbook = generate_xlsx_for_project(self.project)
+
+        for employee in employees:
+            author = get_employee_name(employee)
+            sheet = project_workbook.get_sheet_by_name(author)
+            daily_hours_for_employee = sheet.cell(
+                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=2
+            ).value
+
+            sum_from_reports = employee.report_set.aggregate(Sum("work_hours"))
+            sum_from_reports_as_string = self._hours_date_time_to_excel_time_field(sum_from_reports["work_hours__sum"])
+            self.assertEqual(daily_hours_for_employee, sum_from_reports_as_string)
+
+    @staticmethod
+    def _hours_date_time_to_excel_time_field(hours_delta):
+        sum_from_reports_as_string = f"{int(hours_delta.total_seconds() / 3600)}:00:00"
+        return f'=timevalue("{sum_from_reports_as_string}")'
 
 
 class ExportMethodTestForSingleUser(DataSetUpToTests):
