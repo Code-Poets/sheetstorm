@@ -1,3 +1,4 @@
+import calendar
 from datetime import timedelta
 from typing import List
 
@@ -29,3 +30,8 @@ def extract_year_and_month_from_url(url: str) -> List[str]:
         month = now.month
 
     return [year, month]
+
+
+@register.filter
+def convert_to_month_name(month_number: str) -> str:
+    return calendar.month_name[int(month_number)]

@@ -49,7 +49,7 @@ class AccessPermissionsTestCase(TestCase):
                     "year": self.report.creation_date.year,
                     "month": self.report.creation_date.month,
                 },
-            ): [CustomUser.UserType.ADMIN.name],
+            ): [CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name, CustomUser.UserType.EMPLOYEE.name],
             reverse(
                 "export-project-data-xlsx",
                 kwargs={
