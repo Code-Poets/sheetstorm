@@ -204,3 +204,7 @@ textarea.form-control, #id_description {
 .project-reports-edit-button-column {
     text-align: right;
 }
+
+.description-column > p > a {
+    color: deepskyblue;
+}
