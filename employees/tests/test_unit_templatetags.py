@@ -5,6 +5,7 @@ from assertpy import assert_that
 from django.db.models.functions import datetime
 from django.test import TestCase
 
+from employees.templatetags.data_display_filters import convert_to_month_name
 from employees.templatetags.data_display_filters import duration_field_to_string
 from employees.templatetags.data_display_filters import extract_year_and_month_from_url
 from employees.templatetags.data_structure_element_selectors import get_key_value
@@ -52,3 +53,19 @@ class TestExtractionTag:
         assert_that(extract_year_and_month_from_url(url)).is_equal_to(
             [datetime.datetime.now().year, datetime.datetime.now().month]
         )
+
+
+class TestConvertToMonthName:
+    @pytest.mark.parametrize(
+        ("month_number", "month"), [(1, "January"), ("4", "April"), (6, "June"), ("12", "December")]
+    )  # pylint: disable=no-self-use
+    def test_function_convert_correctly_numbers_to_months_names(self, month_number, month):
+        assert_that(convert_to_month_name(month_number)).is_equal_to(month)
+
+    def test_function_raise_value_error_if_value_is_not_a_string_number(self):  # pylint: disable=no-self-use
+        with pytest.raises(ValueError):
+            convert_to_month_name("June")
+
+    def test_function_raise_index_error_if_value_is_out_of_range(self):  # pylint: disable=no-self-use
+        with pytest.raises(IndexError):
+            convert_to_month_name("13")

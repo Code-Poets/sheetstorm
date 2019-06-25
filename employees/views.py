@@ -388,7 +388,16 @@ class ProjectReportDetail(UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentRe
 
 
 @method_decorator(login_required, name="dispatch")
-@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.ADMIN.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.EMPLOYEE.name,
+        ]
+    ),
+    name="dispatch",
+)
 class ExportUserReportView(DetailView):
     model = CustomUser
 
