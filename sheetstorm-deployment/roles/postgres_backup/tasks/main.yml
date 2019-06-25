@@ -16,6 +16,24 @@
         group: sheetstorm
         mode:  0555
 
+    - name:  Create a directory for openssl public key
+      file:
+        path:  "{{ postgres_backup_public_key_dir }}"
+        state: directory
+        owner: sheetstorm
+        group: sheetstorm
+        mode:  0700
+      when: server_configuration == 'remote'
+
+    - name:   Upload openssl public key
+      template:
+        src:   "{{ sheetstorm_secret_dir }}/postgres_backup_key.pem.pub"
+        dest:  "{{ postgres_backup_public_key_dir }}/postgres_backup_key.pem.pub"
+        owner: sheetstorm
+        group: sheetstorm
+        mode:  0444
+      when: server_configuration == 'remote'
+
     - name:  Copy cronjob that runs postgresql backup
       template:
         src:   crontab.txt.j2

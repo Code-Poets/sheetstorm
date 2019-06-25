@@ -13,6 +13,8 @@ if [ -z $database_name ]; then
     exit 1
 fi
 
+NAME_OF_BACKUP_FILE="$POSTGRESQL_BACKUP_DIR/"$database_name"_${SHEETSTORM_VERSION}_${DATE}.sql.enc"
+
 pg_dump                                             \
     --username=postgres                             \
     --data-only                                     \
@@ -30,7 +32,14 @@ pg_dump                                             \
     --exclude-table socialaccount_socialapp         \
     --exclude-table socialaccount_socialapp_sites   \
     --exclude-table socialaccount_socialtoken       \
-    $database_name > $POSTGRESQL_BACKUP_DIR/"$database_name"_${SHEETSTORM_VERSION}_${DATE}.sql
+    $database_name  |                               \
+        openssl smime                               \
+            -encrypt                                \
+            -aes256                                 \
+            -binary                                 \
+            -outform DER                            \
+            -out $NAME_OF_BACKUP_FILE               \
+            {{ postgres_backup_public_key_dir }}/postgres_backup_key.pem.pub
 
 # Cleanup database backups older than 30 days.
 find $POSTGRESQL_BACKUP_DIR          \
