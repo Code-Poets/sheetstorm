@@ -1,4 +1,5 @@
 import calendar
+import re
 from datetime import timedelta
 from typing import List
 
@@ -17,13 +18,12 @@ def duration_field_to_string(data: timedelta) -> str:
 
 @register.filter
 def extract_year_and_month_from_url(url: str) -> List[str]:
-    splitted_url = url.split("/")
-    while "" in splitted_url:
-        splitted_url.remove("")
+    regex = re.compile(r"/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})$")
+    date = regex.search(url)
 
-    if splitted_url[-2].isdigit() and splitted_url[-1].isdigit():
-        year = splitted_url[-2]
-        month = splitted_url[-1]
+    if date is not None:
+        year = date.group("year")
+        month = date.group("month")
     else:
         now = datetime.datetime.now()
         year = now.year
