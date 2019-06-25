@@ -72,4 +72,6 @@ class ExcelGeneratorSettingsConstants(Enum):
     XLSX_EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.xlsx"'
     CSV_CONTENT_TYPE_FORMAT = "application/csv"
     CSV_EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.csv"'
+    ZIP_CONTENT_TYPE_FORMAT = "application/zip"
+    ZIP_EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.zip"'
     BORDER = "double"

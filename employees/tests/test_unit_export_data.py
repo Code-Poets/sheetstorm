@@ -81,6 +81,12 @@ class ExportViewTest(DataSetUpToTests):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response._headers["content-disposition"][1].endswith('csv"'))
 
+    def test_export_reports_for_project_should_download_for_project_csv_as_zip_file(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url_project + "?format=csv")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response._headers["content-disposition"][1].endswith('zip"'))
+
 
 class ExportMethodTestForProject(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
