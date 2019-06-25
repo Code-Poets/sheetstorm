@@ -47,6 +47,10 @@ class TestExtractionTag:
             "/felicita/felicita/felicita/2019/4/felicita",
             "/mamma/mia/mamma/2018/9/mia",
             "/kazde/pokolenie/ma/2100/1/wlasny",
+            "/wazne/sa/tylko/te/chwile/22001/1",
+            "/another/one/bites/the/dust/2001/111",
+            "/czerwony/jak/cegla/111/33",
+            "/ostatnia/niedziela/dzisiaj/sie/rozstaniemy/3/1",
         ],
     )  # pylint: disable=no-self-use
     def test_if_function_get_incorrect_url_should_return_current_year_and_month(self, url):
