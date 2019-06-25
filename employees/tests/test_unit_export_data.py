@@ -1,10 +1,12 @@
 from datetime import timedelta
+from io import BytesIO
 
 from django.db.models import Sum
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
+from openpyxl import load_workbook
 
 from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.exports import generate_xlsx_for_project
@@ -213,11 +215,13 @@ class TestExportingFunctions(TestCase):
         reports_in_day = 2
         # creating reports in desc order
         number_of_days = 4
+        self.year = "2019"
+        self.month = "06"
         for i in range(number_of_days, 0, -1):
             for _ in range(reports_in_day):
-                ReportFactory(author=self.employee2, project=self.project, date=f"2019-06-{i}")
-                ReportFactory(author=self.employee3, project=self.project, date=f"2019-06-{i}")
-                ReportFactory(author=self.employee1, project=self.project, date=f"2019-06-{i}")
+                ReportFactory(author=self.employee2, project=self.project, date=f"{self.year}-{self.month}-{i}")
+                ReportFactory(author=self.employee3, project=self.project, date=f"{self.year}-{self.month}-{i}")
+                ReportFactory(author=self.employee1, project=self.project, date=f"{self.year}-{self.month}-{i}")
         self.report_asc = Report.objects.filter(author__id=self.employee1.pk).order_by("date")
         self.reports_per_user = reports_in_day * number_of_days
 
@@ -284,3 +288,11 @@ class TestExportingFunctions(TestCase):
             number_of_unique_dates = len(set(dates))
             self.assertTrue(number_of_dates > 0)
             self.assertEqual(number_of_dates, number_of_unique_dates)
+
+    def test_user_can_export_only_his_own_reports(self):
+        self.client.force_login(self.employee1)
+        url = reverse("export-data-xlsx", kwargs={"pk": self.employee2.pk, "year": self.year, "month": self.month})
+        response = self.client.get(url)
+        received_workbook = load_workbook(filename=BytesIO(response.content))
+        self.assertEqual(len(received_workbook.sheetnames), 1)
+        self.assertEqual(received_workbook.sheetnames[0], f"{self.employee1.first_name} {self.employee1.last_name[0]}.")
