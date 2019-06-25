@@ -366,3 +366,7 @@ span {
 #login-header {
   padding: 30px;
 }
+
+#sidebarCollapse {
+    visibility: hidden;
+}
