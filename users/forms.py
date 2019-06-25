@@ -1,5 +1,6 @@
 from bootstrap_datepicker_plus import DatePickerInput
 from captcha.fields import CaptchaField
+from captcha.fields import CaptchaTextInput
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.forms import UserCreationForm
@@ -8,6 +9,7 @@ from django_countries.widgets import CountrySelectWidget
 
 from common.constants import CORRECT_DATE_FORMAT
 from users.common import constants
+from users.common.constants import PLACE_HOLDER_CAPTCHA
 from users.models import CustomUser
 
 
@@ -68,7 +70,7 @@ class CustomUserChangeForm(UserChangeForm):
 
 class CustomUserSignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=constants.EMAIL_MAX_LENGTH, required=True, label="id_email")
-    captcha = CaptchaField()
+    captcha = CaptchaField(widget=CaptchaTextInput(attrs={"placeholder": PLACE_HOLDER_CAPTCHA}))
 
     class Meta:
         model = CustomUser
