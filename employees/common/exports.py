@@ -1,5 +1,8 @@
 import csv
+import zipfile
 from datetime import timedelta
+from io import BytesIO
+from io import StringIO
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -16,6 +19,7 @@ from openpyxl.styles import Border
 from openpyxl.styles import Font
 from openpyxl.styles import Side
 from openpyxl.utils import get_column_letter
+from openpyxl.workbook import _writer
 
 from common.convert import convert_string_work_hours_field_to_hour_and_minutes
 from employees.common.constants import ExcelGeneratorSettingsConstants as constants
@@ -231,7 +235,7 @@ def convert_markdown_html_to_text(html: str) -> str:
     return "".join(BeautifulSoup(html, features="html.parser").findAll(text=True))
 
 
-def save_work_book_as_csv(writer: csv.DictWriter, work_book: Workbook) -> None:
+def save_work_book_as_csv(writer: _writer, work_book: Workbook) -> None:
     sheet = work_book.active
     is_last_row = False
     total_hours = timezone.timedelta()
@@ -267,3 +271,20 @@ def save_work_book_as_csv(writer: csv.DictWriter, work_book: Workbook) -> None:
                 next_row.append(cell.value)
 
         writer.writerow(next_row)
+
+
+def save_work_book_as_zip_of_csv(work_book: Workbook) -> BytesIO:
+    zip_file_data = BytesIO()
+    zip_file = zipfile.ZipFile(zip_file_data, "w")
+
+    for sheet_index, sheet_name in enumerate(work_book.sheetnames):
+        work_book.active = sheet_index
+        csv_file_data = StringIO()
+        writer = csv.writer(csv_file_data)
+        save_work_book_as_csv(writer, work_book)
+        file_name = f'{sheet_name.replace(" ", "_").replace(".", "").lower()}-reports.csv'
+        zip_file.writestr(file_name, csv_file_data.getvalue())
+
+    zip_file.close()
+
+    return zip_file_data

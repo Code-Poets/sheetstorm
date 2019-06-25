@@ -1,5 +1,6 @@
 import csv
 import io
+import zipfile
 from datetime import timedelta
 
 from django.db.models import Sum
@@ -14,6 +15,7 @@ from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.exports import get_employee_name
 from employees.common.exports import save_work_book_as_csv
+from employees.common.exports import save_work_book_as_zip_of_csv
 from employees.factories import ReportFactory
 from employees.models import Report
 from managers.factories import ProjectFactory
@@ -260,6 +262,47 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
             ).value,
             self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][5],
         )
+
+
+class SaveWorkBookAsZipOfCSVTesCase(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+        self.project = ProjectFactory()
+        self.project.members.add(self.user)
+        ReportFactory(author=self.user, project=self.project)
+
+    def test_save_work_book_as_zip_of_csv_creates_zip_file(self):
+        workbook_for_project = generate_xlsx_for_project(self.project)
+        zip_file_data = save_work_book_as_zip_of_csv(workbook_for_project)
+
+        self.assertIsInstance(zip_file_data, io.BytesIO)
+
+        zip_file = zipfile.ZipFile(zip_file_data)
+        self.assertEqual(len(zip_file.infolist()), 1)
+        self.assertEqual(
+            zip_file.infolist()[0].filename,
+            f"{self.user.first_name.lower()}_{self.user.last_name[0].lower()}-reports.csv",
+        )
+        self.assertTrue(zip_file.infolist()[0].file_size > 0)
+
+    def test_save_work_book_as_zip_of_csv_creates_zip_file_with_two_csv_files_for_two_users_in_project(self):
+        user_2 = UserFactory()
+        self.project.members.add(user_2)
+        ReportFactory(author=user_2, project=self.project)
+        workbook_for_project = generate_xlsx_for_project(self.project)
+
+        zip_file_data = save_work_book_as_zip_of_csv(workbook_for_project)
+        self.assertIsInstance(zip_file_data, io.BytesIO)
+
+        zip_file = zipfile.ZipFile(zip_file_data)
+        self.assertEqual(len(zip_file.infolist()), 2)
+        file_names = [zip_info.filename for zip_info in zip_file.infolist()]
+
+        self.assertIn(f"{self.user.first_name.lower()}_{self.user.last_name[0].lower()}-reports.csv", file_names)
+        self.assertIn(f"{user_2.first_name.lower()}_{user_2.last_name[0].lower()}-reports.csv", file_names)
+        self.assertTrue(zip_file.infolist()[0].file_size > 0)
+        self.assertTrue(zip_file.infolist()[1].file_size > 0)
 
 
 class TestExportingFunctions(TestCase):
