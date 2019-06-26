@@ -4,8 +4,6 @@ from django.utils.translation import ugettext_lazy as _
 
 DEFAULT_COUNTRY_CODE = "PL"
 
-VALID_EMAIL_DOMAIN_LIST = ["codepoets.it"]
-
 EMAIL_MAX_LENGTH = 255
 FIRST_NAME_MAX_LENGTH = 30
 LAST_NAME_MAX_LENGTH = 30

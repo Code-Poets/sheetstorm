@@ -1,6 +1,7 @@
 import datetime
 
 import mock
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator
 from django.test import TestCase
@@ -140,7 +141,7 @@ class TestCustomUserModelField(BaseModelTestCase):
 
     def test_customuser_model_email_field_should_not_accept_string_longer_than_set_limit(self):
         self.field_should_not_accept_input(
-            "email", "a" * (constants.EMAIL_MAX_LENGTH - 12) + "@" + constants.VALID_EMAIL_DOMAIN_LIST[0]
+            "email", "a" * (constants.EMAIL_MAX_LENGTH - 12) + "@" + settings.VALID_EMAIL_DOMAIN_LIST[0]
         )
 
     def test_customuser_model_first_name_field_should_accept_correct_input(self):
