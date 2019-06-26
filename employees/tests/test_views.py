@@ -9,6 +9,7 @@ from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportListStrings
 from employees.factories import ReportFactory
+from employees.factories import TaskActivityTypeFactory
 from employees.models import Report
 from employees.models import TaskActivityType
 from employees.views import AdminReportView
@@ -199,7 +200,9 @@ class ProjectReportDetailTests(TestCase):
         self.project = ProjectFactory()
         self.project.members.add(self.user)
         self.client.force_login(self.user)
-        self.report = ReportFactory(author=self.user, project=self.project)
+        self.report = ReportFactory(
+            author=self.user, project=self.project, task_activities=TaskActivityTypeFactory(name="Review")
+        )
         self.url = reverse("project-report-detail", args=(self.report.pk,))
         self.data = {
             "date": self.report.date,
@@ -236,6 +239,14 @@ class ProjectReportDetailTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.context_data["form"]._errors)
         self.assertTrue(self.report.editable)
+
+    def test_form_task_activity_is_initialized_with_latest_activity(self):
+        latest_activity = TaskActivityTypeFactory(name="Backend Development")
+        ReportFactory(author=self.user, project=self.project, task_activities=latest_activity)
+        response = self.client.get(self.url)
+        form = response.context_data["form"]
+        form_task_activities = form.initial["task_activities"]
+        self.assertEqual(form_task_activities, latest_activity)
 
 
 class ReportDetailViewTests(TestCase):
