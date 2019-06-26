@@ -410,7 +410,10 @@ class ExportUserReportView(DetailView):
         )
 
     def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
-        author = super().get_object()
+        if self.request.user.is_admin:
+            author = super().get_object()
+        else:
+            author = self.get_queryset().get(pk=self.request.user.pk)
         response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CONTENT_TYPE_FORMAT.value)
         response["Content-Disposition"] = ExcelGeneratorSettingsConstants.EXPORTED_FILE_NAME.value.format(
             author.email, datetime.date.today()
