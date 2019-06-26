@@ -20,6 +20,7 @@
     <form method="post" class="login">
         {% csrf_token %}
       <input type="text" id="username" class="fadeIn second" name="username" placeholder="Email" required>
+      {% include 'partials/errors_in_field.html' with errors=form.email.errors %}
       <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
       <input type="submit" class="fadeIn fourth" value="{% trans 'Login' %}">
     </form>
@@ -30,19 +31,6 @@
         <span><a class="underlineHover" href="{% url 'password_reset' %}">Forgot your password?</a></span>
     </div>
   </div>
-     {% if form.errors %}
-                {% for field in form %}
-                    {% for error in field.errors %}
-                    <div class="alert alert-danger">
-                        <strong>{{ error|escape }}</strong>
-                     </div>
-                    {% endfor %}
-                {% endfor %}
-      {% for error in form.non_field_errors %}
-                <div class="alert alert-danger">
-                    <strong>{{ error|escape }}</strong>
-                </div>
-      {% endfor %}
-     {% endif %}
+  {% include 'partials/errors_in_field.html' with errors=form.non_field_errors %}
 </div>
 {% endblock %}
