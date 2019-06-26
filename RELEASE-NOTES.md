@@ -1,8 +1,30 @@
-### next
+### v0.6.0
+
+##### Features
+
+- Feature add captcha to registration view ([#317](https://github.com/Code-Poets/sheetstorm/pull/317))
+- Feature add cron job that automatically renew Let's Encrypt Certificate ([#324](https://github.com/Code-Poets/sheetstorm/pull/324))
+- Feature add encryption to postgres backups ([#339](https://github.com/Code-Poets/sheetstorm/pull/339))
+- Feature add modsecurity lib to the nginx ([#320](https://github.com/Code-Poets/sheetstorm/pull/320))
+- Feature add possibility to export monthly reports for every user ([#332](https://github.com/Code-Poets/sheetstorm/pull/332))
+- Feature add signup email confirmation ([#308](https://github.com/Code-Poets/sheetstorm/pull/308))
+- Feature better export of reports ([#331](https://github.com/Code-Poets/sheetstorm/pull/331))
+- Feature mitigating DDoS attack with nginx ([#297](https://github.com/Code-Poets/sheetstorm/pull/297))
+- Feature rebuild register interface ([#283](https://github.com/Code-Poets/sheetstorm/pull/283))
 
 ##### Bugfixes
-- Update `Django` to `2.2.2` to mitigate a security issue
+
+- Bugfix add a missing file that allows you to reset database in the virtual machine ([#338](https://github.com/Code-Poets/sheetstorm/pull/338))
 - Bugfix calendar display in user report edit form ([#300](https://github.com/Code-Poets/sheetstorm/issues/300))
+- Bugfix change dipslay of `user_type` to be human readable ([#293](https://github.com/Code-Poets/sheetstorm/pull/293))
+- Bugfix exporting report description to xls ([#303](https://github.com/Code-Poets/sheetstorm/pull/303))
+- Bugfix for incorrect html tag ([#328](https://github.com/Code-Poets/sheetstorm/pull/328))
+- Bugfix hide toggle button ([#335](https://github.com/Code-Poets/sheetstorm/pull/335))
+- Bugfix make hyperlink highlighted ([#334](https://github.com/Code-Poets/sheetstorm/pull/334))
+- Bugfix manager can't edit his own reports in projects where he is not manager ([#319](https://github.com/Code-Poets/sheetstorm/pull/319))
+- Bugfix navigation bar ([#322](https://github.com/Code-Poets/sheetstorm/pull/322))
+- Bugfix pass markdown_description property to template ([#305](https://github.com/Code-Poets/sheetstorm/pull/305))
+- Bugfix update `Django` to `2.2.2` and adapt test ([#302](https://github.com/Code-Poets/sheetstorm/pull/302))
 
 
 ### v0.5.0
