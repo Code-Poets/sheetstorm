@@ -45,7 +45,7 @@
             {% for report in date.list %}
                 {% if forloop.first %}
                 <td class="author-reports-date-column" rowspan={{ date.list|length }}>
-                    <strong>{{ date.grouper }}</strong>
+                    <strong>{{ date.grouper| date:"l, d F Y" }}</strong>
                 </td>
                 {% else %}
                 <tr>

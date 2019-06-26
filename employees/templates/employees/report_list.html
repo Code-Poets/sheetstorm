@@ -60,7 +60,7 @@
                 {% for reports in date %}
                 {% for report in reports.list %}
                 {% if forloop.first %}
-                    <td class="date-column" rowspan={{ reports.list|length }}><strong>{{ reports.grouper }}</strong></td>
+                    <td class="date-column" rowspan={{ reports.list|length }}><strong>{{ reports.grouper| date:"l, d F Y" }}</strong></td>
                     {% else %}
                     <tr>
                     {% endif %}
