@@ -74,7 +74,7 @@ class ExportViewTest(DataSetUpToTests):
 
 class ExportMethodTestForProject(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
-        authors = self.workbook_for_project.get_sheet_names()
+        authors = self.workbook_for_project.sheetnames
         for author in authors:
             self.assertEqual(author, f"{self.user.first_name} {self.user.last_name[0]}.")
         self.assertEqual(len(authors), 1)
@@ -133,7 +133,7 @@ class ExportMethodTestForProject(DataSetUpToTests):
 
         for employee in employees:
             author = get_employee_name(employee)
-            sheet = project_workbook.get_sheet_by_name(author)
+            sheet = project_workbook[author]
             daily_hours_for_employee = sheet.cell(
                 row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=2
             ).value
@@ -150,7 +150,7 @@ class ExportMethodTestForProject(DataSetUpToTests):
 
 class ExportMethodTestForSingleUser(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
-        sheet_names = self.workbook_for_user.get_sheet_names()
+        sheet_names = self.workbook_for_user.sheetnames
         for author in sheet_names:
             self.assertEqual(author, f"{self.user.first_name} {self.user.last_name[0]}.")
         self.assertEqual(len(sheet_names), 1)

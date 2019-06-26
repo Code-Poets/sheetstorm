@@ -215,4 +215,4 @@ class ReportExtractor:
 
 
 def convert_markdown_html_to_text(html: str) -> str:
-    return "".join(BeautifulSoup(html).findAll(text=True))
+    return "".join(BeautifulSoup(html, features="html.parser").findAll(text=True))
