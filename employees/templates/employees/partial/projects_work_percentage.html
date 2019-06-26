@@ -1,0 +1,11 @@
+<h3>{{ UI_text.PROJECTS_WORK_PERCENTAGE_HEADER.value }}</h3>
+<table class="table">
+    <tbody>
+        {% for project, work_percentage in projects_work_percentage.items %}
+        <tr>
+            <td>{{ project }}</td>
+            <td>{{ work_percentage|floatformat:2 }} %</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

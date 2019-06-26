@@ -9,6 +9,7 @@ from employees.common.strings import ReportValidationStrings
 from employees.factories import ReportFactory
 from employees.models import Report
 from employees.models import TaskActivityType
+from managers.factories import ProjectFactory
 from managers.models import Project
 from users.factories import UserFactory
 from users.models import CustomUser
@@ -255,3 +256,64 @@ class TestReportTaskActivitiesParameter(DataSetUpToTests):
         test_activity_type.full_clean()
         test_activity_type.save()
         self.field_should_accept_input("task_activities", TaskActivityType.objects.get(name="test"))
+
+
+class TestGetProjectsWorkPercentage(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+        self.project_1 = ProjectFactory()
+        self.project_2 = ProjectFactory()
+        self.user.projects.add(self.project_1, self.project_2)
+
+    def test_get_projects_work_percentage_should_return_projects_with_work_time_percent(self):
+        ReportFactory(
+            author=self.user, project=self.project_1, work_hours=timezone.timedelta(hours=8), date=timezone.now().date()
+        )
+        ReportFactory(
+            author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=4), date=timezone.now().date()
+        )
+        ReportFactory(
+            author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=8), date=timezone.now().date()
+        )
+
+        result = self.user.get_projects_work_percentage()
+
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result, {self.project_1: 40.0, self.project_2: 60.0})
+
+    def test_get_projects_work_percentage_should_return_data_from_current_month_start_to_now_if_no_params_provided(
+        self
+    ):
+        previous_month = timezone.now().date() - timezone.timedelta(days=31)
+        ReportFactory(
+            author=self.user, project=self.project_1, work_hours=timezone.timedelta(hours=8), date=timezone.now().date()
+        )
+        ReportFactory(
+            author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=4), date=previous_month
+        )
+        self.user.projects.add(self.project_1, self.project_2)
+
+        result = self.user.get_projects_work_percentage()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result, {self.project_1: 100.0})
+
+    def test_get_projects_work_percentage_should_return_data_from_given_time_range_if_params_provided(self):
+        ReportFactory(
+            author=self.user,
+            project=self.project_1,
+            work_hours=timezone.timedelta(hours=8),
+            date=timezone.now().date() - timezone.timedelta(days=2),
+        )
+        ReportFactory(
+            author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=4), date=timezone.now().date()
+        )
+
+        result = self.user.get_projects_work_percentage(
+            from_date=timezone.now().date() - timezone.timedelta(days=3),
+            to_date=timezone.now().date() - timezone.timedelta(days=1),
+        )
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result, {self.project_1: 100.0})

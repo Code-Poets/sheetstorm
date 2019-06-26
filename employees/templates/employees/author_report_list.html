@@ -82,6 +82,7 @@
         {% if object.get_reports_created.count == 0 %}
             <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
         {% endif %}
+        {% include "employees/partial/projects_work_percentage.html" %}
     </div>
 </div>
 {% endblock %}
