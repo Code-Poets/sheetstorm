@@ -57,7 +57,9 @@ class ReportForm(forms.ModelForm):
 
     def __init__(self, *args: Any, **kwargs: Any):
         super(ReportForm, self).__init__(*args, **kwargs)
-        self.fields["project"].queryset = kwargs["initial"]["author"].projects.all()
+        self.fields["project"].queryset = kwargs["initial"]["author"].get_project_ordered_by_last_report_creation_date()
+        if self.fields["project"].queryset.exists():
+            self.initial["project"] = self.fields["project"].queryset.first()
 
 
 class MonthSwitchForm(forms.Form):

@@ -9,9 +9,11 @@ from django.contrib.auth.models import PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models import Max
 from django.db.models import Q
 from django.db.models import QuerySet
 from django.db.models import Sum
+from django.db.models import Value
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -180,6 +182,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             project: ((project.work_hours_sum / work_hours_sum) * 100 if work_hours_sum.total_seconds() > 0 else 0)
             for project in work_hours_per_project
         }
+
+    def get_project_ordered_by_last_report_creation_date(self) -> QuerySet:
+        return self.projects.annotate(
+            last_report_creation_date=Coalesce(
+                Max("report__creation_date", filter=Q(report__author=self)), Value("1970-01-01 00:00:00")
+            )
+        ).order_by("-last_report_creation_date")
 
 
 @receiver(post_save, sender=CustomUser)
