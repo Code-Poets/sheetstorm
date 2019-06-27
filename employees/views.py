@@ -214,7 +214,7 @@ class ReportDetailBase(UpdateView):
 
     def get_initial(self) -> dict:
         initial = super().get_initial()
-        initial.update({"author": self.request.user})
+        initial.update({"author": self.object.author})
         return initial
 
     def get_context_data(self, **kwargs: Any) -> dict:
@@ -262,7 +262,7 @@ class ReportDetailView(
 
     def get_initial(self) -> dict:
         initial = super().get_initial()
-        initial.update({"author": self.request.user})
+        initial.update({"author": self.object.author})
         return initial
 
     def get_context_data(self, **kwargs: Any) -> dict:
