@@ -15,6 +15,11 @@ urlpatterns = [
         views.AuthorReportView.as_view(),
         name="author-report-list",
     ),
+    url(
+        r"^reports/project/(?P<pk>[0-9]+)/author/(?P<user_pk>[0-9]+)/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
+        views.AuthorReportProjectView.as_view(),
+        name="author-report-project-list",
+    ),
     url(r"^reports/management/(?P<pk>[0-9]+)/$", views.AdminReportView.as_view(), name="admin-report-detail"),
     url(
         r"^reports/project/(?P<pk>[0-9]+)/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
