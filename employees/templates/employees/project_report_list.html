@@ -21,14 +21,14 @@
     </small>
     {{ object.name }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}
 </h1>
-{% with date=path|extract_year_and_month_from_url %}
-<a href="{% url 'export-project-data-xlsx' pk=object.pk year=date.0 month=date.1 %}" class="btn btn-info">
-    Export Reports to XLSX
-</a>
-<a href="{% url 'export-project-data-xlsx' pk=object.id year=date.0 month=date.1 %}?format=csv" class="btn btn-info">
-    Export Reports to CSV
-</a>
-{% endwith %}
+{% if not only_one_author_reports %}
+    <a href="{% url 'export-project-data-xlsx' pk=object.pk year=year month=month %}" class="btn btn-info">
+        Export Reports to XLSX
+    </a>
+    <a href="{% url 'export-project-data-xlsx' pk=object.id year=year month=month %}?format=csv" class="btn btn-info">
+        Export Reports to CSV
+    </a>
+{% endif %}
 <div class="container">
     <div class="table-responsive">
         {% regroup object.get_report_ordered by author as reports_by_author %}
