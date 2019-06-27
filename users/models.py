@@ -6,7 +6,6 @@ from typing import Optional
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
-from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Max
@@ -21,7 +20,6 @@ from django.utils import timezone
 from django_countries.fields import CountryField
 
 from users.common import constants
-from users.common.constants import ErrorCode
 from users.common.fields import ChoiceEnum
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomUserUserTypeText
@@ -44,21 +42,16 @@ class CustomUserManager(BaseUserManager):
         Returns created user.
         """
 
-        if email is None:
-            raise ValidationError(
-                ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, ErrorCode.CREATE_USER_EMAIL_MISSING
-            )
-        else:
-            custom_validate_email_function(email)
-
-        if not password:
-            raise ValidationError(
-                ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, ErrorCode.CREATE_USER_PASSWORD_MISSING
-            )
         email = self.normalize_email(email)
         user = self.model(
-            email=email, is_staff=is_staff, is_active=True, is_superuser=is_superuser, user_type=user_type
+            email=email,
+            password=password,
+            is_staff=is_staff,
+            is_active=True,
+            is_superuser=is_superuser,
+            user_type=user_type,
         )
+        user.full_clean()
         user.set_password(password)
         user.save()
         return user

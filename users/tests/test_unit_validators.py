@@ -2,9 +2,13 @@ import datetime
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.test import override_settings
 from freezegun import freeze_time
+from parameterized import parameterized
 
+from users.common.strings import ValidationErrorText
 from users.validators import UserAgeValidator
+from users.validators import UserEmailValidation
 
 
 @freeze_time("2019-05-27")
@@ -44,3 +48,34 @@ class TestUserAgeValidator(TestCase):
             self.user_age_validator(date_of_birth)
         except Exception as e:  # pylint:disable=broad-except
             self.fail(f"Unexpected exception {str(e)} has occurred!")
+
+
+class TestUserEmailValidation(TestCase):
+    def setUp(self) -> None:
+        self.user_email_validation = UserEmailValidation()
+
+    @parameterized.expand(
+        [
+            ("testusercodepoets.it", ValidationErrorText.VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE),
+            ("@codepoets.it", ValidationErrorText.VALIDATION_ERROR_EMAIL_MALFORMED_FIRST_PART),
+            ("testuser@invaliddomain.com", ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN),
+        ]
+    )
+    def test_validator_should_throw_exception_with_invalid_email(self, email, exception_message):
+        with self.assertRaises(ValidationError) as exception:
+            self.user_email_validation(email)
+        self.assertEqual(exception_message, exception.exception.message)
+
+    @parameterized.expand(
+        [("valid@codepoets.it", ["codepoets.it"]), ("valid@fewdomains.it", ["test.pl", "fewdomains.it"])]
+    )
+    def test_validator_should_allow_all_email_domains_with_empty_valid_domain_list(self, email, valid_email_domains):
+        with override_settings(VALID_EMAIL_DOMAIN_LIST=valid_email_domains):
+            valid_email = self.user_email_validation(email)
+        self.assertEqual(valid_email, email)
+
+    @parameterized.expand(["valid@codepoets.it", "valid@otherdomain.it"])
+    def test_validator_all_domain_are_not_allowed_if_valid_email_domain_list_is_empty(self, email):
+        with override_settings(VALID_EMAIL_DOMAIN_LIST=[]):
+            with self.assertRaises(ValidationError):
+                self.user_email_validation(email)
