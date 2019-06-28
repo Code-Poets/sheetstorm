@@ -25,6 +25,14 @@ server {
 
     }
 
+    location /postgres-backup/ {
+        allow 172.30.2.1;
+        deny all;
+
+        limit_except GET { deny all; }
+        alias        {{ postgres_backup_dir }}/;
+    }
+
     location /static/ {
         alias {{ static_file_dir }};
     }

@@ -22,6 +22,17 @@ server {
         proxy_pass                            $sheetstorm_backend;
 
     }
+
+    location /postgres-backup/ {
+        allow                {{ allow_ip_to_postgres_backup_endpoint }};
+        deny                 all;
+        auth_basic           "closed site";
+        auth_basic_user_file htpasswd;
+
+        limit_except GET { deny all; }
+        alias        {{ postgres_backup_dir }}/;
+    }
+
     location /static/ {
         alias {{ static_file_dir }};
     }
