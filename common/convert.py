@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Optional
 from typing import Tuple
 
 from django.core.exceptions import ValidationError
@@ -6,7 +7,9 @@ from django.core.exceptions import ValidationError
 from employees.common.strings import ReportValidationStrings
 
 
-def timedelta_to_string(data: timedelta) -> str:
+def timedelta_to_string(data: Optional[timedelta]) -> str:
+    if data is None:
+        return ""
     days = data.days
     hours = data.seconds // 3600
     minutes = (data.seconds % 3600) // 60
