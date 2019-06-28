@@ -26,6 +26,7 @@ class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin:
                 super()  # type: ignore
                 .get_queryset()
                 .filter(Q(project__managers=self.request.user.pk) | Q(author=self.request.user.pk))  # type: ignore
+                .distinct()
             )
         else:
             return super().get_queryset()  # type: ignore
