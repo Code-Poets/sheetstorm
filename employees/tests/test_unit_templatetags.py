@@ -5,6 +5,7 @@ from assertpy import assert_that
 from django.db.models.functions import datetime
 from django.test import TestCase
 
+from common.convert import timedelta_to_string
 from employees.templatetags.data_display_filters import convert_to_month_name
 from employees.templatetags.data_display_filters import duration_field_to_string
 from employees.templatetags.data_display_filters import extract_year_and_month_from_url
@@ -73,3 +74,22 @@ class TestConvertToMonthName:
     def test_function_raise_index_error_if_value_is_out_of_range(self):  # pylint: disable=no-self-use
         with pytest.raises(IndexError):
             convert_to_month_name("13")
+
+
+@pytest.mark.parametrize(
+    ("input_", "expected_output"),
+    [
+        (None, ""),
+        (timedelta(), "00:00"),
+        (timedelta(seconds=59), "00:00"),
+        (timedelta(seconds=129), "00:02"),
+        (timedelta(minutes=5), "00:05"),
+        (timedelta(minutes=3, seconds=2), "00:03"),
+        (timedelta(hours=7), "07:00"),
+        (timedelta(hours=1, minutes=30), "01:30"),
+        (timedelta(days=1), "24:00"),
+        (timedelta(days=2, hours=3, minutes=12, seconds=5), "51:12"),
+    ],
+)
+def test_timedelta_to_string(input_, expected_output):
+    assert_that(timedelta_to_string(input_)).is_equal_to(expected_output)

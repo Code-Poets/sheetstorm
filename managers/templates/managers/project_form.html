@@ -45,7 +45,7 @@
 {% block extra_script %}
 {{ form.media }}
 {% if request.user.is_admin and object %}
-  <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="//code.jquery.com/jquery-3.3.1.js"></script>
   <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script type="text/javascript" src="{% static 'managers/scripts/delete_project_popup.js' %}"></script>
 {% endif %}

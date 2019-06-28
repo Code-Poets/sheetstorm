@@ -32,13 +32,13 @@ class ProjectJoinForm(forms.Form):
 
 class DurationInput(TextInput):
     def format_value(self, value: Optional[str]) -> str:
-        if value is not None:
+        if value is not None and value != ":":
             return timedelta_to_string(parse_duration(value))
         return ""
 
 
 class DurationFieldForm(forms.DurationField):
-    widget = DurationInput
+    widget = DurationInput(attrs={"data-mask": "09:99", "placeholder": "H:MM"})
 
     def clean(self, value: str) -> str:
         if value is None:
