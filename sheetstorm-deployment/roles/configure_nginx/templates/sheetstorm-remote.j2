@@ -7,6 +7,10 @@ server {
         return 301 https://sheetstorm.codepoets.it$request_uri;
     }
 
+    # Activate modsecurity module
+    modsecurity            on;
+    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
+
     location / {
         limit_req  zone=ip_req_limit   burst={{ nginx.number_of_requests_stored_in_queue }} nodelay;
         limit_conn ip_connection_limit {{ nginx.number_of_open_connections_per_client }};
@@ -42,10 +46,6 @@ server {
     listen           80 default_server;
     listen      [::]:80 default_server;
     server_name sheetstorm.codepoets.it s.codepoets.it;
-
-    # Activate modsecurity module
-    modsecurity            on;
-    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
 
     client_body_timeout   {{ nginx.client_body_timeout }};
     client_header_timeout {{ nginx.client_header_timeout }};

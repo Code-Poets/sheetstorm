@@ -6,6 +6,11 @@ server {
     if ($host = s.codepoets.it) {
         return 301 https://sheetstorm.codepoets.it$request_uri;
     }
+
+    # Activate modsecurity module
+    modsecurity            on;
+    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
+
     error_page 503 /503.html;
 
     location = /503.html {
@@ -39,10 +44,6 @@ server {
     listen           80 default_server;
     listen      [::]:80 default_server;
     server_name sheetstorm.codepoets.it;
-
-    # Activate modsecurity module
-    modsecurity            on;
-    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
 
     client_body_timeout   {{ nginx.client_body_timeout }};
     client_header_timeout {{ nginx.client_header_timeout }};
