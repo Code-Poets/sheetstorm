@@ -23,15 +23,7 @@ from users.factories import UserFactory
 from users.models import CustomUser
 
 
-class InitTaskTypeTestCase(TestCase):
-    def setUp(self):
-        super().setUp()
-        task_type = TaskActivityType(pk=1, name="Other")
-        task_type.full_clean()
-        task_type.save()
-
-
-class AuthorReportViewTests(InitTaskTypeTestCase):
+class AuthorReportViewTests(TestCase):
     def setUp(self):
         super().setUp()
         self.user = AdminUserFactory()
@@ -80,13 +72,14 @@ class AuthorReportViewTests(InitTaskTypeTestCase):
         self.assertEqual(response.url, f"/reports/author/{self.user.pk}/{current_date.year}/{current_date.month}/")
 
 
-class AdminReportViewTests(InitTaskTypeTestCase):
+class AdminReportViewTests(TestCase):
     def setUp(self):
         super().setUp()
-        self.user = AdminUserFactory()
+        self.admin = AdminUserFactory()
+        self.user = UserFactory()
         self.project = ProjectFactory()
         self.project.members.add(self.user)
-        self.client.force_login(self.user)
+        self.client.force_login(self.admin)
         self.report = ReportFactory(author=self.user, project=self.project)
         self.url = reverse("admin-report-detail", kwargs={"pk": self.report.pk})
         self.data = {
