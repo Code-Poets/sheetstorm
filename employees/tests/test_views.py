@@ -14,6 +14,7 @@ from employees.factories import TaskActivityTypeFactory
 from employees.models import Report
 from employees.models import TaskActivityType
 from employees.views import AdminReportView
+from employees.views import AuthorReportProjectView
 from employees.views import AuthorReportView
 from employees.views import ProjectReportList
 from managers.factories import ProjectFactory
@@ -582,3 +583,67 @@ class ProjectReportListTests(TestCase):
                     fields_to_check.append(getattr(report, field))
             for field in fields_to_check:
                 self.assertContains(response, field)
+
+
+class TestAuthorReportProjectView(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+        self.project = ProjectFactory()
+        self.project.members.add(self.user)
+        current_date = timezone.now()
+        self.report = ReportFactory(author=self.user, project=self.project, date=current_date)
+
+        self.url = reverse(
+            "author-report-project-list",
+            kwargs={
+                "pk": self.project.pk,
+                "user_pk": self.user.pk,
+                "year": current_date.year,
+                "month": current_date.month,
+            },
+        )
+
+    def test_view_should_display_author_reports_of_project_on_admin_get(self):
+        admin = AdminUserFactory()
+        self.client.force_login(admin)
+        response = self.client.get(self.url)
+        self.assertContains(response, self.report.description)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, AuthorReportProjectView.template_name)
+
+    def test_view_should_display_author_reports_of_project_on_manager_project_get(self):
+        manager = ManagerUserFactory()
+        self.project.managers.add(manager)
+        self.client.force_login(manager)
+        response = self.client.get(self.url)
+        self.assertContains(response, self.report.description)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, AuthorReportProjectView.template_name)
+
+    def test_view_should_not_display_reports_for_any_other_managers(self):
+        user = ManagerUserFactory()
+        other_project = ProjectFactory()
+        other_project.managers.add(user)
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_should_not_display_reports_for_other_users(self):
+        employee_user = UserFactory()
+        self.client.force_login(employee_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_view_should_display_author_reports_only_one_project(self):
+        admin = AdminUserFactory()
+        report_from_project1 = ReportFactory(author=self.user, project=self.project, date=self.report.date)
+        report_from_other_project = ReportFactory(author=self.user)
+        self.client.force_login(admin)
+        response = self.client.get(self.url)
+        self.assertContains(response, self.report.description)
+        self.assertContains(response, report_from_project1.description)
+        self.assertContains(response, report_from_project1.project.name)
+        self.assertNotContains(response, report_from_other_project.description)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, AuthorReportProjectView.template_name)
