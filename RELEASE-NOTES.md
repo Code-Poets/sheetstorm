@@ -1,3 +1,10 @@
+### v0.7.1
+
+##### Bugfixes
+
+- Bugfix calendar widget display in `report-list` ([#357](https://github.com/Code-Poets/sheetstorm/pull/357))
+
+
 ### v0.7.0
 
 ##### Features
