@@ -32,24 +32,39 @@ class ProjectJoinFormTests(TestCase):
 
 
 class TestDurationFieldForm:
-    def _test_duration_field_form(self, initial_value: str, input_value: str) -> str:  # pylint: disable=no-self-use
-        duration_field_form = DurationFieldForm(initial=initial_value)
-        return duration_field_form.clean(input_value)
-
     @pytest.mark.parametrize(
-        ("initial_value", "input_value", "expected_value"), [("08:00", "8:00", "8:00:00"), ("08:00", "8:0", "8:0:00")]
+        ("initial_value", "input_value", "expected_value"),
+        [("08:00", "8:00", "8:00:00"), ("08:00", "8:0", "8:0:00"), ("", "08:00", "08:00:00")],
     )
     def test_correct_work_hours_is_same_as_assumpted(self, initial_value, input_value, expected_value):
-        assertpy.assert_that(self._test_duration_field_form(initial_value, input_value)).is_equal_to(expected_value)
+        assertpy.assert_that(self._test_duration_field_form(input_value, initial=initial_value)).is_equal_to(
+            expected_value
+        )
 
     @pytest.mark.parametrize(
         ("initial_value", "input_value"),
-        [("08:00", ":00"), ("08:00", "8:"), ("08:00", ":"), ("08:00", ""), ("08:00", "four:zero"), ("08:00", "8:zero")],
+        [
+            ("08:00", ":00"),
+            ("08:00", "8:"),
+            ("08:00", ":"),
+            ("08:00", ""),
+            ("08:00", "four:zero"),
+            ("08:00", "8:zero"),
+            ("", "8:"),
+        ],
     )
     def test_incorrect_work_hours_will_raise_exception(self, initial_value, input_value):
         with pytest.raises(ValidationError) as exception:
-            self._test_duration_field_form(initial_value, input_value)
+            self._test_duration_field_form(input_value, initial=initial_value)
         assertpy.assert_that(exception.value.message).is_equal_to(ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
+
+    def test_duration_field_form_is_masked(self):  # pylint: disable=no-self-use
+        duration_field_form = DurationFieldForm()
+        assertpy.assert_that(duration_field_form.widget.attrs).contains("data-mask", "placeholder")
+
+    def _test_duration_field_form(self, input_value: str, **kwargs: str) -> str:  # pylint: disable=no-self-use
+        duration_field_form = DurationFieldForm(**kwargs)
+        return duration_field_form.clean(input_value)
 
 
 class MonthSwitchFormTests(TestCase):
