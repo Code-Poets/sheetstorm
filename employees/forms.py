@@ -18,6 +18,7 @@ from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
 from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
 from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
 from employees.models import Report
+from managers.models import Project
 
 
 class ProjectJoinForm(forms.Form):
@@ -49,6 +50,7 @@ class DurationFieldForm(forms.DurationField):
 
 class ReportForm(forms.ModelForm):
     work_hours = DurationFieldForm()
+    project = forms.ModelChoiceField(queryset=Project.objects, empty_label=None)
 
     class Meta:
         model = Report
