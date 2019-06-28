@@ -4,6 +4,7 @@
     - consts.yml
     - versions.yml
     - ../../sheetstorm-config/var.yml
+    - ../../sheetstorm-secret/var.yml
   vars:
     server_configuration: remote
   roles:
@@ -47,6 +48,12 @@
             hour:   "2"
             user:   root
             job:    /usr/bin/certbot renew --quiet
+
+        - name: Add secret file that contain credentials to nginx endpoint with postgresql backups
+          copy:
+            src:  "{{ sheetstorm_secret_dir}}/htpasswd"
+            dest: "/etc/nginx/htpasswd"
+            mode: 0644
 
         - include_role:
             name: configure_nginx
