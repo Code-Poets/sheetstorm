@@ -338,6 +338,17 @@ class ReportDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(report_manager.description, data["description"])
 
+    def test_custom_report_detail_view_should_return_only_one_report_when_are_more_than_one_managers_in_project(self):
+        manager_1 = ManagerUserFactory()
+        manager_2 = ManagerUserFactory()
+        self.report.project.managers.add(manager_1)
+        self.report.project.managers.add(manager_2)
+        report_1 = ReportFactory(author=manager_1, project=self.report.project)
+        self.client.force_login(manager_1)
+        response = self.client.get(path=reverse("custom-report-detail", args=(report_1.pk,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, report_1.description)
+
 
 class ReportDeleteViewTests(TestCase):
     def setUp(self):
