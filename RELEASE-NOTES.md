@@ -1,3 +1,20 @@
+### v0.7.0
+
+##### Features
+
+- Feature add day name to reports ([#346](https://github.com/Code-Poets/sheetstorm/pull/346))
+- Feature add mask for work hours field in reports form ([#345](https://github.com/Code-Poets/sheetstorm/pull/345))
+- Feature add nginx endpoint that allows downloading encrypted postgres backups ([#353](https://github.com/Code-Poets/sheetstorm/pull/353))
+- Feature default project for new report ([#327](https://github.com/Code-Poets/sheetstorm/pull/327))
+- Feature default task activity for new report ([#337](https://github.com/Code-Poets/sheetstorm/pull/337))
+- Feature percentage time of worker for each project ([#330](https://github.com/Code-Poets/sheetstorm/pull/330))
+
+##### Bugfixes
+
+- Bugfix move directives that configure modsecurity nginx module to another place in the nginx config files ([#347](https://github.com/Code-Poets/sheetstorm/pull/347))
+- Bugfix MultipleObjectsReturned exception when manager wants to edit his reports ([#354](https://github.com/Code-Poets/sheetstorm/pull/354))
+
+
 ### v0.6.0
 
 ##### Features
