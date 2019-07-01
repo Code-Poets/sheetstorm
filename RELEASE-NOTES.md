@@ -1,3 +1,11 @@
+### v0.7.2
+
+##### Bugfixes
+
+- Bugfix "---------------" in projects dropdown list in reposr list view ([#349](https://github.com/Code-Poets/sheetstorm/pull/349))
+- Bugfix regex for extracting year and month from url ([#364](https://github.com/Code-Poets/sheetstorm/pull/364))
+
+
 ### v0.7.1
 
 ##### Bugfixes
