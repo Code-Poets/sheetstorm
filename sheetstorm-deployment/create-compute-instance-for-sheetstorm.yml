@@ -9,10 +9,29 @@
     - reserve_static_ip
   tasks:
     - block:
+        - name:   Check if postgresql backups disk for the "{{ server_name }}" instance already exists
+          shell: >
+              gcloud compute disks list
+              --project   {{ gke.project }}
+              | grep {{ server_name }}-database-backup
+          register:      disk_result
+          ignore_errors: yes
+
+        - name:   Create postgresql disk for the "{{ server_name }}" instance
+          command: >
+              gcloud compute disks create {{ server_name }}-database-backup
+              --type        {{ resources_of_postgresql_backups_disk.disk_type }}
+              --size        {{ resources_of_postgresql_backups_disk.disk_size }}
+              --description "Persistent disk attached to the {{ server_name }} instance"
+              --project     {{ gke.project }}
+              --zone        {{ gke.zone }}
+          when: disk_result.stdout == ""
+
         - name:    Create a GCP instance for {{ server_name }}
           command: >
               gcloud compute instances create {{ server_name }}
               --description  "Vm instance that contain {{ server_name }}"
+              --disk         name={{ server_name }}-database-backup
               --machine-type {{ machine_type }}
               --address      {{ name_of_ip }}
               --project      {{ gke.project }}

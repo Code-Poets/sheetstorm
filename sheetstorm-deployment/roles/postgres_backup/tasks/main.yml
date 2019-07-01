@@ -1,6 +1,25 @@
 - become:      yes
   become_user: root
   block:
+    - name:   Create a ext4 filesystem on /dev/sdb and check disk blocks
+      filesystem:
+        fstype: ext4
+        dev:    /dev/sdb
+
+    - name: Mount disk for postgresql backups
+      mount:
+        path:   "{{ postgres_backup_dir }}"
+        src:    /dev/sdb
+        fstype: ext4
+        state:  mounted
+
+    - name:    Change owner of mountpoint
+      file:
+        path: "{{ postgres_backup_dir }}"
+        owner: sheetstorm
+        group: sheetstorm
+        mode: '0744'
+
     - name:  Create home bin directory
       file:
         path:  "{{ home_dir }}/bin/"
