@@ -34,9 +34,10 @@ class TestExtractionTag:
     @pytest.mark.parametrize(
         ("url", "date"),
         [
-            ("/felicita/felicita/felicita/felicita/2019/4", ["2019", "4"]),
-            ("/mamma/mia/mamma/mia/2018/9", ["2018", "9"]),
-            ("/kazde/pokolenie/ma/wlasny/2100/1", ["2100", "1"]),
+            ("/felicita/felicita/felicita/felicita/2019/4/", ["2019", "4"]),
+            ("/reports/2019/6/", ["2019", "6"]),
+            ("/mamma/mia/mamma/mia/2018/9/", ["2018", "9"]),
+            ("/kazde/pokolenie/ma/wlasny/2100/1/", ["2100", "1"]),
         ],
     )  # pylint: disable=no-self-use
     def test_extract_year_and_month_from_url_function_should_correct_extract_year_and_month(self, url, date):

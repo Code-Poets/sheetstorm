@@ -18,7 +18,7 @@ def duration_field_to_string(data: timedelta) -> str:
 
 @register.filter
 def extract_year_and_month_from_url(url: str) -> List[str]:
-    regex = re.compile(r"/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})$")
+    regex = re.compile(r"/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$")
     date = regex.search(url)
 
     if date is not None:
