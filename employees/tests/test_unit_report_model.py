@@ -3,6 +3,7 @@ import datetime
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
+from parameterized import parameterized
 
 from employees.common.constants import ReportModelConstants
 from employees.common.strings import ReportValidationStrings
@@ -118,26 +119,43 @@ class TestReportAuthorParameterFails(DataSetUpToTests):
         self.field_should_not_accept_null("author")
 
 
-class TestReportWorkHoursParameterFails(DataSetUpToTests):
-
-    # PARAM
+class TestReportWorkHoursParameter(DataSetUpToTests):
     def test_report_model_work_hours_field_should_not_accept_non_numeric_value(self):
-        self.field_should_not_accept_input("work_hours", self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS)
+        self.field_should_not_accept_input(
+            "work_hours",
+            self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS,
+            error_message=str(ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value),
+        )
 
     def test_report_model_work_hours_field_should_not_be_empty(self):
         self.field_should_not_accept_null("work_hours")
 
-    # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_maximum(self):
         self.field_should_not_accept_input(
-            "work_hours", ReportModelConstants.MAX_WORK_HOURS.value + datetime.timedelta(hours=25)
+            "work_hours",
+            ReportModelConstants.MAX_WORK_HOURS.value + datetime.timedelta(minutes=30),
+            error_message=str(ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value),
         )
 
-    # PARAM
     def test_report_model_work_hours_field_should_not_accept_value_exceeding_set_minimum(self):
         self.field_should_not_accept_input(
-            "work_hours", ReportModelConstants.MIN_WORK_HOURS.value - datetime.timedelta(seconds=1)
+            "work_hours",
+            ReportModelConstants.MIN_WORK_HOURS.value - datetime.timedelta(seconds=1),
+            error_message=str(ReportValidationStrings.WORK_HOURS_MIN_VALUE_NOT_EXCEEDED.value),
         )
+
+    @parameterized.expand([(16,), (20,), (31,), (59,)])
+    def test_report_model_work_hours_field_should_not_accept_value_which_is_not_divisible_by_15(self, minutes):
+        self.field_should_not_accept_input(
+            "work_hours",
+            datetime.timedelta(minutes=minutes),
+            error_message=str(ReportValidationStrings.WORK_HOURS_MINUTES_ARE_INCORRECT.value),
+            error_class=ValidationError,
+        )
+
+    @parameterized.expand([(0,), (15,), (30,), (45,)])
+    def test_report_model_work_hours_field_should_accept_value_which_is_divisible_by_15(self, minutes):
+        self.field_should_accept_input("work_hours", datetime.timedelta(hours=1, minutes=minutes))
 
 
 class InitTaskTypeTestCase(TestCase):

@@ -47,6 +47,9 @@ class DurationFieldForm(forms.DurationField):
         (hours, minutes) = convert_string_work_hours_field_to_hour_and_minutes(value)
         return f"{hours}:{minutes}:00"
 
+    def prepare_value(self, value: str) -> str:
+        return f"{value}:00"
+
 
 class ReportForm(forms.ModelForm):
     work_hours = DurationFieldForm()
