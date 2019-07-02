@@ -1,6 +1,7 @@
 import datetime
 
 import mock
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator
 from django.test import TestCase
@@ -19,14 +20,14 @@ class TestCustomUserModel(TestCase):
     def test_create_user_method_should_raise_custom_validation_error_when_email_is_none(self):
         with self.assertRaises(ValidationError) as custom_exception:
             CustomUser.objects._create_user(None, "testuserpasswd", False, False, CustomUser.UserType.EMPLOYEE.name)
-        self.assertEqual(ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, custom_exception.exception.message)
+        self.assertEqual(ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, custom_exception.exception.messages[0])
 
     def test_create_user_method_should_raise_custom_validation_error_when_password_is_none(self):
         with self.assertRaises(ValidationError) as custom_exception:
             CustomUser.objects._create_user(
                 "testuser@codepoets.it", None, False, False, CustomUser.UserType.EMPLOYEE.name
             )
-        self.assertEqual(ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, custom_exception.exception.message)
+        self.assertEqual(ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, custom_exception.exception.messages[0])
 
     def test_user_create_superuser_method_should_create_user_with_admin_attributes(self):
         user = CustomUser.objects.create_superuser("testadminuser@codepoets.it", "testadminuserpasswd")
@@ -140,7 +141,7 @@ class TestCustomUserModelField(BaseModelTestCase):
 
     def test_customuser_model_email_field_should_not_accept_string_longer_than_set_limit(self):
         self.field_should_not_accept_input(
-            "email", "a" * (constants.EMAIL_MAX_LENGTH - 12) + "@" + constants.VALID_EMAIL_DOMAIN_LIST[0]
+            "email", "a" * (constants.EMAIL_MAX_LENGTH - 12) + "@" + settings.VALID_EMAIL_DOMAIN_LIST[0]
         )
 
     def test_customuser_model_first_name_field_should_accept_correct_input(self):

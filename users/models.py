@@ -6,7 +6,6 @@ from typing import Optional
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
-from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Max
@@ -21,14 +20,13 @@ from django.utils import timezone
 from django_countries.fields import CountryField
 
 from users.common import constants
-from users.common.constants import ErrorCode
 from users.common.fields import ChoiceEnum
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomUserUserTypeText
 from users.common.strings import ValidationErrorText
-from users.common.utils import custom_validate_email_function
 from users.common.validators import PhoneRegexValidator
 from users.validators import UserAgeValidator
+from users.validators import UserEmailValidation
 
 logger = logging.getLogger(__name__)
 
@@ -44,21 +42,16 @@ class CustomUserManager(BaseUserManager):
         Returns created user.
         """
 
-        if email is None:
-            raise ValidationError(
-                ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE, ErrorCode.CREATE_USER_EMAIL_MISSING
-            )
-        else:
-            custom_validate_email_function(email)
-
-        if not password:
-            raise ValidationError(
-                ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE, ErrorCode.CREATE_USER_PASSWORD_MISSING
-            )
         email = self.normalize_email(email)
         user = self.model(
-            email=email, is_staff=is_staff, is_active=True, is_superuser=is_superuser, user_type=user_type
+            email=email,
+            password=password,
+            is_staff=is_staff,
+            is_active=True,
+            is_superuser=is_superuser,
+            user_type=user_type,
         )
+        user.full_clean()
         user.set_password(password)
         user.save()
         return user
@@ -82,7 +75,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         MANAGER = CustomUserUserTypeText.MANAGER
         ADMIN = CustomUserUserTypeText.ADMIN
 
-    email = models.EmailField(CustomUserModelText.EMAIL_ADDRESS, max_length=constants.EMAIL_MAX_LENGTH, unique=True)
+    email = models.EmailField(
+        CustomUserModelText.EMAIL_ADDRESS,
+        max_length=constants.EMAIL_MAX_LENGTH,
+        unique=True,
+        validators=[UserEmailValidation()],
+        error_messages={"blank": ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE},
+    )
     first_name = models.CharField(
         CustomUserModelText.FIRST_NAME, max_length=constants.FIRST_NAME_MAX_LENGTH, blank=True
     )
@@ -108,7 +107,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     user_type = models.CharField(
         max_length=constants.USER_TYPE_MAX_LENGTH, choices=UserType.choices(), default=UserType.EMPLOYEE.name
     )
-
+    password = models.CharField(
+        max_length=128, error_messages={"null": ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE}
+    )
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
@@ -117,9 +118,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = CustomUserModelText.VERBOSE_NAME_USER
         verbose_name_plural = CustomUserModelText.VERBOSE_NAME_PLURAL_USERS
         ordering = ("id",)
-
-    def clean(self) -> None:
-        custom_validate_email_function(self.email)
 
     def get_absolute_url(self) -> str:
         """

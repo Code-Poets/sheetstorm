@@ -1,9 +1,9 @@
 # pylint: disable=line-too-long
 from enum import Enum
 
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from users.common import constants
 from utils.mixins import NotCallableMixin
 
 
@@ -45,13 +45,13 @@ class CustomUserModelText:
 
 
 class ValidationErrorText:
-    VALIDATION_ERROR_EMAIL_MESSAGE = "The given email must be set"
+    VALIDATION_ERROR_EMAIL_MESSAGE = "Please enter correct email address"
     VALIDATION_ERROR_EMAIL_EXISTING_MESSAGE = "User with this Email address already exists."
-    VALIDATION_ERROR_PASSWORD_MESSAGE = "The given password must be set"
+    VALIDATION_ERROR_PASSWORD_MESSAGE = "Please enter your password"
     VALIDATION_ERROR_EMAIL_MALFORMED_FIRST_PART = "Invalid first part of email - you cannot use '' or ' ' signs"
     VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE = 'The given email must contain one "@" sign'
     VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN = (
-        "Please enter an e-mail address with a valid domain (" + ", ".join(constants.VALID_EMAIL_DOMAIN_LIST) + ")"
+        "Please enter an e-mail address with a valid domain (" + ", ".join(settings.VALID_EMAIL_DOMAIN_LIST) + ")"
     )
     VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN_SHORT = "Please enter an e-mail address with a valid domain"
     VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = _("A user is already registered with this e-mail address.")

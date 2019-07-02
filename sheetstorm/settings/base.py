@@ -268,3 +268,6 @@ COUNTRIES_FIRST = [
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# List of valid email domains which are allowed in SheetStorm
+VALID_EMAIL_DOMAIN_LIST: list = []

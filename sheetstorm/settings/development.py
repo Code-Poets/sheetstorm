@@ -12,3 +12,5 @@ DATABASES['default']['HOST']     = ''
 DATABASES['default']['PORT']     = ''
 
 CAPTCHA_TEST_MODE = True
+
+VALID_EMAIL_DOMAIN_LIST = ["codepoets.it"]

@@ -2,6 +2,7 @@ import datetime
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.deconstruct import deconstructible
 
@@ -23,3 +24,18 @@ class UserAgeValidator:
             if not self.MINIMAL_ACCETABLE_AGLE <= age <= self.MAXIMAL_ACCEPTABLE_AGE:
                 raise ValidationError(ValidationErrorText.VALIDATION_ERROR_AGE_NOT_ACCEPTED)
         return users_birth_date
+
+
+@deconstructible
+class UserEmailValidation:
+    def __call__(self, email: Optional[str]) -> Optional[str]:
+        if email is not None and email.count("@") == 1:
+            if email.split("@")[0] in ["", " "]:
+                raise ValidationError(message=ValidationErrorText.VALIDATION_ERROR_EMAIL_MALFORMED_FIRST_PART)
+
+            else:
+                if email.split("@")[1] not in settings.VALID_EMAIL_DOMAIN_LIST:
+                    raise ValidationError(message=ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN)
+        else:
+            raise ValidationError(message=ValidationErrorText.VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE)
+        return email
