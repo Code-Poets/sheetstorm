@@ -185,6 +185,14 @@ class ReportCustomListTests(TestCase):
         self.assertNotContains(response, other_report.description)
         self.assertNotContains(response, yet_another_report.description)
 
+    def test_custom_report_list_view_form_should_have_latest_report_data_set(self):
+        latest_activity = TaskActivityTypeFactory(name="Some other task activity")
+        latest_report = ReportFactory(author=self.user, task_activities=latest_activity)
+        latest_report.project.members.add(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.context_data["form"].initial["task_activities"].pk, latest_activity.pk)
+        self.assertEqual(response.context_data["form"].initial["project"].pk, latest_report.project.pk)
+
 
 class ProjectReportDetailTests(TestCase):
     def setUp(self):
@@ -233,13 +241,13 @@ class ProjectReportDetailTests(TestCase):
         self.assertIsNotNone(response.context_data["form"]._errors)
         self.assertTrue(self.report.editable)
 
-    def test_form_task_activity_is_initialized_with_latest_activity(self):
-        latest_activity = TaskActivityTypeFactory(name="Backend Development")
-        ReportFactory(author=self.user, project=self.project, task_activities=latest_activity)
-        response = self.client.get(self.url)
-        form = response.context_data["form"]
-        form_task_activities = form.initial["task_activities"]
-        self.assertEqual(form_task_activities, latest_activity)
+    def test_project_report_detail_view_should_show_data_from_current_report_not_from_latest_report(self):
+        # Latest report
+        ReportFactory(author=self.user)
+        response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data["form"].initial["task_activities"], self.report.task_activities.pk)
+        self.assertEqual(response.context_data["form"].initial["project"], self.report.project.pk)
 
 
 class ReportDetailViewTests(TestCase):
@@ -312,6 +320,14 @@ class ReportDetailViewTests(TestCase):
         response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(other_project not in response.context_data["form"].fields["project"].queryset)
+
+    def test_custom_report_detail_view_should_show_data_from_current_report_not_from_latest_report(self):
+        # Latest report
+        ReportFactory(author=self.user)
+        response = self.client.get(path=reverse("custom-report-detail", args=(self.report.pk,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data["form"].initial["task_activities"], self.report.task_activities.pk)
+        self.assertEqual(response.context_data["form"].initial["project"], self.report.project.pk)
 
     def test_manager_should_be_able_to_update_his_reports_in_project_in_which_he_is_not_manager(self):
         user_manager = ManagerUserFactory()

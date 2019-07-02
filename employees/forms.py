@@ -61,11 +61,12 @@ class ReportForm(forms.ModelForm):
         super(ReportForm, self).__init__(*args, **kwargs)
         author = kwargs["initial"]["author"]
         self.fields["project"].queryset = author.get_project_ordered_by_last_report_creation_date()
-        if self.fields["project"].queryset.exists():
-            self.initial["project"] = self.fields["project"].queryset.first()
-        report_set = author.report_set.order_by("-creation_date")
-        if report_set:
-            self.initial["task_activities"] = report_set.first().task_activities
+        if self.instance.pk is None:
+            if self.fields["project"].queryset.exists():
+                self.initial["project"] = self.fields["project"].queryset.first()
+            report_set = author.report_set.order_by("-creation_date")
+            if report_set:
+                self.initial["task_activities"] = report_set.first().task_activities
 
 
 class MonthSwitchForm(forms.Form):
