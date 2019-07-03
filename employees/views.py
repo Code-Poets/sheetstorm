@@ -218,7 +218,7 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
             logger.debug(f"User with id: {request.user.pk} join to the project with id: {project.pk}")
             return redirect(self.get_success_url())
         else:
-            return self.render_to_response(context={"form": form})
+            return self.render_to_response(context=self.get_context_data().update({"project_form": form}))
 
 
 class ReportDetailBase(UpdateView):
