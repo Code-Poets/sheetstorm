@@ -1,4 +1,5 @@
 import datetime
+import re
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
@@ -39,3 +40,17 @@ class UserEmailValidation:
         else:
             raise ValidationError(message=ValidationErrorText.VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE)
         return email
+
+
+@deconstructible
+class UserNameValidatior:
+    def __init__(self) -> None:
+        self.regex = re.compile(
+            "[\"'@_!#$%^&*()<>?/|}{~:;\]\[=+\\\]"  # noqa: W605  # pylint: disable=anomalous-backslash-in-string
+        )
+
+    def __call__(self, name: Optional[str]) -> Optional[str]:
+        if isinstance(name, str):
+            if self.regex.search(name):
+                raise ValidationError(message=ValidationErrorText.VALIDATION_ERROR_SPECIAL_CHARACTERS_IN_NAME)
+        return name
