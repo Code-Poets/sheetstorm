@@ -19,7 +19,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django_countries.fields import CountryField
 
-from users.common import constants
+from users.common.constants import UserConstants
 from users.common.fields import ChoiceEnum
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomUserUserTypeText
@@ -78,20 +78,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(
         CustomUserModelText.EMAIL_ADDRESS,
-        max_length=constants.EMAIL_MAX_LENGTH,
+        max_length=UserConstants.EMAIL_MAX_LENGTH.value,
         unique=True,
         validators=[UserEmailValidation()],
         error_messages={"blank": ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE},
     )
     first_name = models.CharField(
         CustomUserModelText.FIRST_NAME,
-        max_length=constants.FIRST_NAME_MAX_LENGTH,
+        max_length=UserConstants.FIRST_NAME_MAX_LENGTH.value,
         blank=True,
         validators=[UserNameValidatior()],
     )
     last_name = models.CharField(
         CustomUserModelText.LAST_NAME,
-        max_length=constants.LAST_NAME_MAX_LENGTH,
+        max_length=UserConstants.LAST_NAME_MAX_LENGTH.value,
         blank=True,
         validators=[UserNameValidatior()],
     )
@@ -110,11 +110,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     )
     updated_at = models.DateTimeField(CustomUserModelText.UPDATED_AT, auto_now=True)
     phone_number = models.CharField(
-        validators=[PhoneRegexValidator], max_length=constants.PHONE_NUMBER_MAX_LENGTH, blank=True, null=True
+        validators=[PhoneRegexValidator], max_length=UserConstants.PHONE_NUMBER_MAX_LENGTH.value, blank=True, null=True
     )
     country = CountryField(blank=True)
     user_type = models.CharField(
-        max_length=constants.USER_TYPE_MAX_LENGTH, choices=UserType.choices(), default=UserType.EMPLOYEE.name
+        max_length=UserConstants.USER_TYPE_MAX_LENGTH.value, choices=UserType.choices(), default=UserType.EMPLOYEE.name
     )
     password = models.CharField(
         max_length=128, error_messages={"null": ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE}
