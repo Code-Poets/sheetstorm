@@ -13,10 +13,7 @@ from django.utils.dateparse import parse_duration
 
 from common.convert import convert_string_work_hours_field_to_hour_and_minutes
 from common.convert import timedelta_to_string
-from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE
-from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
-from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
-from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
+from employees.common.constants import MonthNavigationConstants
 from employees.models import Report
 from managers.models import Project
 
@@ -80,12 +77,16 @@ class MonthSwitchForm(forms.Form):
         validators=[
             MaxValueValidator(
                 datetime.date(
-                    year=MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE, month=MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE, day=1
+                    year=MonthNavigationConstants.MAX_YEAR_VALUE.value,
+                    month=MonthNavigationConstants.MAX_MONTH_VALUE.value,
+                    day=1,
                 )
             ),
             MinValueValidator(
                 datetime.date(
-                    year=MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE, month=MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE, day=1
+                    year=MonthNavigationConstants.MIN_YEAR_VALUE.value,
+                    month=MonthNavigationConstants.MIN_MONTH_VALUE.value,
+                    day=1,
                 )
             ),
         ],
