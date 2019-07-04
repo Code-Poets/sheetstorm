@@ -11,7 +11,7 @@ MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE = 2019
 class ReportModelConstants(Enum):
     MAX_DESCRIPTION_LENGTH = 4096
     MAX_WORK_HOURS = timedelta(hours=24)
-    MIN_WORK_HOURS = timedelta(minutes=1)
+    MIN_WORK_HOURS = timedelta(minutes=15)
 
 
 class TaskActivityTypeConstans(Enum):

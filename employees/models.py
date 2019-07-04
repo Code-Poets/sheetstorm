@@ -79,7 +79,11 @@ class Report(models.Model):
 
         if hasattr(self, "author"):
             if not isinstance(self.work_hours, timedelta):
-                raise ValidationError(message=ReportValidationStrings.WORK_HOURS_FIELD_NOT_TIMEDELTA_INSTANCE.value)
+                raise ValidationError(message=ReportValidationStrings.WORK_HOURS_WRONG_FORMAT.value)
+            if self.work_hours < ReportModelConstants.MIN_WORK_HOURS.value:
+                raise ValidationError(message=ReportValidationStrings.WORK_HOURS_MIN_VALUE_NOT_EXCEEDED.value)
+            if self.work_hours.seconds % timedelta(minutes=15).total_seconds() != 0:
+                raise ValidationError(message=ReportValidationStrings.WORK_HOURS_MINUTES_ARE_INCORRECT.value)
             work_hours_per_day = self.author.report_set.get_report_work_hours_sum_for_date(self.date, self.pk)
             _24_hours = timedelta(hours=24)
             hours_to_compare = work_hours_per_day + self.work_hours
@@ -87,5 +91,3 @@ class Report(models.Model):
                 raise ValidationError(
                     message=ReportValidationStrings.WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED.value
                 )
-            if hours_to_compare < ReportModelConstants.MIN_WORK_HOURS.value:
-                raise ValidationError(message=ReportValidationStrings.WORK_HOURS_MIN_VALUE_NOT_EXCEEDED.value)

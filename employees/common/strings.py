@@ -4,6 +4,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from utils.mixins import NotCallableMixin
 
+from .constants import ReportModelConstants
+
 
 class ReportListStrings(NotCallableMixin, Enum):
     PAGE_TITLE = _("Reports")
@@ -94,11 +96,12 @@ class ProjectReportDetailStrings(NotCallableMixin, Enum):
 
 
 class ReportValidationStrings(NotCallableMixin, Enum):
+    WORK_HOURS_MINUTES_ARE_INCORRECT = _("Possible values for minutes are 0, 15, 30 and 45")
     WORK_HOURS_SUM_FOR_GIVEN_DATE_FOR_SINGLE_AUTHOR_EXCEEDED = _(
         "Sum of work hours of all reports from a given day for single author must not exceed 24."
     )
     WORK_HOURS_MIN_VALUE_NOT_EXCEEDED = _(
-        "Minimum value for work hours for single report must not be less than 1 minute"
+        f"Minimum value for work hours for single report must not be less than {int(ReportModelConstants.MIN_WORK_HOURS.value.total_seconds() / 60)} minutes"
     )
     WORK_HOURS_FIELD_NOT_TIMEDELTA_INSTANCE = _("Work hours field must be instance of timedelta")
     WORK_HOURS_WRONG_FORMAT = _("Acceptable format for work hours field is: HH:MM and HH")
