@@ -1,4 +1,11 @@
+from decimal import Decimal
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+
 from bs4 import BeautifulSoup
+from django.utils.datetime_safe import datetime
 from openpyxl import Workbook
 from openpyxl.cell import Cell
 from openpyxl.styles import Alignment
@@ -14,7 +21,7 @@ from managers.models import Project
 from users.models import CustomUser
 
 
-def set_format_styles_for_main_cells(cell: Cell, is_header: bool):
+def set_format_styles_for_main_cells(cell: Cell, is_header: bool) -> None:
     cell.font = Font(name=constants.FONT.value, bold=True)
     cell.alignment = Alignment(horizontal=constants.CENTER_ALINGMENT.value)
     border_style = Side(style=constants.BORDER.value)
@@ -25,13 +32,13 @@ def set_format_styles_for_main_cells(cell: Cell, is_header: bool):
     )
 
 
-def set_and_fill_description_cell(cell: Cell, cell_value: str):
+def set_and_fill_description_cell(cell: Cell, cell_value: str) -> None:
     wrapped_alignment = Alignment(vertical=constants.VERCTICAL_TOP.value, wrap_text=True)
     cell.alignment = wrapped_alignment
     cell.value = cell_value
 
 
-def set_and_fill_hours_cell(cell: Cell, cell_value: str):
+def set_and_fill_hours_cell(cell: Cell, cell_value: str) -> None:
     if cell_value is not None:
         cell.value = constants.TIMEVALUE_FORMULA.value.format(cell_value)
     else:
@@ -55,17 +62,17 @@ def generate_xlsx_for_project(project: Project) -> Workbook:
 
 
 class ReportExtractor:
-    def __init__(self):
+    def __init__(self) -> None:
         self._current_row = -1
-        self._workbook = None
-        self._headers = []
+        self._workbook = None  # type: Workbook
+        self._headers = []  # type: List
         self._description_column_index = -1
         self._hours_column_index = -1
         self._daily_hours_column_index = -1
         self._formula = ""
         self._last_date = None
-        self._active_worksheet = None
-        self._headers_settings = {}
+        self._active_worksheet = None  # type: Workbook
+        self._headers_settings = {}  # type: Dict
 
     def generate_xlsx_for_project(self, project: Project) -> Workbook:
         authors = project.members.all()
@@ -83,7 +90,7 @@ class ReportExtractor:
         return self._workbook
 
     def generate_xlsx_for_single_user(self, author: CustomUser) -> Workbook:
-        reports = author.get_reports_created().order_by("date", "project__name")
+        reports = author.get_reports_created().order_by("date", "project__name")  # type: ReportQuerySet
         self._workbook = Workbook()
         self._set_xlsx_settings_for_user_report()
         employee_name = get_employee_name(author)
@@ -91,14 +98,14 @@ class ReportExtractor:
         self._fill_report_for_single_user(employee_name, reports)
         return self._workbook
 
-    def _fill_report_for_single_user(self, employee_name, reports):
+    def _fill_report_for_single_user(self, employee_name: str, reports: ReportQuerySet) -> None:
         self._prepare_worksheet(employee_name)
         for report in reports:
             self._fill_single_report(report, reports)
 
         self._summarize_user_reports()
 
-    def _fill_single_report(self, report, reports):
+    def _fill_single_report(self, report: Report, reports: ReportQuerySet) -> None:
         report_date, daily_hours = self._get_report_date_and_daily_hours(report, reports)
         storage_data = {
             constants.DATE_HEADER_STR.value: report_date,
@@ -111,12 +118,12 @@ class ReportExtractor:
         self._fill_current_report_data(storage_data)
         self._current_row += 1
 
-    def _prepare_worksheet(self, employee_name):
+    def _prepare_worksheet(self, employee_name: str) -> None:
         self._reset_per_sheet_settings()
         self._set_active_worksheet_name(employee_name)
         self._fill_headers(employee_name)
 
-    def _reset_per_sheet_settings(self):
+    def _reset_per_sheet_settings(self) -> None:
         self._current_row = constants.FIRST_ROW_FOR_DATA.value
         self._last_date = None
 
@@ -144,7 +151,7 @@ class ReportExtractor:
             employee_sheet_index = -1
         self._workbook.active = self._workbook.worksheets[employee_sheet_index]
 
-    def _fill_headers(self, employee_name: str):
+    def _fill_headers(self, employee_name: str) -> None:
         self._set_employee_name_in_worksheet(employee_name)
         for col_num, column_name in enumerate(self._headers, start=1):
             cell = self._active_worksheet.cell(row=constants.HEADERS_ROW.value, column=col_num)
@@ -152,7 +159,7 @@ class ReportExtractor:
             set_format_styles_for_main_cells(cell, is_header=True)
             self._set_column_width(col_num, column_name)
 
-    def _set_employee_name_in_worksheet(self, employee_name: str):
+    def _set_employee_name_in_worksheet(self, employee_name: str) -> None:
         self._active_worksheet.merge_cells(
             start_row=constants.EMPLOYEE_NAME_ROW.value,
             end_row=constants.EMPLOYEE_NAME_ROW.value,
@@ -164,12 +171,12 @@ class ReportExtractor:
         )
         cell.value = constants.EMPLOYEE_NAME.value.format(employee_name)
 
-    def _set_column_width(self, col_num: int, column_name: str):
+    def _set_column_width(self, col_num: int, column_name: str) -> None:
         column_letter = get_column_letter(col_num)
         column_dimensions = self._active_worksheet.column_dimensions[column_letter]
         column_dimensions.width = self._headers_settings[column_name].width
 
-    def _fill_current_report_data(self, storage_data: dict):
+    def _fill_current_report_data(self, storage_data: dict) -> None:
         for column_name, cell_value in storage_data.items():
             if self._headers_settings[column_name] is not None:
                 cell = self._active_worksheet.cell(
@@ -184,7 +191,7 @@ class ReportExtractor:
                 else:
                     cell.value = cell_value
 
-    def _summarize_user_reports(self):
+    def _summarize_user_reports(self) -> None:
         total_cell = self._active_worksheet.cell(row=self._current_row, column=constants.TOTAL_COLUMN.value)
         total_cell.value = constants.TOTAL.value
         for column_number in range(1, self._active_worksheet.max_column + 1):
@@ -199,7 +206,9 @@ class ReportExtractor:
         total_hours_cell.number_format = constants.TOTAL_HOURS_FORMAT.value
         set_format_styles_for_main_cells(total_hours_cell, is_header=False)
 
-    def _get_report_date_and_daily_hours(self, current_report: Report, reports_subset: ReportQuerySet):
+    def _get_report_date_and_daily_hours(
+        self, current_report: Report, reports_subset: ReportQuerySet
+    ) -> Tuple[Optional[datetime], Optional[Decimal]]:
         # returns report_date and daily_hours
         # if this is their first occurrence in a day
         # other way returns None
@@ -211,7 +220,7 @@ class ReportExtractor:
             daily_hours = reports_subset.get_report_work_hours_sum_for_date(date)
             report_date = date
         self._last_date = date
-        return report_date, daily_hours
+        return (report_date, daily_hours)
 
 
 def convert_markdown_html_to_text(html: str) -> str:
