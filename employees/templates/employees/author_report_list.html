@@ -19,7 +19,7 @@
     {{ UI_text.RETURN_BUTTON_MESSAGE.value }}
     {% with date=path|extract_year_and_month_from_url %}
         <a href="{% url 'export-data-xlsx' pk=object.id year=date.0 month=date.1 %}" class="btn btn-info">
-            Export Reports
+            Export My Reports
         </a>
     {% endwith %}
 </a>
