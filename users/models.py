@@ -27,6 +27,7 @@ from users.common.strings import ValidationErrorText
 from users.common.validators import PhoneRegexValidator
 from users.validators import UserAgeValidator
 from users.validators import UserEmailValidation
+from users.validators import UserNameValidatior
 
 logger = logging.getLogger(__name__)
 
@@ -83,9 +84,17 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         error_messages={"blank": ValidationErrorText.VALIDATION_ERROR_EMAIL_MESSAGE},
     )
     first_name = models.CharField(
-        CustomUserModelText.FIRST_NAME, max_length=constants.FIRST_NAME_MAX_LENGTH, blank=True
+        CustomUserModelText.FIRST_NAME,
+        max_length=constants.FIRST_NAME_MAX_LENGTH,
+        blank=True,
+        validators=[UserNameValidatior()],
     )
-    last_name = models.CharField(CustomUserModelText.LAST_NAME, max_length=constants.LAST_NAME_MAX_LENGTH, blank=True)
+    last_name = models.CharField(
+        CustomUserModelText.LAST_NAME,
+        max_length=constants.LAST_NAME_MAX_LENGTH,
+        blank=True,
+        validators=[UserNameValidatior()],
+    )
     is_staff = models.BooleanField(
         CustomUserModelText.IS_STAFF, default=False, help_text=CustomUserModelText.STAFF_HELP_TEXT
     )

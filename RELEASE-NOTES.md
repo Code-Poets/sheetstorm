@@ -1,3 +1,17 @@
+### v0.7.3
+
+##### Features
+
+- Feature add automatically creating and mounting an additional disk for postgression backup purposes ([#373](https://github.com/Code-Poets/sheetstorm/pull/373))
+
+##### Bugfixes
+
+- Bugfix add more restrict setting work_hours value ([#378](https://github.com/Code-Poets/sheetstorm/pull/378))
+- Bugfix add validation for special characters in names ([#381](https://github.com/Code-Poets/sheetstorm/pull/381))
+- Bugfix for on report editing, the task activity is set to default ([#377](https://github.com/Code-Poets/sheetstorm/pull/377))
+- Bugfix variable default date value on report creation ([#375](https://github.com/Code-Poets/sheetstorm/pull/375))
+
+
 ### v0.7.2
 
 ##### Bugfixes

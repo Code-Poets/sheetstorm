@@ -57,6 +57,7 @@ class ValidationErrorText:
     VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = _("A user is already registered with this e-mail address.")
     VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE = _("The two password fields didn't match.")
     VALIDATION_ERROR_AGE_NOT_ACCEPTED = _("User can't be below 18 or above 99 years old.")
+    VALIDATION_ERROR_SPECIAL_CHARACTERS_IN_NAME = _("The name must not contain special characters")
 
 
 class CustomUserCountryText:

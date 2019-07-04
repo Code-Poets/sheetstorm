@@ -9,6 +9,7 @@ from parameterized import parameterized
 from users.common.strings import ValidationErrorText
 from users.validators import UserAgeValidator
 from users.validators import UserEmailValidation
+from users.validators import UserNameValidatior
 
 
 @freeze_time("2019-05-27")
@@ -79,3 +80,47 @@ class TestUserEmailValidation(TestCase):
         with override_settings(VALID_EMAIL_DOMAIN_LIST=[]):
             with self.assertRaises(ValidationError):
                 self.user_email_validation(email)
+
+
+class TestUserNameValidator(TestCase):
+    def setUp(self):
+        self.user_name_validator = UserNameValidatior()
+
+    @parameterized.expand(
+        [
+            "!",
+            "@",
+            "#",
+            "$",
+            "%",
+            "^",
+            "&",
+            "*",
+            "(",
+            ")",
+            "_",
+            "+",
+            "=",
+            "/",
+            "\\",
+            "|",
+            '"',
+            "'",
+            ":",
+            ";",
+            "{",
+            "}",
+            "[",
+            "]",
+            "/",
+        ]
+    )
+    def test_validator_raise_exception_when_name_contains_special_characters(self, special_char):
+        with self.assertRaises(ValidationError):
+            self.user_name_validator(f"Kowalski{special_char}")
+
+    def test_validator_should_pass_when_name_contain_dash(self):
+        try:
+            self.user_name_validator("Kowalska-Nowak")
+        except ValidationError:
+            self.fail()
