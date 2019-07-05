@@ -4,8 +4,7 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from managers.commons.constants import MAX_NAME_LENGTH
-from managers.commons.constants import STOP_DATE_VALIDATION_ERROR_MESSAGE
+from managers.commons.constants import ProjectConstants
 from managers.models import Project
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.utils import generate_random_phone_number
@@ -27,19 +26,20 @@ class TestProjectModel(TestCase):
         self.assertTrue("This field cannot be blank." in str(exception.exception))
 
     def test_project_name_should_not_be_longer_than_set_max_length(self):
-        project = Project(start_date=datetime.now().date(), name="X" * (MAX_NAME_LENGTH + 1))
+        project = Project(start_date=datetime.now().date(), name="X" * (ProjectConstants.MAX_NAME_LENGTH.value + 1))
         with self.assertRaises(ValidationError) as exception:
             project.full_clean()
         self.assertTrue(
-            "Ensure this value has at most " + str(MAX_NAME_LENGTH) + " characters" in str(exception.exception)
+            "Ensure this value has at most " + str(ProjectConstants.MAX_NAME_LENGTH.value) + " characters"
+            in str(exception.exception)
         )  # pylint: disable=line-too-long # noqa E501
 
     def test_project_name_should_be_shorter_than_or_equal_set_max_length(self):
-        project = Project(start_date=datetime.now().date(), name="X" * MAX_NAME_LENGTH)
+        project = Project(start_date=datetime.now().date(), name="X" * ProjectConstants.MAX_NAME_LENGTH.value)
         try:
             project.full_clean()
         except ValidationError:
-            self.fail("Ensure this value has at most " + str(MAX_NAME_LENGTH) + " characters")
+            self.fail("Ensure this value has at most " + str(ProjectConstants.MAX_NAME_LENGTH.value) + " characters")
 
 
 class TestProjectModelField(BaseModelTestCase):
@@ -58,7 +58,7 @@ class TestProjectModelField(BaseModelTestCase):
         self.field_should_not_accept_null("name")
 
     def test_project_model_name_field_should_not_accept_string_longer_than_set_limit(self):
-        self.field_should_not_accept_input("name", "a" * (MAX_NAME_LENGTH + 1))
+        self.field_should_not_accept_input("name", "a" * (ProjectConstants.MAX_NAME_LENGTH.value + 1))
 
     def test_project_model_start_date_field_should_accept_correct_input(self):
         self.field_should_accept_input("start_date", datetime.now().date())
@@ -67,9 +67,11 @@ class TestProjectModelField(BaseModelTestCase):
         self.field_should_not_accept_null("start_date")
 
     def test_project_model_start_date_field_should_not_accept_non_date_or_datetime_value(self):
-        self.field_should_not_accept_input("start_date", generate_random_phone_number(MAX_NAME_LENGTH))
         self.field_should_not_accept_input(
-            "start_date", generate_random_string_from_letters_and_digits(MAX_NAME_LENGTH)
+            "start_date", generate_random_phone_number(ProjectConstants.MAX_NAME_LENGTH.value)
+        )
+        self.field_should_not_accept_input(
+            "start_date", generate_random_string_from_letters_and_digits(ProjectConstants.MAX_NAME_LENGTH.value)
         )  # pylint: disable=line-too-long # noqa E501
 
     def test_project_model_stop_date_field_should_accept_correct_input(self):
@@ -104,5 +106,5 @@ class TestProjectModelField(BaseModelTestCase):
         with self.assertRaises(ValidationError) as exception:
             project.full_clean()
             project.save()
-        self.assertEqual(STOP_DATE_VALIDATION_ERROR_MESSAGE, exception.exception.messages.pop())
+        self.assertEqual(ProjectConstants.STOP_DATE_VALIDATION_ERROR_MESSAGE.value, exception.exception.messages.pop())
         self.assertFalse(Project.objects.all().exists())

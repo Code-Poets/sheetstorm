@@ -10,9 +10,7 @@ from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from managers.commons.constants import MAX_NAME_LENGTH
-from managers.commons.constants import MESSAGE_FOR_CORRECT_DATE_FORMAT
-from managers.commons.constants import STOP_DATE_VALIDATION_ERROR_MESSAGE
+from managers.commons.constants import ProjectConstants
 from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
@@ -30,8 +28,8 @@ class ProjectQuerySet(models.QuerySet):
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=MAX_NAME_LENGTH)
-    start_date = models.DateField(help_text=MESSAGE_FOR_CORRECT_DATE_FORMAT)
+    name = models.CharField(max_length=ProjectConstants.MAX_NAME_LENGTH.value)
+    start_date = models.DateField(help_text=ProjectConstants.MESSAGE_FOR_CORRECT_DATE_FORMAT.value)
     stop_date = models.DateField(null=True, blank=True)
     terminated = models.BooleanField(default=False)
     managers = models.ManyToManyField(CustomUser, related_name="manager_projects")
@@ -50,7 +48,7 @@ class Project(models.Model):
     def clean(self) -> None:
         super().clean()
         if self.stop_date is not None and self.start_date > self.stop_date:
-            raise ValidationError(message=STOP_DATE_VALIDATION_ERROR_MESSAGE)
+            raise ValidationError(message=ProjectConstants.STOP_DATE_VALIDATION_ERROR_MESSAGE.value)
 
 
 @receiver(m2m_changed, sender=Project.managers.through)

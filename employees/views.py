@@ -20,11 +20,8 @@ from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from django.views.generic.base import ContextMixin
 
-from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE
-from employees.common.constants import MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
-from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
-from employees.common.constants import MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
 from employees.common.constants import ExcelGeneratorSettingsConstants
+from employees.common.constants import MonthNavigationConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.strings import AuthorReportListStrings
@@ -76,15 +73,15 @@ class MonthNavigationMixin(ContextMixin):
         return date.strftime("%m/%y")
 
     def _date_out_of_bounds(self) -> bool:
-        year_too_old = int(self.kwargs["year"]) < MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
+        year_too_old = int(self.kwargs["year"]) < MonthNavigationConstants.MIN_YEAR_VALUE.value
         date_too_old = (
-            int(self.kwargs["month"]) < MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE
-            and int(self.kwargs["year"]) == MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE
+            int(self.kwargs["month"]) < MonthNavigationConstants.MIN_MONTH_VALUE.value
+            and int(self.kwargs["year"]) == MonthNavigationConstants.MIN_YEAR_VALUE.value
         )
-        year_too_far = int(self.kwargs["year"]) > MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
+        year_too_far = int(self.kwargs["year"]) > MonthNavigationConstants.MAX_YEAR_VALUE.value
         date_too_far = (
-            int(self.kwargs["month"]) > MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE
-            and int(self.kwargs["year"]) == MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE
+            int(self.kwargs["month"]) > MonthNavigationConstants.MAX_MONTH_VALUE.value
+            and int(self.kwargs["year"]) == MonthNavigationConstants.MAX_YEAR_VALUE.value
         )
         return year_too_old or date_too_old or year_too_far or date_too_far
 
@@ -95,9 +92,15 @@ class MonthNavigationMixin(ContextMixin):
         month = int(self.kwargs["month"])
         pk = self.kwargs.get("pk", None)
 
-        if month == MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE and year == MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE:
+        if (
+            month == MonthNavigationConstants.MAX_MONTH_VALUE.value
+            and year == MonthNavigationConstants.MAX_YEAR_VALUE.value
+        ):
             disable_next_button = True
-        elif month == MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE and year == MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE:
+        elif (
+            month == MonthNavigationConstants.MIN_MONTH_VALUE.value
+            and year == MonthNavigationConstants.MIN_YEAR_VALUE.value
+        ):
             disable_previous_button = True
 
         return {

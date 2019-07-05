@@ -8,8 +8,8 @@ from django.forms import ModelForm
 from django_countries.widgets import CountrySelectWidget
 
 from common.constants import CORRECT_DATE_FORMAT
-from users.common import constants
-from users.common.constants import PLACE_HOLDER_CAPTCHA
+from users.common.constants import CaptchaConstants
+from users.common.constants import UserConstants
 from users.models import CustomUser
 
 
@@ -69,8 +69,8 @@ class CustomUserChangeForm(UserChangeForm):
 
 
 class CustomUserSignUpForm(UserCreationForm):
-    email = forms.EmailField(max_length=constants.EMAIL_MAX_LENGTH, required=True, label="id_email")
-    captcha = CaptchaField(widget=CaptchaTextInput(attrs={"placeholder": PLACE_HOLDER_CAPTCHA}))
+    email = forms.EmailField(max_length=UserConstants.EMAIL_MAX_LENGTH.value, required=True, label="id_email")
+    captcha = CaptchaField(widget=CaptchaTextInput(attrs={"placeholder": CaptchaConstants.PLACE_HOLDER_CAPTCHA.value}))
 
     class Meta:
         model = CustomUser

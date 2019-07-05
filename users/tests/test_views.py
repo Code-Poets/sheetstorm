@@ -4,7 +4,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from freezegun import freeze_time
 
-from users.common import constants
+from users.common.constants import UserConstants
 from users.common.strings import ValidationErrorText
 from users.common.utils import generate_random_phone_number
 from users.factories import AdminUserFactory
@@ -144,7 +144,7 @@ class UserUpdateTests(TestCase):
 
     def test_user_update_view_should_update_user_on_post(self):
         old_phone_number = self.user.phone_number
-        new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH)
+        new_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value)
         response = self.client.get(path=reverse("custom-user-update"))
         self.assertContains(response, old_phone_number)
 
@@ -155,7 +155,7 @@ class UserUpdateTests(TestCase):
 
     def test_user_update_view_should_not_update_user_on_post_if_form_is_invalid(self):
         phone_number_before_request = self.user.phone_number
-        new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH - 1)
+        new_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1)
         response = self.client.post(path=reverse("custom-user-update"), data={"phone_number": new_phone_number})
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
@@ -185,7 +185,7 @@ class UserUpdateByAdminTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_user_update_by_admin_view_should_update_user_on_post(self):
-        new_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH)
+        new_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value)
         response = self.client.post(path=self.correct_url, data=self._get_user_data(new_phone_number))
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 302)
@@ -193,7 +193,7 @@ class UserUpdateByAdminTests(TestCase):
 
     def test_user_update_by_admin_view_should_not_update_user_on_post_if_form_is_invalid(self):
         phone_number_before_request = self.user.phone_number
-        invalid_phone_number = generate_random_phone_number(constants.PHONE_NUMBER_MIN_LENGTH - 1)
+        invalid_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1)
         response = self.client.post(path=self.correct_url, data=self._get_user_data(invalid_phone_number))
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)

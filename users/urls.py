@@ -4,7 +4,7 @@ from django.conf.urls import url
 from django.urls import path
 
 from users import views
-from users.common.constants import CAPTCHA_SCALE_SIZE
+from users.common.constants import CaptchaConstants
 
 urlpatterns = [
     path("accounts/password_reset/", views.CustomPasswordResetView.as_view(), name="password_reset"),
@@ -31,5 +31,10 @@ urlpatterns = [
         name="activate",
     ),
     url(r"^captcha/", include("captcha.urls")),
-    url(r"image/(?P<key>\w+)/$", captcha_image, name="captcha-image", kwargs={"scale": CAPTCHA_SCALE_SIZE}),
+    url(
+        r"image/(?P<key>\w+)/$",
+        captcha_image,
+        name="captcha-image",
+        kwargs={"scale": CaptchaConstants.CAPTCHA_SCALE_SIZE.value},
+    ),
 ]

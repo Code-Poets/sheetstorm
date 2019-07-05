@@ -7,7 +7,7 @@ from django.core.validators import MaxLengthValidator
 from django.test import TestCase
 from freezegun import freeze_time
 
-from users.common import constants
+from users.common.constants import UserConstants
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.strings import CustomUserModelText
 from users.common.strings import ValidationErrorText
@@ -49,28 +49,36 @@ class TestCustomUserModel(TestCase):
     def test_user_with_first_name_longer_than_FIRST_NAME_MAX_LENGTH_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save(
-                "testuser@codepoets.it", "a" * (constants.FIRST_NAME_MAX_LENGTH + 1), "", "", "newuserpasswd"
+                "testuser@codepoets.it", "a" * (UserConstants.FIRST_NAME_MAX_LENGTH.value + 1), "", "", "newuserpasswd"
             )
         self.assertTrue(str(MaxLengthValidator.message) in str(exception.exception))
 
     def test_user_with_last_name_longer_than_LAST_NAME_MAX_LENGTH_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save(
-                "testuser@codepoets.it", "", "a" * (constants.LAST_NAME_MAX_LENGTH + 1), "", "newuserpasswd"
+                "testuser@codepoets.it", "", "a" * (UserConstants.LAST_NAME_MAX_LENGTH.value + 1), "", "newuserpasswd"
             )
         self.assertTrue(str(MaxLengthValidator.message) in str(exception.exception))
 
     def test_user_with_phone_number_longer_than_PHONE_NUMBER_MAX_LENGTH_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save(
-                "testuser@codepoets.it", "", "", "1" * (constants.PHONE_NUMBER_MAX_LENGTH + 1), "newuserpasswd"
+                "testuser@codepoets.it",
+                "",
+                "",
+                "1" * (UserConstants.PHONE_NUMBER_MAX_LENGTH.value + 1),
+                "newuserpasswd",
             )
         self.assertTrue(str(CustomUserModelText.PHONE_REGEX_MESSAGE) in str(exception.exception))
 
     def test_user_with_phone_number_shorter_than_PHONE_NUMBER_MIN_LENGTH_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save(
-                "testuser@codepoets.it", "", "", "1" * (constants.PHONE_NUMBER_MIN_LENGTH - 1), "newuserpasswd"
+                "testuser@codepoets.it",
+                "",
+                "",
+                "1" * (UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1),
+                "newuserpasswd",
             )
         self.assertTrue(str(CustomUserModelText.PHONE_REGEX_MESSAGE) in str(exception.exception))
 
@@ -80,7 +88,7 @@ class TestCustomUserModel(TestCase):
                 "testuser@codepoets.it",
                 "",
                 "",
-                generate_random_string_from_letters_and_digits(constants.PHONE_NUMBER_MIN_LENGTH),
+                generate_random_string_from_letters_and_digits(UserConstants.PHONE_NUMBER_MIN_LENGTH.value),
                 "newuserpasswd",
             )
         self.assertTrue(str(CustomUserModelText.PHONE_REGEX_MESSAGE) in str(exception.exception))
@@ -141,7 +149,7 @@ class TestCustomUserModelField(BaseModelTestCase):
 
     def test_customuser_model_email_field_should_not_accept_string_longer_than_set_limit(self):
         self.field_should_not_accept_input(
-            "email", "a" * (constants.EMAIL_MAX_LENGTH - 12) + "@" + settings.VALID_EMAIL_DOMAIN_LIST[0]
+            "email", "a" * (UserConstants.EMAIL_MAX_LENGTH.value - 12) + "@" + settings.VALID_EMAIL_DOMAIN_LIST[0]
         )
 
     def test_customuser_model_first_name_field_should_accept_correct_input(self):
@@ -151,7 +159,7 @@ class TestCustomUserModelField(BaseModelTestCase):
         self.field_should_accept_null("first_name")
 
     def test_customuser_model_first_name_field_should_not_accept_string_longer_than_set_limit(self):
-        self.field_should_not_accept_input("first_name", "a" * (constants.FIRST_NAME_MAX_LENGTH + 1))
+        self.field_should_not_accept_input("first_name", "a" * (UserConstants.FIRST_NAME_MAX_LENGTH.value + 1))
 
     def test_customuser_model_last_name_field_should_accept_correct_input(self):
         self.field_should_accept_input("last_name", "Userlastname")
@@ -160,7 +168,7 @@ class TestCustomUserModelField(BaseModelTestCase):
         self.field_should_accept_null("last_name")
 
     def test_customuser_model_last_name_field_should_not_accept_string_longer_than_set_limit(self):
-        self.field_should_not_accept_input("last_name", "a" * (constants.LAST_NAME_MAX_LENGTH + 1))
+        self.field_should_not_accept_input("last_name", "a" * (UserConstants.LAST_NAME_MAX_LENGTH.value + 1))
 
     def test_customuser_model_is_staff_field_should_have_default_value(self):
         self.field_should_have_non_null_default(field="is_staff", value=False)
@@ -188,10 +196,10 @@ class TestCustomUserModelField(BaseModelTestCase):
         self.field_should_accept_null("phone_number")
 
     def test_customuser_model_phone_number_field_should_not_accept_decimal_longer_than_set_limit(self):
-        self.field_should_not_accept_input("phone_number", "1" * (constants.PHONE_NUMBER_MAX_LENGTH + 1))
+        self.field_should_not_accept_input("phone_number", "1" * (UserConstants.PHONE_NUMBER_MAX_LENGTH.value + 1))
 
     def test_customuser_model_phone_number_field_should_not_accept_decimal_shorter_than_set_limit(self):
-        self.field_should_not_accept_input("phone_number", "1" * (constants.PHONE_NUMBER_MIN_LENGTH - 1))
+        self.field_should_not_accept_input("phone_number", "1" * (UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1))
 
     def test_customuser_model_country_field_should_accept_correct_input(self):
         self.field_should_accept_input("country", "GB")

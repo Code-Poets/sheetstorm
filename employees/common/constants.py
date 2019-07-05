@@ -2,10 +2,12 @@ from datetime import timedelta
 from enum import Enum
 from typing import NamedTuple
 
-MONTH_NAVIGATION_FORM_MAX_MONTH_VALUE = 12
-MONTH_NAVIGATION_FORM_MIN_MONTH_VALUE = 5
-MONTH_NAVIGATION_FORM_MAX_YEAR_VALUE = 2099
-MONTH_NAVIGATION_FORM_MIN_YEAR_VALUE = 2019
+
+class MonthNavigationConstants(Enum):
+    MAX_MONTH_VALUE = 12
+    MIN_MONTH_VALUE = 5
+    MAX_YEAR_VALUE = 2099
+    MIN_YEAR_VALUE = 2019
 
 
 class ReportModelConstants(Enum):
