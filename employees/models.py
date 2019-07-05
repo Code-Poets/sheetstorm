@@ -1,6 +1,5 @@
 from datetime import date
 from datetime import timedelta
-from decimal import Decimal
 from typing import Optional
 
 from django.core.exceptions import ValidationError
@@ -33,7 +32,7 @@ class ReportQuerySet(models.QuerySet):
             .values_list("date_created", "created_count")
         )
 
-    def get_report_work_hours_sum_for_date(self, for_date: date, excluded_id: Optional[int] = None) -> Decimal:
+    def get_report_work_hours_sum_for_date(self, for_date: date, excluded_id: Optional[int] = None) -> timedelta:
         queryset = self.filter(date=for_date)
 
         # Don't add currently edited report work hours.
