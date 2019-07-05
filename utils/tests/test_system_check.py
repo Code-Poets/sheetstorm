@@ -3,13 +3,16 @@ from unittest import TestCase
 from django.conf import settings
 from django.test import override_settings
 
+from sheetstorm.system_check import check_settings_email_backend
+from sheetstorm.system_check import check_settings_site_id
 from sheetstorm.system_check import check_settings_valid_email_domain_list
 from sheetstorm.system_check import create_error_01_valid_email_domain_list_is_not_a_list
 from sheetstorm.system_check import create_error_02_invalid_domain_address
-from sheetstorm.system_check import create_error_04_site_id_value_must_be_integer
-from sheetstorm.system_check import create_error_05_email_backend_value_must_be_string
-from sheetstorm.system_check import create_error_06_email_backend_library_does_not_exist
-from sheetstorm.system_check import create_error_07_email_backend_file_does_not_have_attribute
+from sheetstorm.system_check import create_error_03_site_id_value_must_be_integer
+from sheetstorm.system_check import create_error_04_email_backend_value_must_be_string
+from sheetstorm.system_check import create_error_05_module_does_not_have_attribute
+from sheetstorm.system_check import create_error_06_can_not_import_path
+from sheetstorm.system_check import create_error_07_setting_does_not_exist
 from sheetstorm.system_check import create_warning_01_duplicated_values_in_valid_email_domain_list
 from sheetstorm.system_check import create_warning_02_empty_valid_email_domain_list
 
@@ -72,14 +75,22 @@ class TestSiteId(TestCase):
     def test_check_settings_site_id_raise_error_when_it_is_not_instance_of_integer(self):
         errors = check_settings_site_id()
 
-        self.assertTrue(len(errors) > 0)
-        self.assertEqual(errors[0], create_error_04_site_id_value_must_be_integer())
+        self.assertTrue(len(errors) == 1)
+        self.assertEqual(errors[0], create_error_03_site_id_value_must_be_integer())
+
+    @override_settings(SITE_ID=1)
+    def test_check_site_id_with_correct_value(self):
+        errors = check_settings_site_id()
+
+        self.assertEqual(errors, [])
 
     @override_settings()
-    def test_check_settings_site_id_raise_error_when_settings_doesnt_exist(self):
+    def test_check_settings_site_id_raise_error_when_setting_does_not_exist(self):
         del settings.SITE_ID
-        with self.assertRaises(AttributeError):
-            check_settings_site_id()
+        errors = check_settings_site_id()
+
+        self.assertTrue(len(errors) == 1)
+        self.assertEqual(errors[0], create_error_07_setting_does_not_exist("SITE_ID"))
 
 
 class TestEmailBackend(TestCase):
@@ -93,40 +104,30 @@ class TestEmailBackend(TestCase):
     def test_check_settings_email_backend_should_raise_error_when_it_is_not_instance_of_string(self):
         errors = check_settings_email_backend()
 
-        self.assertTrue(len(errors) > 0)
-        self.assertEqual(errors[0], create_error_05_email_backend_value_must_be_string())
+        self.assertTrue(len(errors) == 1)
+        self.assertEqual(errors[0], create_error_04_email_backend_value_must_be_string())
 
     @override_settings(EMAIL_BACKEND="django.core.mail.notexistingmodule.console.EmailBackend")
     def test_check_settings_email_backend_should_raise_error_when_some_module_does_not_exist(self):
         errors = check_settings_email_backend()
 
-        self.assertTrue(len(errors) > 0)
-        self.assertEqual(
-            errors[0],
-            create_08_email_backend_one_of_modules_does_not_exist("django.core.mail.notexistingmodule.console"),
-        )
-
-    @override_settings(EMAIL_BACKEND="django.core.mail.notexistingfile.EmailBackend")
-    def test_check_settings_email_backend_should_raise_error_when_file_does_not_exist(self):
-        errors = check_settings_email_backend()
-
-        self.assertTrue(len(errors) > 0)
-        self.assertEqual(errors[0], create_error_06_email_backend_library_does_not_exist())
+        self.assertTrue(len(errors) == 1)
+        self.assertEqual(errors[0], create_error_06_can_not_import_path("django.core.mail.notexistingmodule.console"))
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.console.NoAttribute")
     def test_check_settings_email_backend_should_raise_error_when_file_does_not_have_attribute(self):
         errors = check_settings_email_backend()
 
-        self.assertTrue(len(errors) > 0)
+        self.assertTrue(len(errors) == 1)
         self.assertEqual(
             errors[0],
-            create_error_07_email_backend_file_does_not_have_attribute(
-                "django.core.mail.backends.console", "NoAttribute"
-            ),
+            create_error_05_module_does_not_have_attribute("django.core.mail.backends.console", "NoAttribute"),
         )
 
     @override_settings()
-    def test_check_settings_email_backend_raise_error_when_settings_doesnt_exist(self):
+    def test_check_settings_email_backend_raise_error_when_setting_does_not_exist(self):
         del settings.EMAIL_BACKEND
-        with self.assertRaises(AttributeError):
-            check_settings_email_backend()
+        errors = check_settings_email_backend()
+
+        self.assertTrue(len(errors) == 1)
+        self.assertEqual(errors[0], create_error_07_setting_does_not_exist("EMAIL_BACKEND"))
