@@ -94,6 +94,7 @@ class ProjectCreateView(CreateView):
 
     def get_context_data(self, **kwargs: Any) -> dict:
         logger.info(f"User with id: {self.request.user.pk} is in project create view")
+        ProjectAdminForm.user_pk = self.request.user.pk
         context_data = super().get_context_data(**kwargs)
         context_data["back_url"] = self.get_success_url()
         return context_data
@@ -102,6 +103,12 @@ class ProjectCreateView(CreateView):
         return reverse("custom-projects-list")
 
     def form_valid(self, form: ProjectAdminForm) -> HttpRequest:
+        if self.request.user not in form.cleaned_data["managers"]:
+            assert not self.request.user.is_employee
+            managers_pk_list = [manager.pk for manager in form.cleaned_data["managers"]]
+            managers_pk_list.append(self.request.user.pk)
+            managers_queryset = CustomUser.objects.filter(pk__in=managers_pk_list)
+            form.cleaned_data["managers"] = managers_queryset
         project = form.save()
         logger.info(f"New project with id: {project.pk} has been created")
         return super(ModelFormMixin, self).form_valid(form)  # pylint: disable=bad-super-call
