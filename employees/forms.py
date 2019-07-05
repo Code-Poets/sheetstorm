@@ -10,6 +10,7 @@ from django.db.models import QuerySet
 from django.forms import HiddenInput
 from django.forms import TextInput
 from django.utils.dateparse import parse_duration
+from django.utils.duration import duration_string
 
 from common.convert import convert_string_work_hours_field_to_hour_and_minutes
 from common.convert import timedelta_to_string
@@ -45,7 +46,10 @@ class DurationFieldForm(forms.DurationField):
         return f"{hours}:{minutes}:00"
 
     def prepare_value(self, value: str) -> str:
-        return f"{value}:00"
+        if isinstance(value, datetime.timedelta):
+            return duration_string(value)
+        else:
+            return f"{value}:00"
 
 
 class ReportForm(forms.ModelForm):
