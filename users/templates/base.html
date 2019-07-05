@@ -94,12 +94,12 @@
                 {% if request.path|startswith:'/reports/' and not request.path|startswith:'/reports/author/'%}
                 <a class="active" href="{% url 'custom-report-list' year month %}">
                     <img src="{% static 'users/images/white/iko-05.png' %}">
-                    <span>{% trans 'Reports' %}</span>
+                    <span>{% trans 'My Reports' %}</span>
                 </a>
                 {% else %}
                 <a href="{% url 'custom-report-list' year month %}">
                     <img src="{% static 'users/images/grey/ico-05.png' %}">
-                    <span>{% trans 'Reports' %}</span>
+                    <span>{% trans 'My Reports' %}</span>
                 </a>
                 {% endif %}
             </li>
