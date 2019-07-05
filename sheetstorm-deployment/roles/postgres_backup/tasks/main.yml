@@ -5,6 +5,7 @@
       filesystem:
         fstype: ext4
         dev:    /dev/sdb
+      when: server_configuration == 'remote'
 
     - name: Mount disk for postgresql backups
       mount:
@@ -12,6 +13,7 @@
         src:    /dev/sdb
         fstype: ext4
         state:  mounted
+      when: server_configuration == 'remote'
 
     - name:    Change owner of mountpoint
       file:
@@ -19,6 +21,7 @@
         owner: sheetstorm
         group: sheetstorm
         mode: '0744'
+      when: server_configuration == 'remote'
 
     - name:  Create home bin directory
       file:
