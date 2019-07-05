@@ -1,4 +1,4 @@
-from decimal import Decimal
+from datetime import timedelta
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -208,7 +208,7 @@ class ReportExtractor:
 
     def _get_report_date_and_daily_hours(
         self, current_report: Report, reports_subset: ReportQuerySet
-    ) -> Tuple[Optional[datetime], Optional[Decimal]]:
+    ) -> Tuple[Optional[datetime], Optional[timedelta]]:
         # returns report_date and daily_hours
         # if this is their first occurrence in a day
         # other way returns None
