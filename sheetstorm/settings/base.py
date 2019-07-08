@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     # SheetStorm
     'managers.apps.ManagersConfig',
     'employees.apps.EmployeesConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 MIDDLEWARE = [
