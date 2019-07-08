@@ -1,3 +1,14 @@
+### v0.7.4
+
+##### Bugfixes
+
+- Bugfix add auto assigning manager if he create project ([#390](https://github.com/Code-Poets/sheetstorm/pull/390))
+- Bugfix change names in UI ([#385](https://github.com/Code-Poets/sheetstorm/pull/385))
+- Bugfix disable mounting additional disk on the local virtual machine ([#389](https://github.com/Code-Poets/sheetstorm/pull/389))
+- Bugfix fill context on invalid form response ([#379](https://github.com/Code-Poets/sheetstorm/pull/379))
+- Bugfix missing work hours during updating reports ([#384](https://github.com/Code-Poets/sheetstorm/pull/384))
+
+
 ### v0.7.3
 
 ##### Features
