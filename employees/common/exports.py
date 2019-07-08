@@ -1,19 +1,27 @@
+import csv
+import zipfile
 from datetime import timedelta
+from io import BytesIO
+from io import StringIO
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
 
 from bs4 import BeautifulSoup
+from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from openpyxl import Workbook
 from openpyxl.cell import Cell
+from openpyxl.cell.cell import TYPE_FORMULA
 from openpyxl.styles import Alignment
 from openpyxl.styles import Border
 from openpyxl.styles import Font
 from openpyxl.styles import Side
 from openpyxl.utils import get_column_letter
+from openpyxl.workbook import _writer
 
+from common.convert import convert_string_work_hours_field_to_hour_and_minutes
 from employees.common.constants import ExcelGeneratorSettingsConstants as constants
 from employees.models import Report
 from employees.models import ReportQuerySet
@@ -225,3 +233,58 @@ class ReportExtractor:
 
 def convert_markdown_html_to_text(html: str) -> str:
     return "".join(BeautifulSoup(html, features="html.parser").findAll(text=True))
+
+
+def save_work_book_as_csv(writer: _writer, work_book: Workbook) -> None:
+    sheet = work_book.active
+    is_last_row = False
+    total_hours = timezone.timedelta()
+
+    for row_number, row in enumerate(sheet.rows, start=1):
+        if row_number == 1:
+            continue
+
+        # Check if is last row by comparing first cell value to `TOTAL`.
+        if isinstance(row[0].value, str) and row[0].value == constants.TOTAL.value:
+            is_last_row = True
+
+        next_row = []
+        for cell_number, cell in enumerate(row, start=1):
+            if isinstance(cell.value, str) and cell.value.lower().startswith("=timevalue"):
+                hours_as_string = cell.value[len('=timevalue("') : -len('")')]  # noqa: E203
+                next_row.append(hours_as_string)
+
+                # If contains valid hours value, add it to total hours.
+                if (
+                    not is_last_row
+                    and row_number > 2
+                    and cell_number
+                    == constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
+                        constants.HOURS_HEADER_STR.value
+                    ].position
+                ):
+                    hours, minutes = convert_string_work_hours_field_to_hour_and_minutes(hours_as_string)
+                    total_hours += timezone.timedelta(hours=int(hours), minutes=int(minutes))
+            elif is_last_row and cell.data_type is TYPE_FORMULA:
+                next_row.append(str(total_hours)[:-3])
+            else:
+                next_row.append(cell.value)
+
+        writer.writerow(next_row)
+
+
+def save_work_book_as_zip_of_csv(work_book: Workbook) -> BytesIO:
+    zip_file_data = BytesIO()
+    zip_file = zipfile.ZipFile(zip_file_data, "w")
+
+    for sheet_index, sheet_name in enumerate(work_book.sheetnames):
+        work_book.active = sheet_index
+        csv_file_data = StringIO()
+        writer = csv.writer(csv_file_data)
+        save_work_book_as_csv(writer, work_book)
+        file_name = f'{sheet_name.replace(" ", "_").replace(".", "").lower()}-reports.csv'
+        zip_file.writestr(file_name, csv_file_data.getvalue())
+
+    zip_file.close()
+
+    return zip_file_data

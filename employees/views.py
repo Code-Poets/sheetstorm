@@ -1,3 +1,4 @@
+import csv
 import datetime
 import logging
 from typing import Any
@@ -24,6 +25,8 @@ from employees.common.constants import ExcelGeneratorSettingsConstants
 from employees.common.constants import MonthNavigationConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
+from employees.common.exports import save_work_book_as_csv
+from employees.common.exports import save_work_book_as_zip_of_csv
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import MonthNavigationText
 from employees.common.strings import ProjectReportDetailStrings
@@ -432,12 +435,22 @@ class ExportUserReportView(DetailView):
             author = super().get_object()
         else:
             author = self.get_queryset().get(pk=self.request.user.pk)
-        response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CONTENT_TYPE_FORMAT.value)
-        response["Content-Disposition"] = ExcelGeneratorSettingsConstants.EXPORTED_FILE_NAME.value.format(
-            author.email, datetime.date.today()
-        )
+
         work_book = generate_xlsx_for_single_user(author)
-        work_book.save(response)
+
+        if self.request.GET.get("format") == "csv":
+            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CSV_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.CSV_EXPORTED_FILE_NAME.value.format(
+                author.email, datetime.date.today()
+            )
+            writer = csv.writer(response)
+            save_work_book_as_csv(writer, work_book)
+        else:
+            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
+                author.email, datetime.date.today()
+            )
+            work_book.save(response)
         return response
 
 
@@ -459,10 +472,20 @@ class ExportReportsInProjectView(UserIsManagerOfCurrentProjectMixin, DetailView)
 
     def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
         project = super().get_object()
-        response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CONTENT_TYPE_FORMAT.value)
-        response["Content-Disposition"] = ExcelGeneratorSettingsConstants.EXPORTED_FILE_NAME.value.format(
-            project.name, datetime.date.today()
-        )
         work_book = generate_xlsx_for_project(project)
-        work_book.save(response)
+
+        if self.request.GET.get("format") == "csv":
+            zip_file = save_work_book_as_zip_of_csv(work_book)
+            response = HttpResponse(
+                zip_file.getvalue(), content_type=ExcelGeneratorSettingsConstants.ZIP_CONTENT_TYPE_FORMAT.value
+            )
+            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.ZIP_EXPORTED_FILE_NAME.value.format(
+                project.name, datetime.date.today()
+            )
+        else:
+            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
+                project.name, datetime.date.today()
+            )
+            work_book.save(response)
         return response
