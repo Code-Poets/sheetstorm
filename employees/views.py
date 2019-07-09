@@ -13,6 +13,7 @@ from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import redirect
 from django.shortcuts import reverse
+from django.urls import resolve
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView
@@ -49,14 +50,16 @@ logger = logging.getLogger(__name__)
 
 
 class MonthNavigationMixin(ContextMixin):
-    url_name = ""
     kwargs = {}  # type: dict
 
     def _get_url_from_date(self, date: datetime.date, pk: int = None) -> str:
         url_kwargs = {"year": date.year, "month": date.month}
+        if "user_pk" in self.kwargs:
+            url_kwargs.update({"user_pk": self.kwargs["user_pk"]})
         if pk is not None:
             url_kwargs["pk"] = pk
-        return reverse(self.url_name, kwargs=url_kwargs)
+        current_url = resolve(self.request.path_info).url_name
+        return reverse(current_url, kwargs=url_kwargs)
 
     def _get_previous_month_url(self, year: int, month: int, pk: int) -> str:
         date = datetime.date(year=year, month=month, day=1) + relativedelta(months=-1)
@@ -116,6 +119,8 @@ class MonthNavigationMixin(ContextMixin):
             "disable_next_button": disable_next_button,
             "disable_previous_button": disable_previous_button,
             "title_date": self._get_title_date(year, month),
+            "year": year,
+            "month": month,
         }
 
     def get_context_data(self, **kwargs: Any) -> dict:
@@ -129,9 +134,12 @@ class MonthNavigationMixin(ContextMixin):
         form = MonthSwitchForm(data=post_data)
         if form.is_valid():
             redirect_kwargs = {"year": post_data["date"].year, "month": post_data["date"].month}
+            current_url = resolve(request.path_info).url_name
             if self.kwargs.get("pk", None) is not None:
                 redirect_kwargs["pk"] = self.kwargs["pk"]
-            return redirect(reverse(self.url_name, kwargs=redirect_kwargs))
+            if self.kwargs.get("user_pk", None) is not None:
+                redirect_kwargs["user_pk"] = self.kwargs["user_pk"]
+            return redirect(reverse(current_url, kwargs=redirect_kwargs))
         else:
             return redirect(request.path)
 
@@ -323,10 +331,9 @@ class ReportDeleteView(
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
-class AuthorReportView(MonthNavigationMixin, ProjectsWorkPercentageMixin, DetailView):
-    template_name = "employees/author_report_list.html"
+class AuthorReportView(DetailView, ProjectsWorkPercentageMixin, MonthNavigationMixin):
     model = CustomUser
-    url_name = "author-report-list"
+    template_name = "employees/author_report_list.html"
 
     def get_queryset(self) -> QuerySet:
         return CustomUser.objects.prefetch_related(
@@ -367,18 +374,9 @@ class AdminReportView(ReportDetailBase):
     check_permissions(allowed_user_types=[CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name]),
     name="dispatch",
 )
-class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, MonthNavigationMixin):
-    template_name = "employees/project_report_list.html"
+class BaseProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, MonthNavigationMixin):
     model = Project
-    url_name = "project-report-list"
-
-    def get_queryset(self) -> QuerySet:
-        return Project.objects.prefetch_related(
-            Prefetch(
-                "report_set",
-                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
-            )
-        )
+    template_name = "employees/project_report_list.html"
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context = super().get_context_data(**kwargs)
@@ -392,9 +390,45 @@ class ProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, MonthNav
         return super().get(request, *args, **kwargs)
 
     def post(  # pylint: disable=unused-argument
-        self, request: HttpRequest, pk: int, year: int, month: int
+        self, request: HttpRequest, pk: int, year: int, month: int, user_pk: int = None
     ) -> HttpResponseRedirectBase:
         return self.redirect_to_another_month(request)
+
+
+class ProjectReportList(BaseProjectReportList):
+    extra_context = {"only_one_author_reports": False}
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                Prefetch(
+                    "report_set",
+                    queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+                )
+            )
+        )
+
+
+class AuthorReportProjectView(BaseProjectReportList):
+    extra_context = {"only_one_author_reports": True}
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                Prefetch(
+                    "report_set",
+                    queryset=Report.objects.filter(
+                        date__year=self.kwargs["year"],
+                        date__month=self.kwargs["month"],
+                        author_id=self.kwargs["user_pk"],
+                    ),
+                )
+            )
+        )
 
 
 @method_decorator(login_required, name="dispatch")

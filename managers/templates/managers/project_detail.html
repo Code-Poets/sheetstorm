@@ -42,27 +42,29 @@
   <div class="container">
     <br/>
     {% for user in project.managers.all %}
-    <div class="col-sm-3">
-      <div class="list-group">
-        <div class="list-group-item list-group-item-action list-group-item-warning">
-          <table>
-            <tr>
-              <td rowspan="2">
-                <font size="5"><span class="glyphicon glyphicon-user"></span></font>
-              </td>
-              <td>
-                &nbsp; <small>{{ user.email }} </small>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                &nbsp; <small>{{ user.first_name }} {{ user.last_name }}</small>
-              </td>
-            </tr>
-          </table>
+    <a href="{% url 'author-report-project-list' pk=project.pk user_pk=user.pk year=year month=month %}">
+        <div class="col-sm-3" >
+          <div class="list-group">
+            <div class="list-group-item list-group-item-action list-group-item-warning">
+              <table>
+                <tr>
+                  <td rowspan="2">
+                    <font size="5"><span class="glyphicon glyphicon-user"></span></font>
+                  </td>
+                  <td>
+                    &nbsp; <small>{{ user.email }} </small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    &nbsp; <small>{{ user.first_name }} {{ user.last_name }}</small>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+    </a>
     {% endfor %}
   </div>
 
@@ -72,27 +74,29 @@
     <div class="container">
       <br/>
       {% for user in project.members.all %}
-      <div class="col-sm-3">
-        <div class="list-group">
-          <div class="list-group-item list-group-item-action list-group-item-dark">
-            <table>
-              <tr>
-                <td rowspan="2">
-                  <font size="5"><span class="glyphicon glyphicon-user"></span></font>
-                </td>
-                <td>
-                  &nbsp; <small>{{ user.email }} </small>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  &nbsp; <small>{{ user.first_name }} {{ user.last_name }}</small>
-                </td>
-              </tr>
-            </table>
+         <a href="{% url 'author-report-project-list' pk=project.pk user_pk=user.pk  year=year month=month %}">
+          <div class="col-sm-3">
+            <div class="list-group">
+              <div class="list-group-item list-group-item-action list-group-item-dark">
+                <table>
+                  <tr>
+                    <td rowspan="2">
+                      <font size="5"><span class="glyphicon glyphicon-user"></span></font>
+                    </td>
+                    <td>
+                      &nbsp; <small>{{ user.email }} </small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      &nbsp; <small>{{ user.first_name }} {{ user.last_name }}</small>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+         </a>
       {% endfor %}
     </div>
 

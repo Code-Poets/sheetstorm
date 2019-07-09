@@ -96,14 +96,12 @@
     </div>
 </div>
     {% if object_list %}
-        {% with date=path|extract_year_and_month_from_url %}
-            <a href="{% url 'export-data-xlsx' pk=user.pk year=date.0 month=date.1 %}" class="btn btn-info">
-                Export {{ date.1 | convert_to_month_name }} {{ date.0 }} Reports to XLSX
+            <a href="{% url 'export-data-xlsx' pk=user.pk year=year month=month %}" class="btn btn-info">
+                Export {{ month | convert_to_month_name }} {{ year }} Reports to XLSX
             </a>
-            <a href="{% url 'export-data-xlsx' pk=user.pk year=date.0 month=date.1 %}?format=csv" class="btn btn-info">
-                Export {{ date.1 | convert_to_month_name }} {{ date.0 }} Reports to CSV
+            <a href="{% url 'export-data-xlsx' pk=user.pk year=year month=month %}?format=csv" class="btn btn-info">
+                Export {{ month| convert_to_month_name }} {{ year }} Reports to CSV
             </a>
-        {% endwith %}
     {% endif %}
 {% endblock %}
 

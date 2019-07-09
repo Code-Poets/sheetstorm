@@ -23,9 +23,9 @@
 {% url 'custom-user-update' as account_url %}
 {% url 'custom-users-list' as custom_users_list_url %}
 {% url 'custom-projects-list' as custom_projects_list_url %}
-{% now "Y" as year %}
-{% now "n" as month %}
-{% url 'custom-report-list' year month as custom_report_list_url %}
+{% now "Y" as year_for_urls %}
+{% now "n" as month_for_urls %}
+{% url 'custom-report-list' year_for_urls month_for_urls as custom_report_list_url %}
 <div class="wrapper">
     <!-- Sidebar Holder -->
     <nav id="sidebar" class="hidden-print">
@@ -92,12 +92,12 @@
             {% endif %}
             <li>
                 {% if request.path|startswith:'/reports/' and not request.path|startswith:'/reports/author/'%}
-                <a class="active" href="{% url 'custom-report-list' year month %}">
+                <a class="active" href="{% url 'custom-report-list' year_for_urls month_for_urls %}">
                     <img src="{% static 'users/images/white/iko-05.png' %}">
                     <span>{% trans 'My Reports' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-report-list' year month %}">
+                <a href="{% url 'custom-report-list' year_for_urls month_for_urls %}">
                     <img src="{% static 'users/images/grey/ico-05.png' %}">
                     <span>{% trans 'My Reports' %}</span>
                 </a>
