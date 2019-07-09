@@ -34,6 +34,8 @@ class ExcelGeneratorSettingsConstants(Enum):
     HEADERS_ROW = 2
     TOTAL_COLUMN = 1
     FIRST_ROW_FOR_DATA = 3
+    DEFAULT_ROW_HEIGHT = 15
+    MAX_DESCRIPTION_WIDTH = 100
 
     DATE_HEADER_STR = "Date"
     DAILY_HOURS_HEADER_STR = "Daily hours"
