@@ -8,7 +8,6 @@ from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from django.utils.translation import gettext_lazy as _
 
 from managers.commons.constants import ProjectConstants
 from users.models import CustomUser
@@ -33,9 +32,7 @@ class Project(models.Model):
     stop_date = models.DateField(null=True, blank=True)
     terminated = models.BooleanField(default=False)
     managers = models.ManyToManyField(CustomUser, related_name="manager_projects")
-    members = models.ManyToManyField(
-        CustomUser, related_name="projects", help_text=_("How to add more employees? Select by CTRL + click")
-    )
+    members = models.ManyToManyField(CustomUser, related_name="projects")
 
     objects = ProjectQuerySet.as_manager()
 
