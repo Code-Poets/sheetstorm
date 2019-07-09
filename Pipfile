@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 assertpy = "*"
+behave = "*"
+behave-django = "*"
 black = "==19.3b0"
 django-mock-queries = "*"
 factory-boy = "*"
@@ -17,6 +19,7 @@ parameterized = "*"
 pytest = "*"
 pytest-cov = "*"
 pytest-django = "*"
+selenium = "*"
 
 [packages]
 django-bootstrap-datepicker-plus = "*"
