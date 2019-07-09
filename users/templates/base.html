@@ -23,6 +23,7 @@
 {% url 'custom-user-update' as account_url %}
 {% url 'custom-users-list' as custom_users_list_url %}
 {% url 'custom-projects-list' as custom_projects_list_url %}
+{% url 'custom-users-notifications' as custom_users_notifications %}
 {% now "Y" as year_for_urls %}
 {% now "n" as month_for_urls %}
 {% url 'custom-report-list' year_for_urls month_for_urls as custom_report_list_url %}
@@ -76,6 +77,19 @@
             </li>
             {% endif %}
             {% if user.user_type == manager or user.user_type == admin %}
+            <li>
+                {% if request.path|startswith:custom_users_notifications %}
+                <a class="active" href="{% url 'custom-users-notifications' %}">
+                    <img src="{% static 'users/images/white/notifications.png' %}">
+                    <span>{% trans 'Notifications' %}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'custom-users-notifications' %}">
+                    <img src="{% static 'users/images/grey/notifications.png' %}">
+                    <span>{% trans 'Notifications' %}</span>
+                </a>
+                {% endif %}
+            </li>
             <li>
                 {% if request.path|startswith:custom_projects_list_url %}
                 <a class="active" href="{% url 'custom-projects-list' %}">
