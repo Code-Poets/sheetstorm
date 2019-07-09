@@ -19,4 +19,5 @@ urlpatterns = [
     url(r"^", include("users.urls")),
     url(r"^managers/", include("managers.urls")),
     url(r"^", include("employees.urls")),
+    url(r"^", include("notifications.urls")),
 ]
