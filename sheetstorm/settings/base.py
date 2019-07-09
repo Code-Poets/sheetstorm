@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'captcha',
     'crispy_forms',
     'raven.contrib.django.raven_compat',
+    'django_select2',
     # SheetStorm
     'managers.apps.ManagersConfig',
     'employees.apps.EmployeesConfig',
