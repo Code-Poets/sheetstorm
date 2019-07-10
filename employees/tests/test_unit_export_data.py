@@ -87,6 +87,77 @@ class ExportViewTest(DataSetUpToTests):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response._headers["content-disposition"][1].endswith('zip"'))
 
+    def test_export_reports_for_project_author_reports_should_download_if_user_is_manager_of_current_project(self):
+        manager = ManagerUserFactory()
+        self.project.managers.add(manager)
+        self.client.force_login(manager)
+        project_author_reports_url = reverse(
+            "export-project-author-reports-data-xlsx",
+            kwargs={
+                "pk": self.data["project"],
+                "user_pk": self.user.pk,
+                "year": str(self.report.creation_date.year),
+                "month": str(self.report.creation_date.month),
+            },
+        )
+        response = self.client.get(project_author_reports_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response._headers["content-disposition"][1].endswith('xlsx"'))
+
+    def test_export_reports_for_project_author_reports_should_download_csv(self):
+        manager = ManagerUserFactory()
+        self.project.managers.add(manager)
+        self.client.force_login(manager)
+        project_author_reports_url = reverse(
+            "export-project-author-reports-data-xlsx",
+            kwargs={
+                "pk": self.data["project"],
+                "user_pk": self.user.pk,
+                "year": str(self.report.creation_date.year),
+                "month": str(self.report.creation_date.month),
+            },
+        )
+
+        response = self.client.get(project_author_reports_url + "?format=csv")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response._headers["content-disposition"][1].endswith('csv"'))
+
+    def test_export_reports_for_project_author_reports_should_download_xlsx_if_user_is_not_a_manager_of_current_project(
+        self
+    ):
+        manager = ManagerUserFactory()
+        self.client.force_login(manager)
+        project_author_reports_url = reverse(
+            "export-project-author-reports-data-xlsx",
+            kwargs={
+                "pk": self.data["project"],
+                "user_pk": self.user.pk,
+                "year": str(self.report.creation_date.year),
+                "month": str(self.report.creation_date.month),
+            },
+        )
+
+        response = self.client.get(project_author_reports_url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_export_reports_for_project_author_reports_should_download_csv_if_user_is_not_a_manager_of_current_project(self):
+        manager = ManagerUserFactory()
+        self.client.force_login(manager)
+        project_author_reports_url = reverse(
+            "export-project-author-reports-data-xlsx",
+            kwargs={
+                "pk": self.data["project"],
+                "user_pk": self.user.pk,
+                "year": str(self.report.creation_date.year),
+                "month": str(self.report.creation_date.month),
+            },
+        )
+
+        response = self.client.get(project_author_reports_url + "?format=csv")
+
+        self.assertEqual(response.status_code, 404)
+
 
 class ExportMethodTestForProject(DataSetUpToTests):
     def test_sheetnames_should_have_name_and_first_letter_of_surname_and_one_sheet(self):
