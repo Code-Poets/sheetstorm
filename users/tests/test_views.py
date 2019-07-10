@@ -3,14 +3,19 @@ from django.test import TestCase
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from freezegun import freeze_time
+from parameterized import parameterized
 
+from employees.factories import ReportFactory
+from managers.factories import ProjectFactory
 from users.common.constants import UserConstants
 from users.common.strings import ValidationErrorText
 from users.common.utils import generate_random_phone_number
 from users.factories import AdminUserFactory
+from users.factories import ManagerUserFactory
 from users.factories import UserFactory
 from users.models import CustomUser
 from users.tokens import account_activation_token
+from users.views import NotificationUserListView
 from users.views import SignUp
 
 
@@ -272,3 +277,50 @@ class SignUpTests(TestCase):
             response = self.client.get(path=url)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(CustomUser.objects.get(email=self.user.email).is_active, False)
+
+
+class NotificationsTests(TestCase):
+    def setUp(self):
+        self.admin = AdminUserFactory()
+        self.employee = UserFactory()
+        self.manager = ManagerUserFactory()
+        self.project = ProjectFactory()
+        self.project.managers.add(self.admin)
+        self.project.managers.add(self.manager)
+        self.project.members.add(self.employee)
+        self.url = reverse("custom-users-notifications")
+
+    def _check_response(self, response, status_code, contains):
+        self.assertTemplateUsed(response, NotificationUserListView.template_name)
+        self.assertEqual(response.status_code, status_code)
+        for element in contains:
+            self.assertContains(response, element)
+
+    @parameterized.expand(["2019-07-06", "2019-07-07", "2019-07-08"])
+    def test_manager_should_not_get_any_notification_about_missing_reports(self, test_date):
+        with freeze_time("2019-07-05"):
+            ReportFactory(author=self.employee, project=self.project, date="2019-07-05")
+
+        self.client.force_login(self.manager)
+        with freeze_time(test_date):
+            response = self.client.get(self.url)
+        self._check_response(response, 200, ["No new notifications about employees in your projects"])
+
+    @parameterized.expand([("2019-07-10", "<td>1</td>"), ("2019-07-11", "<td>2</td>"), ("2019-07-15", "<td>4</td>")])
+    def test_manager_should_get_notification_about_missing_reports(self, test_date, missing_reports):
+        with freeze_time("2019-07-08"):
+            ReportFactory(author=self.employee, project=self.project, date="2019-07-08")
+
+        self.client.force_login(self.manager)
+        with freeze_time(test_date):
+            response = self.client.get(self.url)
+        self._check_response(response, 200, [self.employee.email, missing_reports])
+
+    def test_manager_should_only_get_notifications_about_employees_from_his_projects(self):
+        with freeze_time("2019-07-08"):
+            ReportFactory(date="2019-07-08")
+
+        self.client.force_login(self.manager)
+        with freeze_time("2019-07-15"):
+            response = self.client.get(self.url)
+        self._check_response(response, 200, ["No new notifications about employees in your projects"])

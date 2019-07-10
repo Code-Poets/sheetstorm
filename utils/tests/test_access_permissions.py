@@ -74,6 +74,7 @@ class AccessPermissionsTestCase(TestCase):
             reverse("custom-users-list"): [CustomUser.UserType.ADMIN.name],
             reverse("custom-user-update-by-admin", kwargs={"pk": self.user.pk}): [CustomUser.UserType.ADMIN.name],
             reverse("custom-user-create"): [CustomUser.UserType.ADMIN.name],
+            reverse("custom-users-notifications"): [CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name],
         }
 
         # Iterate over all urls and all user types and check if response is 200 or 302.
