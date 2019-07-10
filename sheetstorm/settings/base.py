@@ -44,9 +44,6 @@ INSTALLED_APPS = [
     'django_countries',
     'users',
     # 3rd party
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
     'bootstrap_datepicker_plus',
     'captcha',
     'crispy_forms',

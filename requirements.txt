@@ -5,7 +5,6 @@ certifi
 chardet
 defusedxml
 Django
-django-allauth
 django-bootstrap-datepicker-plus
 django-countries
 django-crispy-forms
