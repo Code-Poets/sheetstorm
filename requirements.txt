@@ -9,6 +9,7 @@ django-bootstrap-datepicker-plus
 django-countries
 django-crispy-forms
 django-mock-queries
+django-select2
 django-simple-captcha
 factory-boy
 flake8

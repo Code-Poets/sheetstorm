@@ -208,3 +208,7 @@ textarea.form-control, #id_description {
 .description-column > p > a {
     color: deepskyblue;
 }
+
+.select2-results__option[aria-selected=true] {
+    background-color: #3875D7
+}
