@@ -4,6 +4,7 @@ from typing import Optional
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import QuerySet
 from django.db.models.functions import Coalesce
 from markdown import markdown
 from markdown_checklists.extension import ChecklistsExtension
@@ -47,6 +48,12 @@ class ReportQuerySet(models.QuerySet):
             .annotate(monthly_hours_sum=models.Sum("work_hours"))
             .values_list("author", "monthly_hours_sum")
         )
+
+    def get_reports_from_a_particular_month(self, year: int, month: int, author_id: Optional[int] = None) -> QuerySet:
+        filtered_reports = self.filter(date__year=year, date__month=month)
+        if author_id is not None:
+            filtered_reports = filtered_reports.filter(author=author_id)
+        return filtered_reports
 
 
 class Report(models.Model):

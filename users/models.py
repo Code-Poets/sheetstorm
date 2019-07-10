@@ -9,6 +9,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Max
+from django.db.models import Prefetch
 from django.db.models import Q
 from django.db.models import QuerySet
 from django.db.models import Sum
@@ -30,6 +31,11 @@ from users.validators import UserEmailValidation
 from users.validators import UserNameValidatior
 
 logger = logging.getLogger(__name__)
+
+
+class CustomUserQuerySet(models.QuerySet):
+    def get_with_prefetched_reports(self, reports: QuerySet) -> QuerySet:
+        return self.prefetch_related(Prefetch("report_set", queryset=reports))
 
 
 class CustomUserManager(BaseUserManager):
@@ -119,7 +125,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(
         max_length=128, error_messages={"null": ValidationErrorText.VALIDATION_ERROR_PASSWORD_MESSAGE}
     )
-    objects = CustomUserManager()
+    objects = CustomUserManager.from_queryset(CustomUserQuerySet)()
 
     USERNAME_FIELD = "email"
 

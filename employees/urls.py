@@ -37,4 +37,9 @@ urlpatterns = [
         views.ExportReportsInProjectView.as_view(),
         name="export-project-data-xlsx",
     ),
+    url(
+        r"^export/project/(?P<pk>[0-9]+)/author/(?P<user_pk>[0-9]+)/reports(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
+        views.ExportAuthorReportProjectView.as_view(),
+        name="export-project-author-reports-data-xlsx",
+    ),
 ]
