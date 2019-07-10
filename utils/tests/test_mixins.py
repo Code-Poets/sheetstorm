@@ -182,3 +182,14 @@ class ProjectsWorkPercentageMixinTestCase(TestCase):
             timezone.now().date().replace(year=2000, month=11, day=1),
             timezone.now().date().replace(year=2000, month=11, day=30),
         )
+
+    def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_last_30_days_paramemeters_if_current_month_and_year(
+        self
+    ):
+        current_date = timezone.now().date()
+
+        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+            response = self.view(self.request, year=current_date.year, month=current_date.month)
+
+        self.assertEqual(response.status_code, 200)
+        get_projects_work_percentage.assert_called_once_with(current_date - timezone.timedelta(days=30), current_date)
