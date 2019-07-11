@@ -199,6 +199,15 @@ class ReportCustomListTests(TestCase):
         response = self.client.get("/reports/2019/5/")
         self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=1))
 
+    def test_default_date_should_be_monday_when_the_last_report_was_created_on_friday_of_the_same_month(self):
+        # Friday
+        with freeze_time("2019-05-03"):
+            ReportFactory(date=datetime.date(year=2019, month=5, day=3), author=self.user)
+        # Monday
+        with freeze_time("2019-5-06"):
+            response = self.client.get("/reports/2019/5/")
+        self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=6))
+
     def test_default_date_should_be_day_later_than_last_report_if_it_wasnt_created_today(self):
         with freeze_time("2019-05-01"):
             ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)

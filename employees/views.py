@@ -181,6 +181,8 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
         date = last_report.date + timezone.timedelta(days=1)
         if date.month != month:
             return last_report.date
+        while date.isoweekday() in [6, 7]:
+            date += timezone.timedelta(days=1)
         return date
 
     def get_initial(self) -> dict:
