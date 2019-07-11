@@ -95,6 +95,7 @@ class ReportExtractor:
                 continue
 
             self._fill_report_for_single_user(employee_name, reports)
+            self._set_printing_settings_for_current_sheet()
 
         self._workbook._sheets.sort(key=lambda w: str.lower(w.title))
         return self._workbook
@@ -106,6 +107,7 @@ class ReportExtractor:
         employee_name = get_employee_name(author)
 
         self._fill_report_for_single_user(employee_name, reports)
+        self._set_printing_settings_for_current_sheet()
         return self._workbook
 
     def _fill_report_for_single_user(self, employee_name: str, reports: ReportQuerySet) -> None:
@@ -245,6 +247,11 @@ class ReportExtractor:
 
         row_height = constants.DEFAULT_ROW_HEIGHT.value * (1 + new_lines_in_description + rows_in_xlsx)
         self._active_worksheet.row_dimensions[self._current_row].height = row_height
+
+    def _set_printing_settings_for_current_sheet(self) -> None:
+        self._active_worksheet.set_printer_settings(paper_size=9, orientation="landscape")
+        self._active_worksheet.sheet_properties.pageSetUpPr.fitToPage = True
+        self._active_worksheet.page_setup.fitToHeight = False
 
 
 def convert_markdown_html_to_text(html: str) -> str:
