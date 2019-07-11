@@ -200,20 +200,23 @@ class ReportCustomListTests(TestCase):
         self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=1))
 
     def test_default_date_should_be_day_later_than_last_report_if_it_wasnt_created_today(self):
-        with freeze_time("2019-05-31"):
+        with freeze_time("2019-05-01"):
             ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)
-        response = self.client.get("/reports/2019/5/")
+        with freeze_time("2019-05-03"):
+            response = self.client.get("/reports/2019/5/")
         self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=2))
 
     def test_default_date_should_be_last_day_of_the_month_if_thats_the_date_of_last_report(self):
         with freeze_time("2019-05-31"):
             report = ReportFactory(date=datetime.date(year=2019, month=5, day=31), author=self.user)
-        response = self.client.get("/reports/2019/5/")
+        with freeze_time("2019-06-01"):
+            response = self.client.get("/reports/2019/5/")
         self.assertEqual(response.context_data["form"].initial["date"], report.date)
 
     def test_default_date_should_be_date_of_the_last_report_if_it_was_created_today(self):
-        report = ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)
-        response = self.client.get("/reports/2019/5/")
+        with freeze_time("2019-05-01"):
+            report = ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)
+            response = self.client.get("/reports/2019/5/")
         self.assertEqual(response.context_data["form"].initial["date"], report.date)
 
 
