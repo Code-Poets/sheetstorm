@@ -110,4 +110,4 @@ class ReportValidationStrings(NotCallableMixin, Enum):
 
 class MonthNavigationText(NotCallableMixin, Enum):
     SWITCH_MONTH = _("Go")
-    RECENT_MONTH = _("Recent month")
+    CURRENT_MONTH = _("Current month")
