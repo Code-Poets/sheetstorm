@@ -1,5 +1,6 @@
 from django.shortcuts import reverse
 from django.test import TestCase
+from django.test import override_settings
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from freezegun import freeze_time
@@ -212,6 +213,7 @@ class UserUpdateByAdminTests(TestCase):
         }
 
 
+@override_settings(EMAIL_SIGNUP_VERIFICATION=True)
 class SignUpTests(TestCase):
     def setUp(self):
         self.user = CustomUser(email="testuser@codepoets.it", first_name="John", last_name="Doe", password="passwduser")

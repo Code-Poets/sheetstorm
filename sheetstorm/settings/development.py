@@ -14,3 +14,5 @@ DATABASES['default']['PORT']     = ''
 CAPTCHA_TEST_MODE = True
 
 VALID_EMAIL_DOMAIN_LIST = ["codepoets.it"]
+
+EMAIL_SIGNUP_VERIFICATION = False

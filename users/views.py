@@ -4,6 +4,7 @@ from typing import Any
 from typing import Optional
 from typing import Type
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView
@@ -61,7 +62,12 @@ class SignUp(FormView):
 
     def form_valid(self, form: CustomUserSignUpForm) -> HttpResponseRedirectBase:
         user = form.save()
-        self._send_activation_email(user)
+        if settings.EMAIL_SIGNUP_VERIFICATION:
+            self._send_activation_email(user)
+        else:
+            user.is_active = True
+            user.full_clean()
+            user.save()
         logger.info(f"New user with id: {user.pk} has been created")
         return redirect("success-signup")
 
