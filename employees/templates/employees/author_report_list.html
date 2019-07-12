@@ -17,8 +17,11 @@
 <h1>{{ object.email }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}</h1>
 <a href="{% url 'custom-users-list' %}" class="btn btn-primary hidden-print">
     {{ UI_text.RETURN_BUTTON_MESSAGE.value }}
-        <a href="{% url 'export-data-xlsx' pk=object.id year=year month=month %}">
+        <a href="{% url 'export-data' pk=object.id year=year month=month %}" class="btn btn-info">
             Export My Reports
+        </a>
+        <a href="{% url 'export-data' pk=object.id year=year month=month %}?format=csv" class="btn btn-info">
+                Export Reports to CSV
         </a>
 </a>
 <div class="container">

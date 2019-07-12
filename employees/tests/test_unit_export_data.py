@@ -37,7 +37,7 @@ class DataSetUpToTests(TestCase):
         self.project.members.add(self.user)
         self.data = {"project": self.project.pk, "author": self.user.pk}
         self.url_single_user = reverse(
-            "export-data-xlsx",
+            "export-data",
             kwargs={
                 "pk": self.user.pk,
                 "year": str(self.report.creation_date.year),
@@ -45,7 +45,7 @@ class DataSetUpToTests(TestCase):
             },
         )
         self.url_project = reverse(
-            "export-project-data-xlsx",
+            "export-project-reports",
             kwargs={
                 "pk": self.data["project"],
                 "year": str(self.report.creation_date.year),
@@ -92,7 +92,7 @@ class ExportViewTest(DataSetUpToTests):
         self.project.managers.add(manager)
         self.client.force_login(manager)
         project_author_reports_url = reverse(
-            "export-project-author-reports-data-xlsx",
+            "export-project-author-reports",
             kwargs={
                 "pk": self.data["project"],
                 "user_pk": self.user.pk,
@@ -109,7 +109,7 @@ class ExportViewTest(DataSetUpToTests):
         self.project.managers.add(manager)
         self.client.force_login(manager)
         project_author_reports_url = reverse(
-            "export-project-author-reports-data-xlsx",
+            "export-project-author-reports",
             kwargs={
                 "pk": self.data["project"],
                 "user_pk": self.user.pk,
@@ -129,7 +129,7 @@ class ExportViewTest(DataSetUpToTests):
         manager = ManagerUserFactory()
         self.client.force_login(manager)
         project_author_reports_url = reverse(
-            "export-project-author-reports-data-xlsx",
+            "export-project-author-reports",
             kwargs={
                 "pk": self.data["project"],
                 "user_pk": self.user.pk,
@@ -141,11 +141,13 @@ class ExportViewTest(DataSetUpToTests):
         response = self.client.get(project_author_reports_url)
         self.assertEqual(response.status_code, 404)
 
-    def test_export_reports_for_project_author_reports_should_download_csv_if_user_is_not_a_manager_of_current_project(self):
+    def test_export_reports_for_project_author_reports_should_download_csv_if_user_is_not_a_manager_of_current_project(
+        self
+    ):
         manager = ManagerUserFactory()
         self.client.force_login(manager)
         project_author_reports_url = reverse(
-            "export-project-author-reports-data-xlsx",
+            "export-project-author-reports",
             kwargs={
                 "pk": self.data["project"],
                 "user_pk": self.user.pk,
@@ -472,7 +474,7 @@ class TestExportingFunctions(TestCase):
 
     def test_user_can_export_only_his_own_reports(self):
         self.client.force_login(self.employee1)
-        url = reverse("export-data-xlsx", kwargs={"pk": self.employee2.pk, "year": self.year, "month": self.month})
+        url = reverse("export-data", kwargs={"pk": self.employee2.pk, "year": self.year, "month": self.month})
         response = self.client.get(url)
         received_workbook = load_workbook(filename=io.BytesIO(response.content))
         self.assertEqual(len(received_workbook.sheetnames), 1)
