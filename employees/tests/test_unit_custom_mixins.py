@@ -126,9 +126,16 @@ class MonthNavigationMixinContextDataTests(TestCase):
             "path": self.mixin.request.path,
             "navigation_text": MonthNavigationText,
             "month_form": MonthSwitchForm(initial_date=datetime.date(year=2019, month=3, day=1)),
-            "next_month_url": "/reports/project/1/2019/4/",
-            "recent_month_url": f"/reports/project/1/{current_date.year}/{current_date.month}/",
-            "previous_month_url": "/reports/project/1/2019/2/",
+            "next_month_url": reverse(
+                "project-report-list", kwargs={"pk": self.mixin.kwargs["pk"], "year": 2019, "month": 4}
+            ),
+            "recent_month_url": reverse(
+                "project-report-list",
+                kwargs={"pk": self.mixin.kwargs["pk"], "year": current_date.year, "month": current_date.month},
+            ),
+            "previous_month_url": reverse(
+                "project-report-list", kwargs={"pk": self.mixin.kwargs["pk"], "year": 2019, "month": 2}
+            ),
             "disable_next_button": False,
             "disable_previous_button": False,
             "title_date": "03/19",
@@ -140,38 +147,47 @@ class MonthNavigationMixinContextDataTests(TestCase):
     def test_month_navigator_should_render_html_with_links_to_other_months_for_given_url(self):
         rendered_template = self._render_month_navigation_bar(2019, 1, 1)
         current_date = timezone.now()
-        self.assertTrue('<a href="/reports/project/1/2018/12/" class="btn btn-info">' in rendered_template)
-        self.assertTrue(
-            f'<a href="/reports/project/1/{current_date.year}/{current_date.month}/" class="btn btn-info">'
-            in rendered_template
+        url_previous = reverse("project-report-list", kwargs={"year": 2018, "month": 12, "pk": 1})
+        url_current = reverse(
+            "project-report-list", kwargs={"year": current_date.year, "month": current_date.month, "pk": 1}
         )
-        self.assertTrue('<a href="/reports/project/1/2019/2/" class="btn btn-info">' in rendered_template)
+        url_next = reverse("project-report-list", kwargs={"year": 2019, "month": 2, "pk": 1})
+        self.assertTrue(f'<a href="{url_previous}" class="btn btn-info">' in rendered_template)
+        self.assertTrue(f'<a href="{url_current}" class="btn btn-info">' in rendered_template)
+        self.assertTrue(f'<a href="{url_next}" class="btn btn-info">' in rendered_template)
 
     def test_month_navigator_should_not_render_html_with_link_to_next_month_if_upper_limit_is_met(self):
         rendered_template = self._render_month_navigation_bar(2099, 12, 1)
         current_date = timezone.now()
-        self.assertTrue('<a href="/reports/project/1/2099/11/" class="btn btn-info">' in rendered_template)
-        self.assertTrue(
-            f'<a href="/reports/project/1/{current_date.year}/{current_date.month}/" class="btn btn-info">'
-            in rendered_template
+        url_previous = reverse("project-report-list", kwargs={"year": 2099, "month": 11, "pk": 1})
+        url_current = reverse(
+            "project-report-list", kwargs={"year": current_date.year, "month": current_date.month, "pk": 1}
         )
-        self.assertFalse('<a href="/reports/project/1/2100/1/" class="btn btn-info">' in rendered_template)
+        url_next = reverse("project-report-list", kwargs={"year": 2100, "month": 1, "pk": 1})
+        self.assertTrue(f'<a href="{url_previous}" class="btn btn-info">' in rendered_template)
+        self.assertTrue(f'<a href="{url_current}" class="btn btn-info">' in rendered_template)
+        self.assertFalse(f'<a href="{url_next}" class="btn btn-info">' in rendered_template)
 
     def test_month_navigator_should_not_render_html_with_link_to_previous_month_if_lower_limit_is_met(self):
         rendered_template = self._render_month_navigation_bar(2019, 5, 1)
         current_date = timezone.now()
-        self.assertTrue('<a href="/reports/project/1/2019/6/" class="btn btn-info">' in rendered_template)
-        self.assertTrue(
-            f'<a href="/reports/project/1/{current_date.year}/{current_date.month}/" class="btn btn-info">'
-            in rendered_template
+        url_previous = reverse("project-report-list", kwargs={"year": 2019, "month": 6, "pk": 1})
+        url_current = reverse(
+            "project-report-list", kwargs={"year": current_date.year, "month": current_date.month, "pk": 1}
         )
-        self.assertFalse('<a href="/reports/project/1/2000/4/" class="btn btn-info">' in rendered_template)
+        url_next = reverse("project-report-list", kwargs={"year": 2000, "month": 4, "pk": 1})
+        self.assertTrue(f'<a href="{url_previous}" class="btn btn-info">' in rendered_template)
+        self.assertTrue(f'<a href="{url_current}" class="btn btn-info">' in rendered_template)
+        self.assertFalse(f'<a href="{url_next}" class="btn btn-info">' in rendered_template)
 
     def test_month_navigator_should_render_html_with_month_navigation_form_related_to_post_method_under_request_path(
         self
     ):
         rendered_template = self._render_month_navigation_bar(2019, 3, 1)
-        self.assertTrue('<form action="/reports/project/1/2019/3/" method="POST">' in rendered_template)
+        self.assertTrue(
+            f'<form action="{reverse("project-report-list", kwargs={"year": 2019, "month": 3, "pk": 1})}" method="POST">'
+            in rendered_template
+        )
 
     def test_redirect_to_another_month_method_should_redirect_to_link_with_provided_date(self):
         current_date = timezone.now()
@@ -187,11 +203,11 @@ class MonthNavigationMixinContextDataTests(TestCase):
     def test_redirect_to_another_month_method_should_redirect_to_request_path_if_provided_date_is_out_of_bonds(self):
         self.mixin.kwargs["pk"] = 1
         request = HttpRequest()
-        request.path = "/reports/project/1/2019/3/"
+        request.path = reverse("project-report-list", kwargs={"year": 2019, "month": 3, "pk": 1})
         request.POST["date"] = "04-2019"
         response = self.mixin.redirect_to_another_month(request)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/reports/project/1/2019/3/")
+        self.assertEqual(response.url, reverse("project-report-list", kwargs={"year": 2019, "month": 3, "pk": 1}))
 
     def test_redirect_to_current_month_method_should_redirect_to_current_month_section(self):
         current_date = timezone.now()

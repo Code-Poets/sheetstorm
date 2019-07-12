@@ -16,8 +16,7 @@ from django.urls import include
 
 urlpatterns = [
     url(r"^admin/", admin.site.urls),
-    url(r"^", include("users.urls")),
+    url(r"^employees/", include("employees.urls")),
     url(r"^managers/", include("managers.urls")),
-    url(r"^", include("employees.urls")),
-    # url(r"^select2/", include("django_select2.urls")),
+    url(r"^users/", include("users.urls")),
 ]

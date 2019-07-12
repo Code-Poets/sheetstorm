@@ -113,7 +113,7 @@ class UserCreateTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/users/")
+        self.assertEqual(response.url, reverse("custom-users-list"))
         self.assertEqual(CustomUser.objects.all().count(), 2)
 
     def test_user_create_view_should_not_add_new_user_on_post_if_form_is_invalid(self):

@@ -65,13 +65,21 @@ class AuthorReportViewTests(TestCase):
     def test_author_report_list_view_should_redirect_to_another_month_on_post(self):
         response = self.client.post(self.url, data={"date": "09-2020"})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, f"/reports/author/{self.user.pk}/2020/9/")
+        self.assertEqual(
+            response.url, reverse("author-report-list", kwargs={"pk": self.user.pk, "year": 2020, "month": 9})
+        )
 
     def test_author_report_list_view_should_redirect_to_current_date_if_date_parameters_are_out_of_bonds(self):
         response = self.client.get(reverse("author-report-list", kwargs={"pk": self.user.pk, "year": 2019, "month": 4}))
         current_date = datetime.datetime.now()
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, f"/reports/author/{self.user.pk}/{current_date.year}/{current_date.month}/")
+        self.assertEqual(
+            response.url,
+            reverse(
+                "author-report-list",
+                kwargs={"pk": self.user.pk, "year": current_date.year, "month": current_date.month},
+            ),
+        )
 
 
 class AdminReportViewTests(TestCase):
@@ -172,7 +180,7 @@ class ReportCustomListTests(TestCase):
     def test_custom_report_list_view_should_redirect_to_another_month_if_month_switch_was_called_on_post(self):
         response = self.client.post(self.url, data={"date": "09-2020", "month-switch": "month-switch"})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/reports/2020/9/")
+        self.assertEqual(response.url, reverse("custom-report-list", args=("2020", "9")))
 
     def test_custom_report_list_view_should_not_display_reports_from_different_month_than_selected(self):
         current_date = datetime.datetime.now().date()
@@ -196,7 +204,7 @@ class ReportCustomListTests(TestCase):
         self.assertEqual(response.context_data["form"].initial["project"].pk, latest_report.project.pk)
 
     def test_default_date_should_be_first_day_of_the_month_if_there_are_no_reports(self):
-        response = self.client.get("/reports/2019/5/")
+        response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=1))
 
     def test_default_date_should_be_monday_when_the_last_report_was_created_on_friday_of_the_same_month(self):
@@ -205,27 +213,27 @@ class ReportCustomListTests(TestCase):
             ReportFactory(date=datetime.date(year=2019, month=5, day=3), author=self.user)
         # Monday
         with freeze_time("2019-5-06"):
-            response = self.client.get("/reports/2019/5/")
+            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=6))
 
     def test_default_date_should_be_day_later_than_last_report_if_it_wasnt_created_today(self):
         with freeze_time("2019-05-01"):
             ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)
         with freeze_time("2019-05-03"):
-            response = self.client.get("/reports/2019/5/")
+            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=2))
 
     def test_default_date_should_be_last_day_of_the_month_if_thats_the_date_of_last_report(self):
         with freeze_time("2019-05-31"):
             report = ReportFactory(date=datetime.date(year=2019, month=5, day=31), author=self.user)
         with freeze_time("2019-06-01"):
-            response = self.client.get("/reports/2019/5/")
+            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         self.assertEqual(response.context_data["form"].initial["date"], report.date)
 
     def test_default_date_should_be_date_of_the_last_report_if_it_was_created_today(self):
         with freeze_time("2019-05-01"):
             report = ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)
-            response = self.client.get("/reports/2019/5/")
+            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         self.assertEqual(response.context_data["form"].initial["date"], report.date)
 
 
@@ -566,7 +574,9 @@ class ProjectReportListTests(TestCase):
     def test_project_report_list_view_should_redirect_to_another_month_on_post(self):
         response = self.client.post(self.url, data={"date": "09-2020"})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, f"/reports/project/{self.project.id}/2020/9/")
+        self.assertEqual(
+            response.url, reverse("project-report-list", kwargs={"pk": self.project.id, "year": 2020, "month": 9})
+        )
 
     def test_project_report_list_view_should_redirect_to_current_date_if_date_parameters_are_out_of_bonds(self):
         response = self.client.get(
@@ -574,7 +584,13 @@ class ProjectReportListTests(TestCase):
         )
         current_date = datetime.datetime.now()
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, f"/reports/project/{self.project.id}/{current_date.year}/{current_date.month}/")
+        self.assertEqual(
+            response.url,
+            reverse(
+                "project-report-list",
+                kwargs={"pk": self.project.id, "year": current_date.year, "month": current_date.month},
+            ),
+        )
 
     def _assert_response_contain_report(self, response, reports):
         for report in reports:
