@@ -40,7 +40,7 @@ def set_format_styles_for_main_cells(cell: Cell, is_header: bool) -> None:
     )
 
 
-def set_and_fill_description_cell(cell: Cell, cell_value: str) -> None:
+def set_and_fill_cell(cell: Cell, cell_value: str) -> None:
     wrapped_alignment = Alignment(vertical=constants.VERCTICAL_TOP.value, wrap_text=True)
     cell.alignment = wrapped_alignment
     cell.value = cell_value
@@ -51,6 +51,8 @@ def set_and_fill_hours_cell(cell: Cell, cell_value: str) -> None:
         cell.value = constants.TIMEVALUE_FORMULA.value.format(cell_value)
     else:
         cell.value = cell_value
+    alignment = Alignment(vertical=constants.VERCTICAL_TOP.value)
+    cell.alignment = alignment
     cell.number_format = constants.HOURS_FORMAT.value
 
 
@@ -124,6 +126,7 @@ class ReportExtractor:
             constants.DESCRIPTION_HEADER_STR.value: convert_markdown_html_to_text(report.markdown_description),
         }
         self._fill_current_report_data(storage_data)
+        self._set_row_height(str(storage_data[constants.DESCRIPTION_HEADER_STR.value]))
         self._current_row += 1
 
     def _prepare_worksheet(self, employee_name: str) -> None:
@@ -190,14 +193,12 @@ class ReportExtractor:
                 cell = self._active_worksheet.cell(
                     row=self._current_row, column=self._headers_settings[column_name].position
                 )
-                if column_name == constants.DESCRIPTION_HEADER_STR.value:
-                    set_and_fill_description_cell(cell, cell_value)
-                elif column_name == constants.HOURS_HEADER_STR.value:
+                if column_name == constants.HOURS_HEADER_STR.value:
                     set_and_fill_hours_cell(cell, cell_value)
                 elif column_name == constants.DAILY_HOURS_HEADER_STR.value:
                     set_and_fill_hours_cell(cell, cell_value)
                 else:
-                    cell.value = cell_value
+                    set_and_fill_cell(cell, cell_value)
 
     def _summarize_user_reports(self) -> None:
         total_cell = self._active_worksheet.cell(row=self._current_row, column=constants.TOTAL_COLUMN.value)
@@ -229,6 +230,21 @@ class ReportExtractor:
             report_date = date
         self._last_date = date
         return (report_date, daily_hours)
+
+    def _set_row_height(self, description: str) -> None:
+        """
+        If the description contains a new line ( "\n" character) or text exceeds 100 characters row height is automatically resized.
+        """
+
+        new_lines_in_description = description.count("\n")
+        splitted_description = description.split("\n")
+        rows_in_xlsx = 0
+
+        for row in splitted_description:
+            rows_in_xlsx += int(len(row) / constants.MAX_DESCRIPTION_WIDTH.value)
+
+        row_height = constants.DEFAULT_ROW_HEIGHT.value * (1 + new_lines_in_description + rows_in_xlsx)
+        self._active_worksheet.row_dimensions[self._current_row].height = row_height
 
 
 def convert_markdown_html_to_text(html: str) -> str:
