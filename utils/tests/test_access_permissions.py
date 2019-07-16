@@ -70,6 +70,12 @@ class AccessPermissionsTestCase(TestCase):
                 CustomUser.UserType.MANAGER.name,
             ],
             reverse("custom-project-delete", kwargs={"pk": self.report.project.pk}): [CustomUser.UserType.ADMIN.name],
+            # Index page.
+            reverse("home"): [
+                CustomUser.UserType.EMPLOYEE.name,
+                CustomUser.UserType.MANAGER.name,
+                CustomUser.UserType.ADMIN.name,
+            ],
             # Users.
             reverse("custom-users-list"): [CustomUser.UserType.ADMIN.name],
             reverse("custom-user-update-by-admin", kwargs={"pk": self.user.pk}): [CustomUser.UserType.ADMIN.name],
