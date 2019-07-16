@@ -18,7 +18,6 @@ urlpatterns = [
     path("accounts/password_change/", views.CustomPasswordChangeView.as_view(), name="password_change"),
     # TODO: Use only `django.contrib.auth.urls` that are needed, otherwise security issue.
     path("accounts/", include("django.contrib.auth.urls")),
-    url(r"^$", views.index, name="home"),
     url(r"^signup/$", views.SignUp.as_view(), name="signup"),
     url(r"^user/$", views.UserUpdate.as_view(), name="custom-user-update"),
     url(r"^user/create/$", views.UserCreate.as_view(), name="custom-user-create"),

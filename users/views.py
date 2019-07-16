@@ -21,7 +21,6 @@ from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import redirect
-from django.shortcuts import render
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -49,12 +48,6 @@ from users.tokens import account_activation_token
 from utils.decorators import check_permissions
 
 logger = logging.getLogger(__name__)
-
-
-@login_required
-def index(request: HttpRequest) -> HttpResponse:
-    logger.info(f"User with id: {request.user.pk} is on home page")
-    return render(request, "home.html")
 
 
 class SignUp(FormView):
