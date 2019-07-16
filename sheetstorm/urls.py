@@ -14,7 +14,10 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include
 
+from users import views
+
 urlpatterns = [
+    url(r"^$", views.index, name="home"),
     url(r"^admin/", admin.site.urls),
     url(r"^employees/", include("employees.urls")),
     url(r"^managers/", include("managers.urls")),
