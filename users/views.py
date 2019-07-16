@@ -12,7 +12,10 @@ from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.auth.views import PasswordResetDoneView
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.sites.shortcuts import get_current_site
+from django.db.models import F
+from django.db.models import Max
 from django.db.models import QuerySet
+from django.db.models.functions import Coalesce
 from django.forms import ModelForm
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -35,6 +38,8 @@ from common.utils import send_email
 from users.common.strings import AccountConfirmationText
 from users.common.strings import ConfirmationMessages
 from users.common.strings import SuccessInfoAfterRegistrationText
+from users.common.strings import UserNotificationsText
+from users.common.utils import count_workdays
 from users.forms import AdminUserChangeForm
 from users.forms import CustomUserCreationForm
 from users.forms import CustomUserSignUpForm
@@ -210,3 +215,41 @@ class ActivateAccountView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["is_activated"] = self.activate()
         return context
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
+class NotificationUserListView(ListView):
+    template_name = "user_notifications_list.html"
+    model = CustomUser
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                is_active=True,
+                projects__terminated=False,
+                projects__stop_date__isnull=True,
+                projects__managers__pk=self.request.user.pk,
+            )
+            .annotate(last_report_date=Coalesce(Max("report__date"), datetime.date.today()))
+            .annotate(days_without_report=datetime.date.today() - F("last_report_date"))
+            .order_by("-last_report_date")
+            .distinct()
+        )
+
+    def get_context_data(self, *, _object_list: Any = None, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        users_days_without_report_dict = {}
+        for user in context_data["object_list"]:
+            no_report_days = count_workdays(user.last_report_date, user.days_without_report)
+            if no_report_days > 0:
+                users_days_without_report_dict[user.email] = no_report_days
+
+        context_data["users_days_without_report"] = users_days_without_report_dict
+        context_data["UI_text"] = UserNotificationsText
+        return context_data

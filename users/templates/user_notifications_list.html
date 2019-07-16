@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+{% load data_structure_element_selectors %}
+
+{% block content %}
+<h1>
+    {% trans 'Notifications' %}
+</h1>
+<div class="container">
+    <div class="table-responsive">
+        {% if users_days_without_report %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <td>{% trans 'Id' %}</td>
+                        <td>{% trans 'Email' %}</td>
+                        <td>{% trans 'Days without Report' %}</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users_days_without_report %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user }}</td>
+                            <td>{{ users_days_without_report|get_key_value:user }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+        {{ UI_text.NO_MORE_NOTIFICATIONS.value }}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

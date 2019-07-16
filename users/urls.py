@@ -37,4 +37,5 @@ urlpatterns = [
         name="captcha-image",
         kwargs={"scale": CaptchaConstants.CAPTCHA_SCALE_SIZE.value},
     ),
+    url(r"notifications/$", views.NotificationUserListView.as_view(), name="custom-users-notifications"),
 ]

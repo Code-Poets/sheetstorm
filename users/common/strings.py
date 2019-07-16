@@ -88,3 +88,7 @@ class AccountConfirmationText(NotCallableMixin, Enum):
     FAIL = _("Your account has not been activated! Please contact with contact@codepoets.it.")
     REDIRECTION_INFO = _("You will be redirected in few seconds to the login site or press a button to make it faster.")
     OKAY_BUTTON = _("Okay!")
+
+
+class UserNotificationsText(NotCallableMixin, Enum):
+    NO_MORE_NOTIFICATIONS = _("No new notifications about employees in your projects.")

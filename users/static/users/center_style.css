@@ -433,3 +433,7 @@ span {
     padding: 2%;
     float: left;
 }
+
+.table-bordered thead {
+    font-weight: bold;
+}
