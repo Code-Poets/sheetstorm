@@ -295,7 +295,11 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
         super().setUp()
         self.csv_file = io.StringIO()
         writer = csv.writer(self.csv_file)
-        save_work_book_as_csv(writer, self.workbook_for_user)
+        save_work_book_as_csv(
+            writer,
+            self.workbook_for_user,
+            ExcelGeneratorSettingsConstants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value,
+        )
         self.csv_content = [line for line in csv.reader(self.csv_file.getvalue().split("\n"))]
 
     def test_date_should_be_the_same_in_excel(self):

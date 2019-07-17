@@ -478,7 +478,9 @@ class ExportUserReportView(DetailView):
                 author.email, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             writer = csv.writer(response)
-            save_work_book_as_csv(writer, work_book)
+            save_work_book_as_csv(
+                writer, work_book, ExcelGeneratorSettingsConstants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value
+            )
         else:
             response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
             response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
@@ -556,7 +558,9 @@ class ExportAuthorReportProjectView(UserIsManagerOfCurrentProjectMixin, DetailVi
                 f"{author.email}/{project.name}", f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             writer = csv.writer(response)
-            save_work_book_as_csv(writer, work_book)
+            save_work_book_as_csv(
+                writer, work_book, ExcelGeneratorSettingsConstants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value
+            )
         else:
             response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
             response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(

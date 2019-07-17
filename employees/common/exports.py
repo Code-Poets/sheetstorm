@@ -258,7 +258,7 @@ def convert_markdown_html_to_text(html: str) -> str:
     return "".join(BeautifulSoup(html, features="html.parser").findAll(text=True))
 
 
-def save_work_book_as_csv(writer: _writer, work_book: Workbook) -> None:
+def save_work_book_as_csv(writer: _writer, work_book: Workbook, columns_setting: dict) -> None:
     sheet = work_book.active
     is_last_row = False
     total_hours = timezone.timedelta()
@@ -281,10 +281,7 @@ def save_work_book_as_csv(writer: _writer, work_book: Workbook) -> None:
                 if (
                     not is_last_row
                     and row_number > 2
-                    and cell_number
-                    == constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
-                        constants.HOURS_HEADER_STR.value
-                    ].position
+                    and cell_number == columns_setting[constants.HOURS_HEADER_STR.value].position
                 ):
                     hours, minutes = convert_string_work_hours_field_to_hour_and_minutes(hours_as_string)
                     total_hours += timezone.timedelta(hours=int(hours), minutes=int(minutes))
@@ -304,7 +301,7 @@ def save_work_book_as_zip_of_csv(work_book: Workbook) -> BytesIO:
         work_book.active = sheet_index
         csv_file_data = StringIO()
         writer = csv.writer(csv_file_data)
-        save_work_book_as_csv(writer, work_book)
+        save_work_book_as_csv(writer, work_book, constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value)
         file_name = f'{sheet_name.replace(" ", "_").replace(".", "").lower()}-reports.csv'
         zip_file.writestr(file_name, csv_file_data.getvalue())
 
