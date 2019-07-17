@@ -2,6 +2,8 @@ from datetime import timedelta
 from enum import Enum
 from typing import NamedTuple
 
+from openpyxl.styles import Side
+
 
 class MonthNavigationConstants(Enum):
     MAX_MONTH_VALUE = 12
@@ -76,3 +78,4 @@ class ExcelGeneratorSettingsConstants(Enum):
     ZIP_CONTENT_TYPE_FORMAT = "application/zip"
     ZIP_EXPORTED_FILE_NAME = 'attachment; filename="{}_{}-reports.zip"'
     BORDER = "double"
+    BORDER_STYLE = Side(style=f"{'double'}")
