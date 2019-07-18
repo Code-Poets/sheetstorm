@@ -5,6 +5,7 @@ from typing import Set
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.query import Prefetch
 from django.db.models.query import QuerySet
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
@@ -24,6 +25,9 @@ class ProjectQuerySet(models.QuerySet):
 
     def filter_completed(self) -> QuerySet:
         return self.filter(~Q(stop_date=None))
+
+    def get_with_prefetched_reports(self, reports: QuerySet) -> QuerySet:
+        return self.prefetch_related(Prefetch("report_set", queryset=reports))
 
 
 class Project(models.Model):

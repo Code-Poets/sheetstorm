@@ -6,11 +6,11 @@ from typing import Union
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
-from django.db.models.query import Prefetch
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirectBase
+from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import reverse
 from django.urls import resolve
@@ -194,7 +194,7 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
         return (
             super()
             .get_queryset()
-            .filter(author=self.request.user, date__year=self.kwargs["year"], date__month=self.kwargs["month"])
+            .get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"])
             .order_by("-date", "project__name", "-creation_date")
         )
 
@@ -338,10 +338,11 @@ class AuthorReportView(DetailView, ProjectsWorkPercentageMixin, MonthNavigationM
     template_name = "employees/author_report_list.html"
 
     def get_queryset(self) -> QuerySet:
-        return CustomUser.objects.prefetch_related(
-            Prefetch(
-                "report_set",
-                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+        return (
+            super()
+            .get_queryset()
+            .get_with_prefetched_reports(
+                Report.objects.get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"])
             )
         )
 
@@ -404,33 +405,29 @@ class ProjectReportList(BaseProjectReportList):
         return (
             super()
             .get_queryset()
-            .prefetch_related(
-                Prefetch(
-                    "report_set",
-                    queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
-                )
+            .get_with_prefetched_reports(
+                Report.objects.get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"])
             )
         )
 
 
 class AuthorReportProjectView(BaseProjectReportList):
-    extra_context = {"only_one_author_reports": True}
-
     def get_queryset(self) -> QuerySet:
         return (
             super()
             .get_queryset()
-            .prefetch_related(
-                Prefetch(
-                    "report_set",
-                    queryset=Report.objects.filter(
-                        date__year=self.kwargs["year"],
-                        date__month=self.kwargs["month"],
-                        author_id=self.kwargs["user_pk"],
-                    ),
+            .get_with_prefetched_reports(
+                Report.objects.get_reports_from_a_particular_month(
+                    self.kwargs["year"], self.kwargs["month"], self.kwargs["user_pk"]
                 )
             )
         )
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        context["only_one_author_reports"] = True
+        context["user_pk"] = self.kwargs["user_pk"]
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
@@ -459,10 +456,11 @@ class ExportUserReportView(DetailView):
     model = CustomUser
 
     def get_queryset(self) -> QuerySet:
-        return CustomUser.objects.prefetch_related(
-            Prefetch(
-                "report_set",
-                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+        return (
+            super()
+            .get_queryset()
+            .get_with_prefetched_reports(
+                Report.objects.get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"])
             )
         )
 
@@ -477,14 +475,14 @@ class ExportUserReportView(DetailView):
         if self.request.GET.get("format") == "csv":
             response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CSV_CONTENT_TYPE_FORMAT.value)
             response["Content-Disposition"] = ExcelGeneratorSettingsConstants.CSV_EXPORTED_FILE_NAME.value.format(
-                author.email, datetime.date.today()
+                author.email, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             writer = csv.writer(response)
             save_work_book_as_csv(writer, work_book)
         else:
             response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
             response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
-                author.email, datetime.date.today()
+                author.email, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             work_book.save(response)
         return response
@@ -499,10 +497,11 @@ class ExportReportsInProjectView(UserIsManagerOfCurrentProjectMixin, DetailView)
     model = Project
 
     def get_queryset(self) -> QuerySet:
-        return Project.objects.prefetch_related(
-            Prefetch(
-                "report_set",
-                queryset=Report.objects.filter(date__year=self.kwargs["year"], date__month=self.kwargs["month"]),
+        return (
+            super()
+            .get_queryset()
+            .get_with_prefetched_reports(
+                Report.objects.get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"])
             )
         )
 
@@ -516,12 +515,52 @@ class ExportReportsInProjectView(UserIsManagerOfCurrentProjectMixin, DetailView)
                 zip_file.getvalue(), content_type=ExcelGeneratorSettingsConstants.ZIP_CONTENT_TYPE_FORMAT.value
             )
             response["Content-Disposition"] = ExcelGeneratorSettingsConstants.ZIP_EXPORTED_FILE_NAME.value.format(
-                project.name, datetime.date.today()
+                project.name, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
         else:
             response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
             response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
-                project.name, datetime.date.today()
+                project.name, f"{self.kwargs['month']}/{self.kwargs['year']}"
+            )
+            work_book.save(response)
+        return response
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
+class ExportAuthorReportProjectView(UserIsManagerOfCurrentProjectMixin, DetailView):
+    model = Project
+
+    def get_queryset(self) -> QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .get_with_prefetched_reports(
+                Report.objects.get_reports_from_a_particular_month(
+                    self.kwargs["year"], self.kwargs["month"], self.kwargs["user_pk"]
+                )
+            )
+        )
+
+    def render_to_response(self, context: dict, **response_kwargs: Any) -> HttpResponse:
+        project = super().get_object()
+        author = get_object_or_404(CustomUser, pk=self.kwargs["user_pk"])
+        work_book = generate_xlsx_for_project(project)
+
+        if self.request.GET.get("format") == "csv":
+            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CSV_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.CSV_EXPORTED_FILE_NAME.value.format(
+                f"{author.email}/{project.name}", f"{self.kwargs['month']}/{self.kwargs['year']}"
+            )
+            writer = csv.writer(response)
+            save_work_book_as_csv(writer, work_book)
+        else:
+            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
+                f"{author.email}/{project.name}", f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             work_book.save(response)
         return response

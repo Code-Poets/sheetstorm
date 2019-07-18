@@ -30,11 +30,16 @@ urlpatterns = [
     url(
         r"^export/user-reports/(?P<pk>[0-9]+)/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
         views.ExportUserReportView.as_view(),
-        name="export-data-xlsx",
+        name="export-data",
     ),
     url(
         r"^export/project-reports/(?P<pk>[0-9]+)/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
         views.ExportReportsInProjectView.as_view(),
-        name="export-project-data-xlsx",
+        name="export-project-reports",
+    ),
+    url(
+        r"^export/project/(?P<pk>[0-9]+)/author/(?P<user_pk>[0-9]+)/reports(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
+        views.ExportAuthorReportProjectView.as_view(),
+        name="export-project-author-reports",
     ),
 ]

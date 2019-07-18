@@ -96,10 +96,10 @@
     </div>
 </div>
     {% if object_list %}
-            <a href="{% url 'export-data-xlsx' pk=user.pk year=year month=month %}" class="btn btn-info">
+            <a href="{% url 'export-data' pk=user.pk year=year month=month %}" class="btn btn-info">
                 Export {{ month | convert_to_month_name }} {{ year }} Reports to XLSX
             </a>
-            <a href="{% url 'export-data-xlsx' pk=user.pk year=year month=month %}?format=csv" class="btn btn-info">
+            <a href="{% url 'export-data' pk=user.pk year=year month=month %}?format=csv" class="btn btn-info">
                 Export {{ month| convert_to_month_name }} {{ year }} Reports to CSV
             </a>
     {% endif %}

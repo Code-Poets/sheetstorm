@@ -22,10 +22,17 @@
     {{ object.name }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}
 </h1>
 {% if not only_one_author_reports %}
-    <a href="{% url 'export-project-data-xlsx' pk=object.pk year=year month=month %}" class="btn btn-info">
+    <a href="{% url 'export-project-reports' pk=object.id year=year month=month %}" class="btn btn-info">
         Export Reports to XLSX
     </a>
-    <a href="{% url 'export-project-data-xlsx' pk=object.id year=year month=month %}?format=csv" class="btn btn-info">
+    <a href="{% url 'export-project-reports' pk=object.id year=year month=month %}?format=csv" class="btn btn-info">
+        Export Reports to CSV
+    </a>
+{% else %}
+    <a href="{% url 'export-project-author-reports' pk=object.id user_pk=user_pk year=year month=month %}" class="btn btn-info">
+        Export Reports to XLSX
+    </a>
+    <a href="{% url 'export-project-author-reports' pk=object.id user_pk=user_pk year=year month=month %}?format=csv" class="btn btn-info">
         Export Reports to CSV
     </a>
 {% endif %}
