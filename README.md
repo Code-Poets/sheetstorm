@@ -29,19 +29,15 @@ git clone https://github.com/Code-Poets/sheetstorm.git
     ```
     You can verify the installation by running: `python3.7 -m pip`.
 
-3. Install virtualenv with PIP: 
+3. Install pipenv with PIP: 
     ```
-    sudo python3.7 -m pip install virtualenv
+    pip install pipenv
     ```
 
-4. Create new virtualenv and install all dependencies:
-    ```
-    virtualenv ~/.virtualenvs/sheetstorm --python python3.7
-    . ~/.virtualenvs/sheetstorm/bin/activate
-    pip install pip --upgrade
+4. Change directory to the folder containing SheetStorm project and install all dependencies from Pipfile:
     
-    # Dependencies for running sheetstorm application
-    pip install --requirement sheetstorm/requirements.lock
+    ```
+    pipenv install
     ```
 
 5. Install PostgreSQL:

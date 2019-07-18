@@ -1,0 +1,36 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+assertpy = "*"
+black = "==19.3b0"
+django-mock-queries = "*"
+factory-boy = "*"
+flake8 = "*"
+freezegun = "*"
+mypy = "*"
+pylint = "*"
+parameterized = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-django = "*"
+
+[packages]
+beautifulsoup4 = "*"
+django-bootstrap-datepicker-plus = "*"
+django-countries = "*"
+django-crispy-forms = "*"
+django-select2 = "*"
+django-simple-captcha = "*"
+Django = "*"
+markdown-checklists = "*"
+Markdown = "*"
+openpyxl = "*"
+psycopg2 = "*"
+python-dateutil = "*"
+raven = "*"
+
+[requires]
+python_version = "3.7"
