@@ -149,6 +149,13 @@ class ReportCustomListTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, other_report.description)
 
+    def test_custom_list_view_should_not_display_other_users_reports_when_user_does_not_have_reports(self):
+        user_with_no_reports = UserFactory()
+        self.client.force_login(user_with_no_reports)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.report)
+
     def test_custom_report_list_view_should_add_new_report_on_post(self):
         response = self.client.post(self.url, self.data)
         self.assertEqual(response.status_code, 302)
