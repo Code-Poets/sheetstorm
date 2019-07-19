@@ -24,9 +24,12 @@
 {% url 'custom-users-list' as custom_users_list_url %}
 {% url 'custom-projects-list' as custom_projects_list_url %}
 {% url 'custom-users-notifications' as custom_users_notifications %}
+{% url 'logout' as logout_url %}
 {% now "Y" as year_for_urls %}
 {% now "n" as month_for_urls %}
 {% url 'custom-report-list' year_for_urls month_for_urls as custom_report_list_url %}
+{% url 'custom-report-list' year month as custom_report_list_actual_date_url %}
+{% url 'password_change' as password_change_url %}
 <div class="wrapper">
     <!-- Sidebar Holder -->
     <nav id="sidebar" class="hidden-print">
@@ -37,25 +40,25 @@
         <ul class="list-unstyled components">
             <li>
                 {% if request.path == home_url %}
-                <a class="active" href="{% url 'home' %}">
+                <a class="active" href="{{ home_url }}">
                     <img src="{% static 'users/images/white/iko-02.png' %}">
                     <span>{% trans 'Home' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'home' %}">
+                <a href="{{ home_url }}">
                     <img src="{% static 'users/images/grey/ico-02.png' %}">
                     <span>{% trans 'Home' %}</span>
                 </a>
                 {% endif %}
             </li>
             <li>
-                {% if request.path == account_url %}
-                <a class="active" href="{% url 'custom-user-update' %}">
+                {% if request.path|startswith:account_url or request.path|startswith:password_change_url %}
+                <a class="active" href="{{ account_url }}">
                     <img src="{% static 'users/images/white/iko-01.png' %}">
                     <span>{% trans 'Account' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-user-update' %}">
+                <a href="{{ account_url }}">
                     <img src="{% static 'users/images/grey/ico-01.png' %}">
                     <span>{% trans 'Account' %}</span>
                 </a>
@@ -63,13 +66,13 @@
             </li>
             {% if user.user_type == admin %}
             <li>
-                {% if request.path == custom_users_list_url or request.path|startswith:'/reports/author/' %}
-                <a class="active" href="{% url 'custom-users-list' %}">
+                {% if request.path|startswith:custom_users_list_url or request.path|startswith:'/employees/reports/author/' %}
+                <a class="active" href="{{ custom_users_list_url }}">
                     <img src="{% static 'users/images/white/iko-03.png' %}">
                     <span>{% trans 'Employees' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-users-list' %}">
+                <a href="{{ custom_users_list_url }}">
                     <img src="{% static 'users/images/grey/ico-03.png' %}">
                     <span>{% trans 'Employees' %}</span>
                 </a>
@@ -79,25 +82,25 @@
             {% if user.user_type == manager or user.user_type == admin %}
             <li>
                 {% if request.path|startswith:custom_users_notifications %}
-                <a class="active" href="{% url 'custom-users-notifications' %}">
+                <a class="active" href="{{ custom_users_notifications }}">
                     <img src="{% static 'users/images/white/notifications.png' %}">
                     <span>{% trans 'Notifications' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-users-notifications' %}">
+                <a href="{{ custom_users_notifications }}">
                     <img src="{% static 'users/images/grey/notifications.png' %}">
                     <span>{% trans 'Notifications' %}</span>
                 </a>
                 {% endif %}
             </li>
             <li>
-                {% if request.path|startswith:custom_projects_list_url %}
-                <a class="active" href="{% url 'custom-projects-list' %}">
+                {% if request.path|startswith:custom_projects_list_url or request.path|startswith:'/employees/reports/project/' %}
+                <a class="active" href="{{ custom_projects_list_url }}">
                     <img src="{% static 'users/images/white/iko-04.png' %}">
                     <span>{% trans 'Projects' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-projects-list' %}">
+                <a href="{{ custom_projects_list_url }}">
                     <img src="{% static 'users/images/grey/ico-04.png' %}">
                     <span>{% trans 'Projects' %}</span>
                 </a>
@@ -105,20 +108,20 @@
             </li>
             {% endif %}
             <li>
-                {% if request.path|startswith:'/reports/' and not request.path|startswith:'/reports/author/'%}
-                <a class="active" href="{% url 'custom-report-list' year_for_urls month_for_urls %}">
+                {% if request.path == custom_report_list_url or request.path|startswith:custom_report_list_actual_date_url %}
+                <a class="active" href="{{ custom_report_list_url }}">
                     <img src="{% static 'users/images/white/iko-05.png' %}">
                     <span>{% trans 'My Reports' %}</span>
                 </a>
                 {% else %}
-                <a href="{% url 'custom-report-list' year_for_urls month_for_urls %}">
+                <a href="{{ custom_report_list_url }}">
                     <img src="{% static 'users/images/grey/ico-05.png' %}">
                     <span>{% trans 'My Reports' %}</span>
                 </a>
                 {% endif %}
             </li>
             <li id="logout">
-                <a href="{% url 'logout' %}">
+                <a href="{{ logout_url }}">
                     <img src="{% static 'users/images/grey/ico-23.png' %}">
                     <span>{% trans 'Logout' %}</span>
                 </a>
