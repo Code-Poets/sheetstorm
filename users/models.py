@@ -39,8 +39,6 @@ class CustomUserQuerySet(models.QuerySet):
 
 
 class CustomUserManager(BaseUserManager):
-    use_in_migrations = True
-
     def _create_user(
         self, email: str, password: str, is_staff: bool, is_superuser: bool, user_type: str
     ) -> "CustomUser":
