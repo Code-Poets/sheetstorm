@@ -26,8 +26,8 @@
 
 <div>
   <b>{% trans "Started at:" %} </b> {{ project.start_date }}
-  {% if project.terminated %}
-    &nbsp; <font color="Grey"> {% trans  "terminated" %}</font>
+  {% if project.suspended %}
+    &nbsp; <font color="Grey"> {% trans  "suspended" %}</font>
   {% endif %}
   <br>
 

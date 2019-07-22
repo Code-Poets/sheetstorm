@@ -136,7 +136,7 @@ class ProjectCreateViewTests(ProjectBaseTests):
         self.data = {
             "name": "Another Example Project",
             "start_date": timezone.now().date() - timezone.timedelta(days=30),
-            "terminated": False,
+            "suspended": False,
             "managers": [self.user.pk],
             "members": [self.user.pk],
         }
