@@ -194,7 +194,7 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
         return (
             super()
             .get_queryset()
-            .get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"])
+            .get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"], self.request.user)
             .order_by("-date", "project__name", "-creation_date")
         )
 
