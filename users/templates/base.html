@@ -111,12 +111,12 @@
                 {% if request.path == custom_report_list_url or request.path|startswith:custom_report_list_actual_date_url %}
                 <a class="active" href="{{ custom_report_list_url }}">
                     <img src="{% static 'users/images/white/iko-05.png' %}">
-                    <span>{% trans 'My Reports' %}</span>
+                    <span>{% trans 'Reports' %}</span>
                 </a>
                 {% else %}
                 <a href="{{ custom_report_list_url }}">
                     <img src="{% static 'users/images/grey/ico-05.png' %}">
-                    <span>{% trans 'My Reports' %}</span>
+                    <span>{% trans 'Reports' %}</span>
                 </a>
                 {% endif %}
             </li>
