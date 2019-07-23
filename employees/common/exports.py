@@ -135,7 +135,7 @@ class ReportExtractor:
             constants.PROJECT_HEADER_STR.value: report.project.name,
             constants.TASK_ACTIVITY_HEADER_STR.value: report.task_activities.name,
             constants.HOURS_HEADER_STR.value: report.work_hours_str,
-            constants.DESCRIPTION_HEADER_STR.value: convert_markdown_html_to_text(report.markdown_description),
+            constants.DESCRIPTION_HEADER_STR.value: convert_markdown_html_to_text(report.description),
         }
         self._fill_current_report_data(storage_data)
         self._set_row_height(str(storage_data[constants.DESCRIPTION_HEADER_STR.value]))
