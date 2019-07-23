@@ -22,7 +22,8 @@ from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from django.views.generic.base import ContextMixin
 
-from employees.common.constants import ExcelGeneratorSettingsConstants
+from employees.common.constants import ColumnSettings
+from employees.common.constants import ExcelGeneratorSettingsConstants as excel_constants
 from employees.common.constants import MonthNavigationConstants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
@@ -473,15 +474,18 @@ class ExportUserReportView(DetailView):
         work_book = generate_xlsx_for_single_user(author)
 
         if self.request.GET.get("format") == "csv":
-            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CSV_CONTENT_TYPE_FORMAT.value)
-            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.CSV_EXPORTED_FILE_NAME.value.format(
+            response = HttpResponse(content_type=excel_constants.CSV_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = excel_constants.CSV_EXPORTED_FILE_NAME.value.format(
                 author.email, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             writer = csv.writer(response)
-            save_work_book_as_csv(writer, work_book)
+            hours_column_setting: ColumnSettings = excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
+                excel_constants.HOURS_HEADER_STR.value
+            ]
+            save_work_book_as_csv(writer, work_book, hours_column_setting)
         else:
-            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
-            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
+            response = HttpResponse(content_type=excel_constants.XLSX_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = excel_constants.XLSX_EXPORTED_FILE_NAME.value.format(
                 author.email, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             work_book.save(response)
@@ -511,15 +515,13 @@ class ExportReportsInProjectView(UserIsManagerOfCurrentProjectMixin, DetailView)
 
         if self.request.GET.get("format") == "csv":
             zip_file = save_work_book_as_zip_of_csv(work_book)
-            response = HttpResponse(
-                zip_file.getvalue(), content_type=ExcelGeneratorSettingsConstants.ZIP_CONTENT_TYPE_FORMAT.value
-            )
-            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.ZIP_EXPORTED_FILE_NAME.value.format(
+            response = HttpResponse(zip_file.getvalue(), content_type=excel_constants.ZIP_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = excel_constants.ZIP_EXPORTED_FILE_NAME.value.format(
                 project.name, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
         else:
-            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
-            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
+            response = HttpResponse(content_type=excel_constants.XLSX_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = excel_constants.XLSX_EXPORTED_FILE_NAME.value.format(
                 project.name, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             work_book.save(response)
@@ -551,15 +553,18 @@ class ExportAuthorReportProjectView(UserIsManagerOfCurrentProjectMixin, DetailVi
         work_book = generate_xlsx_for_project(project)
 
         if self.request.GET.get("format") == "csv":
-            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.CSV_CONTENT_TYPE_FORMAT.value)
-            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.CSV_EXPORTED_FILE_NAME.value.format(
+            response = HttpResponse(content_type=excel_constants.CSV_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = excel_constants.CSV_EXPORTED_FILE_NAME.value.format(
                 f"{author.email}/{project.name}", f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             writer = csv.writer(response)
-            save_work_book_as_csv(writer, work_book)
+            hours_column_setting: ColumnSettings = excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value[
+                excel_constants.HOURS_HEADER_STR.value
+            ]
+            save_work_book_as_csv(writer, work_book, hours_column_setting)
         else:
-            response = HttpResponse(content_type=ExcelGeneratorSettingsConstants.XLSX_CONTENT_TYPE_FORMAT.value)
-            response["Content-Disposition"] = ExcelGeneratorSettingsConstants.XLSX_EXPORTED_FILE_NAME.value.format(
+            response = HttpResponse(content_type=excel_constants.XLSX_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = excel_constants.XLSX_EXPORTED_FILE_NAME.value.format(
                 f"{author.email}/{project.name}", f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
             work_book.save(response)

@@ -56,7 +56,6 @@ class ExcelGeneratorSettingsConstants(Enum):
     HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT = {
         DATE_HEADER_STR: ColumnSettings(position=1, width=12),
         DAILY_HOURS_HEADER_STR: ColumnSettings(position=2, width=12),
-        PROJECT_HEADER_STR: None,
         TASK_ACTIVITY_HEADER_STR: ColumnSettings(position=3, width=30),
         HOURS_HEADER_STR: ColumnSettings(position=4, width=6),
         DESCRIPTION_HEADER_STR: ColumnSettings(position=5, width=100),
