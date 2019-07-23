@@ -191,7 +191,7 @@ class ReportExtractor:
 
     def _fill_current_report_data(self, storage_data: dict) -> None:
         for column_name, cell_value in storage_data.items():
-            if self._headers_settings[column_name] is not None:
+            if self._headers_settings.get(column_name) is not None:
                 cell = self._active_worksheet.cell(
                     row=self._current_row, column=self._headers_settings[column_name].position
                 )
