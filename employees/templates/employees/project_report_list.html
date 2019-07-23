@@ -67,7 +67,7 @@
                     {% endif %}
                     <td class="project-reports-task-activity-column">{{ report.task_activities }}</td>
                     <td class="project-reports-work-hours-column">{{ report.work_hours_str }}</td>
-                    <td class="project-reports-description-column">{{ report.markdown_description|safe }}</td>
+                    <td class="project-reports-description-column">{{ report.description|safe|urlize }}</td>
                     <td class="project-reports-creation-date-column hidden-print">{{ report.creation_date }}</td>
                     <td class="project-reports-last-update-column hidden-print">{{ report.last_update }}</td>
                     <td class="project-reports-editable-column hidden-print">{{ report.editable|yesno:"False,True" }}</td>
