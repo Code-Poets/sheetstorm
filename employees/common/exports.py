@@ -17,7 +17,6 @@ from openpyxl.cell.cell import TYPE_FORMULA
 from openpyxl.styles import Alignment
 from openpyxl.styles import Border
 from openpyxl.styles import Font
-from openpyxl.styles import Side
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import _writer
 
@@ -33,11 +32,15 @@ from users.models import CustomUser
 def set_format_styles_for_main_cells(cell: Cell, is_header: bool) -> None:
     cell.font = Font(name=constants.FONT.value, bold=True)
     cell.alignment = Alignment(horizontal=constants.CENTER_ALINGMENT.value)
-    border_style = Side(style=constants.BORDER.value)
     cell.border = (
-        Border(bottom=border_style, top=border_style, right=border_style, left=border_style)
+        Border(
+            bottom=constants.BORDER_STYLE.value,
+            top=constants.BORDER_STYLE.value,
+            right=constants.BORDER_STYLE.value,
+            left=constants.BORDER_STYLE.value,
+        )
         if is_header
-        else Border(top=border_style)
+        else Border(top=constants.BORDER_STYLE.value)
     )
 
 
@@ -45,6 +48,7 @@ def set_and_fill_cell(cell: Cell, cell_value: str) -> None:
     wrapped_alignment = Alignment(vertical=constants.VERCTICAL_TOP.value, wrap_text=True)
     cell.alignment = wrapped_alignment
     cell.value = cell_value
+    set_borders_between_columns(cell)
 
 
 def set_and_fill_hours_cell(cell: Cell, cell_value: str) -> None:
@@ -52,9 +56,14 @@ def set_and_fill_hours_cell(cell: Cell, cell_value: str) -> None:
         cell.value = constants.TIMEVALUE_FORMULA.value.format(cell_value)
     else:
         cell.value = cell_value
-    alignment = Alignment(vertical=constants.VERCTICAL_TOP.value)
+    alignment = Alignment(vertical=constants.VERCTICAL_TOP.value, horizontal=constants.CENTER_ALINGMENT.value)
     cell.alignment = alignment
     cell.number_format = constants.HOURS_FORMAT.value
+    set_borders_between_columns(cell)
+
+
+def set_borders_between_columns(cell: Cell) -> None:
+    cell.border = Border(left=constants.BORDER_STYLE.value, right=constants.BORDER_STYLE.value)
 
 
 def get_employee_name(author: CustomUser) -> str:
