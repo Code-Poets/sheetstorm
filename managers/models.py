@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class ProjectQuerySet(models.QuerySet):
-    def filter_terminated(self) -> QuerySet:
-        return self.filter(terminated=True, stop_date=None)
+    def filter_suspended(self) -> QuerySet:
+        return self.filter(suspended=True, stop_date=None)
 
     def filter_active(self) -> QuerySet:
-        return self.filter(terminated=False, stop_date=None)
+        return self.filter(suspended=False, stop_date=None)
 
     def filter_completed(self) -> QuerySet:
         return self.filter(~Q(stop_date=None))
@@ -34,7 +34,7 @@ class Project(models.Model):
     name = models.CharField(max_length=ProjectConstants.MAX_NAME_LENGTH.value)
     start_date = models.DateField(help_text=ProjectConstants.MESSAGE_FOR_CORRECT_DATE_FORMAT.value)
     stop_date = models.DateField(null=True, blank=True)
-    terminated = models.BooleanField(default=False)
+    suspended = models.BooleanField(default=False)
     managers = models.ManyToManyField(CustomUser, related_name="manager_projects")
     members = models.ManyToManyField(CustomUser, related_name="projects")
 

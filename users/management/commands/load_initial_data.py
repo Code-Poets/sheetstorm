@@ -115,17 +115,17 @@ class Command(BaseCommand):
         self._add_member_to_project_if_not_added_yet(project_pending, user_employee_2)
         self._add_member_to_project_if_not_added_yet(project_pending, user_manager_1)
 
-        project_terminated = Project.objects.filter(name="e_munchkin").first()
-        if project_terminated is None:
-            project_terminated = ProjectFactory(
-                name="e_munchkin", start_date=timezone.now() - timezone.timedelta(days=7), terminated=True
+        project_suspended = Project.objects.filter(name="e_munchkin").first()
+        if project_suspended is None:
+            project_suspended = ProjectFactory(
+                name="e_munchkin", start_date=timezone.now() - timezone.timedelta(days=7), suspended=True
             )
 
-        self._add_manager_to_project_if_not_added_yet(project_terminated, user_manager_1)
-        self._add_member_to_project_if_not_added_yet(project_terminated, user_employee_2)
-        self._add_member_to_project_if_not_added_yet(project_terminated, user_employee_3)
-        self._add_member_to_project_if_not_added_yet(project_terminated, user_manager_1)
-        self._add_member_to_project_if_not_added_yet(project_terminated, user_manager_2)
+        self._add_manager_to_project_if_not_added_yet(project_suspended, user_manager_1)
+        self._add_member_to_project_if_not_added_yet(project_suspended, user_employee_2)
+        self._add_member_to_project_if_not_added_yet(project_suspended, user_employee_3)
+        self._add_member_to_project_if_not_added_yet(project_suspended, user_manager_1)
+        self._add_member_to_project_if_not_added_yet(project_suspended, user_manager_2)
 
         #
         # Reports
@@ -171,7 +171,7 @@ class Command(BaseCommand):
             date=timezone.now() - timezone.timedelta(days=2),
             description="Some report containing hours with fraction",
             author=user_employee_2,
-            project=project_terminated,
+            project=project_suspended,
             work_hours=timezone.timedelta(hours=8, minutes=30),
             editable=True,
         )
@@ -207,7 +207,7 @@ class Command(BaseCommand):
             date=timezone.now() - timezone.timedelta(days=2),
             description="Some report",
             author=user_manager_2,
-            project=project_terminated,
+            project=project_suspended,
             work_hours=timezone.timedelta(hours=8),
             editable=True,
         )
@@ -225,7 +225,7 @@ class Command(BaseCommand):
             date=timezone.now() - timezone.timedelta(days=1),
             description="Some report on the same day as other two",
             author=user_manager_1,
-            project=project_terminated,
+            project=project_suspended,
             work_hours=timezone.timedelta(hours=4),
             editable=True,
         )
@@ -234,7 +234,7 @@ class Command(BaseCommand):
             date=timezone.now() - timezone.timedelta(days=1),
             description="Some report",
             author=user_employee_3,
-            project=project_terminated,
+            project=project_suspended,
             work_hours=timezone.timedelta(hours=8),
             editable=True,
         )

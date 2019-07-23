@@ -225,7 +225,7 @@ class NotificationUserListView(ListView):
             .get_queryset()
             .filter(
                 is_active=True,
-                projects__terminated=False,
+                projects__suspended=False,
                 projects__stop_date__isnull=True,
                 projects__managers__pk=self.request.user.pk,
             )

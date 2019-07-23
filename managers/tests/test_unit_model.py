@@ -80,11 +80,11 @@ class TestProjectModelField(BaseModelTestCase):
     def test_project_model_stop_date_field_may_be_empty(self):
         self.field_should_accept_null("stop_date")
 
-    def test_project_model_terminated_field_should_accept_correct_input(self):
-        self.field_should_accept_input("terminated", True)
+    def test_project_model_suspended_field_should_accept_correct_input(self):
+        self.field_should_accept_input("suspended", True)
 
-    def test_project_model_terminated_field_should_have_default_value(self):
-        self.field_should_have_non_null_default("terminated", value=False)
+    def test_project_model_suspended_field_should_have_default_value(self):
+        self.field_should_have_non_null_default("suspended", value=False)
 
     def test_project_model_managers_field_should_accept_correct_input(self):
         project = self.default_model()

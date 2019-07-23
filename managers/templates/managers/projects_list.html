@@ -21,7 +21,7 @@
           <a class="nav-link" href="#active" style="color:grey">{% trans "Active" %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#terminated" style="color:grey">{% trans "Terminated" %}</a>
+          <a class="nav-link" href="#suspended" style="color:grey">{% trans "Suspended" %}</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#completed" style="color:grey">{% trans "Completed" %}</a>
@@ -90,17 +90,17 @@
       </div>
     </div>
 
-  <div id="terminated" class="modal-dialog" style="margin-bottom:0">
-    <button class="btn btn-info btn-block" type="button" data-toggle="collapse" data-target="#collapseTerminated" aria-expanded="false" aria-controls="collapseTerminated">
-      {% trans "Terminated" %}
+  <div id="suspended" class="modal-dialog" style="margin-bottom:0">
+    <button class="btn btn-info btn-block" type="button" data-toggle="collapse" data-target="#collapseSuspended" aria-expanded="false" aria-controls="collapseSuspended">
+      {% trans "Suspended" %}
     </button>
   </div>
-  <div class="collapse" id="collapseTerminated">
+  <div class="collapse" id="collapseSuspended">
     <div class="card card-body">
       <br/>
       <div class="container">
         <div class="row">
-          {% for project in object_list.filter_terminated %}
+          {% for project in object_list.filter_suspended %}
             <div class="col-sm-4">
               <div class="list-group">
                 <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-info flex-column align-items-start">
@@ -175,7 +175,7 @@
           {% for project in object_list %}
             <div class="col-sm-4">
               <div class="list-group">
-                {% if project.terminated is False and project.stop_date is None %}
+                {% if project.suspended is False and project.stop_date is None %}
                   <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-action flex-column align-items-start active">
                 {% elif project.stop_date is not None %}
                   <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-success flex-column align-items-start">
