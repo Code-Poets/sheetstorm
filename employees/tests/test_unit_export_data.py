@@ -10,7 +10,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 from openpyxl import load_workbook
 
-from employees.common.constants import ExcelGeneratorSettingsConstants
+from employees.common.constants import ExcelGeneratorSettingsConstants as excel_constants
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.exports import get_employee_name
@@ -171,36 +171,26 @@ class ExportMethodTestForProject(DataSetUpToTests):
     def test_date_should_be_the_same_in_excel(self):
         self.assertEqual(
             self.report.date,
-            str(
-                self.workbook_for_project.active.cell(
-                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=1
-                ).value
-            ),
+            str(self.workbook_for_project.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=1).value),
         )
 
     def test_task_activity_should_be_the_same_in_excel(self):
         self.assertEqual(
             self.report.task_activities.name,
-            self.workbook_for_project.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=3
-            ).value,
+            self.workbook_for_project.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=3).value,
         )
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
-            ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(work_hours),
-            self.workbook_for_project.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=4
-            ).value,
+            excel_constants.TIMEVALUE_FORMULA.value.format(work_hours),
+            self.workbook_for_project.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=4).value,
         )
 
     def test_description_should_be_the_same_in_excel(self):
         self.assertEqual(
             self.report.description,
-            self.workbook_for_project.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=5
-            ).value,
+            self.workbook_for_project.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=5).value,
         )
 
     def test_daily_hours_should_be_equal_to_sum_of_hours_from_reports_of_author(self):
@@ -223,9 +213,7 @@ class ExportMethodTestForProject(DataSetUpToTests):
         for employee in employees:
             author = get_employee_name(employee)
             sheet = project_workbook[author]
-            daily_hours_for_employee = sheet.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=2
-            ).value
+            daily_hours_for_employee = sheet.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=2).value
 
             sum_from_reports = employee.report_set.aggregate(Sum("work_hours"))
             sum_from_reports_as_string = self._hours_date_time_to_excel_time_field(sum_from_reports["work_hours__sum"])
@@ -247,46 +235,32 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
     def test_date_should_be_the_same_in_excel(self):
         self.assertEqual(
             self.report.date,
-            str(
-                self.workbook_for_user.active.cell(
-                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=1
-                ).value
-            ),
+            str(self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=1).value),
         )
 
     def test_project_name_should_be_the_same_in_excel(self):
         self.assertEqual(
             self.report.project.name,
-            str(
-                self.workbook_for_user.active.cell(
-                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=3
-                ).value
-            ),
+            str(self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=3).value),
         )
 
     def test_task_activity_should_be_the_same_in_excel(self):
         self.assertEqual(
             self.report.task_activities.name,
-            self.workbook_for_user.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=4
-            ).value,
+            self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=4).value,
         )
 
     def test_hours_should_be_the_same_in_excel(self):
         work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
-            ExcelGeneratorSettingsConstants.TIMEVALUE_FORMULA.value.format(work_hours),
-            self.workbook_for_user.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=5
-            ).value,
+            excel_constants.TIMEVALUE_FORMULA.value.format(work_hours),
+            self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=5).value,
         )
 
     def test_description_should_be_the_same_in_excel(self):
         self.assertEqual(
             self.report.description,
-            self.workbook_for_user.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=6
-            ).value,
+            self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=6).value,
         )
 
 
@@ -295,55 +269,40 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
         super().setUp()
         self.csv_file = io.StringIO()
         writer = csv.writer(self.csv_file)
-        save_work_book_as_csv(
-            writer,
-            self.workbook_for_user,
-            ExcelGeneratorSettingsConstants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value,
-        )
+        hours_column_setting = excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
+            excel_constants.HOURS_HEADER_STR.value
+        ]
+        save_work_book_as_csv(writer, self.workbook_for_user, hours_column_setting)
         self.csv_content = [line for line in csv.reader(self.csv_file.getvalue().split("\n"))]
 
     def test_date_should_be_the_same_in_excel(self):
         self.assertEqual(
-            str(
-                self.workbook_for_user.active.cell(
-                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=1
-                ).value
-            ),
-            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][0],
+            str(self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=1).value),
+            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][0],
         )
 
     def test_project_name_should_be_the_same_in_excel(self):
         self.assertEqual(
-            str(
-                self.workbook_for_user.active.cell(
-                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=3
-                ).value
-            ),
-            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][2],
+            str(self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=3).value),
+            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][2],
         )
 
     def test_task_activity_should_be_the_same_in_excel(self):
         self.assertEqual(
-            self.workbook_for_user.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=4
-            ).value,
-            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][3],
+            self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=4).value,
+            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][3],
         )
 
     def test_hours_should_be_the_same_in_excel(self):
         self.assertEqual(
-            self.workbook_for_user.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=5
-            ).value,
-            f'=timevalue("{self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][4]}")',
+            self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=5).value,
+            f'=timevalue("{self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][4]}")',
         )
 
     def test_description_should_be_the_same_in_excel(self):
         self.assertEqual(
-            self.workbook_for_user.active.cell(
-                row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value, column=6
-            ).value,
-            self.csv_content[ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value - 2][5],
+            self.workbook_for_user.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value, column=6).value,
+            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][5],
         )
 
 
@@ -437,38 +396,24 @@ class TestExportingFunctions(TestCase):
             # there are two reports per day, but "Date" and "Daily hours" should occur only once per day
             if i % 2 == 0:
                 self.assertEqual(
-                    workbook.active.cell(
-                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
-                    ).value,
-                    element.date,
+                    workbook.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value + i, column=1).value, element.date
                 )
                 self.assertIn(
-                    "=timevalue",
-                    workbook.active.cell(
-                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=2
-                    ).value,
+                    "=timevalue", workbook.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value + i, column=2).value
                 )
             else:
                 self.assertEqual(
-                    workbook.active.cell(
-                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
-                    ).value,
-                    None,
+                    workbook.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value + i, column=1).value, None
                 )
                 self.assertEqual(
-                    workbook.active.cell(
-                        row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=2
-                    ).value,
-                    None,
+                    workbook.active.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value + i, column=2).value, None
                 )
 
     def _assert_dates_are_unique_in_reports_of_user(self, workbook):
         for worksheet in workbook.worksheets:
             dates = []
             for i in range(self.reports_per_user):
-                cell_value = worksheet.cell(
-                    row=ExcelGeneratorSettingsConstants.FIRST_ROW_FOR_DATA.value + i, column=1
-                ).value
+                cell_value = worksheet.cell(row=excel_constants.FIRST_ROW_FOR_DATA.value + i, column=1).value
                 if cell_value is not None:
                     dates.append(cell_value)
             number_of_dates = len(dates)
