@@ -2,9 +2,11 @@ from datetime import timedelta
 
 import pytest
 from assertpy import assert_that
+from django.template.defaultfilters import urlize
 from django.test import TestCase
 
 from common.convert import timedelta_to_string
+from employees.templatetags.data_display_filters import annotate_no_follow_link_with_css_class
 from employees.templatetags.data_display_filters import convert_to_month_name
 from employees.templatetags.data_display_filters import duration_field_to_string
 from employees.templatetags.data_structure_element_selectors import get_key_value
@@ -61,3 +63,34 @@ class TestConvertToMonthName:
 )
 def test_timedelta_to_string(input_, expected_output):
     assert_that(timedelta_to_string(input_)).is_equal_to(expected_output)
+
+
+@pytest.mark.parametrize(
+    ("input_", "output_format"),
+    [
+        ("", ""),
+        ("no html", "no html"),
+        (
+            '<a href="http://www.django.com" rel="nofollow">www.django.com</a>',
+            '<a href="http://www.django.com" rel="nofollow" class="{}">www.django.com</a>',
+        ),
+        (urlize("www.django.com"), '<a href="http://www.django.com" rel="nofollow" class="{}">www.django.com</a>'),
+        (
+            urlize("My favourite website is www.django.com"),
+            'My favourite website is <a href="http://www.django.com" rel="nofollow" class="{}">www.django.com</a>',
+        ),
+        (
+            "this report will contain two links\n"
+            '<a href="http://www.django.com" rel="nofollow">www.django.com</a>\n'
+            '<a href="http://www.python.org" rel="nofollow">python official</a>',
+            "this report will contain two links\n"
+            '<a href="http://www.django.com" rel="nofollow" class="{}">www.django.com</a>\n'
+            '<a href="http://www.python.org" rel="nofollow" class="{}">python official</a>',
+        ),
+    ],
+)
+def test_annotate_no_follow_link_with_css_class(input_, output_format):
+    css_class = "clickable_link"
+    expected_output = output_format.format(*([css_class] * output_format.count("{}")))
+    result = annotate_no_follow_link_with_css_class(input_, css_class)
+    assert_that(result).is_equal_to(expected_output)
