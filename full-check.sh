@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+printf "=============== VIRTUAL ENVIRONMENT PACKAGES CHECKS ================\n"
+./check-environment-packages.sh
+printf "\n"
+
 printf "=================== DJANGO CONFIGURATION CHECKS ====================\n"
 python manage.py check
 printf "\n"
