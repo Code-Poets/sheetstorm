@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 from parameterized import parameterized
 
-from employees.common.constants import ReportModelConstants
+from employees.common.constants import ReportModelConstants  # pylint: disable=no-name-in-module
 from employees.common.strings import ReportValidationStrings
 from employees.factories import ReportFactory
 from employees.models import Report

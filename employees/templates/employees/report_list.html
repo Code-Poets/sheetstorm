@@ -25,7 +25,6 @@
     <form action="{{ path }}" method="POST">
         {% csrf_token %}
         {{ form|crispy }}
-        <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown is supported</a><br/>
        <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
     </form>
 </div>
@@ -67,7 +66,7 @@
                     <td class="project-column">{{ report.project }}</td>
     ﻿               <td class="task-activities-column">{{ report.task_activities }}</td>
                     <td class="work-hours-column">{{ report.work_hours_str }}</td>
-                    <td class="description-column">{{ report.markdown_description|safe|urlize}}<td>
+                    <td class="description-column">{{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}<td>
                     <td class="edit-button-column Invisible hidden-print">
                         {% if report.editable %}
                         <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">

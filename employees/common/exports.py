@@ -8,7 +8,6 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-from bs4 import BeautifulSoup
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from openpyxl import Workbook
@@ -135,7 +134,7 @@ class ReportExtractor:
             constants.PROJECT_HEADER_STR.value: report.project.name,
             constants.TASK_ACTIVITY_HEADER_STR.value: report.task_activities.name,
             constants.HOURS_HEADER_STR.value: report.work_hours_str,
-            constants.DESCRIPTION_HEADER_STR.value: convert_markdown_html_to_text(report.markdown_description),
+            constants.DESCRIPTION_HEADER_STR.value: report.description,
         }
         self._fill_current_report_data(storage_data)
         self._set_row_height(str(storage_data[constants.DESCRIPTION_HEADER_STR.value]))
@@ -262,10 +261,6 @@ class ReportExtractor:
         self._active_worksheet.set_printer_settings(paper_size=9, orientation="landscape")
         self._active_worksheet.sheet_properties.pageSetUpPr.fitToPage = True
         self._active_worksheet.page_setup.fitToHeight = False
-
-
-def convert_markdown_html_to_text(html: str) -> str:
-    return "".join(BeautifulSoup(html, features="html.parser").findAll(text=True))
 
 
 def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_setting: ColumnSettings) -> None:

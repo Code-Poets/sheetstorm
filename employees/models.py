@@ -6,8 +6,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import QuerySet
 from django.db.models.functions import Coalesce
-from markdown import markdown
-from markdown_checklists.extension import ChecklistsExtension
 
 from common.convert import timedelta_to_string
 from employees.common.constants import ReportModelConstants
@@ -72,13 +70,6 @@ class Report(models.Model):
     @property
     def work_hours_str(self) -> str:
         return timedelta_to_string(self.work_hours)
-
-    @property
-    def markdown_description(self) -> str:
-        return markdown(
-            self.description,
-            extensions=["extra", "sane_lists", "wikilinks", "nl2br", "legacy_em", ChecklistsExtension()],
-        )
 
     def clean(self) -> None:
         super().clean()
