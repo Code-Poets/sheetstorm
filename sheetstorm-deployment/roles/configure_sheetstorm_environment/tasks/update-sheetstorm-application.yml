@@ -21,12 +21,11 @@
         clone:   yes
         update:  yes
 
-    - name:  Install requirements for sheetstorm
-      pip:
-        chdir:              "{{ sheetstorm_dir }}"
-        requirements:       requirements.lock
-        virtualenv:         ~/virtualenv
-        virtualenv_python:  "python{{ python_version }}"
+    - name:   Install requirements for sheetstorm
+      shell:  source ~/virtualenv/bin/activate && pipenv --bare install
+      args:
+        executable: /bin/bash
+        chdir:      "{{ sheetstorm_dir }}"
 
     - name:  Install gunicorn for sheetstorm
       pip:
