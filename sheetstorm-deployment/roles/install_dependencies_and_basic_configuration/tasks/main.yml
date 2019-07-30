@@ -31,8 +31,6 @@
       apt:
         name:
           - git
-          - virtualenv
-          - python3-setuptools
           - wget
 
     - name:  Install dependencies from testing
@@ -47,11 +45,14 @@
           - zlib1g-dev
           - libpcre++-dev
           - zlib1g-dev
-          - python{{ python_version }}
           - postgresql={{ postgres_package_version }}
+          - python{{ python_version }}
           - python3-distutils
           - python3-psycopg2
           - python3-certbot-nginx
+          - python3-setuptools
+          - pipenv
+          - virtualenv
 
     - name:  Remove unused dependencies
       apt:   autoremove=yes
