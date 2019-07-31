@@ -21,6 +21,14 @@
             dest:  /etc/systemd/system/sheetstorm-web.service
             mode:  0644
 
+        - name:  Add script that upload postgresql backup to Google Cloud Storage
+          template:
+            src:   upload-postgresql-backup-to-gcloud-bucket.sh.j2
+            dest:  "{{ home_dir }}/bin/upload-postgresql-backup-to-gcloud-bucket.sh"
+            mode:  0755
+            owner: sheetstorm
+            group: sheetstorm
+
         - name:  Enable sheetstorm service
           service:
             daemon_reload: yes
@@ -48,6 +56,14 @@
             hour:   "2"
             user:   root
             job:    /usr/bin/certbot renew --quiet
+
+        - name: Add cron job that automatically copy postgresql backup to Google Cloud Storage
+          cron:
+            name:   upload postgresql backup
+            minute: "0"
+            hour:   "3"
+            user:   sheetstorm
+            job:    "{{ home_dir }}/bin/upload-postgresql-backup-to-gcloud-bucket.sh sheetstorm"
 
         - name: Add secret file that contain credentials to nginx endpoint with postgresql backups
           copy:
