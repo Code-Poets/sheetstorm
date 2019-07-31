@@ -70,7 +70,7 @@ class MonthNavigationMixin(ContextMixin):
         date = datetime.date(year=year, month=month, day=1) + relativedelta(months=+1)
         return self._get_url_from_date(date, pk)
 
-    def _get_recent_month_url(self, pk: int) -> str:
+    def _get_current_month_url(self, pk: int) -> str:
         date = datetime.datetime.now().date()
         return self._get_url_from_date(date, pk)
 
@@ -115,7 +115,7 @@ class MonthNavigationMixin(ContextMixin):
             "navigation_text": MonthNavigationText,
             "month_form": MonthSwitchForm(initial_date=datetime.date(year=year, month=month, day=1)),
             "next_month_url": self._get_next_month_url(year, month, pk),
-            "recent_month_url": self._get_recent_month_url(pk),
+            "recent_month_url": self._get_current_month_url(pk),
             "previous_month_url": self._get_previous_month_url(year, month, pk),
             "disable_next_button": disable_next_button,
             "disable_previous_button": disable_previous_button,
@@ -148,7 +148,7 @@ class MonthNavigationMixin(ContextMixin):
         pk = self.kwargs.get("pk", None)
         if pk is not None:
             pk = int(pk)
-        return redirect(self._get_recent_month_url(pk))
+        return redirect(self._get_current_month_url(pk))
 
 
 @method_decorator(login_required, name="dispatch")
