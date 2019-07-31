@@ -22,7 +22,7 @@
     {% for error in errors.non_field_errors %}
     <h4><font color="red">{{ error }}</font></h4>
     {% endfor %}
-    <form action="{{ path }}" method="POST">
+    <form action="{{ path }}" method="POST" id="reportForm" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
         {% csrf_token %}
         {{ form|crispy }}
        <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
@@ -119,4 +119,5 @@
             document.getElementById("join_form").hidden = true;
         </script>
     {% endif %}
+    <script src="{% static 'employees/scripts/load_activities_for_project.js' %}"></script>
 {% endblock %}

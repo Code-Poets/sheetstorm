@@ -18,6 +18,7 @@ from employees.common.constants import MonthNavigationConstants
 from employees.models import Report
 from employees.models import TaskActivityType
 from managers.models import Project
+from users.models import CustomUser
 
 
 class ProjectJoinForm(forms.Form):
@@ -59,18 +60,31 @@ class ReportForm(forms.ModelForm):
 
     class Meta:
         model = Report
-        fields = ("date", "author", "description", "task_activities", "project", "work_hours")
+        fields = ("date", "author", "description", "project", "task_activities", "work_hours")
         widgets = {"date": DatePickerInput(format="%Y-%m-%d"), "author": HiddenInput}
 
     def __init__(self, *args: Any, **kwargs: Any):
         super(ReportForm, self).__init__(*args, **kwargs)
         author = kwargs["initial"]["author"]
         self.fields["project"].queryset = author.get_project_ordered_by_last_report_creation_date()
+
+        self._filter_task_activities_per_project(author)
+        self._set_last_choices_in_report_form(author)
+
+    def _filter_task_activities_per_project(self, author: CustomUser) -> None:
+        if 'project' in self.data:
+            project_id = int(self.data.get('project'))
+            self.fields['task_activities'].queryset = TaskActivityType.objects.filter(projects=project_id).order_by('name')
+        elif self.instance.pk:
+            self.fields['task_activities'].queryset = self.instance.project.project_activities.order_by('name')
+
+    def _set_last_choices_in_report_form(self, author):
         if self.instance.pk is None:
             if self.fields["project"].queryset.exists():
                 self.initial["project"] = self.fields["project"].queryset.first()
             report_set = author.report_set.order_by("-creation_date")
             if report_set:
+                self.fields['task_activities'].queryset = report_set.first().project.project_activities.all()
                 self.initial["task_activities"] = report_set.first().task_activities
 
 

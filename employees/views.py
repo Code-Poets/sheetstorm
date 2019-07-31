@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
+from django.http.response import Http404
 from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
@@ -21,6 +22,7 @@ from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
 from django.views.generic.base import ContextMixin
+from django.views.generic.base import TemplateView
 
 from employees.common.constants import ColumnSettings
 from employees.common.constants import ExcelGeneratorSettingsConstants as excel_constants
@@ -39,6 +41,7 @@ from employees.forms import MonthSwitchForm
 from employees.forms import ProjectJoinForm
 from employees.forms import ReportForm
 from employees.models import Report
+from employees.models import TaskActivityType
 from managers.models import Project
 from users.models import CustomUser
 from utils.decorators import check_permissions
@@ -573,3 +576,19 @@ class ExportAuthorReportProjectView(UserIsManagerOfCurrentProjectMixin, DetailVi
             )
             work_book.save(response)
         return response
+
+
+@method_decorator(login_required, name="dispatch")
+class LoadTaskActivitiesInProjectView(TemplateView):
+    template_name = "employees/partial/task_activity_list.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data(**kwargs)
+        try:
+            int(self.request.GET["project"])
+        except (ValueError, KeyError):
+            raise Http404
+        context["task_activities"] = TaskActivityType.objects.filter(projects=self.request.GET.get("project")).order_by(
+            "name"
+        )
+        return context
