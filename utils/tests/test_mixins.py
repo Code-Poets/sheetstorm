@@ -2,6 +2,7 @@ from django.test import RequestFactory
 from django.test import TestCase
 from django.utils import timezone
 from django.views.generic import ListView
+from freezegun import freeze_time
 from mock import patch
 
 from employees.factories import ReportFactory
@@ -152,6 +153,7 @@ class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixinTestCase(Te
         self.assertEqual(len(response.context_data["object_list"]), 2)
 
 
+@freeze_time("2019-11-06 21:00:00")
 class ProjectsWorkPercentageMixinTestCase(TestCase):
     def setUp(self):
         super().setUp()
