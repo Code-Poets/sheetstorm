@@ -195,3 +195,15 @@ class ProjectsWorkPercentageMixinTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         get_projects_work_percentage.assert_called_once_with(current_date - timezone.timedelta(days=30), current_date)
+
+    @freeze_time("2019-07-31 14:23")
+    def test_setting_previous_month_works_with_shorter_months(self):
+        june = 6
+        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+            response = self.view(self.request, year=2019, month=june)
+
+        self.assertEqual(response.status_code, 200)
+        get_projects_work_percentage.assert_called_once_with(
+            timezone.now().date().replace(year=2019, month=june, day=1),
+            timezone.now().date().replace(year=2019, month=june, day=30),
+        )

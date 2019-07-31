@@ -75,7 +75,7 @@ class MonthNavigationMixinCustomMethodsTests(TestCase):
         )
         self.mixin.request = request
         self.assertEqual(
-            self.mixin._get_recent_month_url(1),
+            self.mixin._get_current_month_url(1),
             reverse(
                 "project-report-list",
                 kwargs={"year": self.current_date.year, "month": self.current_date.month, "pk": 1},

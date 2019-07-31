@@ -58,7 +58,7 @@ class ProjectsWorkPercentageMixin(ContextMixin):
                 to_date = current_date
             else:
                 from_date = timezone.now().date().replace(year=year, month=month, day=1)
-                to_date = self._set_last_day_of_month_on_date(timezone.now().date().replace(year=year, month=month))
+                to_date = self._set_last_day_of_month_on_date(year=year, month=month)
 
         if self.model == CustomUser:
             user = self.object
@@ -69,7 +69,7 @@ class ProjectsWorkPercentageMixin(ContextMixin):
         return context_data
 
     @staticmethod
-    def _set_last_day_of_month_on_date(current_date: date) -> date:
-        if current_date.month == 12:
-            return current_date.replace(day=31)
-        return current_date.replace(month=current_date.month + 1, day=1) - timezone.timedelta(days=1)
+    def _set_last_day_of_month_on_date(year: int, month: int) -> date:
+        if month == 12:
+            return date(year=year, month=month, day=31)
+        return date(year=year, month=month + 1, day=1) - timezone.timedelta(days=1)
