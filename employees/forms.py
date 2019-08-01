@@ -1,4 +1,5 @@
 import datetime
+from contextlib import suppress
 from typing import Any
 from typing import Optional
 
@@ -68,23 +69,30 @@ class ReportForm(forms.ModelForm):
         author = kwargs["initial"]["author"]
         self.fields["project"].queryset = author.get_project_ordered_by_last_report_creation_date()
 
-        self._filter_task_activities_per_project(author)
+        self._filter_task_activities_per_project()
         self._set_last_choices_in_report_form(author)
 
-    def _filter_task_activities_per_project(self, author: CustomUser) -> None:
-        if 'project' in self.data:
-            project_id = int(self.data.get('project'))
-            self.fields['task_activities'].queryset = TaskActivityType.objects.filter(projects=project_id).order_by('name')
+    def _filter_task_activities_per_project(self) -> None:
+        if "project" in self.data:
+            with suppress(ValueError, TypeError):
+                project_id = int(self.data.get("project"))
+                self.fields["task_activities"].queryset = TaskActivityType.objects.filter(projects=project_id).order_by(
+                    "name"
+                )
         elif self.instance.pk:
-            self.fields['task_activities'].queryset = self.instance.project.project_activities.order_by('name')
+            self.fields["task_activities"].queryset = self.instance.project.project_activities.order_by("name")
 
-    def _set_last_choices_in_report_form(self, author):
+    def _set_last_choices_in_report_form(self, author: CustomUser) -> None:
         if self.instance.pk is None:
             if self.fields["project"].queryset.exists():
                 self.initial["project"] = self.fields["project"].queryset.first()
+                self.fields["task_activities"].queryset = self.initial["project"].project_activities.all()
+            else:
+                self.fields["task_activities"].queryset = TaskActivityType.objects.none()
+
             report_set = author.report_set.order_by("-creation_date")
             if report_set:
-                self.fields['task_activities'].queryset = report_set.first().project.project_activities.all()
+                self.fields["task_activities"].queryset = report_set.first().project.project_activities.all()
                 self.initial["task_activities"] = report_set.first().task_activities
 
 

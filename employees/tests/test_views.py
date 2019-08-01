@@ -11,6 +11,7 @@ from freezegun import freeze_time
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ProjectReportListStrings
 from employees.common.strings import ReportListStrings
+from employees.common.strings import ReportValidationStrings
 from employees.factories import ReportFactory
 from employees.factories import TaskActivityTypeFactory
 from employees.models import Report
@@ -89,17 +90,18 @@ class AdminReportViewTests(TestCase):
         super().setUp()
         self.admin = AdminUserFactory()
         self.user = UserFactory()
+        self.task_activity = TaskActivityTypeFactory(is_default=True)
         self.project = ProjectFactory()
         self.project.members.add(self.user)
         self.client.force_login(self.admin)
-        self.report = ReportFactory(author=self.user, project=self.project)
+        self.report = ReportFactory(author=self.user, project=self.project, task_activities=self.task_activity)
         self.url = reverse("admin-report-detail", kwargs={"pk": self.report.pk})
         self.data = {
             "date": timezone.now().date(),
             "description": "Some other description",
             "project": self.report.project.pk,
             "author": self.user.pk,
-            "task_activities": self.report.task_activities.pk,
+            "task_activities": self.task_activity.pk,
             "work_hours": "8:00",
         }
 
@@ -122,7 +124,10 @@ class ReportCustomListTests(TestCase):
     def setUp(self):
         self.user = UserFactory()
         self.client.force_login(self.user)
-        self.report = ReportFactory(author=self.user, date=datetime.datetime.now().date())
+        self.task_activity = TaskActivityTypeFactory(is_default=True)
+        self.report = ReportFactory(
+            author=self.user, date=datetime.datetime.now().date(), task_activities=self.task_activity
+        )
         self.report.project.members.add(self.user)
         self.url = reverse(
             "custom-report-list",
@@ -134,7 +139,7 @@ class ReportCustomListTests(TestCase):
             "project": self.report.project.pk,
             "author": self.user.pk,
             "work_hours": "8:00",
-            "task_activities": self.report.task_activities.pk,
+            "task_activities": self.task_activity.pk,
         }
 
     def test_custom_list_view_should_display_users_report_list_on_get(self):
@@ -245,24 +250,49 @@ class ReportCustomListTests(TestCase):
             response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
         self.assertEqual(response.context_data["form"].initial["date"], report.date)
 
+    def test_custom_report_list_view_task_activities_should_contain_only_task_activities_related_to_project(self):
+        not_default_task_activity = TaskActivityTypeFactory()
+        self.assertNotIn(not_default_task_activity, self.report.project.project_activities.all())
+
+        response = self.client.get(self.url, data={"project": self.report.project.pk})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["form"].initial["project"], self.report.project)
+        self.assertIn(self.task_activity, response.context["form"].fields["task_activities"].queryset)
+        self.assertNotIn(not_default_task_activity, response.context["form"].fields["task_activities"].queryset)
+
+    def test_custom_report_list_view_should_not_add_report_on_post_when_task_activity_is_not_related_not_project(self):
+        not_related_to_project_task_activity = TaskActivityTypeFactory()
+        author_reports_before_post = self.user.report_set.all()
+
+        self.data["task_activities"] = not_related_to_project_task_activity.pk
+
+        response = self.client.post(self.url, self.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context_data["form"].errors["task_activities"][0],
+            ReportValidationStrings.TASK_ACTIVITY_NOT_RELATED_TO_PROJECT.value,
+        )
+        self.assertCountEqual(author_reports_before_post, self.user.report_set.all())
+
 
 class ProjectReportDetailTests(TestCase):
     def setUp(self):
         super().setUp()
         self.user = AdminUserFactory()
+        self.task_activity = TaskActivityTypeFactory(is_default=True)
         self.project = ProjectFactory()
         self.project.members.add(self.user)
         self.client.force_login(self.user)
-        self.report = ReportFactory(
-            author=self.user, project=self.project, task_activities=TaskActivityTypeFactory(name="Review")
-        )
+        self.report = ReportFactory(author=self.user, project=self.project, task_activities=self.task_activity)
         self.url = reverse("project-report-detail", args=(self.report.pk,))
         self.data = {
             "date": self.report.date,
             "description": self.report.description,
             "project": self.report.project.pk,
             "author": self.report.author.pk,
-            "task_activities": self.report.task_activities.pk,
+            "task_activities": self.task_activity.pk,
             "work_hours": self.report.work_hours_str,
         }
 
@@ -307,15 +337,17 @@ class ReportDetailViewTests(TestCase):
         super().setUp()
         self.user = UserFactory()
         self.client.force_login(self.user)
-        self.report = ReportFactory(author=self.user)
-        self.report.project.members.add(self.user)
+        self.task_activity = TaskActivityTypeFactory(is_default=True)
+        self.project = ProjectFactory()
+        self.project.members.add(self.user)
+        self.report = ReportFactory(author=self.user, project=self.project, task_activities=self.task_activity)
         self.url = reverse("custom-report-detail", args=(self.report.pk,))
         self.data = {
             "date": self.report.date,
             "description": self.report.description,
-            "project": self.report.project.pk,
+            "project": self.project.pk,
             "author": self.report.author.pk,
-            "task_activities": self.report.task_activities.pk,
+            "task_activities": self.task_activity.pk,
             "work_hours": self.report.work_hours_str,
         }
 
@@ -384,14 +416,14 @@ class ReportDetailViewTests(TestCase):
     def test_manager_should_be_able_to_update_his_reports_in_project_in_which_he_is_not_manager(self):
         user_manager = ManagerUserFactory()
         self.client.force_login(user_manager)
-        report_manager = ReportFactory(author=user_manager)
+        report_manager = ReportFactory(author=user_manager, task_activities=self.task_activity)
         report_manager.project.members.add(user_manager)
         data = {
             "date": report_manager.date,
             "description": "report_manager other description",
             "project": report_manager.project.pk,
             "author": report_manager.author.pk,
-            "task_activities": report_manager.task_activities.pk,
+            "task_activities": self.task_activity.pk,
             "work_hours": report_manager.work_hours_str,
         }
         response = self.client.post(path=reverse("custom-report-detail", args=(report_manager.pk,)), data=data)
@@ -427,7 +459,7 @@ class ReportDeleteViewTests(TestCase):
 class ProjectReportListTests(TestCase):
     def setUp(self):
         super().setUp()
-        self.task_type = TaskActivityType(pk=1, name="Other")
+        self.task_type = TaskActivityType(pk=1, name="Other", is_default=True)
         self.task_type.full_clean()
         self.task_type.save()
         self.user = AdminUserFactory()
