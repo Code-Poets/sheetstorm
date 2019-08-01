@@ -9,6 +9,7 @@ from managers.views import ProjectCreateView
 from managers.views import ProjectDetailView
 from managers.views import ProjectsListView
 from managers.views import ProjectUpdateView
+from users.factories import ManagerUserFactory
 from users.factories import UserFactory
 from users.models import CustomUser
 
@@ -137,7 +138,6 @@ class ProjectCreateViewTests(ProjectBaseTests):
             "name": "Another Example Project",
             "start_date": timezone.now().date() - timezone.timedelta(days=30),
             "suspended": False,
-            "managers": [self.user.pk],
             "members": [self.user.pk],
         }
 
@@ -146,11 +146,16 @@ class ProjectCreateViewTests(ProjectBaseTests):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, ProjectCreateView.template_name)
 
-    def test_project_create_view_should_add_new_project_on_post(self):
+    def test_project_create_view_should_add_new_project_on_post_and_add_user_of_request_to_managers(self):
         response = self.client.post(self.url, self.data)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Project.objects.count(), 1)
-        self.assertTrue(Project.objects.filter(name=self.data["name"]).exists())
+        project = Project.objects.get(name=self.data["name"])
+        self.assertEqual(project.name, self.data["name"])
+        self.assertEqual(project.start_date, self.data["start_date"])
+        self.assertCountEqual([members.pk for members in project.members.all()], self.data["members"])
+        self.assertEqual(project.suspended, self.data["suspended"])
+        self.assertIn(self.user, project.managers.all())
 
     def test_project_create_view_should_not_add_new_project_on_post_if_data_is_invalid(self):
         del self.data["name"]
@@ -204,6 +209,18 @@ class ProjectUpdateViewTestCase(ProjectBaseTests):
         self.assertEqual(response.status_code, 404)
         self.project.refresh_from_db()
         self.assertEqual(self.project.managers.count(), 0)
+
+    def test_project_update_view_should_display_all_aggregated_managers_on_get(self):
+        self.project.managers.add(self.user)
+        other_manager = ManagerUserFactory()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.user, response.context_data["form"].initial["managers"])
+        self.assertNotIn(other_manager, response.context_data["form"].initial["managers"])
+        self.assertContains(response, self.user)
+        self.assertContains(response, other_manager)
 
 
 class ProjectDeleteViewTests(ProjectBaseTests):
