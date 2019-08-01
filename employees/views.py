@@ -131,7 +131,10 @@ class MonthNavigationMixin(ContextMixin):
 
     def redirect_to_another_month(self, request: HttpRequest) -> HttpResponseRedirectBase:
         post_data = request.POST.copy()
-        post_data["date"] = datetime.datetime.strptime(post_data["date"], "%m-%Y")
+        try:
+            post_data["date"] = datetime.datetime.strptime(post_data["date"], "%m-%Y")
+        except ValueError:
+            self.redirect_to_current_month()
         form = MonthSwitchForm(data=post_data)
         if form.is_valid():
             redirect_kwargs = {"year": post_data["date"].year, "month": post_data["date"].month}

@@ -200,7 +200,23 @@ class MonthNavigationMixinContextDataTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("project-report-list", kwargs={"year": 2020, "month": 5, "pk": 1}))
 
-    def test_redirect_to_another_month_method_should_redirect_to_request_path_if_provided_date_is_out_of_bonds(self):
+    def test_redirect_to_another_month_method_should_redirect_to_current_month_when_date_is_malformed(self):
+        current_date = timezone.now()
+        self.mixin.kwargs["pk"] = 1
+        request = self.factory.post(
+            reverse("project-report-list", kwargs={"year": current_date.year, "month": current_date.month, "pk": 1}),
+            data={"date": "05-2"},
+        )
+        self.mixin.request = request
+
+        response = self.mixin.redirect_to_another_month(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.mixin.redirect_to_current_month().url)
+
+    def test_redirect_to_another_month_method_shoredirect_tould_redirect_to_request_path_if_provided_date_is_out_of_bonds(
+        self
+    ):
         self.mixin.kwargs["pk"] = 1
         request = HttpRequest()
         request.path = reverse("project-report-list", kwargs={"year": 2019, "month": 3, "pk": 1})
