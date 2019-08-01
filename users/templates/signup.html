@@ -13,7 +13,7 @@
         <form method="post" class="signup">
             {% csrf_token %}
             <label for="id_email"></label>
-            <input id="id_email" type="email" class="fadeIn first" name="email" placeholder="Email" required>
+            <input id="id_email" type="email" class="fadeIn first" name="email" placeholder="Email" required value="{{ form.email.value }}">
                 {% include 'partials/errors_in_field.html' with errors=form.email.errors %}
                 {% include 'partials/errors_in_field.html' with errors=form.non_field_errors %}
             <label for="id_password"></label>
