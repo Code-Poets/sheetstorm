@@ -1,7 +1,9 @@
 import datetime
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.shortcuts import reverse
+from django.template.defaultfilters import date
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
@@ -605,12 +607,8 @@ class ProjectReportListTests(TestCase):
             other_fields = ["description", "author", "task_activities"]
             work_hours = report.work_hours_str
             fields_to_check = [work_hours]
-            for date in dates:
-                fields_to_check.append(
-                    datetime.datetime.strftime(
-                        datetime.datetime.fromtimestamp(int(getattr(report, date).timestamp())), "%B %-d, %Y, %-I:%M"
-                    )
-                )
+            for date_ in dates:
+                fields_to_check.append(date(getattr(report, date_), settings.DATE_FORMAT))
             for field in other_fields:
                 if field == "author":
                     fields_to_check.append(getattr(report, field).email)
