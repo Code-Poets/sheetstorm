@@ -1,7 +1,3 @@
-import csv
-import zipfile
-from io import BytesIO
-from io import StringIO
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -268,15 +264,15 @@ def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_set
     total_hours = timezone.timedelta()
 
     for row_number, row in enumerate(sheet.rows, start=1):
-        if row_number == 1:
-            continue
-
         # Check if is last row by comparing first cell value to `TOTAL`.
         if isinstance(row[0].value, str) and row[0].value == constants.TOTAL.value:
             is_last_row = True
 
         next_row = []
         for cell_number, cell in enumerate(row, start=1):
+            if row_number == 1:
+                next_row.append(cell.parent.title)
+                break
             if isinstance(cell.value, str) and cell.value.lower().startswith("=timevalue"):
                 hours_as_string = cell.value[len('=timevalue("') : -len('")')]  # noqa: E203
                 next_row.append(hours_as_string)
@@ -293,21 +289,10 @@ def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_set
         writer.writerow(next_row)
 
 
-def save_work_book_as_zip_of_csv(work_book: Workbook) -> BytesIO:
-    zip_file_data = BytesIO()
-    zip_file = zipfile.ZipFile(zip_file_data, "w")
-
-    for sheet_index, sheet_name in enumerate(work_book.sheetnames):
+def export_all_project_reports_as_one_csv_file(work_book: Workbook, writer: _writer) -> None:
+    hours_column_setting: ColumnSettings = constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value[
+        constants.HOURS_HEADER_STR.value
+    ]
+    for sheet_index in range(len(work_book.sheetnames)):
         work_book.active = sheet_index
-        csv_file_data = StringIO()
-        writer = csv.writer(csv_file_data)
-        hours_column_setting: ColumnSettings = constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value[
-            constants.HOURS_HEADER_STR.value
-        ]
         save_work_book_as_csv(writer, work_book, hours_column_setting)
-        file_name = f'{sheet_name.replace(" ", "_").replace(".", "").lower()}-reports.csv'
-        zip_file.writestr(file_name, csv_file_data.getvalue())
-
-    zip_file.close()
-
-    return zip_file_data
