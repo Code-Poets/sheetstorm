@@ -34,5 +34,6 @@
               --disk         name={{ server_name }}-database-backup
               --machine-type {{ machine_type }}
               --address      {{ name_of_ip }}
+              --scopes       default,storage-full
               --project      {{ gke.project }}
               --zone         {{ gke.zone }}
