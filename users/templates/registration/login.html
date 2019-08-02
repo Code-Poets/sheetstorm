@@ -19,7 +19,7 @@
     </div>
     <form method="post" class="login">
         {% csrf_token %}
-      <input type="text" id="username" class="fadeIn second" name="username" placeholder="Email" required value="{{ form.username.value }}">
+      <input type="text" id="username" class="fadeIn second" name="username" placeholder="Email" required {% if form.username.value %} value="{{ form.username.value }} {% endif %}">
       <input type="password" id="password" class="fadeIn third" name="password" placeholder="Password" required>
       <input type="submit" class="fadeIn fourth" value="{% trans 'Login' %}">
     </form>
