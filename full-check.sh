@@ -24,3 +24,7 @@ printf "========================= UNIT TESTS WITH COVERAGE =================\n"
 # NOTE: 'manage.py test' does not find all tests unless we run it from within the app directory.
 ./run-test-coverage.sh
 printf "\n"
+
+printf "========================= E2E SELENIUM TESTS ======================\n"
+./e2e.sh
+printf "\n"
