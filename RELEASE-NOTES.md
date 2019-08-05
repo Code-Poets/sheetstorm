@@ -1,3 +1,37 @@
+### v0.8.0
+
+##### Features
+
+- Feature add export to project author report project view ([#424](https://github.com/Code-Poets/sheetstorm/pull/424))
+- Feature add lines separators in columns ([#439](https://github.com/Code-Poets/sheetstorm/pull/439))
+- Feature add notifications ([#421](https://github.com/Code-Poets/sheetstorm/pull/421))
+- Feature enable export reports to csv file ([#326](https://github.com/Code-Poets/sheetstorm/pull/326))
+- Feature improve managers and employees selection ([#416](https://github.com/Code-Poets/sheetstorm/pull/416))
+
+##### Bugfixes
+
+- Bugfix add set method for printing ([#426](https://github.com/Code-Poets/sheetstorm/pull/426))
+- Bugfix add freeze_time decorator to work percentage time mixin tests ([#465](https://github.com/Code-Poets/sheetstorm/pull/465))
+- Bugfix add task activities to Report in initial data ([#450](https://github.com/Code-Poets/sheetstorm/pull/450))
+- Bugfix change "Recent month" to "Current month" in month navigation bar ([#429](https://github.com/Code-Poets/sheetstorm/pull/429))
+- Bugfix change CustomUser's manager to enable migration making ([#451](https://github.com/Code-Poets/sheetstorm/pull/451))
+- Bugfix change name from 'My Reports' to 'Reports' ([#455](https://github.com/Code-Poets/sheetstorm/pull/455))
+- Bugfix custom report list ([#446](https://github.com/Code-Poets/sheetstorm/pull/446))
+- Bugfix login and home urls ([#438](https://github.com/Code-Poets/sheetstorm/pull/438))
+- Bugfix failing  tests in master ([#470](https://github.com/Code-Poets/sheetstorm/pull/470))
+- Bugfix modify template to preserve user's email in case of errors ([#467](https://github.com/Code-Poets/sheetstorm/pull/467))
+- Bugfix month navigation ([#466](https://github.com/Code-Poets/sheetstorm/pull/466))
+- Bugfix navigation form (in case of malformed date) ([#471](https://github.com/Code-Poets/sheetstorm/pull/471))
+- Bugfix OpenOffice does not display full description ([#423](https://github.com/Code-Poets/sheetstorm/pull/423))
+- Bugfix set active actual url ([#448](https://github.com/Code-Poets/sheetstorm/pull/448))
+- Bugfix stats at the bottom of report list should involve reports from last 30 days ([#419](https://github.com/Code-Poets/sheetstorm/pull/419))
+- Bugfix total hours in csv in project reports ([#440](https://github.com/Code-Poets/sheetstorm/pull/440))
+- Bugfix urls namespace and add reverse to missing usages in tests ([#428](https://github.com/Code-Poets/sheetstorm/pull/428))
+- Bugfix weekends should be skipped in reports date suggestion ([#427](https://github.com/Code-Poets/sheetstorm/pull/427))
+- Bugfix work hours display in report update ([#417](https://github.com/Code-Poets/sheetstorm/pull/417))
+
+
+
 ### v0.7.4
 
 ##### Bugfixes
