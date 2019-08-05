@@ -4,12 +4,14 @@ $(function () {
         autoOpen: false,
         buttons : [
           {
+            id: "id_decline_update_button",
             text: "No",
             click: function () {
               $(this).dialog('close');
             }
           },
           {
+            id: "id_confirm_update_button",
             text: "Yes",
             click: function () {
                 $('form').submit()

@@ -247,7 +247,6 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_EMAIL_FIELD = 'email'
 ACCOUNT_LOGOUT_ON_GET = True
 
@@ -275,3 +274,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # List of valid email domains which are allowed in SheetStorm
 VALID_EMAIL_DOMAIN_LIST: list = []
+
+# Boolean value enabling user signup verification via email
+EMAIL_SIGNUP_VERIFICATION = True

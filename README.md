@@ -4,7 +4,6 @@ Base application for management of employees working hours
 ## Software requirements
 - Python 3.7.0
 - Django 2.1.1
-- Django REST framework 3.8.2
 
 ## Environment set-up
 
@@ -186,4 +185,17 @@ If your database configuration differs from the defaults, you may need to tweak 
 DATABASES['default']['NAME'] = 'sheetstorm'
 DATABASES['default']['USER'] = 'postgres'
 DATABASES['deafult']['PASSWORD'] = ''
+```
+
+## Edge-to-edge testing
+
+This project uses **Selenium** framework for simulating client behaviour for testing purposes.
+In order to successfully run edge-to-edge tests, [Chrome browser](https://www.google.com/chrome/?brand=CHBD&gclid=Cj0KCQjwjrvpBRC0ARIsAFrFuV8EL1z4WIY9bSYJVucgCvPOonyxbtfjg5hXMCv5r8jquIUxegwe0ykaAhVIEALw_wcB&gclsrc=aw.ds) must be installed
+and [ChromeDriver](http://chromedriver.chromium.org) must be downloaded and included in PATH.
+You can run edge-to-edge tests by executing script located in `e2e.sh` file.
+
+
+**NOTE:** Chrome supports headless run. In order to run tests in headless mode, modify following value in `sheetstorm/settings/testing.py`:
+```
+HEADLESS_BROWSER_RUN = False    #Change to 'True' for headless testing run
 ```

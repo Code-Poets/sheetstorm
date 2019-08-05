@@ -11,6 +11,6 @@ fi
 
 pipenv uninstall --all
 
-yes | pipenv install --dev --clear
+pipenv install --dev --clear
 
 pipenv check
