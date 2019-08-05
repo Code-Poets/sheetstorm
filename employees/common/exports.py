@@ -63,6 +63,12 @@ def set_borders_between_columns(cell: Cell) -> None:
     cell.border = Border(left=constants.BORDER_STYLE.value, right=constants.BORDER_STYLE.value)
 
 
+def separate_days(cell: Cell) -> None:
+    cell.border = Border(
+        left=constants.BORDER_STYLE.value, right=constants.BORDER_STYLE.value, top=constants.BORDER_STYLE.value
+    )
+
+
 def get_employee_name(author: CustomUser) -> str:
     if author.last_name and author.first_name:
         return f"{author.first_name} {author.last_name[0]}."
@@ -196,6 +202,8 @@ class ReportExtractor:
         column_dimensions.width = self._headers_settings[column_name].width
 
     def _fill_current_report_data(self, storage_data: dict) -> None:
+        is_next_day = storage_data[constants.DATE_HEADER_STR.value] is not None
+
         for column_name, cell_value in storage_data.items():
             if self._headers_settings.get(column_name) is not None:
                 cell = self._active_worksheet.cell(
@@ -205,6 +213,9 @@ class ReportExtractor:
                     set_and_fill_hours_cell(cell, cell_value)
                 else:
                     set_and_fill_cell(cell, cell_value)
+
+                if is_next_day:
+                    separate_days(cell)
 
     def _summarize_user_reports(self) -> None:
         total_cell = self._active_worksheet.cell(row=self._current_row, column=constants.TOTAL_COLUMN.value)
