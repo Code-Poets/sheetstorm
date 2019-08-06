@@ -10,6 +10,10 @@
     display:inline-block;
 }
 
+.table {
+    table-layout: fixed;
+}
+
 .modal-dialog {
     margin-bottom: 0;
 }
@@ -48,6 +52,7 @@
 
 .description-column {
     text-align: left;
+    word-wrap: break-word;
 }
 
 .work-hours-column {
@@ -100,6 +105,7 @@
 
 .author-reports-description-column {
     text-align: left;
+    word-wrap: break-word;
 }
 
 .author-reports-creation-date-column {
@@ -133,7 +139,7 @@ textarea.form-control, #id_description {
 
 
 .project-reports-task-activity-header {
-    width:1%;
+    width: 10.18%;
     white-space:nowrap;
 }
 
@@ -187,6 +193,7 @@ textarea.form-control, #id_description {
 
 .project-reports-description-column {
     text-align: left;
+    word-wrap: break-word;
 }
 
 .project-reports-creation-date-column {
