@@ -225,3 +225,17 @@ a.pagelink:visited,
 a.pagelink:active { color: #3366FF; text-decoration: none; }
 
 a.pagelink:hover { color: #006699; text-decoration: underline; }
+
+.main-white-container{
+    background-color: white;
+    box-shadow: 0 0 10px grey;
+    width: 80%;
+}
+
+.double-space-margin-bottom{
+    margin-bottom: 2em;
+}
+
+.double-space-margin-top{
+    margin-top: 2em;
+}

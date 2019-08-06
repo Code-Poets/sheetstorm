@@ -8,116 +8,123 @@
 {% load data_structure_element_selectors %}
 
 {% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
 {% endblock %}
 
 {% block content %}
-{% include "employees/month_navigation_bar.html" %}
-<h1>{{ UI_text.PAGE_TITLE.value }} {{ title_date }}</h1>
+  {% include "employees/month_navigation_bar.html" %}
+  <h1>{{ UI_text.PAGE_TITLE.value }} {{ title_date }}</h1>
 
-<input class="hidden-print" type="button" id="opener" value="{{ UI_text.JOIN_PROJECT_BUTTON.value }}"/>
+  <div class="container main-white-container">
+    <input class="hidden-print double-space-margin-top" type="button" id="opener" value="{{ UI_text.JOIN_PROJECT_BUTTON.value }}" />
 
-<div class="modal-dialog hidden-print">
-    {% for error in errors.non_field_errors %}
-    <h4><font color="red">{{ error }}</font></h4>
-    {% endfor %}
-    <form action="{{ path }}" method="POST" id="reportForm" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
+    <div class="modal-dialog hidden-print">
+      {% for error in errors.non_field_errors %}
+        <h4>
+          <font color="red">{{ error }}</font>
+        </h4>
+      {% endfor %}
+      <form action="{{ path }}" method="POST" id="reportForm" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
         {% csrf_token %}
         {{ form|crispy }}
-       <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
-    </form>
-</div>
+        <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+      </form>
+    </div>
 
-<div class="hidden-print" id="dialog" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
-    <form action="{{ path }}" id="join_form" method="POST">
+    <div class="hidden=print" id="dialog" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
+      <form action="{{ path }}" id="join_form" method="POST">
         {% csrf_token %}
         {{ project_form }}
         <input type="submit" name="join" value="{{ UI_text.JOIN_POPUP_YES.value }}">
-    </form>
-    {% if hide_join %}
+      </form>
+      {% if hide_join %}
         {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
-    {% endif %}
-</div>
+      {% endif %}
+    </div>
 
-</br>
-<div class="container">
-    <div class="table-responsive">
+    <div class="container double-space-margin-top">
+      <div class="table-responsive">
         <table class="table">
-            <thead>
-                <tr>
-                    <th class="date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-                    <th class="task-activities-header">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
-                    <th class="work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
-                    <th>{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-                    <td class="edit-button-header Invisible"></td>
-                </tr>
-            </thead>
-            <tbody>
-                {% regroup object_list by date as date %}
-                {% for reports in date %}
-                {% for report in reports.list %}
+          <thead>
+            <tr>
+              <th class="date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+              <th class="project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+              <th class="task-activities-header">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
+              <th class="work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+              <th>{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+              <td class="edit-button-header Invisible"></td>
+            </tr>
+          </thead>
+          <tbody>
+            {% regroup object_list by date as date %}
+            {% for reports in date %}
+              {% for report in reports.list %}
                 {% if forloop.first %}
-                    <td class="date-column" rowspan={{ reports.list|length }}><strong>{{ reports.grouper| date:"l, d F Y" }}</strong></td>
-                    {% else %}
-                    <tr>
+                  <td class="date-column" rowspan={{ reports.list|length }}><strong>{{ reports.grouper| date:"l, d F Y" }}</strong></td>
+                {% else %}
+                  <tr>
+                {% endif %}
+                  <td class="project-column">{{ report.project }}</td>
+                  ﻿<td class="task-activities-column">{{ report.task_activities }}</td>
+                  <td class="work-hours-column">{{ report.work_hours_str }}</td>
+                  <td class="description-column">{{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
+                  <td></td>
+                  <td class="edit-button-column Invisible hidden-print">
+                    {% if report.editable %}
+                      <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                      </a>
                     {% endif %}
-                    <td class="project-column">{{ report.project }}</td>
-    ﻿               <td class="task-activities-column">{{ report.task_activities }}</td>
-                    <td class="work-hours-column">{{ report.work_hours_str }}</td>
-                    <td class="description-column">{{ report.description|safe|urlize|linebreaks|annotate_no_follow_link_with_css_class:"pagelink" }}<td>
-                    <td class="edit-button-column Invisible hidden-print">
-                        {% if report.editable %}
-                        <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">
-                            <span class="glyphicon glyphicon-pencil"></span>
-                        </a>
-                        {% endif %}
-                    </td>
+                  </td>
                 </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
-                    <td class="work-hours-column"><strong>{{ daily_hours_sum|get_key_value:reports.grouper|duration_field_to_string }}</strong></td>
-                    <td></td>
-                    <td class="edit-button-column Invisible hidden-print"></td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    {% if not date|length == 0 %}
-                        <td colspan="3"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
-                        <td class="work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:user.pk|duration_field_to_string }}</strong></td>
-                    {% endif %}
-                </tr>
-            </tbody>
+              {% endfor %}
+              <tr>
+                <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
+                <td class="work-hours-column"><strong>{{ daily_hours_sum|get_key_value:reports.grouper|duration_field_to_string }}</strong></td>
+                <td></td>
+                <td class="edit-button-column Invisible hidden-print"></td>
+              </tr>
+            {% endfor %}
+            <tr>
+              {% if not date|length == 0 %}
+                <td colspan="3"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+                <td class="work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:user.pk|duration_field_to_string }}</strong></td>
+              {% endif %}
+            </tr>
+          </tbody>
         </table>
         {% include "employees/partial/projects_work_percentage.html" %}
+      </div>
     </div>
-</div>
+
     {% if object_list %}
-            <a href="{% url 'export-data' pk=user.pk year=year month=month %}" class="btn btn-info">
-                Export {{ month | convert_to_month_name }} {{ year }} Reports to XLSX
-            </a>
-            <a href="{% url 'export-data' pk=user.pk year=year month=month %}?format=csv" class="btn btn-info">
-                Export {{ month| convert_to_month_name }} {{ year }} Reports to CSV
-            </a>
+      <div class="double-space-margin-bottom">
+        <a href="{% url 'export-data' pk=user.pk year=year month=month %}" class="btn btn-info">
+          Export {{ month | convert_to_month_name }} {{ year }} Reports to XLSX
+        </a>
+        <a href="{% url 'export-data' pk=user.pk year=year month=month %}?format=csv" class="btn btn-info">
+          Export {{ month| convert_to_month_name }} {{ year }} Reports to CSV
+        </a>
+      </div>
     {% endif %}
+  </div>
 {% endblock %}
 
 {% block extra_script %}
-    {{ form.media }}
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
-    {{ month_form.media }}
-    <script src="//code.jquery.com/jquery-3.3.1.js"></script>
-    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  {{ form.media }}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+  {{ month_form.media }}
+  <script src="//code.jquery.com/jquery-3.3.1.js"></script>
+  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script type="text/javascript">
+    var join_discard_text = "{{ UI_text.JOIN_POPUP_NO.value }}";
+  </script>
+  <script src="{% static 'employees/scripts/join_popup_window.js' %}"></script>
+  {% if hide_join %}
     <script type="text/javascript">
-        var join_discard_text = "{{ UI_text.JOIN_POPUP_NO.value }}";
+      document.getElementById("join_form").hidden = true;
     </script>
-    <script src="{% static 'employees/scripts/join_popup_window.js' %}"></script>
-    {% if hide_join %}
-        <script type="text/javascript">
-            document.getElementById("join_form").hidden = true;
-        </script>
-    {% endif %}
-    <script src="{% static 'employees/scripts/load_activities_for_project.js' %}"></script>
+  {% endif %}
+  <script src="{% static 'employees/scripts/load_activities_for_project.js' %}"></script>
 {% endblock %}
