@@ -1,6 +1,5 @@
 import csv
 import io
-import zipfile
 
 from django.test import TestCase
 from django.urls import reverse
@@ -13,7 +12,6 @@ from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.exports import get_employee_name
 from employees.common.exports import save_work_book_as_csv
-from employees.common.exports import save_work_book_as_zip_of_csv
 from employees.factories import ReportFactory
 from employees.models import Report
 from managers.factories import ProjectFactory
@@ -79,11 +77,11 @@ class ExportViewTest(DataSetUpToTests):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response._headers["content-disposition"][1].endswith('csv"'))
 
-    def test_export_reports_for_project_should_download_for_project_csv_as_zip_file(self):
+    def test_export_reports_for_project_should_download_csv(self):
         self.client.force_login(self.user)
         response = self.client.get(self.url_project + "?format=csv")
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response._headers["content-disposition"][1].endswith('zip"'))
+        self.assertTrue(response._headers["content-disposition"][1].endswith('csv"'))
 
     def test_export_reports_for_project_author_reports_should_download_if_user_is_manager_of_current_project(self):
         manager = ManagerUserFactory()
@@ -297,6 +295,11 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
         ]
         save_work_book_as_csv(writer, self.workbook_for_user, hours_column_setting)
         self.csv_content = [line for line in csv.reader(self.csv_file.getvalue().split("\n"))]
+        self.second_row = 2
+
+    def test_employee_name_should_be_the_same_in_excel(self):
+
+        self.assertEqual(str(self.workbook_for_user.active.title), self.csv_content[0][0])
 
     def test_date_should_be_the_same_in_excel(self):
         self.assertEqual(
@@ -308,7 +311,7 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
                     ].position,
                 ).value
             ),
-            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][0],
+            self.csv_content[self.second_row][0],
         )
 
     def test_project_name_should_be_the_same_in_excel(self):
@@ -321,7 +324,7 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
                     ].position,
                 ).value
             ),
-            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][1],
+            self.csv_content[self.second_row][1],
         )
 
     def test_task_activity_should_be_the_same_in_excel(self):
@@ -332,7 +335,7 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
                     excel_constants.TASK_ACTIVITY_HEADER_STR.value
                 ].position,
             ).value,
-            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][2],
+            self.csv_content[self.second_row][2],
         )
 
     def test_hours_should_be_the_same_in_excel(self):
@@ -343,7 +346,7 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
                     excel_constants.HOURS_HEADER_STR.value
                 ].position,
             ).value,
-            f'=timevalue("{self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][3]}")',
+            f'=timevalue("{self.csv_content[self.second_row][3]}")',
         )
 
     def test_description_should_be_the_same_in_excel(self):
@@ -354,49 +357,8 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
                     excel_constants.DESCRIPTION_HEADER_STR.value
                 ].position,
             ).value,
-            self.csv_content[excel_constants.FIRST_ROW_FOR_DATA.value - 2][4],
+            self.csv_content[self.second_row][4],
         )
-
-
-class SaveWorkBookAsZipOfCSVTesCase(TestCase):
-    def setUp(self):
-        super().setUp()
-        self.user = UserFactory()
-        self.project = ProjectFactory()
-        self.project.members.add(self.user)
-        ReportFactory(author=self.user, project=self.project)
-
-    def test_save_work_book_as_zip_of_csv_creates_zip_file(self):
-        workbook_for_project = generate_xlsx_for_project(self.project)
-        zip_file_data = save_work_book_as_zip_of_csv(workbook_for_project)
-
-        self.assertIsInstance(zip_file_data, io.BytesIO)
-
-        zip_file = zipfile.ZipFile(zip_file_data)
-        self.assertEqual(len(zip_file.infolist()), 1)
-        self.assertEqual(
-            zip_file.infolist()[0].filename,
-            f"{self.user.first_name.lower()}_{self.user.last_name[0].lower()}-reports.csv",
-        )
-        self.assertTrue(zip_file.infolist()[0].file_size > 0)
-
-    def test_save_work_book_as_zip_of_csv_creates_zip_file_with_two_csv_files_for_two_users_in_project(self):
-        user_2 = UserFactory()
-        self.project.members.add(user_2)
-        ReportFactory(author=user_2, project=self.project)
-        workbook_for_project = generate_xlsx_for_project(self.project)
-
-        zip_file_data = save_work_book_as_zip_of_csv(workbook_for_project)
-        self.assertIsInstance(zip_file_data, io.BytesIO)
-
-        zip_file = zipfile.ZipFile(zip_file_data)
-        self.assertEqual(len(zip_file.infolist()), 2)
-        file_names = [zip_info.filename for zip_info in zip_file.infolist()]
-
-        self.assertIn(f"{self.user.first_name.lower()}_{self.user.last_name[0].lower()}-reports.csv", file_names)
-        self.assertIn(f"{user_2.first_name.lower()}_{user_2.last_name[0].lower()}-reports.csv", file_names)
-        self.assertTrue(zip_file.infolist()[0].file_size > 0)
-        self.assertTrue(zip_file.infolist()[1].file_size > 0)
 
 
 class TestExportingFunctions(TestCase):

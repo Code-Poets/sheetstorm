@@ -25,10 +25,10 @@ from django.views.generic.base import ContextMixin
 from employees.common.constants import ColumnSettings
 from employees.common.constants import ExcelGeneratorSettingsConstants as excel_constants
 from employees.common.constants import MonthNavigationConstants
+from employees.common.exports import export_all_project_reports_as_one_csv_file
 from employees.common.exports import generate_xlsx_for_project
 from employees.common.exports import generate_xlsx_for_single_user
 from employees.common.exports import save_work_book_as_csv
-from employees.common.exports import save_work_book_as_zip_of_csv
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import MonthNavigationText
 from employees.common.strings import ProjectReportDetailStrings
@@ -517,11 +517,12 @@ class ExportReportsInProjectView(UserIsManagerOfCurrentProjectMixin, DetailView)
         work_book = generate_xlsx_for_project(project)
 
         if self.request.GET.get("format") == "csv":
-            zip_file = save_work_book_as_zip_of_csv(work_book)
-            response = HttpResponse(zip_file.getvalue(), content_type=excel_constants.ZIP_CONTENT_TYPE_FORMAT.value)
-            response["Content-Disposition"] = excel_constants.ZIP_EXPORTED_FILE_NAME.value.format(
+            response = HttpResponse(content_type=excel_constants.CSV_CONTENT_TYPE_FORMAT.value)
+            response["Content-Disposition"] = excel_constants.CSV_EXPORTED_FILE_NAME.value.format(
                 project.name, f"{self.kwargs['month']}/{self.kwargs['year']}"
             )
+            writer = csv.writer(response)
+            export_all_project_reports_as_one_csv_file(work_book, writer)
         else:
             response = HttpResponse(content_type=excel_constants.XLSX_CONTENT_TYPE_FORMAT.value)
             response["Content-Disposition"] = excel_constants.XLSX_EXPORTED_FILE_NAME.value.format(
