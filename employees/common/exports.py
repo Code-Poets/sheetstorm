@@ -1,12 +1,10 @@
 import csv
 import zipfile
-from datetime import timedelta
 from io import BytesIO
 from io import StringIO
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Tuple
 
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
@@ -122,15 +120,14 @@ class ReportExtractor:
     def _fill_report_for_single_user(self, employee_name: str, reports: ReportQuerySet) -> None:
         self._prepare_worksheet(employee_name)
         for report in reports:
-            self._fill_single_report(report, reports)
+            self._fill_single_report(report)
 
         self._summarize_user_reports()
 
-    def _fill_single_report(self, report: Report, reports: ReportQuerySet) -> None:
-        report_date, daily_hours = self._get_report_date_and_daily_hours(report, reports)
+    def _fill_single_report(self, report: Report) -> None:
+        report_date = self._get_report_date(report)
         storage_data = {
             constants.DATE_HEADER_STR.value: report_date,
-            constants.DAILY_HOURS_HEADER_STR.value: daily_hours,
             constants.PROJECT_HEADER_STR.value: report.project.name,
             constants.TASK_ACTIVITY_HEADER_STR.value: report.task_activities.name,
             constants.HOURS_HEADER_STR.value: report.work_hours_str,
@@ -206,8 +203,6 @@ class ReportExtractor:
                 )
                 if column_name == constants.HOURS_HEADER_STR.value:
                     set_and_fill_hours_cell(cell, cell_value)
-                elif column_name == constants.DAILY_HOURS_HEADER_STR.value:
-                    set_and_fill_hours_cell(cell, cell_value)
                 else:
                     set_and_fill_cell(cell, cell_value)
 
@@ -226,21 +221,14 @@ class ReportExtractor:
         total_hours_cell.number_format = constants.TOTAL_HOURS_FORMAT.value
         set_format_styles_for_main_cells(total_hours_cell, is_header=False)
 
-    def _get_report_date_and_daily_hours(
-        self, current_report: Report, reports_subset: ReportQuerySet
-    ) -> Tuple[Optional[datetime], Optional[timedelta]]:
-        # returns report_date and daily_hours
-        # if this is their first occurrence in a day
-        # other way returns None
+    def _get_report_date(self, current_report: Report) -> Optional[datetime]:
         date = current_report.date
         if self._last_date == date:
-            daily_hours = None
             report_date = None
         else:
-            daily_hours = reports_subset.get_report_work_hours_sum_for_date(date)
             report_date = date
         self._last_date = date
-        return (report_date, daily_hours)
+        return report_date
 
     def _set_row_height(self, description: str) -> None:
         """
