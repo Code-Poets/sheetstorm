@@ -234,6 +234,7 @@ class NotificationUserListView(ListView):
                 projects__suspended=False,
                 projects__stop_date__isnull=True,
                 projects__managers__pk=self.request.user.pk,
+                projects__is_notification_enabled=True,
             )
             .annotate(last_report_date=Coalesce(Max("report__date"), datetime.date.today()))
             .annotate(days_without_report=datetime.date.today() - F("last_report_date"))

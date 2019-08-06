@@ -37,6 +37,7 @@ class Project(models.Model):
     suspended = models.BooleanField(default=False)
     managers = models.ManyToManyField(CustomUser, related_name="manager_projects")
     members = models.ManyToManyField(CustomUser, related_name="projects")
+    is_notification_enabled = models.BooleanField(default=True)
 
     objects = ProjectQuerySet.as_manager()
 

@@ -9,6 +9,7 @@ from parameterized import parameterized
 from employees.factories import ReportFactory
 from managers.factories import ProjectFactory
 from users.common.constants import UserConstants
+from users.common.strings import UserNotificationsText
 from users.common.strings import ValidationErrorText
 from users.common.utils import generate_random_phone_number
 from users.factories import AdminUserFactory
@@ -306,7 +307,7 @@ class NotificationsTests(TestCase):
         self.client.force_login(self.manager)
         with freeze_time(test_date):
             response = self.client.get(self.url)
-        self._check_response(response, 200, ["No new notifications about employees in your projects"])
+        self._check_response(response, 200, [UserNotificationsText.NO_MORE_NOTIFICATIONS.value])
 
     @parameterized.expand([("2019-07-10", "<td>1</td>"), ("2019-07-11", "<td>2</td>"), ("2019-07-15", "<td>4</td>")])
     def test_manager_should_get_notification_about_missing_reports(self, test_date, missing_reports):
@@ -325,4 +326,16 @@ class NotificationsTests(TestCase):
         self.client.force_login(self.manager)
         with freeze_time("2019-07-15"):
             response = self.client.get(self.url)
-        self._check_response(response, 200, ["No new notifications about employees in your projects"])
+        self._check_response(response, 200, [UserNotificationsText.NO_MORE_NOTIFICATIONS.value])
+
+    def test_manager_should_not_get_any_notifications_if_they_are_disabled_for_project(self):
+        self.project.is_notification_enabled = False
+        self.project.save()
+
+        with freeze_time("2019-07-08"):
+            ReportFactory(author=self.employee, project=self.project, date="2019-07-08")
+
+        self.client.force_login(self.manager)
+        with freeze_time("2019-07-15"):
+            response = self.client.get(self.url)
+        self._check_response(response, 200, [UserNotificationsText.NO_MORE_NOTIFICATIONS.value])
