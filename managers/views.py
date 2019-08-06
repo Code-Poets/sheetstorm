@@ -82,19 +82,20 @@ class ProjectDetailView(UserIsManagerOfCurrentProjectMixin, DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-@method_decorator(
-    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
-    name="dispatch",
-)
+@method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class ProjectCreateView(CreateView):
     extra_context = {"button_text": _("Create"), "title": _("Create new project")}
     form_class = ProjectAdminForm
     model = Project
     template_name = "managers/project_form.html"
 
+    def get_form_kwargs(self) -> dict:
+        kwargs = super().get_form_kwargs()
+        kwargs["user_pk"] = self.request.user.pk
+        return kwargs
+
     def get_context_data(self, **kwargs: Any) -> dict:
         logger.info(f"User with id: {self.request.user.pk} is in project create view")
-        ProjectAdminForm.user_pk = self.request.user.pk
         context_data = super().get_context_data(**kwargs)
         context_data["back_url"] = self.get_success_url()
         return context_data

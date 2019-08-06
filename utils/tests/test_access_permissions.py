@@ -60,7 +60,7 @@ class AccessPermissionsTestCase(TestCase):
             ): [CustomUser.UserType.MANAGER.name, CustomUser.UserType.ADMIN.name],
             # Managers.
             reverse("custom-projects-list"): [CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name],
-            reverse("custom-project-create"): [CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name],
+            reverse("custom-project-create"): [CustomUser.UserType.ADMIN.name],
             reverse("custom-project-detail", kwargs={"pk": self.report.project.pk}): [
                 CustomUser.UserType.ADMIN.name,
                 CustomUser.UserType.MANAGER.name,

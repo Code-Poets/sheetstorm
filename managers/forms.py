@@ -1,7 +1,4 @@
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
 
 from bootstrap_datepicker_plus import DatePickerInput
 from django import forms
@@ -12,19 +9,17 @@ from managers.models import Project
 from users.models import CustomUser
 
 
-class ManagerSelectMultiple(Select2MultipleWidget):
-    def optgroups(self, name: str, value: List, attrs: Optional[Dict] = None) -> List:
-        self.choices.queryset = CustomUser.objects.exclude(user_type=CustomUser.UserType.EMPLOYEE.name).exclude(
-            pk=self.user_pk if hasattr(self, "user_pk") else None
-        )
-        return super().optgroups(name, value, attrs)
-
-
 class ProjectAdminForm(forms.ModelForm):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
+        user_pk = kwargs.pop("user_pk", None)
         super().__init__(*args, **kwargs)
-        if hasattr(self, "user_pk"):
-            ManagerSelectMultiple.user_pk = self.user_pk
+
+        managers_to_choose = CustomUser.objects.exclude(user_type=CustomUser.UserType.EMPLOYEE.name)
+        if self.instance.pk:
+            self.fields["managers"].queryset = managers_to_choose
+        else:
+            self.fields["managers"].queryset = managers_to_choose.exclude(pk=user_pk)
+            self.fields["managers"].required = False
 
     class Meta:
         model = Project
@@ -32,14 +27,13 @@ class ProjectAdminForm(forms.ModelForm):
         widgets = {
             "start_date": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
             "stop_date": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
-            "managers": ManagerSelectMultiple(),
+            "managers": Select2MultipleWidget(),
             "members": Select2MultipleWidget(),
         }
 
 
-class ProjectManagerForm(ProjectAdminForm):
+class ProjectManagerForm(forms.ModelForm):
     class Meta:
-        model = ProjectAdminForm.Meta.model
-        fields = ProjectAdminForm.Meta.fields
+        model = Project
         exclude = ("managers",)
         widgets = ProjectAdminForm.Meta.widgets
