@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
-{% load crispy_forms_tags %}
 {% load static %}
 
 {% load data_display_filters %}
 {% load data_structure_element_selectors %}
 
 {% block extra_head %}
-  <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'employees/popup_style.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -17,31 +17,11 @@
   <h1>{{ UI_text.PAGE_TITLE.value }} {{ title_date }}</h1>
 
   <div class="container main-white-container">
-    <input class="hidden-print double-space-margin-top" type="button" id="opener" value="{{ UI_text.JOIN_PROJECT_BUTTON.value }}" />
+    <button class="hidden-print btn btn-default double-space-margin-top" type="button" id="opener_create" style="border:none;">
+      <span class="glyphicon glyphicon-edit" style="color:rgb(44, 119, 188);"></span> <font color="#2c77bc"><b>Add new entry</b></font>
+    </button>
 
-    <div class="modal-dialog hidden-print">
-      {% for error in errors.non_field_errors %}
-        <h4>
-          <font color="red">{{ error }}</font>
-        </h4>
-      {% endfor %}
-      <form action="{{ path }}" method="POST" id="reportForm" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
-        {% csrf_token %}
-        {{ form|crispy }}
-        <input type="submit" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
-      </form>
-    </div>
-
-    <div class="hidden=print" id="dialog" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
-      <form action="{{ path }}" id="join_form" method="POST">
-        {% csrf_token %}
-        {{ project_form }}
-        <input type="submit" name="join" value="{{ UI_text.JOIN_POPUP_YES.value }}">
-      </form>
-      {% if hide_join %}
-        {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
-      {% endif %}
-    </div>
+    {% include "employees/partial/create_and_join_dialog.html" %}
 
     <div class="container double-space-margin-top">
       <div class="table-responsive">
@@ -117,14 +97,20 @@
   {{ month_form.media }}
   <script src="//code.jquery.com/jquery-3.3.1.js"></script>
   <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script type="text/javascript">
-    var join_discard_text = "{{ UI_text.JOIN_POPUP_NO.value }}";
-  </script>
-  <script src="{% static 'employees/scripts/join_popup_window.js' %}"></script>
+  <script src="{% static 'employees/scripts/create_and_join_popup_window.js' %}"></script>
   {% if hide_join %}
     <script type="text/javascript">
       document.getElementById("join_form").hidden = true;
     </script>
   {% endif %}
   <script src="{% static 'employees/scripts/load_activities_for_project.js' %}"></script>
+  {% if form.errors or form.non_field_errors%}
+    <script type="text/javascript">
+      var form_errors = true;
+    </script>
+  {% else %}
+    <script type="text/javascript">
+      var form_errors = false;
+    </script>
+  {% endif %}
 {% endblock %}

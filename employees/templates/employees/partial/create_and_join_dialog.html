@@ -1,0 +1,28 @@
+{% load crispy_forms_tags %}
+
+<div class="modal-dialog hidden-print" id="dialog_create" style="display: none" title="Create report" align="center">
+  {% for error in errors.non_field_errors %}
+    <h4><font color="red">{{ error }}</font></h4>
+  {% endfor %}
+  <form action="{{ path }}" method="POST" id="reportForm" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
+    <button class="hidden-print btn btn-default" type="button" id="opener_join" style="border:none;">
+      <span class="glyphicon glyphicon-plus"></span> {{ UI_text.JOIN_PROJECT_BUTTON.value }}
+    </button>
+    <br><br>
+    {% csrf_token %}
+    {{ form|crispy }}
+    <input type="submit" class="btn btn-default" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+  </form>
+  <br/>
+</div>
+
+<div class="hidden-print" id="dialog_join" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
+  <form action="{{ path }}" id="join_form" method="POST">
+    {% csrf_token %}
+    {{ project_form }}
+    <p><input type="submit" name="join" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_YES.value }}"></p>
+  </form>
+  {% if hide_join %}
+    {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
+  {% endif %}
+</div>
