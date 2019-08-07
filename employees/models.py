@@ -15,8 +15,17 @@ from managers.models import Project
 from users.models import CustomUser
 
 
+class TaskActivityTypeQuerySet(models.QuerySet):
+    def get_defaults(self) -> QuerySet:
+        return self.filter(is_default=True)
+
+
 class TaskActivityType(models.Model):
     name = models.CharField(max_length=TaskActivityTypeConstans.TASK_ACTIVITIES_MAX_LENGTH.value)
+    is_default = models.BooleanField(default=False)
+    projects = models.ManyToManyField(Project, related_name="project_activities")
+
+    objects = TaskActivityTypeQuerySet().as_manager()
 
     def __str__(self) -> str:
         return self.name

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'managers/style.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <h1>
+        <small>
+            <a href="{% url 'custom-project-detail' pk=project.pk %}">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </a>
+        </small>
+        {% trans 'Project task activities' %}
+    </h1>
+    <div class="container">
+        <h5>{% trans 'Add new task activity or choose from existing one' %}</h5>
+        <form method="post" action="." class="add-task-activity">
+            {% csrf_token %}
+            {% trans 'Name:' %}
+            {{ form.name }}
+            <button class="add-task-activity-button" type="submit" title="{% trans 'Add new task activity' %}">
+                <span class="glyphicon glyphicon-plus"></span>
+            </button>
+        </form>
+        <p>
+        {% if activities_not_connected %}
+            <form method="post" action="{% url 'project-task-activities' pk=project.pk %}">
+                {% csrf_token %}
+                <select class="multiselect-task-activities" multiple="multiple" name="task_activities" size="6"
+                        title="{% trans 'If you want add more than one press ctrl' %}">
+                    {% for task in activities_not_connected %}
+                        <option value="{{ task.id }}">{{ task.name }}</option>
+                    {% endfor %}
+                </select>
+                <p>
+                    <input type="submit" class="btn btn-primary" value="Add to project">
+                </p>
+            </form>
+        {% endif %}
+        </p>
+    </div>
+    <ul>
+        <div class="container">
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th class="task-activities-column">{% trans 'Index' %}</th>
+                        <th class="task-activities-column">{% trans 'Name' %}</th>
+                        <th class="task-activities-column">{% trans 'Default' %}</th>
+                        <td class=Invisible></td>
+                    </tr>
+                    {% for task_activity in task_activities %}
+                        <tr>
+                            <td class="task-activities-column">{{ forloop.counter }}</td>
+                            <td class="task-activities-column">{{ task_activity.name }}</td>
+                            <td class="task-activities-column">{{ task_activity.is_default }}</td>
+                            <td class=Invisible align="center">
+                                <form id="delete-task-from-relation" method="post" action="{% url 'remove-task-activity-from-project' pk=project.pk task_activity_pk=task_activity.pk %}">
+                                    {% csrf_token %}
+                                    <button form="delete-task-from-relation" type="submit" name="task_activity_pk" class="btn btn-danger glyphicon glyphicon-remove" title="{% trans 'Remove from project' %}"></button></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        {% trans "This project doesn't have any task activities" %}
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </ul>
+{% endblock %}

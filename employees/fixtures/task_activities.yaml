@@ -2,6 +2,7 @@
   pk: 1
   fields:
     name: Other
+    is_default: True
 - model: employees.TaskActivityType
   pk: 2
   fields:
@@ -10,6 +11,7 @@
   pk: 3
   fields:
     name: Meeting
+    is_default: True
 - model: employees.TaskActivityType
   pk: 4
   fields:

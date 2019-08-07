@@ -3,12 +3,15 @@ from django.test import TestCase
 from django.utils import timezone
 from parameterized import parameterized
 
+from employees.factories import TaskActivityTypeFactory
+from employees.models import TaskActivityType
 from managers.factories import ProjectFactory
 from managers.models import Project
 from managers.views import ProjectCreateView
 from managers.views import ProjectDetailView
 from managers.views import ProjectsListView
 from managers.views import ProjectUpdateView
+from users.factories import AdminUserFactory
 from users.factories import ManagerUserFactory
 from users.factories import UserFactory
 from users.models import CustomUser
@@ -242,3 +245,121 @@ class ProjectDeleteViewTests(ProjectBaseTests):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Project.objects.all().count(), 1)
+
+
+class ManageTaskActivitiesInProjectViewTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user_admin = AdminUserFactory()
+        self.client.force_login(self.user_admin)
+        self.default_task_activity_1 = TaskActivityTypeFactory(is_default=True)
+        self.default_task_activity_2 = TaskActivityTypeFactory(is_default=True)
+        self.not_default_task_activity = TaskActivityTypeFactory()
+
+        self.project = ProjectFactory()
+        self.url = reverse("project-task-activities", kwargs={"pk": self.project.pk})
+
+    def test_manage_task_activities_in_project_view_should_raise_404_for_manager_not_of_current_project(self):
+        other_manager = ManagerUserFactory()
+        self.client.force_login(other_manager)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_manage_task_activities_in_project_view_should_get_200_when_user_is_manager_of_current_project(self):
+        project_manager = ManagerUserFactory()
+        self.project.managers.add(project_manager)
+        self.client.force_login(project_manager)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_manage_task_activities_in_project_view_should_redirect_on_employee_get(self):
+        user_employee = UserFactory()
+        self.project.members.add(user_employee)
+        self.client.force_login(user_employee)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_manage_task_activities_view_should_show_all_task_activities_in_project_and_available_to_add(self):
+        self.assertCountEqual(self.project.project_activities.all(), TaskActivityType.objects.get_defaults())
+        self.assertNotIn(self.not_default_task_activity, self.project.project_activities.all())
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.default_task_activity_1.name)
+        self.assertContains(response, self.not_default_task_activity.name)
+
+    def test_manage_task_activities_view_should_add_new_task_activity_on_post_and_add_it_to_project(self):
+        task_activity_name = "New activity"
+        response = self.client.post(self.url, data={"name": task_activity_name})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(TaskActivityType.objects.get(name=task_activity_name), self.project.project_activities.all())
+
+    def test_manage_task_activities_view_should_add_existing_task_activity_to_project_on_add_to_project_function(self):
+        number_of_all_task_activities_before_add = self.project.project_activities.all().count()
+
+        response = self.client.post(self.url, data={"task_activities": self.not_default_task_activity.pk})
+        number_of_all_task_activities_after_add_one_new_task_activity = self.project.project_activities.all().count()
+        num_of_added_task_activities = 1
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(self.not_default_task_activity, self.project.project_activities.all())
+        self.assertEqual(
+            number_of_all_task_activities_after_add_one_new_task_activity,
+            number_of_all_task_activities_before_add + num_of_added_task_activities,
+        )
+
+
+class RemoveTaskActivityFromProjectViewTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user_admin = AdminUserFactory()
+        self.client.force_login(self.user_admin)
+        self.default_task_activity = TaskActivityTypeFactory(is_default=True)
+
+        self.project = ProjectFactory()
+        self.url = reverse(
+            "remove-task-activity-from-project",
+            kwargs={"pk": self.project.pk, "task_activity_pk": self.default_task_activity.pk},
+        )
+
+    def test_remove_task_activities_view_should_remove_task_activity_from_relation_on_delete_from_project_function(
+        self
+    ):
+        number_of_project_task_activities_before_remove = self.project.project_activities.all().count()
+        self.assertIn(self.default_task_activity, self.project.project_activities.all())
+
+        response = self.client.post(self.url)
+        number_of_project_task_activities_after_remove = self.project.project_activities.all().count()
+        removed_task_activities = 1
+
+        self.project.project_activities.all().count()
+        self.assertEqual(response.status_code, 302)
+
+        self.assertNotIn(self.default_task_activity, self.project.project_activities.all())
+        self.assertEqual(
+            number_of_project_task_activities_after_remove,
+            number_of_project_task_activities_before_remove - removed_task_activities,
+        )
+
+    def test_remove_task_activities_view_should_only_handle_post(self):
+        post_response = self.client.post(self.url, data={"task_activity_pk": self.default_task_activity.pk})
+        self.assertEqual(post_response.status_code, 302)
+
+        get_response = self.client.get(self.url, data={"task_activity_pk": self.default_task_activity.pk})
+        self.assertEqual(get_response.status_code, 405)
+
+    def test_manage_task_activities_view_should_raise_404_when_user_is_not_manager_of_current_project(self):
+        manager = ManagerUserFactory()
+        self.client.force_login(manager)
+
+        response = self.client.post(self.url, data={"task_activity_pk": self.default_task_activity.pk})
+
+        self.assertEqual(response.status_code, 404)

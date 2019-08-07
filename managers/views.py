@@ -5,9 +5,12 @@ from typing import Union
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -16,9 +19,13 @@ from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import ListView
+from django.views.generic import RedirectView
 from django.views.generic import UpdateView
+from django.views.generic.edit import FormView
 from django.views.generic.edit import ModelFormMixin
 
+from employees.forms import TaskActivityForm
+from employees.models import TaskActivityType
 from managers.forms import ProjectAdminForm
 from managers.forms import ProjectManagerForm
 from managers.models import Project
@@ -161,3 +168,56 @@ class ProjectDeleteView(DeleteView):
         response = super().delete(request, args, kwargs)
         logger.info(f"Project with id: {kwargs['pk']} has been deleted by user with id: {self.request.user.pk}")
         return response
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
+class ManageTaskActivitiesInProjectView(FormView, UserIsManagerOfCurrentProjectMixin, DetailView):
+    model = Project
+    template_name = "managers/project_task_activities.html"
+    form_class = TaskActivityForm
+
+    def _add_task_activities_to_relation(self, list_of_task_activities: list) -> None:
+        self.object.project_activities.set(
+            TaskActivityType.objects.filter(Q(pk__in=list_of_task_activities) | Q(projects=self.object.pk))
+        )
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context = super().get_context_data()
+        context["project"] = self.object
+        context["activities_not_connected"] = TaskActivityType.objects.exclude(projects=self.kwargs["pk"])
+        context["task_activities"] = self.object.project_activities.all().order_by("name")
+        return context
+
+    def form_valid(self, form: TaskActivityForm) -> HttpRequest:
+        task_activity = form.save()
+        self.object.project_activities.add(task_activity)
+        return super().form_valid(form)
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        self.object = self.get_object()  # pylint: disable=attribute-defined-outside-init
+        if "task_activities" in request.POST:
+            self._add_task_activities_to_relation(request.POST.getlist("task_activities"))
+            return HttpResponseRedirect(self.get_success_url())
+        return super().post(request, *args, **kwargs)
+
+    def get_success_url(self) -> str:
+        return reverse("project-task-activities", kwargs={"pk": self.kwargs["pk"]})
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name, CustomUser.UserType.MANAGER.name]),
+    name="dispatch",
+)
+class RemoveTaskActivityFromProjectView(RedirectView, UserIsManagerOfCurrentProjectMixin, DetailView):
+    http_method_names = ["post"]
+    model = Project
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        task_activity = get_object_or_404(TaskActivityType, pk=self.kwargs["task_activity_pk"])
+        self.get_object().project_activities.remove(task_activity)
+        return HttpResponseRedirect(reverse("project-task-activities", kwargs={"pk": self.kwargs["pk"]}))

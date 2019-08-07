@@ -16,6 +16,7 @@ from common.convert import convert_string_work_hours_field_to_hour_and_minutes
 from common.convert import timedelta_to_string
 from employees.common.constants import MonthNavigationConstants
 from employees.models import Report
+from employees.models import TaskActivityType
 from managers.models import Project
 
 
@@ -115,3 +116,9 @@ class MonthSwitchForm(forms.Form):
             elif self_dict[key] != other_dict[key]:
                 return False
         return True
+
+
+class TaskActivityForm(forms.ModelForm):
+    class Meta:
+        model = TaskActivityType
+        fields = ["name"]
