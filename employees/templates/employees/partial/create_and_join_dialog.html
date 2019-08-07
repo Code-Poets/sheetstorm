@@ -12,6 +12,7 @@
     {% csrf_token %}
     {{ form|crispy }}
     <input type="submit" class="btn btn-default" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+    <input type="button" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_create').dialog('close');">
   </form>
   <br/>
 </div>
@@ -20,9 +21,13 @@
   <form action="{{ path }}" id="join_form" method="POST">
     {% csrf_token %}
     {{ project_form }}
-    <p><input type="submit" name="join" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_YES.value }}"></p>
+    <p>
+      <input type="submit" name="join" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_YES.value }}">
+      <input type="button" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_join').dialog('close');">
+    </p>
   </form>
   {% if hide_join %}
     {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
+    <p><input type="button" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="$('#dialog_join').dialog('close');"></p>
   {% endif %}
 </div>
