@@ -2,11 +2,12 @@
 omit=
 	manage.py
 	*/__init__.py
-    	*/admin.py
-    	*/apps.py
-    	*/urls.py
-    	*/wsgi.py
-    	*/migrations/*
-    	*/mocks/*
-    	*/tests*
-    	*/settings/*
+    */admin.py
+    */apps.py
+    */urls.py
+    */wsgi.py
+    */migrations/*
+    */mocks/*
+    */tests*
+    */settings/*
+    features/*

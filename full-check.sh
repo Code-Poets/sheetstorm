@@ -25,6 +25,6 @@ printf "========================= UNIT TESTS WITH COVERAGE =================\n"
 ./run-test-coverage.sh
 printf "\n"
 
-printf "========================= E2E SELENIUM TESTS ======================\n"
+printf "================= E2E SELENIUM TESTS WITH COVERAGE =================\n"
 ./e2e.sh
 printf "\n"
