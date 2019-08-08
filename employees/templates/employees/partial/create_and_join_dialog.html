@@ -1,33 +1,84 @@
 {% load crispy_forms_tags %}
 
-<div class="modal-dialog hidden-print" id="dialog_create" style="display: none" title="Create report" align="center">
-  {% for error in errors.non_field_errors %}
-    <h4><font color="red">{{ error }}</font></h4>
+<div class="modal-dialog hidden-print div-text-for-popup" id="dialog_create" title="Create report" align="center" style="overflow: visible;">
+  {% for error in form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+      <p class="p-non-field-errors"><small>{{ error }}</small></p>
+    </div>
   {% endfor %}
   <form action="{{ path }}" method="POST" id="reportForm" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
-    <button class="hidden-print btn btn-default" type="button" id="opener_join" style="border:none;">
-      <span class="glyphicon glyphicon-plus"></span> {{ UI_text.JOIN_PROJECT_BUTTON.value }}
-    </button>
-    <br><br>
     {% csrf_token %}
-    {{ form|crispy }}
-    <input type="submit" class="btn btn-default" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
-    <input type="button" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_create').dialog('close');">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="col-md-10">
+          {{ form.project|as_crispy_field }}
+        </div>
+        <div class="col-md-2 div-without-padding-align-left margin-top-space">
+          <button class="hidden-print btn btn-sm btn-default" type="button" id="opener_join">
+            <i class="fa fa-user-plus span-blue-color"></i>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        {{ form.date|as_crispy_field }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="col-md-10">
+          {{ form.task_activities|as_crispy_field }}
+        </div>
+      </div>
+      <div class="col-md-4">
+        {{ form.work_hours|as_crispy_field }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        {{ form.description|as_crispy_field }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        {{ form.author|as_crispy_field }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <input type="submit" class="btn btn-primary" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+      </div>
+      <div class="col-md-6">
+        <input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_create').dialog('close');">
+      </div>
+    </div>
   </form>
-  <br/>
 </div>
+
 
 <div class="hidden-print" id="dialog_join" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
   <form action="{{ path }}" id="join_form" method="POST">
     {% csrf_token %}
-    {{ project_form }}
-    <p>
-      <input type="submit" name="join" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_YES.value }}">
-      <input type="button" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_join').dialog('close');">
-    </p>
+    <div class="row">
+      <div class="col-md-12">
+        {{ project_form.projects|as_crispy_field }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <input type="submit" name="join" class="btn btn-primary" value="{{ UI_text.JOIN_POPUP_YES.value }}">
+      </div>
+      <div class="col-md-6">
+        <input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_join').dialog('close');">
+      </div>
+    </div>
   </form>
   {% if hide_join %}
     {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
-    <p><input type="button" class="btn btn-default" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="$('#dialog_join').dialog('close');"></p>
+    <p><input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="$('#dialog_join').dialog('close');"></p>
   {% endif %}
 </div>

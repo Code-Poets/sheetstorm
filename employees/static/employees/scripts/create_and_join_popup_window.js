@@ -11,10 +11,9 @@ $(function () {
   $("#dialog_create").dialog ({
       modal: false,
       autoOpen: false,
-      minWidth: 300,
-      minHeight: 330,
+      resizable: false,
       width: 550,
-      height: 750,
+      height: 970,
       close: function(event, ui){ $('#opener_create').attr('disabled', false); },
 	})
 
