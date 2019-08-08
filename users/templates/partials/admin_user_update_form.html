@@ -1,0 +1,32 @@
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+<div class="row form-row">
+    <div class="form-group col-md-6 mb-0">
+        {{ form.first_name|as_crispy_field }}
+    </div>
+    <div class="form-group col-md-6 mb-0">
+        {{ form.last_name|as_crispy_field }}
+    </div>
+</div>
+<div class="row form-row">
+    <div class="form-group col-md-6 mb-0">
+        {{ form.email|as_crispy_field }}
+    </div>
+    <div class="form-group col-md-6 mb-0">
+        {{ form.user_type|as_crispy_field }}
+    </div>
+</div>
+<div class="form-group row">
+    <div class="form-group col-md-4 mb-0">
+        <input type="button" id="opener_user_account_update" class="btn btn-success" name="update"
+           value="{% trans 'Update' %}">
+    </div>
+    <div class="form-group col-md-4 mb-0">
+        <input type="button" class="btn btn-secondary discard-button" name="discard" value="{% trans 'Discard' %}"
+           onclick="location.href='{{ current_view_url }}'">
+    </div>
+    <div class="form-group col-md-4 mb-0">
+        <input type="button" class="btn btn-danger" id="opener_user_account" name="delete" value="{% trans 'Delete' %}">
+    </div>
+</div>
