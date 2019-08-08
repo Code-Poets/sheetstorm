@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.utils import timezone
+from freezegun import freeze_time
 
 from employees.factories import TaskActivityTypeFactory
 from employees.models import TaskActivityType
@@ -71,3 +72,23 @@ class TestProjectSignals(TestCase):
         project.refresh_from_db()
 
         self.assertCountEqual([custom_task_activity, default_task_activity], list(project.project_activities.all()))
+
+    @freeze_time("2019-08-08")
+    def test_project_should_not_be_suspended_when_stop_date_is_not_null(self):
+        date = timezone.now().date()
+        self.project.suspended = True
+        self.project.stop_date = date
+        self.project.save()
+        self.project.refresh_from_db()
+
+        self.assertEqual(self.project.suspended, False)
+        self.assertEqual(self.project.stop_date, date)
+
+    @freeze_time("2019-08-08")
+    def test_project_could_be_suspended_when_stop_date_is_null(self):
+        self.project.suspended = True
+        self.project.save()
+        self.project.refresh_from_db()
+
+        self.assertEqual(self.project.suspended, True)
+        self.assertEqual(self.project.stop_date, None)
