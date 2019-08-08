@@ -14,19 +14,9 @@
 {% endblock %}
 
 {% block content %}
-  {% include "employees/month_navigation_bar.html" %}
-  <h1>{{ UI_text.PAGE_TITLE.value }} {{ title_date }}</h1>
-
-  <div class="container main-white-container">
-
-    <button class="hidden-print btn btn-default double-space-margin-top button-without-border" type="button" id="opener_create">
-        <span class="glyphicon glyphicon-edit span-blue-color"></span>
-        <span class="span-blue-color"><strong>Add new entry</strong></span>
-    </button>
-
-    {% include "employees/partial/create_and_join_dialog.html" %}
-
-    <div class="container narrower-container double-space-margin-to">
+  <div class="container main-white-container margin-top-space">
+    {% include "employees/partial/report_list_navigation_bar.html" %}
+    <div class="container narrower-container">
       <div class="table-responsive">
         <table class="table">
           <thead>

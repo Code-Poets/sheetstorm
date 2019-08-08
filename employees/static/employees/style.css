@@ -8,7 +8,7 @@
 }
 
 #month-navigation-form {
-    width: 15%;
+    width: 100%;
     margin-top: 0;
     margin-bottom: 0;
     display:inline-block;
@@ -307,4 +307,12 @@ a.pagelink:hover { color: #006699; text-decoration: underline; }
     border-top-style: solid;
     border-top-width: 3px;
     border-top-color: rgb(180, 180, 180);
+}
+
+.no-padding {
+    padding:0;
+}
+
+.margin-create-button {
+    margin-top:0.8em;
 }

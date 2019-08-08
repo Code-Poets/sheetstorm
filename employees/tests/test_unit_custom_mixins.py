@@ -114,7 +114,12 @@ class MonthNavigationMixinContextDataTests(TestCase):
 
     def _render_month_navigation_bar(self, year, month, pk):
         context = self._get_month_navigation_context_data(year, month, pk)
-        template_to_render = Template("{% include 'employees/month_navigation_bar.html' %}")
+        template_to_render = Template("{% include 'employees/partial/month_navigation_bar.html' %}")
+        return template_to_render.render(context)
+
+    def _render_month_navigation_bar_with_form(self, year, month, pk):
+        context = self._get_month_navigation_context_data(year, month, pk)
+        template_to_render = Template("{% include 'employees/partial/month_navigation_bar_with_form.html' %}")
         return template_to_render.render(context)
 
     def test_month_navigator_get_context_data_method_should_return_all_data_necessary_for_month_navigator_template(
@@ -152,9 +157,9 @@ class MonthNavigationMixinContextDataTests(TestCase):
             "project-report-list", kwargs={"year": current_date.year, "month": current_date.month, "pk": 1}
         )
         url_next = reverse("project-report-list", kwargs={"year": 2019, "month": 2, "pk": 1})
-        self.assertTrue(f'<a href="{url_previous}" class="btn btn-info">' in rendered_template)
-        self.assertTrue(f'<a href="{url_current}" class="btn btn-info">' in rendered_template)
-        self.assertTrue(f'<a href="{url_next}" class="btn btn-info">' in rendered_template)
+        self.assertTrue(f'<a href="{url_previous}"' in rendered_template)
+        self.assertTrue(f'<a href="{url_current}"' in rendered_template)
+        self.assertTrue(f'<a href="{url_next}"' in rendered_template)
 
     def test_month_navigator_should_not_render_html_with_link_to_next_month_if_upper_limit_is_met(self):
         rendered_template = self._render_month_navigation_bar(2099, 12, 1)
@@ -164,9 +169,9 @@ class MonthNavigationMixinContextDataTests(TestCase):
             "project-report-list", kwargs={"year": current_date.year, "month": current_date.month, "pk": 1}
         )
         url_next = reverse("project-report-list", kwargs={"year": 2100, "month": 1, "pk": 1})
-        self.assertTrue(f'<a href="{url_previous}" class="btn btn-info">' in rendered_template)
-        self.assertTrue(f'<a href="{url_current}" class="btn btn-info">' in rendered_template)
-        self.assertFalse(f'<a href="{url_next}" class="btn btn-info">' in rendered_template)
+        self.assertTrue(f'<a href="{url_previous}"' in rendered_template)
+        self.assertTrue(f'<a href="{url_current}"' in rendered_template)
+        self.assertFalse(f'<a href="{url_next}"' in rendered_template)
 
     def test_month_navigator_should_not_render_html_with_link_to_previous_month_if_lower_limit_is_met(self):
         rendered_template = self._render_month_navigation_bar(2019, 5, 1)
@@ -176,16 +181,16 @@ class MonthNavigationMixinContextDataTests(TestCase):
             "project-report-list", kwargs={"year": current_date.year, "month": current_date.month, "pk": 1}
         )
         url_next = reverse("project-report-list", kwargs={"year": 2000, "month": 4, "pk": 1})
-        self.assertTrue(f'<a href="{url_previous}" class="btn btn-info">' in rendered_template)
-        self.assertTrue(f'<a href="{url_current}" class="btn btn-info">' in rendered_template)
-        self.assertFalse(f'<a href="{url_next}" class="btn btn-info">' in rendered_template)
+        self.assertTrue(f'<a href="{url_previous}"' in rendered_template)
+        self.assertTrue(f'<a href="{url_current}"' in rendered_template)
+        self.assertFalse(f'<a href="{url_next}"' in rendered_template)
 
     def test_month_navigator_should_render_html_with_month_navigation_form_related_to_post_method_under_request_path(
         self
     ):
-        rendered_template = self._render_month_navigation_bar(2019, 3, 1)
+        rendered_template = self._render_month_navigation_bar_with_form(2019, 3, 1)
         self.assertTrue(
-            f'<form action="{reverse("project-report-list", kwargs={"year": 2019, "month": 3, "pk": 1})}" method="POST">'
+            f'<form class="form-inline" action="{reverse("project-report-list", kwargs={"year": 2019, "month": 3, "pk": 1})}" method="POST">'
             in rendered_template
         )
 
