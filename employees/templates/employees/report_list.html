@@ -18,61 +18,74 @@
   <h1>{{ UI_text.PAGE_TITLE.value }} {{ title_date }}</h1>
 
   <div class="container main-white-container">
-    <button class="hidden-print btn btn-default double-space-margin-top" type="button" id="opener_create" style="border:none;">
-      <span class="glyphicon glyphicon-edit" style="color:rgb(44, 119, 188);"></span> <font color="#2c77bc"><b>Add new entry</b></font>
+
+    <button class="hidden-print btn btn-default double-space-margin-top button-without-border" type="button" id="opener_create">
+        <span class="glyphicon glyphicon-edit span-blue-color"></span>
+        <span class="span-blue-color"><strong>Add new entry</strong></span>
     </button>
 
     {% include "employees/partial/create_and_join_dialog.html" %}
 
-    <div class="container double-space-margin-top">
+    <div class="container narrower-container double-space-margin-to">
       <div class="table-responsive">
         <table class="table">
           <thead>
             <tr>
-              <th class="date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-              <th class="project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-              <th class="task-activities-header">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
-              <th class="work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
-              <th>{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-              <td class="edit-button-header Invisible"></td>
+              <td class="td-text-align-left" colspan="3">
+                <b><h4>{{user.get_full_name}}</b></h4>
+              </td>
+              <td class="hidden-print" colspan="3">
+                <hr class="hr-blue-line">
+              </td>
+            </tr>
+            <tr>
+              <th class="date-header th-blue-border-first-cell">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+              <th class="project-header th-blue-border">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+              <th class="task-activities-header th-blue-border">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
+              <th class="th-blue-border">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+              <td class="edit-button-header Invisible hidden-print"></td>
+              <th class="work-hours-header th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
             </tr>
           </thead>
           <tbody>
             {% regroup object_list by date as date %}
-            {% for reports in date %}
-              {% for report in reports.list %}
-                {% if forloop.first %}
-                  <td class="date-column" rowspan={{ reports.list|length }}><strong>{{ reports.grouper| date:"l, d F Y" }}</strong></td>
-                {% else %}
-                  <tr>
-                {% endif %}
-                  <td class="project-column">{{ report.project }}</td>
-                  ﻿<td class="task-activities-column">{{ report.task_activities }}</td>
-                  <td class="work-hours-column">{{ report.work_hours_str }}</td>
-                  <td class="description-column">{{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
-                  <td></td>
-                  <td class="edit-button-column Invisible hidden-print">
+              {% for reports in date %}
+                {% for report in reports.list %}
+                  {% if forloop.first %}
+                    <tr class="tr-next-day-separator">
+                      <td class="date-column" rowspan={{ reports.list|length }}><strong>{{ reports.grouper| date:"l, d F Y" }}</strong></td>
+                  {% else %}
+                    <tr>
+                  {% endif %}
+                    <td class="project-column">{{ report.project }}</td>
+    ﻿                <td class="task-activities-column">{{ report.task_activities }}</td>
+                    <td class="description-column">{{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}</td>
+                    <td class="edit-button-column Invisible hidden-print">
                     {% if report.editable %}
-                      <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-info">
-                        <span class="glyphicon glyphicon-pencil"></span>
+                      <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-light hidden-print">
+                        <span class="glyphicon glyphicon-edit span-edit-report hidden-print"></span>
                       </a>
                     {% endif %}
-                  </td>
+                    </td>
+                    <td class="work-hours-column">{{ report.work_hours_str }}</td>
+                  </tr>
+                {% endfor %}
+                <tr class="tr-next-day-separator">
+                  <td></td>
+                  <td><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
+                  <td colspan="2"></td>
+                  <td class="edit-button-column Invisible hidden-print"></td>
+                  <td class="work-hours-column"><strong>{{ daily_hours_sum|get_key_value:reports.grouper|duration_field_to_string }}</strong></td>
                 </tr>
               {% endfor %}
-              <tr>
-                <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
-                <td class="work-hours-column"><strong>{{ daily_hours_sum|get_key_value:reports.grouper|duration_field_to_string }}</strong></td>
-                <td></td>
-                <td class="edit-button-column Invisible hidden-print"></td>
+              <tr class="tr-next-day-separator">
+                {% if not date|length == 0 %}
+                  <td class="td-text-align-left"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+                  <td colspan="3"></td>
+                  <td class="hidden-print"></td>
+                  <td class="work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:user.pk|duration_field_to_string }}</strong></td>
+                {% endif %}
               </tr>
-            {% endfor %}
-            <tr>
-              {% if not date|length == 0 %}
-                <td colspan="3"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
-                <td class="work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:user.pk|duration_field_to_string }}</strong></td>
-              {% endif %}
-            </tr>
           </tbody>
         </table>
         {% include "employees/partial/projects_work_percentage.html" %}
@@ -81,10 +94,10 @@
 
     {% if object_list %}
       <div class="double-space-margin-bottom">
-        <a href="{% url 'export-data' pk=user.pk year=year month=month %}" class="btn btn-info">
+        <a href="{% url 'export-data' pk=user.pk year=year month=month %}" class="btn btn-success">
           Export {{ month | convert_to_month_name }} {{ year }} Reports to XLSX
         </a>
-        <a href="{% url 'export-data' pk=user.pk year=year month=month %}?format=csv" class="btn btn-info">
+        <a href="{% url 'export-data' pk=user.pk year=year month=month %}?format=csv" class="btn btn-success">
           Export {{ month| convert_to_month_name }} {{ year }} Reports to CSV
         </a>
       </div>

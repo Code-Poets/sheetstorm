@@ -236,6 +236,10 @@ a.pagelink:hover { color: #006699; text-decoration: underline; }
     width: 80%;
 }
 
+.narrower-container {
+    width: 95%;
+}
+
 .double-space-margin-bottom{
     margin-bottom: 2em;
 }
@@ -264,4 +268,43 @@ a.pagelink:hover { color: #006699; text-decoration: underline; }
 
 .span-blue-color {
     color: var(--cp-blue-color);
+}
+
+.span-edit-report {
+    color:rgb(167,178,211);
+    font-size: 20px;
+}
+
+.button-without-border {
+    border:none;
+}
+
+.table > thead > tr > th, td {
+     vertical-align: top;
+}
+
+.td-text-align-left{
+    text-align: left;
+}
+
+.hr-blue-line {
+    border: 1px solid var(--cp-blue-color);
+}
+
+.th-blue-border {
+    border-left-style: solid;
+    border-left-width: 5px;
+    border-left-color: var(--cp-blue-color);
+}
+
+.th-blue-border-first-cell {
+    border-left-style: solid;
+    border-left-width: 10px;
+    border-left-color: var(--cp-blue-color);
+}
+
+.tr-next-day-separator {
+    border-top-style: solid;
+    border-top-width: 3px;
+    border-top-color: rgb(180, 180, 180);
 }
