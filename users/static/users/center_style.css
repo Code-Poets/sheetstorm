@@ -99,7 +99,9 @@ span {
 #content {
     width: 100%;
     padding: 20px;
-    min-height: 100vh;
+    padding-left: 1%;
+    padding-right: 1%;
+    min-height: calc(100vh - 44px);
     transition: all 0.3s;
 }
 
