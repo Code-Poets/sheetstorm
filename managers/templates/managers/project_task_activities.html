@@ -59,9 +59,10 @@
                             <td class="task-activities-column">{{ task_activity.name }}</td>
                             <td class="task-activities-column">{{ task_activity.is_default }}</td>
                             <td class=Invisible align="center">
-                                <form id="delete-task-from-relation" method="post" action="{% url 'remove-task-activity-from-project' pk=project.pk task_activity_pk=task_activity.pk %}">
+                                <form method="post" action="{% url 'remove-task-activity-from-project' pk=project.pk task_activity_pk=task_activity.pk %}">
                                     {% csrf_token %}
-                                    <button form="delete-task-from-relation" type="submit" name="task_activity_pk" class="btn btn-danger glyphicon glyphicon-remove" title="{% trans 'Remove from project' %}"></button></button>
+                                    <button type="submit" class="btn btn-danger glyphicon glyphicon-remove" title="{% trans 'Remove from project' %}">
+                                    </button>
                                 </form>
                             </td>
                         </tr>
