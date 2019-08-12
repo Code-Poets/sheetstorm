@@ -2,7 +2,6 @@ import datetime
 import logging
 from typing import Any
 from typing import Optional
-from typing import Type
 
 from django.conf import settings
 from django.contrib import messages
@@ -17,7 +16,6 @@ from django.db.models import F
 from django.db.models import Max
 from django.db.models import QuerySet
 from django.db.models.functions import Coalesce
-from django.forms import ModelForm
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirectBase
@@ -101,16 +99,10 @@ class UserCreate(CreateView):
 class UserUpdate(UpdateView):
     template_name = "user_update.html"
     form_class = SimpleUserChangeForm
-    admins_form_class = AdminUserChangeForm
     model = CustomUser
 
     def get_object(self, queryset: Optional[QuerySet] = None) -> CustomUser:
         return self.request.user
-
-    def get_form_class(self) -> Type[ModelForm]:
-        if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
-            return self.admins_form_class
-        return self.form_class
 
     def get_success_url(self) -> str:
         return reverse("custom-user-update")
@@ -124,7 +116,7 @@ class UserUpdate(UpdateView):
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class UserUpdateByAdmin(UpdateView):
-    template_name = "users_detail.html"
+    template_name = "user_update.html"
     form_class = AdminUserChangeForm
     context_object_name = "user_detail"
     model = CustomUser
@@ -132,7 +124,7 @@ class UserUpdateByAdmin(UpdateView):
     def get_success_url(self) -> str:
         return reverse("custom-user-update-by-admin", kwargs={"pk": self.object.pk})
 
-    def form_valid(self, form: SimpleUserChangeForm) -> HttpResponse:
+    def form_valid(self, form: AdminUserChangeForm) -> HttpResponse:
         super().form_valid(form)
         logger.info(f"User with id: {self.object.pk} has been updated by admin with id {self.request.user.pk}")
         messages.success(self.request, ConfirmationMessages.SUCCESSFUL_UPDATE_USER_MESSAGE)
