@@ -4,7 +4,10 @@ from typing import Set
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Case
 from django.db.models import Q
+from django.db.models import Value
+from django.db.models import When
 from django.db.models.query import Prefetch
 from django.db.models.query import QuerySet
 from django.db.models.signals import m2m_changed
@@ -86,3 +89,11 @@ def add_default_task_activities(sender: Project, **kwargs: Any) -> None:
         project = kwargs["instance"]
 
         project.project_activities.set(TaskActivityType.objects.get_defaults())
+
+
+@receiver(post_save, sender=Project)
+def change_suspended_if_project_has_stop_date(sender: Project, **kwargs: Any) -> None:
+    assert sender == Project
+    Project.objects.filter(pk=kwargs["instance"].pk).update(
+        suspended=Case(When(~Q(stop_date=None), then=Value(False)), default=kwargs["instance"].suspended)
+    )
