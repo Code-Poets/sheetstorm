@@ -520,3 +520,68 @@ span {
 .table-bordered thead {
     font-weight: bold;
 }
+
+.main-white-container > .panel-heading > .row {
+    margin-bottom: 5%;
+}
+
+.page-title {
+    font-size: 160%;
+}
+
+.form-actions > a {
+    font-size: 130%;
+}
+
+#update-user-account > .row, #update-user-account > .form-actions, #update-user-account > #div_id_user_type {
+    font-size: 130%;
+}
+
+.form-group > label {
+    font-weight: 400; !important;
+}
+
+.main-white-container {
+    background: white;
+    padding: 5%;
+    -webkit-box-shadow: 0 0 10px grey;
+    -moz-box-shadow: 0 0 10px grey;
+    box-shadow: 0 0 10px grey;
+}
+
+#modal-dialog-update-user-account {
+    width: 60%;
+    max-width: 500px;
+    min-width: 160px;
+}
+
+.form-group.row {
+    margin-top: 5%;
+}
+
+#update-user-account > .form-group > .form-group > input {
+    width: 100%;
+}
+
+ul.messages {
+    list-style-type: none;
+    color: green;
+}
+
+#change-password {
+    width: 100%; !important;
+}
+
+#change-password > span {
+    margin-left: -3%;
+}
+
+.discard-button {
+    background-color: #DDDDDD; !important;
+}
+
+.invalid-feedback {
+    margin-top: 5px;
+    color: red;
+    font-size: 70%;
+}
