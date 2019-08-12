@@ -1,0 +1,32 @@
+{% load static %}
+{% load i18n %}
+{% load url_filter_tags %}
+
+{% with request.path|startswith:custom_users_list_url as admin_is_in_user_update_view %}
+    <div class="main-white-container">
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if admin_is_in_user_update_view %}
+                        <small>
+                            <a href="{% url 'custom-users-list' %}">
+                                <span class="glyphicon glyphicon-chevron-left"></span>
+                            </a>
+                        </small>
+                    {% endif %}
+                    <span><img src="{% static 'users/images/grey/ico-01.png' %}"/></span>
+                    <span class="page-title"><b>{% trans 'Account details' %}</b></span>
+                </div>
+            </div>
+            {% include 'partials/display_messages.html' %}
+        </div>
+        <form id="update-user-account" action="{{ current_view_url }}" method="POST" name="update-user-form">
+            {% csrf_token %}
+            {% if admin_is_in_user_update_view %}
+                {% include 'partials/admin_user_update_form.html' %}
+            {% else %}
+                {% include 'partials/custom_user_update_form.html' %}
+            {% endif %}
+        </form>
+    </div>
+{% endwith %}
