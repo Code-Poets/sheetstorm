@@ -1,0 +1,57 @@
+{% load i18n %}
+{% load static %}
+
+<div class="filtered-projects">
+    <a class="toggled-projects" data-toggle="collapse" href="#multiCollapse-{{ id }}" role="button" aria-expanded="{% if id == "active" %}true{% else %}false{% endif %}" aria-controls="multiCollapse-{{ id }}">
+        {{ header }}
+    </a>
+        <hr class="hr-blue-line">
+</div>
+
+<div class="row main-row">
+    <div class="collapse multi-collapse {% if id == "active" %}collapse in{% endif %}" id="multiCollapse-{{ id }}">
+        <div class="card card-body">
+            {% for project in filtered_list %}
+                <div class="col-sm-6 col-md-4 col-xl-4 box-wrapper">
+                    <a href="{% url 'custom-project-detail' pk=project.id %}">
+                        <div class="row project-box">
+                            <div class="row project">
+                                <div class="project-reports">
+                                    <img src="{% static 'users/images/grey/ico-05.png' %}">
+                                </div>
+                                <div class="project-header">
+                                    <h5><b>{{ project.name }}</b></h5>
+                                    <p>
+                                        <span class="glyphicon glyphicon-expand"></span> {{ project.start_date }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                {% for user in project.managers.all %}
+                                    <p class="project-managers">
+                                        <i class="fas fa-user-tie"></i> {{ user.first_name }} {{ user.last_name }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                            <div class="row">
+                                <p>
+                                    <i class="fas fa-user"></i> {{ project.members.count }}
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="row images">
+                        <a href="{% url 'project-report-list' pk=project.pk year=year_for_urls month=month_for_urls %}" title="{% trans 'Check project reports' %}">
+                            <i class="fas fa-clipboard-list fa-lg"></i>
+                        </a>
+                        <a href="{% url 'project-task-activities' pk=project.pk %}" title="{% trans 'Check project task activities' %}">
+                            <i class="fas fa-cog fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+             {% empty %}
+                <h3>{% trans 'There are no available projects' %}</h3>
+            {% endfor %}
+        </div>
+    </div>
+</div>
