@@ -1,0 +1,17 @@
+{% load crispy_forms_tags %}
+
+<div class="row hidden-print double-space-margin-top">
+  <div class="col-sm-3 hidden-print">
+    {% include "employees/partial/month_navigation_bar_with_form.html" %}
+  </div>
+
+  <div class="col-sm-2 hidden-print">
+    <button class="hidden-print btn btn-lg btn-default button-without-border margin-create-button" type="button" id="opener_create">
+      <span class="glyphicon glyphicon-edit span-blue-color"></span>
+      <span class="span-blue-color"><strong>Add new entry</strong></span>
+    </button>
+  </div>
+
+{% include "employees/partial/create_and_join_dialog.html" %}
+
+</div>
