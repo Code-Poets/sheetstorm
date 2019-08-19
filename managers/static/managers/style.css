@@ -96,7 +96,6 @@
 
 .row.images > a > i {
     color: #2C77BC;
-;
 }
 
 .box-wrapper {
@@ -124,4 +123,77 @@
     text-align: right;
     width: calc(99% - 120px);
     border-color: #2c77bc;
+}
+
+#modal-dialog-create-project-form {
+    background: white;
+    padding: 2.5% 2.5% 1%;
+    -webkit-box-shadow: 0 0 10px grey;
+    -moz-box-shadow: 0 0 10px grey;
+    box-shadow: 0 0 10px grey;
+}
+
+#modal-dialog-create-project-form {
+    min-width: 200px;
+    max-width: 600px;
+    width: 95%;
+    margin: auto;
+}
+
+#create-project-form > .form-group > .form-group > input {
+    width: 10em;
+}
+
+.form-group > label {
+    font-weight: 400; !important;
+    font-size: 130%;
+}
+
+.row.panel-title {
+    margin-bottom: 6%;
+}
+
+.select2.select2-container.select2-container--default {
+    display: unset;
+    width: 50%;
+}
+
+span.selection {
+    min-width: 100px;
+    width: 70%;
+}
+.project-name-div, .activities-div {
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 5%;
+}
+
+.project-buttons > button {
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 15rem;
+}
+
+.delete-project-confimation {
+    display: none;
+}
+
+#div_id_name > div > input {
+    text-align: center;
+    width: 70%;
+    margin: auto;
+}
+
+.input-group.date {
+    width: 70%;
+    max-width: max-content;
+    margin: auto;
+}
+
+@media only screen and (max-width: 400px) {
+    .bootstrap-datetimepicker-widget {
+        left: -90px !important;
+    }
 }

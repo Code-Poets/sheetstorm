@@ -91,7 +91,7 @@ class ProjectDetailView(UserIsManagerOfCurrentProjectMixin, DetailView):
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_permissions(allowed_user_types=[CustomUser.UserType.ADMIN.name]), name="dispatch")
 class ProjectCreateView(CreateView):
-    extra_context = {"button_text": _("Create"), "title": _("Create new project")}
+    extra_context = {"button_text": _("Create"), "title": _("New project")}
     form_class = ProjectAdminForm
     model = Project
     template_name = "managers/project_form.html"
