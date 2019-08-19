@@ -1,6 +1,9 @@
 limit_req_zone $binary_remote_addr zone=ip_req_limit:10m rate={{ nginx.limit_of_requests_per_second }}r/s;
 limit_conn_zone $binary_remote_addr zone=ip_connection_limit:10m;
 
+# Disable sending the nginx version in error pages and server header
+server_tokens off;
+
 server {
     server_name sheetstorm.codepoets.it s.codepoets.it;
     if ($host = s.codepoets.it) {
