@@ -1,9 +1,10 @@
 $(document).ready(function () {
     $('#sidebarCollapse').on('click', function () {
-        $('#sidebar').toggleClass('active');
+        $('#sidebar').toggleClass('collapsed');
     });
 });
 
+
 $('#sidebarCollapse').on("click", function () {
-    $('.toggle').toggleClass('glyphicon-chevron-right');
+    $('.toggle').toggleClass('fa-angle-double-right');
 });
