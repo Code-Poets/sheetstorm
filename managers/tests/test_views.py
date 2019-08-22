@@ -24,7 +24,6 @@ class ProjectBaseTests(TestCase):
             email="testuser@codepoets.it",
             first_name="John",
             last_name="Doe",
-            country="PL",
             user_type=CustomUser.UserType.ADMIN.name,
             is_active=True,
         )

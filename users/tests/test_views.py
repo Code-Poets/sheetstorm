@@ -8,10 +8,8 @@ from parameterized import parameterized
 
 from employees.factories import ReportFactory
 from managers.factories import ProjectFactory
-from users.common.constants import UserConstants
 from users.common.strings import UserNotificationsText
 from users.common.strings import ValidationErrorText
-from users.common.utils import generate_random_phone_number
 from users.factories import AdminUserFactory
 from users.factories import ManagerUserFactory
 from users.factories import UserFactory
@@ -132,13 +130,7 @@ class UserCreateTests(TestCase):
 class UserUpdateTests(TestCase):
     def setUp(self):
         self.user = CustomUser(
-            email="testuser@codepoets.it",
-            password="newuserpasswd",
-            first_name="John",
-            last_name="Doe",
-            country="PL",
-            phone_number="123456789",
-            is_active=True,
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", is_active=True
         )
         self.user.full_clean()
         self.user.save()
@@ -150,23 +142,23 @@ class UserUpdateTests(TestCase):
         self.assertContains(response, self.user.last_name)
 
     def test_user_update_view_should_update_user_on_post(self):
-        old_phone_number = self.user.phone_number
-        new_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value)
+        old_last_name = self.user.last_name
+        new_last_name = "New Last Name"
         response = self.client.get(path=reverse("custom-user-update"))
-        self.assertContains(response, old_phone_number)
+        self.assertContains(response, old_last_name)
 
-        response = self.client.post(path=reverse("custom-user-update"), data={"phone_number": new_phone_number})
+        response = self.client.post(path=reverse("custom-user-update"), data={"last_name": new_last_name})
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(new_phone_number, self.user.phone_number)
+        self.assertEqual(new_last_name, self.user.last_name)
 
     def test_user_update_view_should_not_update_user_on_post_if_form_is_invalid(self):
-        phone_number_before_request = self.user.phone_number
-        new_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1)
-        response = self.client.post(path=reverse("custom-user-update"), data={"phone_number": new_phone_number})
+        last_name_before_request = self.user.last_name
+        invalid_last_name = "Last%$&Name"
+        response = self.client.post(path=reverse("custom-user-update"), data={"last_name": invalid_last_name})
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(phone_number_before_request, self.user.phone_number)
+        self.assertEqual(last_name_before_request, self.user.last_name)
 
 
 class UserUpdateByAdminTests(TestCase):
@@ -176,10 +168,16 @@ class UserUpdateByAdminTests(TestCase):
         self.user.save()
         self.user_admin = AdminUserFactory()
         self.client.force_login(self.user_admin)
-        self.correct_url = reverse("custom-user-update-by-admin", args=(self.user.pk,))
+        self.data = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "email": self.user.email,
+            "user_type": self.user.user_type,
+        }
+        self.correct_url = reverse("custom-user-update-by-admin", kwargs={"pk": self.user.pk})
 
     def test_user_update_by_admin_view_should_display_user_details_on_get(self):
-        response = self.client.get(path=reverse("custom-user-update-by-admin", args=(self.user.pk,)))
+        response = self.client.get(path=reverse("custom-user-update-by-admin", kwargs={"pk": self.user.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.user.email)
         self.assertContains(response, self.user.first_name)
@@ -187,31 +185,21 @@ class UserUpdateByAdminTests(TestCase):
         self.assertTemplateUsed("user_detail.html")
 
     def test_user_update_by_admin_view_should_not_render_non_existing_user(self):
-        not_existing_pk = 1000
-        response = self.client.get(path=reverse("custom-user-update-by-admin", args=(not_existing_pk,)))
+        response = self.client.get(path=reverse("custom-user-update-by-admin", kwargs={"pk": 1000}))
         self.assertEqual(response.status_code, 404)
 
     def test_user_update_by_admin_view_should_update_user_on_post(self):
-        new_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value)
-        response = self.client.post(path=self.correct_url, data=self._get_user_data(new_phone_number))
+        self.data["last_name"] = "NewLastName"
+        response = self.client.post(self.correct_url, self.data)
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(new_phone_number, self.user.phone_number)
+        self.assertEqual(self.data["last_name"], self.user.last_name)
 
     def test_user_update_by_admin_view_should_not_update_user_on_post_if_form_is_invalid(self):
-        phone_number_before_request = self.user.phone_number
-        invalid_phone_number = generate_random_phone_number(UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1)
-        response = self.client.post(path=self.correct_url, data=self._get_user_data(invalid_phone_number))
+        self.data["email"] = "admin@invalid.it"
+        response = self.client.post(self.correct_url, self.data)
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(phone_number_before_request, self.user.phone_number)
-
-    def _get_user_data(self, new_phone_number):
-        return {
-            "email": self.user.email,
-            "phone_number": new_phone_number,
-            "user_type": CustomUser.UserType.EMPLOYEE.name,
-        }
 
 
 @override_settings(EMAIL_SIGNUP_VERIFICATION=True)

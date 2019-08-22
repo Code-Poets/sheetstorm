@@ -33,7 +33,7 @@ class DataSetUpToTests(BaseModelTestCase):
         task_type.save()
         self.SAMPLE_STRING_FOR_TYPE_VALIDATION_TESTS = "This is a string"
         self.author = CustomUser(
-            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe", country="PL"
+            email="testuser@codepoets.it", password="newuserpasswd", first_name="John", last_name="Doe"
         )
         self.author.full_clean()
         self.author.save()

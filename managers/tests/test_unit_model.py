@@ -7,7 +7,6 @@ from django.test import TestCase
 from managers.commons.constants import ProjectConstants
 from managers.models import Project
 from users.common.model_helpers import create_user_using_full_clean_and_save
-from users.common.utils import generate_random_phone_number
 from users.common.utils import generate_random_string_from_letters_and_digits
 from utils.base_tests import BaseModelTestCase
 
@@ -48,8 +47,8 @@ class TestProjectModelField(BaseModelTestCase):
 
     def setUp(self):
         super().setUp()
-        self.manager = create_user_using_full_clean_and_save("manager@codepoets.it", "", "", "", "managerpassword")
-        self.member = create_user_using_full_clean_and_save("projectmember@codepoets.it", "", "", "", "memberpassword")
+        self.manager = create_user_using_full_clean_and_save("manager@codepoets.it", "", "", "managerpassword")
+        self.member = create_user_using_full_clean_and_save("projectmember@codepoets.it", "", "", "memberpassword")
 
     def test_project_model_name_field_should_accept_correct_input(self):
         self.field_should_accept_input("name", "First Project")
@@ -67,9 +66,7 @@ class TestProjectModelField(BaseModelTestCase):
         self.field_should_not_accept_null("start_date")
 
     def test_project_model_start_date_field_should_not_accept_non_date_or_datetime_value(self):
-        self.field_should_not_accept_input(
-            "start_date", generate_random_phone_number(ProjectConstants.MAX_NAME_LENGTH.value)
-        )
+        self.field_should_not_accept_input("start_date", "123456789")
         self.field_should_not_accept_input(
             "start_date", generate_random_string_from_letters_and_digits(ProjectConstants.MAX_NAME_LENGTH.value)
         )  # pylint: disable=line-too-long # noqa E501

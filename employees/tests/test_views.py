@@ -537,7 +537,6 @@ class ProjectReportListTests(TestCase):
             password="otheruserpasswd",
             first_name="Jane",
             last_name="Doe",
-            country="PL",
             is_active=True,
         )
         other_user.full_clean()
