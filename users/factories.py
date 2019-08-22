@@ -13,7 +13,6 @@ class UserFactory(factory.DjangoModelFactory):
     )
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-    country = "PL"
     is_active = True
 
     @factory.post_generation

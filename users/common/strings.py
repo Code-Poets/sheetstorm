@@ -39,9 +39,7 @@ class CustomUserModelText:
         "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."
     )
     DATE_JOINED = _("date joined")
-    DATE_OF_BIRTH = _("date of birth")
     UPDATED_AT = _("updated at")
-    PHONE_REGEX_MESSAGE = _("Phone number must be entered in the format: '999999999'. Up to 15 digits allowed.")
 
 
 class ValidationErrorText:
@@ -56,16 +54,7 @@ class ValidationErrorText:
     VALIDATION_ERROR_EMAIL_MESSAGE_DOMAIN_SHORT = "Please enter an e-mail address with a valid domain"
     VALIDATION_ERROR_SIGNUP_EMAIL_MESSAGE = _("A user is already registered with this e-mail address.")
     VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE = _("The two password fields didn't match.")
-    VALIDATION_ERROR_AGE_NOT_ACCEPTED = _("User can't be below 18 or above 99 years old.")
     VALIDATION_ERROR_SPECIAL_CHARACTERS_IN_NAME = _("The name must not contain special characters")
-
-
-class CustomUserCountryText:
-    POLAND = _("Poland")
-    UNITED_STATES = _("United States")
-    UNITED_KINGDOM = _("United Kingdom")
-    GERMANY = _("Germany")
-    FRANCE = _("France")
 
 
 class CustomUserUserTypeText:
