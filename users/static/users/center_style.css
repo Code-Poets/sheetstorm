@@ -565,6 +565,11 @@ span {
 
 ul.messages {
     list-style-type: none;
+    text-align: left;
+    margin-left: 10%;
+}
+
+ul.messages.success {
     color: green;
     padding-inline-start: 0px;
 }

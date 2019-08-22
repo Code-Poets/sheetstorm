@@ -18,7 +18,7 @@
                     <span class="page-title"><b>{% trans 'Account details' %}</b></span>
                 </div>
             </div>
-            {% include 'partials/display_messages.html' %}
+            {% include 'partials/display_messages.html' with message_type="success" %}
         </div>
         <form id="update-user-account" action="{{ current_view_url }}" method="POST" name="update-user-form">
             {% csrf_token %}
