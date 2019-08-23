@@ -114,12 +114,14 @@ class MonthNavigationMixinContextDataTests(TestCase):
 
     def _render_month_navigation_bar(self, year, month, pk):
         context = self._get_month_navigation_context_data(year, month, pk)
-        template_to_render = Template("{% include 'employees/partial/month_navigation_bar.html' %}")
+        template_to_render = Template("{% include 'employees/partial/month_navigation/month_navigation_bar.html' %}")
         return template_to_render.render(context)
 
     def _render_month_navigation_bar_with_form(self, year, month, pk):
         context = self._get_month_navigation_context_data(year, month, pk)
-        template_to_render = Template("{% include 'employees/partial/month_navigation_bar_with_form.html' %}")
+        template_to_render = Template(
+            "{% include 'employees/partial/month_navigation/month_navigation_bar_with_form.html' %}"
+        )
         return template_to_render.render(context)
 
     def test_month_navigator_get_context_data_method_should_return_all_data_necessary_for_month_navigator_template(

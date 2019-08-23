@@ -1,23 +1,23 @@
-<div class="modal-dialog hidden-print" id="month-navigation-form">
+<div class="row modal-dialog hidden-print" id="month-navigation-form">
   <form class="form-inline" action="{{ path }}" method="POST">
     <div class="col-sm-12 no-padding">
       <p class="span-blue-color div-without-padding-align-left"><strong>MONTH SELECT:</strong></p>
     </div>
-    <div class="col-sm-2 no-padding">
+    <div class="col-xs-2 no-padding">
       {% if not disable_previous_button %}
         <a href="{{ previous_month_url }}" class="btn btn-primary">
           <span class="glyphicon glyphicon-chevron-left"></span>
         </a>
       {% endif %}
     </div>
-    <div class="col-sm-2 no-padding">
+    <div class="col-xs-2 no-padding">
       <button type="submit" name="month-switch" class="btn btn-default">{{ navigation_text.SWITCH_MONTH.value }}</button>
     </div>
-    <div class="col-sm-6 no-padding">
+    <div class="col-xs-6 no-padding">
       {% csrf_token %}
       {{ month_form.date }}
     </div>
-    <div class="col-sm-2 no-padding">
+    <div class="col-xs-2 no-padding">
       {% if not disable_next_button %}
         <a href="{{ next_month_url }}" class="btn btn-primary">
           <span class="glyphicon glyphicon-chevron-right"></span>
