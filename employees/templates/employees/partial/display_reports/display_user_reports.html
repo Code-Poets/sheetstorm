@@ -1,0 +1,48 @@
+{% load data_display_filters %}
+{% load data_structure_element_selectors %}
+
+<div class="container narrower-container">
+    <div class="table-responsive">
+        <table class="table table-responsive-sm">
+            <thead>
+                <tr>
+                    <td class="td-text-align-left-name" colspan="1">
+                        <h4 title="{{ user.get_full_name }}">
+                            <b>{{ user.get_full_name }}</b>
+                        </h4>
+                    </td>
+                    <td class="hidden-print-line" colspan="5">
+                        <hr class="hr-blue-line">
+                    </td>
+                </tr>
+                <tr class="bottom-separator">
+                    <th class="date-header th-blue-border-first-cell">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+                    <th class="project-header th-blue-border">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+                    <th class="task-activities-header th-blue-border">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
+                    <th class="th-blue-border">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+                    <td class="edit-button-header Invisible hidden-print"></td>
+                    <th class="work-hours-header th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% regroup reports by date as date %}
+            {% include "employees/partial/display_reports/reports_in_date_for_author.html" %}
+
+            <tr class="tr-next-day-separator">
+                {% if not date|length == 0 %}
+                    <td class="td-text-align-left"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+                    <td colspan="3"></td>
+                    <td class="hidden-print"></td>
+                    <td class="work-hours-column">
+                        <strong>{{ monthly_hours_sum|get_key_value:user.pk|duration_field_to_string }}</strong>
+                    </td>
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+        {% if not reports %}
+            <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
+        {% endif %}
+        {% include "employees/partial/display_reports/../projects_work_percentage.html" %}
+    </div>
+</div>

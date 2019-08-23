@@ -1,0 +1,16 @@
+{% load i18n %}
+
+{% load data_display_filters %}
+
+<div class="row double-space-margin-bottom">
+    <div class="col-md-6 export-xlsx">
+        <a href="{% if not only_one_author_reports %}{% url 'export-project-reports' pk=object.pk year=year month=month %}{% else %}{% url 'export-project-author-reports' pk=object.pk user_pk=user_pk year=year month=month %}{% endif %}" class="btn btn-success">
+            <span>{% trans 'Export ' %} {{ month | convert_to_month_name }} {{ year }} {% trans ' Reports to XLSX' %}</span>
+        </a>
+    </div>
+    <div class="col-md-6 export-csv">
+        <a href="{% if not only_one_author_reports %}{% url 'export-project-reports' pk=object.pk year=year month=month %}{% else %}{% url 'export-project-author-reports' pk=object.pk user_pk=user_pk year=year month=month %}{% endif %}?format=csv" class="btn btn-success">
+            <span>{% trans 'Export ' %} {{ month| convert_to_month_name }} {{ year }} {% trans ' Reports to CSV' %}</span>
+        </a>
+    </div>
+</div>
