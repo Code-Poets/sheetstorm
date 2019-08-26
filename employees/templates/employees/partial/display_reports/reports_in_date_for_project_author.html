@@ -11,7 +11,7 @@
         {% else %}
             <tr>
         {% endif %}
-            <td class="task-activities-column">{{ report.task_activities }}</td>
+            <td class="activities-column">{{ report.task_activities }}</td>
             <td class="description-column">
                 {{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
             </td>
