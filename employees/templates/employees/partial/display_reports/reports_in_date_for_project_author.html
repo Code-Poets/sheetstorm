@@ -1,0 +1,26 @@
+{% load data_display_filters %}
+
+{% regroup author.list by date as reports_by_date %}
+{% for date in reports_by_date %}
+    {% for report in date.list %}
+        {% if forloop.first %}
+            <tr class="tr-next-day-separator">
+                <td class="date-column" rowspan={{ date.list|length }}>
+                    <strong>{{ report.date }}</strong>
+                </td>
+        {% else %}
+            <tr>
+        {% endif %}
+            <td class="task-activities-column">{{ report.task_activities }}</td>
+            <td class="description-column">
+                {{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
+            </td>
+            <td class="edit-button-column Invisible hidden-print">
+                <a href="{% url 'project-report-detail' pk=report.id %}" class="btn btn-light hidden-print">
+                    <span class="glyphicon glyphicon-edit span-edit-report hidden-print"></span>
+                </a>
+            </td>
+            <td class="work-hours-column">{{ report.work_hours_str }}</td>
+        </tr>
+    {% endfor %}
+{% endfor %}
