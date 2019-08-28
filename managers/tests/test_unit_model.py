@@ -3,8 +3,12 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
+from freezegun import freeze_time
+from parameterized import parameterized
 
 from managers.commons.constants import ProjectConstants
+from managers.factories import ProjectFactory
 from managers.models import Project
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.utils import generate_random_string_from_letters_and_digits
@@ -105,3 +109,38 @@ class TestProjectModelField(BaseModelTestCase):
             project.save()
         self.assertEqual(ProjectConstants.STOP_DATE_VALIDATION_ERROR_MESSAGE.value, exception.exception.messages.pop())
         self.assertFalse(Project.objects.all().exists())
+
+
+class TestProjectQuerySet(TestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.project = ProjectFactory()
+
+    @parameterized.expand(["2019-08-28", "2019-08-29", (None,)])
+    def test_filter_active_projects_should_return_project_with_dates(self, date):
+        with freeze_time("2019-08-28"):
+            self.project.stop_date = date
+            self.project.full_clean()
+            self.project.save()
+
+            self.assertIn(self.project, Project.objects.filter_active())
+
+    @freeze_time("2019-08-28")
+    def test_filter_active_projects_should_not_return_project_with_stop_date_less_than_current_date(self):
+        self.project.stop_date = timezone.now() - timezone.timedelta(days=1)
+        self.project.full_clean()
+        self.project.save()
+
+        self.assertNotIn(self.project, Project.objects.filter_active())
+
+    @freeze_time("2019-08-28")
+    def test_filter_completed_projects_should_return_all_projects_with_stop_date_less_than_current_date(self):
+        project_not_completed = ProjectFactory
+        self.project.stop_date = timezone.now() - timezone.timedelta(days=1)
+        self.project.full_clean()
+        self.project.save()
+
+        completed_projects = Project.objects.filter_completed()
+
+        self.assertIn(self.project, completed_projects)
+        self.assertNotIn(project_not_completed, completed_projects)
