@@ -1,212 +1,32 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'managers/style.css' %}"/>
+{% endblock %}
 
 {% block content %}
-<h1>
-  <button type="button" class="btn btn-default btn-sm" data-toggle="collapse" data-target="#collapseSort" aria-expanded="false" aria-controls="collapseSort">
-    <span class="glyphicon glyphicon-th-list"></span>
-  </button>
-  &nbsp; {% trans 'Projects' %} &nbsp;
-  <a href="{% url 'custom-project-create' %}" class="btn btn-default btn-sm">
-    <span class="glyphicon glyphicon-plus"></span>
-  </a>
-</h1>
+    {% trans 'Active' as active %}
+    {% trans 'Suspended' as suspended %}
+    {% trans 'Completed' as completed %}
+    {% trans 'All' as all %}
 
-<div class="collapse" id="collapseSort">
-  <div class="col-md-4 col-md-offset-4">
-    <nav id="projects-navbar" class="navbar navbar-light" style="background-color: #e6ecff;">
-      <ul class="nav nav-pills">
-        <li class="nav-item">
-          <a class="nav-link" href="#active" style="color:grey">{% trans "Active" %}</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#suspended" style="color:grey">{% trans "Suspended" %}</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#completed" style="color:grey">{% trans "Completed" %}</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#all" style="color:grey">{% trans "All" %}</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" style="color:grey" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-sort-by-attributes"></span> </a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=name" style="color:grey">{% trans "Name" %}</a><br>
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=start_date" style="color:grey">{% trans "Start date" %}</a><br>
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=stop_date" style="color:grey">{% trans "Completed date" %}</a><br>
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=members_count" style="color:grey">{% trans "Members count" %}</a><br>
-          </div>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" style="color:grey" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span> </a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=-name" style="color:grey">{% trans "Name" %}</a><br>
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=-start_date" style="color:grey">{% trans "Start date" %}</a><br>
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=-stop_date" style="color:grey">{% trans "Completed date" %}</a><br>
-            <a class="dropdown-item" href="{% url 'custom-projects-list' %}?sort=-members_count" style="color:grey">{% trans "Members count" %}</a><br>
-          </div>
-        </li>
-      </ul>
-    </nav>
-  </div>
-</div>
-
-<div data-spy="scroll" data-target="#projects-navbar" data-offset="0">
-
-  <div id="active" class="modal-dialog" style="margin-bottom:0">
-    <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseActive" aria-expanded="false" aria-controls="collapseActive">
-      {% trans "Active" %}
-    </button>
-  </div>
-  <div class="panel-collapse collapse in" id="collapseActive">
-    <div class="card card-body">
-      <br/>
-      <div class="container">
-        <div class="row">
-          {% for project in object_list.filter_active %}
-            <div class="col-sm-4">
-              <div class="list-group">
-                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-action flex-column align-items-start active">
-                    <div class="d-flex w-100 justify-content-between">
-                      <h4 class="mb-1">{{ project.name }}</h4>
-                    </div>
-                    <p class="mb-1">{% trans "started at" %}: {{project.start_date}}</p>
-                    <small>{% trans "managers" %}:
-                      {% for user in project.managers.all %}
-                                {{user.first_name}} {{user.last_name}}<br>
-                      {% endfor %}</small>
-                    <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
-                  </a>
-              </div>
-            </div>
-            {% if forloop.counter|divisibleby:3 %}
-              </div>
-              <div class="row">
-            {% endif %}
-          {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
-
-  <div id="suspended" class="modal-dialog" style="margin-bottom:0">
-    <button class="btn btn-info btn-block" type="button" data-toggle="collapse" data-target="#collapseSuspended" aria-expanded="false" aria-controls="collapseSuspended">
-      {% trans "Suspended" %}
-    </button>
-  </div>
-  <div class="collapse" id="collapseSuspended">
-    <div class="card card-body">
-      <br/>
-      <div class="container">
-        <div class="row">
-          {% for project in object_list.filter_suspended %}
-            <div class="col-sm-4">
-              <div class="list-group">
-                <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-info flex-column align-items-start">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h4 class="mb-1">{{ project.name }}</h4>
-                  </div>
-                  <p class="mb-1">{% trans "started at" %}: {{project.start_date}}</p>
-                  <small>{% trans "managers" %}:
-                    {% for user in project.managers.all %}
-                              {{user.first_name}} {{user.last_name}}<br>
-                    {% endfor %}</small>
-                  <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
+    <div class="modal-dialog" id="modal-dialog-project-list">
+        <div class="main-white-container">
+            <h1>
+                <img src="{% static 'managers/images/ico-04.png' %}"> {% trans 'Projects' %}
+                <a href="{% url 'custom-project-create' %}" title="{% trans 'Create a new project' %}">
+                    <img src="{% static 'managers/images/ico-07.png' %}">
                 </a>
-              </div>
-            </div>
-            {% if forloop.counter|divisibleby:3 %}
-              </div>
-              <div class="row">
-            {% endif %}
-          {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
+            </h1>
 
-  <div id="completed" class="modal-dialog" style="margin-bottom:0">
-    <button class="btn btn-success btn-block" type="button" data-toggle="collapse" data-target="#collapseCompleted" aria-expanded="false" aria-controls="collapseCompleted">
-      {% trans "Completed" %}
-    </button>
-  </div>
-  <div class="collapse" id="collapseCompleted">
-    <div class="card card-body">
-      <br/>
-      <div class="container">
-        <div class="row">
-          {% for project in object_list.filter_completed %}
-          <div class="col-sm-4">
-            <div class="list-group">
-                <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-action list-group-item-success flex-column align-items-start">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h4 class="mb-1">{{ project.name }}</h4>
-                  </div>
-                  <p class="mb-1">{% trans "completed at" %}: {{project.stop_date}}</p>
-                  <small>{% trans "managers" %}:
-                    {% for user in project.managers.all %}
-                              {{user.first_name}} {{user.last_name}}<br>
-                    {% endfor %}</small>
-                  <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
-                </a>
-              </div>
-            </div>
-            {% if forloop.counter|divisibleby:3 %}
-              </div>
-              <div class="row">
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
+            {% include "managers/partials/display_projects.html" with filtered_list=object_list.filter_active header=active id="active" %}
+            {% include "managers/partials/display_projects.html" with filtered_list=object_list.filter_suspended header=suspended id="suspended" %}
+            {% include "managers/partials/display_projects.html" with filtered_list=object_list.filter_completed header=completed id="completed" %}
+            {% include "managers/partials/display_projects.html" with filtered_list=object_list header=all id="all" %}
 
-  <div id="all" class="modal-dialog" style="margin-bottom:0">
-    <button class="btn btn-dark btn-block" type="button" data-toggle="collapse" data-target="#collapseAll" aria-expanded="false" aria-controls="collapseAll">
-      {% trans "All" %}
-    </button>
-  </div>
-  <div class="collapse" id="collapseAll">
-    <div class="card card-body">
-      <br/>
-      <div class="container">
-        <div class="row">
-          {% for project in object_list %}
-            <div class="col-sm-4">
-              <div class="list-group">
-                {% if project.suspended is False and project.stop_date is None %}
-                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-action flex-column align-items-start active">
-                {% elif project.stop_date is not None %}
-                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-success flex-column align-items-start">
-                {% else %}
-                  <a href="{% url 'custom-project-detail' pk=project.id %}" class="list-group-item list-group-item-info flex-column align-items-start">
-                {% endif %}
-                    <div class="d-flex w-100 justify-content-between">
-                      <h4 class="mb-1">{{ project.name }}</h4>
-                    </div>
-                      {% if project.stop_date is None %}
-                    <p class="mb-1">{% trans "started at" %}: {{project.start_date}}</p>
-                      {% else %}
-                    <p class="mb-1">{% trans "completed at" %}: {{project.stop_date}}</p>
-                      {% endif %}
-                    <small>{% trans "managers" %}:
-                      {% for user in project.managers.all %}
-                                {{user.first_name}} {{user.last_name}}<br>
-                      {% endfor %}</small>
-                    <small><span class="glyphicon glyphicon-user"></span> {{project.members.count}}</small>
-                  </a>
-                </div>
-            </div>
-            {% if forloop.counter|divisibleby:3 %}
-              </div>
-              <div class="row">
-            {% endif %}
-          {% endfor %}
         </div>
-      </div>
     </div>
-  </div>
-
-</div>
 {% endblock %}

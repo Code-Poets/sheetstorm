@@ -5,3 +5,123 @@
 .multiselect-task-activities {
     margin-left: 15px;
 }
+
+.main-white-container {
+    background: #FAFAFA;
+    padding: 5%;
+    -webkit-box-shadow: 0 0 10px grey;
+    -moz-box-shadow: 0 0 10px grey;
+    box-shadow: 0 0 10px grey;
+    min-width: 240px;
+}
+
+#modal-dialog-project-list {
+    width: 80%;
+}
+
+.row.project-box {
+    -webkit-box-shadow: 0 0 10px grey;
+    -moz-box-shadow: 0 0 10px grey;
+    box-shadow: 0 0 10px grey;
+    background: #FFFFFF;
+    margin: 10px;
+    max-width: 230px;
+    padding: 10px 15px 5px 3.5px; !important;
+    display: block;
+}
+
+.card-body {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row.project-box > .row {
+    text-align: left;
+    margin-left: 4%;
+}
+
+.row.project-box > .row.project {
+    margin-left: -4px;
+
+}
+.row.project {
+    border-left: #056DBA solid 4px;
+    margin-bottom: 7px;
+}
+.project-header {
+    float: left;
+    text-align: left;
+    margin-left: 5%;
+    max-width: 150px;
+}
+
+.project-header > h5 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+.project-reports {
+    float: right;
+    margin-top: 2%;
+    margin-right: 4%;
+}
+
+.project-managers {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.filtered-projects {
+    text-align: left;
+    width: 100%;
+}
+
+.toggled-projects {
+    color: #3366FF;
+    font-size: 130%;
+    display: inline-block;
+    width: 120px;
+}
+
+.toggled-projects:after, .toggled-projects:hover, .toggled-projects:active, .toggled-projects:visited, .toggled-projects:focus  {
+    text-decoration: none;
+}
+
+.row.images {
+    text-align: left;
+    margin-top: -5px;
+    margin-left: 14px;
+}
+
+.row.images > a > i {
+    color: #2C77BC;
+;
+}
+
+.box-wrapper {
+    margin-bottom: 60px;
+    min-width: 250px;
+    max-width: 80%;
+}
+
+.toggled-projects:active {
+    font-size: 160%;
+    font-weight: 700;
+}
+
+.toggled-projects[aria-expanded="true"] {
+    font-size: 160%;
+    font-weight: 700;
+}
+
+.hr-blue-line {
+    display: inline-block;
+    margin-top: 12px;
+    margin-bottom: 0.5em;
+    border-style: inset;
+    border-width: 0.5px;
+    text-align: right;
+    width: calc(99% - 120px);
+    border-color: #2c77bc;
+}
