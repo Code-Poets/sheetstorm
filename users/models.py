@@ -18,15 +18,12 @@ from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django_countries.fields import CountryField
 
 from users.common.constants import UserConstants
 from users.common.fields import ChoiceEnum
 from users.common.strings import CustomUserModelText
 from users.common.strings import CustomUserUserTypeText
 from users.common.strings import ValidationErrorText
-from users.common.validators import PhoneRegexValidator
-from users.validators import UserAgeValidator
 from users.validators import UserEmailValidation
 from users.validators import UserNameValidatior
 
@@ -106,17 +103,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         CustomUserModelText.IS_ACTIVE, default=False, help_text=CustomUserModelText.ACTIVE_HELP_TEXT
     )
     date_joined = models.DateTimeField(CustomUserModelText.DATE_JOINED, auto_now_add=True)
-    date_of_birth = models.DateField(
-        CustomUserModelText.DATE_OF_BIRTH,
-        blank=True,
-        null=True,
-        validators=[UserAgeValidator(UserAgeValidator.MINIMAL_ACCETABLE_AGLE, UserAgeValidator.MAXIMAL_ACCEPTABLE_AGE)],
-    )
     updated_at = models.DateTimeField(CustomUserModelText.UPDATED_AT, auto_now=True)
-    phone_number = models.CharField(
-        validators=[PhoneRegexValidator], max_length=UserConstants.PHONE_NUMBER_MAX_LENGTH.value, blank=True, null=True
-    )
-    country = CountryField(blank=True)
     user_type = models.CharField(
         max_length=UserConstants.USER_TYPE_MAX_LENGTH.value, choices=UserType.choices(), default=UserType.EMPLOYEE.name
     )

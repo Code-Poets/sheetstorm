@@ -1,5 +1,3 @@
-import datetime
-
 import mock
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -9,9 +7,7 @@ from freezegun import freeze_time
 
 from users.common.constants import UserConstants
 from users.common.model_helpers import create_user_using_full_clean_and_save
-from users.common.strings import CustomUserModelText
 from users.common.strings import ValidationErrorText
-from users.common.utils import generate_random_string_from_letters_and_digits
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase
 
@@ -36,68 +32,35 @@ class TestCustomUserModel(TestCase):
         self.assertEqual(user.user_type, CustomUser.UserType.ADMIN.name)
 
     def test_user_with_existing_email_full_clean_should_raise_validation_error(self):
-        create_user_using_full_clean_and_save("testuser@codepoets.it", "", "", "", "newuserpasswd")
+        create_user_using_full_clean_and_save("testuser@codepoets.it", "", "", "newuserpasswd")
         with self.assertRaises(ValidationError) as exception:
-            create_user_using_full_clean_and_save("testuser@codepoets.it", "", "", "", "newuserpasswd")
+            create_user_using_full_clean_and_save("testuser@codepoets.it", "", "", "newuserpasswd")
         self.assertTrue(ValidationErrorText.VALIDATION_ERROR_EMAIL_EXISTING_MESSAGE in str(exception.exception))
 
     def test_user_with_email_without_at_least_one_at_sign_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:
-            create_user_using_full_clean_and_save("wrongtestusercodepoets.it", "", "", "", "newuserpasswd")
+            create_user_using_full_clean_and_save("wrongtestusercodepoets.it", "", "", "newuserpasswd")
         self.assertTrue(ValidationErrorText.VALIDATION_ERROR_EMAIL_AT_SIGN_MESSAGE in exception.exception.messages)
 
     def test_user_with_first_name_longer_than_FIRST_NAME_MAX_LENGTH_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save(
-                "testuser@codepoets.it", "a" * (UserConstants.FIRST_NAME_MAX_LENGTH.value + 1), "", "", "newuserpasswd"
+                "testuser@codepoets.it", "a" * (UserConstants.FIRST_NAME_MAX_LENGTH.value + 1), "", "newuserpasswd"
             )
         self.assertTrue(str(MaxLengthValidator.message) in str(exception.exception))
 
     def test_user_with_last_name_longer_than_LAST_NAME_MAX_LENGTH_full_clean_should_raise_validation_error(self):
         with self.assertRaises(ValidationError) as exception:
             create_user_using_full_clean_and_save(
-                "testuser@codepoets.it", "", "a" * (UserConstants.LAST_NAME_MAX_LENGTH.value + 1), "", "newuserpasswd"
+                "testuser@codepoets.it", "", "a" * (UserConstants.LAST_NAME_MAX_LENGTH.value + 1), "newuserpasswd"
             )
         self.assertTrue(str(MaxLengthValidator.message) in str(exception.exception))
-
-    def test_user_with_phone_number_longer_than_PHONE_NUMBER_MAX_LENGTH_full_clean_should_raise_validation_error(self):
-        with self.assertRaises(ValidationError) as exception:
-            create_user_using_full_clean_and_save(
-                "testuser@codepoets.it",
-                "",
-                "",
-                "1" * (UserConstants.PHONE_NUMBER_MAX_LENGTH.value + 1),
-                "newuserpasswd",
-            )
-        self.assertTrue(str(CustomUserModelText.PHONE_REGEX_MESSAGE) in str(exception.exception))
-
-    def test_user_with_phone_number_shorter_than_PHONE_NUMBER_MIN_LENGTH_full_clean_should_raise_validation_error(self):
-        with self.assertRaises(ValidationError) as exception:
-            create_user_using_full_clean_and_save(
-                "testuser@codepoets.it",
-                "",
-                "",
-                "1" * (UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1),
-                "newuserpasswd",
-            )
-        self.assertTrue(str(CustomUserModelText.PHONE_REGEX_MESSAGE) in str(exception.exception))
-
-    def test_user_with_phone_number_with_non_digits_signs_should_raise_validation_error(self):
-        with self.assertRaises(ValidationError) as exception:
-            create_user_using_full_clean_and_save(
-                "testuser@codepoets.it",
-                "",
-                "",
-                generate_random_string_from_letters_and_digits(UserConstants.PHONE_NUMBER_MIN_LENGTH.value),
-                "newuserpasswd",
-            )
-        self.assertTrue(str(CustomUserModelText.PHONE_REGEX_MESSAGE) in str(exception.exception))
 
 
 class TestCustomUserModelMethods(TestCase):
     def setUp(self):
         self.user = create_user_using_full_clean_and_save(
-            "testuser@codepoets.it", "testusername", "testuserlastname", "", "testuserpasswd"
+            "testuser@codepoets.it", "testusername", "testuserlastname", "testuserpasswd"
         )
 
     def test_get_absolute_url_method_should_return_absolute_url_with_users_email(self):
@@ -137,9 +100,6 @@ class TestCustomUserModelField(BaseModelTestCase):
             "email": "example@codepoets.it",
             "first_name": "Jan",
             "last_name": "Kowalski",
-            "date_of_birth": datetime.datetime.strptime("2000-05-13", "%Y-%m-%d").date(),
-            "phone_number": "123456789",
-            "country": "PL",
             "user_type": "EMPLOYEE",
             "password": "passwduser",
         }
@@ -179,33 +139,8 @@ class TestCustomUserModelField(BaseModelTestCase):
     def test_customuser_model_date_joined_field_should_be_filled_on_save(self):
         self.field_should_have_non_null_default("date_joined")
 
-    def test_customuser_model_date_of_birth_field_should_accept_correct_input(self):
-        date_of_birth = datetime.datetime.strptime("2001-05-26", "%Y-%m-%d").date()
-        self.field_should_accept_input("date_of_birth", date_of_birth)
-
-    def test_customuser_model_date_of_birth_field_may_be_empty(self):
-        self.field_should_accept_null("date_of_birth")
-
     def test_customuser_model_updated_at_field_should_be_filled_on_save(self):
         self.field_should_have_non_null_default("updated_at")
-
-    def test_customuser_model_phone_number_field_should_accept_correct_input(self):
-        self.field_should_accept_input("phone_number", "123654789")
-
-    def test_customuser_model_phone_number_field_may_be_empty(self):
-        self.field_should_accept_null("phone_number")
-
-    def test_customuser_model_phone_number_field_should_not_accept_decimal_longer_than_set_limit(self):
-        self.field_should_not_accept_input("phone_number", "1" * (UserConstants.PHONE_NUMBER_MAX_LENGTH.value + 1))
-
-    def test_customuser_model_phone_number_field_should_not_accept_decimal_shorter_than_set_limit(self):
-        self.field_should_not_accept_input("phone_number", "1" * (UserConstants.PHONE_NUMBER_MIN_LENGTH.value - 1))
-
-    def test_customuser_model_country_field_should_accept_correct_input(self):
-        self.field_should_accept_input("country", "GB")
-
-    def test_customuser_model_country_field_may_be_empty(self):
-        self.field_should_accept_null("country")
 
     def test_customuser_model_user_type_field_should_accept_correct_input(self):
         self.field_should_accept_input("user_type", "EMPLOYEE")

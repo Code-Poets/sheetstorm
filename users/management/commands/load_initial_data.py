@@ -36,8 +36,6 @@ class Command(BaseCommand):
                 user_type=User.UserType.EMPLOYEE.name,
                 first_name="Mieczysław",
                 last_name="Mietkowiak",
-                phone_number="123456789012345",
-                date_of_birth="1962-10-10",
             )
             user_employee_1.set_password("passwduser")  # pylint: disable=no-value-for-parameter
             user_employee_1.save()
@@ -82,7 +80,6 @@ class Command(BaseCommand):
                 user_type=User.UserType.EMPLOYEE.name,
                 first_name="Kurt",
                 last_name="Schmidt",
-                country="DE",
             )
             user_employee_3.set_password("passwduser")  # pylint: disable=no-value-for-parameter
             user_employee_3.save()

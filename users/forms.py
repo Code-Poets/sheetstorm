@@ -1,13 +1,10 @@
-from bootstrap_datepicker_plus import DatePickerInput
 from captcha.fields import CaptchaField
 from captcha.fields import CaptchaTextInput
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
-from django_countries.widgets import CountrySelectWidget
 
-from common.constants import CORRECT_DATE_FORMAT
 from users.common.constants import CaptchaConstants
 from users.common.constants import UserConstants
 from users.models import CustomUser
@@ -31,11 +28,7 @@ class SimpleUserChangeForm(ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ("first_name", "last_name", "date_of_birth", "phone_number", "country")
-        widgets = {
-            "country": CountrySelectWidget(),
-            "date_of_birth": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
-        }
+        fields = ("first_name", "last_name")
 
 
 class AdminUserChangeForm(ModelForm):
@@ -45,11 +38,7 @@ class AdminUserChangeForm(ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "first_name", "last_name", "date_of_birth", "phone_number", "country", "user_type")
-        widgets = {
-            "country": CountrySelectWidget(),
-            "date_of_birth": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
-        }
+        fields = ("email", "first_name", "last_name", "user_type")
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -62,10 +51,6 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = "__all__"
-        widgets = {
-            "country": CountrySelectWidget(),
-            "date_of_birth": DatePickerInput(options={"format": CORRECT_DATE_FORMAT}),
-        }
 
 
 class CustomUserSignUpForm(UserCreationForm):
