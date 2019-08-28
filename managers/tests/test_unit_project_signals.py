@@ -74,8 +74,8 @@ class TestProjectSignals(TestCase):
         self.assertCountEqual([custom_task_activity, default_task_activity], list(project.project_activities.all()))
 
     @freeze_time("2019-08-08")
-    def test_project_should_not_be_suspended_when_stop_date_is_not_null(self):
-        date = timezone.now().date()
+    def test_project_should_not_be_suspended_when_project_is_completed(self):
+        date = timezone.now().date() - timezone.timedelta(days=1)
         self.project.suspended = True
         self.project.stop_date = date
         self.project.save()

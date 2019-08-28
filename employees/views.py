@@ -211,7 +211,9 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
         context_data["object_list"] = self.get_queryset()
         context_data["daily_hours_sum"] = context_data["object_list"].order_by().get_work_hours_sum_for_all_dates()
         context_data["monthly_hours_sum"] = context_data["object_list"].order_by().get_work_hours_sum_for_all_authors()
-        project_form_queryset = Project.objects.exclude(members__id=self.request.user.id).order_by("name")
+        project_form_queryset = (
+            Project.objects.filter_active().exclude(members__id=self.request.user.id).order_by("name")
+        )
         context_data["hide_join"] = not project_form_queryset.exists()
         context_data["project_form"] = ProjectJoinForm(queryset=project_form_queryset)
         return context_data
@@ -228,7 +230,8 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
 
     def _handle_join_request(self, request: HttpRequest) -> HttpResponse:
         form = ProjectJoinForm(
-            queryset=Project.objects.exclude(members__id=self.request.user.id).order_by("name"), data=request.POST
+            queryset=Project.objects.filter_active().exclude(members__id=self.request.user.id).order_by("name"),
+            data=request.POST,
         )
         if form.is_valid():
             project = Project.objects.get(id=int(self.request.POST["projects"]))
