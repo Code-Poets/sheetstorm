@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'raven.contrib.django.raven_compat',
     'django_select2',
+    'staticinline.apps.StaticInlineAppConfig',
     # SheetStorm
     'managers.apps.ManagersConfig',
     'employees.apps.EmployeesConfig',
