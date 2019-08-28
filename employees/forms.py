@@ -7,6 +7,7 @@ from bootstrap_datepicker_plus import DatePickerInput
 from django import forms
 from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
+from django.db.models import Q
 from django.db.models import QuerySet
 from django.forms import HiddenInput
 from django.forms import TextInput
@@ -67,10 +68,12 @@ class ReportForm(forms.ModelForm):
     def __init__(self, *args: Any, **kwargs: Any):
         super(ReportForm, self).__init__(*args, **kwargs)
         author = kwargs["initial"]["author"]
-        self.fields["project"].queryset = author.get_project_ordered_by_last_report_creation_date()
-
+        self.fields["project"].queryset = (
+            Project.objects.filter_active().filter(Q(members=author) | Q(managers=author)).distinct()
+        )
         self._filter_task_activities_per_project()
-        self._set_last_choices_in_report_form(author)
+        if "data" not in kwargs:
+            self._set_last_choices_in_report_form(author)
 
     def _filter_task_activities_per_project(self) -> None:
         if "project" in self.data:
@@ -80,20 +83,29 @@ class ReportForm(forms.ModelForm):
                     "name"
                 )
         elif self.instance.pk:
-            self.fields["task_activities"].queryset = self.instance.project.project_activities.order_by("name")
+            self.fields["task_activities"].queryset = (
+                self.instance.project.project_activities.order_by("name")
+                | TaskActivityType.objects.filter(pk=self.instance.task_activities.pk)
+            ).distinct()
 
     def _set_last_choices_in_report_form(self, author: CustomUser) -> None:
         if self.instance.pk is None:
-            if self.fields["project"].queryset.exists():
+            last_report = author.report_set.order_by("-creation_date").first()
+            if last_report and (
+                author in last_report.project.members.all() or author in last_report.project.managers.all()
+            ):
+                self.initial["project"] = last_report.project
+                self.fields["task_activities"].queryset = last_report.project.project_activities.all()
+                self.initial["task_activities"] = last_report.task_activities
+            elif self.fields["project"].queryset.exists():
                 self.initial["project"] = self.fields["project"].queryset.first()
                 self.fields["task_activities"].queryset = self.initial["project"].project_activities.all()
             else:
                 self.fields["task_activities"].queryset = TaskActivityType.objects.none()
-
-            report_set = author.report_set.order_by("-creation_date")
-            if report_set:
-                self.fields["task_activities"].queryset = report_set.first().project.project_activities.all()
-                self.initial["task_activities"] = report_set.first().task_activities
+        else:
+            self.fields["project"].queryset = (
+                self.fields["project"].queryset | Project.objects.filter(pk=self.instance.project.pk).distinct()
+            )
 
 
 class MonthSwitchForm(forms.Form):
