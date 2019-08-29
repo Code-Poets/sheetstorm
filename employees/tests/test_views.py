@@ -103,6 +103,7 @@ class AdminReportViewTests(TestCase):
             "author": self.user.pk,
             "task_activities": self.task_activity.pk,
             "work_hours": "8:00",
+            "current-project-pk": self.report.project.pk,
         }
 
     def test_admin_report_detail_view_should_display_report_details(self):
@@ -298,6 +299,16 @@ class ReportCustomListTests(TestCase):
         self.assertEqual(len(response.context["form"].fields["project"].queryset), 0)
         self.assertEqual(len(response.context["form"].fields["task_activities"].queryset), 0)
 
+    def test_custom_report_list_manager_should_have_displayed_projects_to_choose_where_he_is_only_a_manager(self):
+        manager = ManagerUserFactory()
+        self.client.force_login(manager)
+        self.report.project.managers.add(manager)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.report.project, response.context["form"].fields["project"].queryset)
+
 
 class ProjectReportDetailTests(TestCase):
     def setUp(self):
@@ -316,6 +327,7 @@ class ProjectReportDetailTests(TestCase):
             "author": self.report.author.pk,
             "task_activities": self.task_activity.pk,
             "work_hours": self.report.work_hours_str,
+            "current-project-pk": self.report.project.pk,
         }
 
     def test_project_report_detail_view_should_display_report_details(self):

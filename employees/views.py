@@ -271,7 +271,7 @@ class ReportDetailBase(UpdateView):
         return reverse(
             self.redirect_url,
             kwargs={
-                "pk": getattr(self.object, self.url_pk).id,
+                "pk": self.request.POST.get("current-project-pk"),
                 "year": self.object.date.year,
                 "month": self.object.date.month,
             },
