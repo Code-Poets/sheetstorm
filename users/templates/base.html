@@ -9,10 +9,31 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'users/center_style.css' %}" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+    <link
+        rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="shortcut icon"
+        href="{% static 'images/favicon.ico' %}"
+        integrity="{% staticinline 'images/favicon.ico' encode="sri" %}"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'users/center_style.css' %}"
+        integrity="{% staticinline 'users/center_style.css' encode="sri" %}"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Roboto:300"
+        integrity="sha256-9o7gAoB+6uFtiO7i3Gkm2niiy1qOx3zwAmcm0B8b668="
+        crossorigin="anonymous"
+    >
     {% block extra_head %}{% endblock %}
 </head>
 <body>

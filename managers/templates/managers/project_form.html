@@ -5,8 +5,19 @@
 {% load crispy_forms_tags %}
 
 {% block extra_head %}
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-  <link rel="stylesheet" type="text/css" href="{% static "employees/style.css" %}">
+    <link
+        rel="stylesheet"
+        href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css"
+        integrity="sha384-Nlo8b0yiGl7Dn+BgLn4mxhIIBU6We7aeeiulNCjHdUv/eKHx59s3anfSUjExbDxn"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static "employees/style.css" %}"
+        integrity="{% staticinline "employees/style.css" encode="sri" %}"
+        crossorigin="anonymous"
+    />
 {% endblock %}
 
 {% block content %}

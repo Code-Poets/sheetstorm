@@ -4,7 +4,13 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'managers/style.css' %}"/>
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'managers/style.css' %}"
+        integrity="{% staticinline 'managers/style.css' encode="sri" %}"
+        crossorigin="anonymous"
+    />
 {% endblock %}
 
 {% block content %}

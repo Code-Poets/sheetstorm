@@ -7,10 +7,32 @@
 {% load data_structure_element_selectors %}
 
 {% block extra_head %}
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'employees/popup_style.css' %}">
+    <link
+        rel="stylesheet"
+        href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css"
+        integrity="sha384-Nlo8b0yiGl7Dn+BgLn4mxhIIBU6We7aeeiulNCjHdUv/eKHx59s3anfSUjExbDxn"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'employees/style.css' %}"
+        integrity="{% staticinline "employees/style.css" encode="sri" %}"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'employees/popup_style.css' %}"
+        integrity="{% staticinline 'employees/popup_style.css' encode="sri" %}"
+        crossorigin="anonymous"
+    />
 {% endblock %}
 
 {% block content %}
