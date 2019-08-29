@@ -3,7 +3,12 @@
 {% load static %}
 {% block content %}
 <head>
-    <script type="text/javascript" src="{% static 'users/scripts/redirect_to_home_page.js' %}"></script>
+    <script
+        type="text/javascript"
+        src="{% static 'users/scripts/redirect_to_home_page.js' %}"
+        integrity="{% staticinline 'users/scripts/redirect_to_home_page.js' encode="sri" %}"
+        crossorigin="anonymous"
+    ></script>
 </head>
 <h1>{{ MESSAGES.CONGRATULATIONS.value }}</h1>
 <p>{{ MESSAGES.ACCOUNT_CREATED.value }}</p>
