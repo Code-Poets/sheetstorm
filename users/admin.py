@@ -10,10 +10,7 @@ from users.models import CustomUser
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (
-            CustomUserAdminText.PERSONAL_INFO,
-            {"fields": ("first_name", "last_name", "date_of_birth", "phone_number", "country")},
-        ),
+        (CustomUserAdminText.PERSONAL_INFO, {"fields": ("first_name", "last_name")}),
         (CustomUserAdminText.STATUS, {"fields": ("user_type",)}),
         (
             CustomUserAdminText.PERMISSIONS,
