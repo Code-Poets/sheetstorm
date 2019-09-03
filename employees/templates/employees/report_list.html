@@ -7,10 +7,32 @@
 {% load data_structure_element_selectors %}
 
 {% block extra_head %}
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
-  <link rel="stylesheet" type="text/css" href="{% static 'employees/popup_style.css' %}">
+    <link
+        rel="stylesheet"
+        href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css"
+        integrity="sha384-Nlo8b0yiGl7Dn+BgLn4mxhIIBU6We7aeeiulNCjHdUv/eKHx59s3anfSUjExbDxn"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'employees/style.css' %}"
+        integrity="{% staticinline "employees/style.css" encode="sri" %}"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'employees/popup_style.css' %}"
+        integrity="{% staticinline 'employees/popup_style.css' encode="sri" %}"
+        crossorigin="anonymous"
+    />
 {% endblock %}
 
 {% block content %}
@@ -96,25 +118,40 @@
 {% endblock %}
 
 {% block extra_script %}
-  {{ form.media }}
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
-  {{ month_form.media }}
-  <script src="//code.jquery.com/jquery-3.3.1.js"></script>
-  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script src="{% static 'employees/scripts/create_and_join_popup_window.js' %}"></script>
-  {% if hide_join %}
-    <script type="text/javascript">
-      document.getElementById("join_form").hidden = true;
-    </script>
-  {% endif %}
-  <script src="{% static 'employees/scripts/load_activities_for_project.js' %}"></script>
-  {% if form.errors or form.non_field_errors%}
-    <script type="text/javascript">
-      var form_errors = true;
-    </script>
-  {% else %}
-    <script type="text/javascript">
-      var form_errors = false;
-    </script>
-  {% endif %}
+    {{ form.media }}
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"
+        integrity="sha384-ZfoEytSMLhLb1Qbwt7UEBdsjsJDd/M14/Uvu7cgxvZc8RQf6nkDemUVF9LDjRP9R"
+        crossorigin="anonymous"></script>
+    {{ month_form.media }}
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.js"
+        integrity="sha384-fJU6sGmyn07b+uD1nMk7/iSb4yvaowcueiQhfVgQuD98rfva8mcr1eSvjchfpMrH"
+        crossorigin="anonymous"></script>
+    <script
+        src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
+        integrity="sha384-JPbtLYL10d/Z1crlc6GGGGM3PavCzzoUJ1UxH0bXHOfguWHQ6XAWrIzW+MBGGXe5"
+        crossorigin="anonymous"></script>
+    <script
+        src="{% static 'employees/scripts/create_and_join_popup_window.js' %}"
+        integrity="{% staticinline 'employees/scripts/create_and_join_popup_window.js' encode="sri" %}"
+        crossorigin="anonymous"></script>
+    {% if hide_join %}
+        <script type="text/javascript">
+            document.getElementById("join_form").hidden = true;
+        </script>
+    {% endif %}
+    <script
+        src="{% static 'employees/scripts/load_activities_for_project.js' %}"
+        integrity="{% staticinline 'employees/scripts/load_activities_for_project.js' encode="sri" %}"
+        crossorigin="anonymous"></script>
+    {% if form.errors or form.non_field_errors%}
+        <script type="text/javascript">
+            var form_errors = true;
+        </script>
+    {% else %}
+        <script type="text/javascript">
+            var form_errors = false;
+        </script>
+    {% endif %}
 {% endblock %}

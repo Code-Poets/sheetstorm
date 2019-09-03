@@ -5,7 +5,13 @@
 {% load crispy_forms_tags %}
 
 {% block extra_head %}
-<link rel="stylesheet" type="text/css" href="{% static 'employees/style.css' %}">
+<link
+    rel="stylesheet"
+    type="text/css"
+    href="{% static 'employees/style.css' %}"
+    integrity="{% staticinline "employees/style.css" encode="sri" %}"
+    crossorigin="anonymous"
+/>
 {% endblock %}
 
 {% block content %}
@@ -26,6 +32,9 @@
 {% endblock %}
 
 {% block extra_script %}
-  {{ form.media }}
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+    {{ form.media }}
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"
+        integrity="sha384-ZfoEytSMLhLb1Qbwt7UEBdsjsJDd/M14/Uvu7cgxvZc8RQf6nkDemUVF9LDjRP9R"
+        crossorigin="anonymous"></script>
 {% endblock %}

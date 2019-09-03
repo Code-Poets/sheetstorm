@@ -3,7 +3,11 @@
 {% load static %}
 {% block content %}
 <head>
-    <script type="text/javascript" src="{% static 'users/scripts/redirect_to_home_page.js' %}"></script>
+    <script
+        type="text/javascript"
+        src="{% static 'users/scripts/redirect_to_home_page.js' %}"
+        integrity="{% staticinline 'users/scripts/redirect_to_home_page.js' encode="sri" %}"
+        crossorigin="anonymous"></script>
 </head>
     {% if is_activated is True %}
         <p>{{ MESSAGES.SUCCESSFUL.value }}</p>
