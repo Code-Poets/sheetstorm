@@ -1,3 +1,27 @@
+### v0.9.0
+
+##### Features
+
+- Feature add dynamic filter for task activities per project ([#469](https://github.com/Code-Poets/sheetstorm/pull/469))
+- Feature add option to switch off notifications ([#483](https://github.com/Code-Poets/sheetstorm/pull/483))
+- Feature add top border to separate days in excel reports ([#481](https://github.com/Code-Poets/sheetstorm/pull/481))
+- Feature export csv for project as one file ([#474](https://github.com/Code-Poets/sheetstorm/pull/474))
+- Feature project should have customisable task activity list ([#460](https://github.com/Code-Poets/sheetstorm/pull/460))
+- Feature rebuild user reports interface ([#312](https://github.com/Code-Poets/sheetstorm/pull/312))
+- Feature refactor project list template view ([#508](https://github.com/Code-Poets/sheetstorm/pull/508))
+- Feature remove fields due to rodo ([#516](https://github.com/Code-Poets/sheetstorm/pull/516))
+
+##### Bugfixes
+
+- Bugfix disable `cyclic-import` in pylintrc config ([#500](https://github.com/Code-Poets/sheetstorm/pull/500))
+- Bugfix incorrect display of reports ([#486](https://github.com/Code-Poets/sheetstorm/pull/486))
+- Bugfix managers field in project admin form ([#472](https://github.com/Code-Poets/sheetstorm/pull/472))
+- Bugfix remove task activity from project ([#503](https://github.com/Code-Poets/sheetstorm/pull/503))
+- Bugfix scripts and links security vulnerabilities ([#528](https://github.com/Code-Poets/sheetstorm/pull/528))
+- Bugfix stop_date and suspended field in project ([#505](https://github.com/Code-Poets/sheetstorm/pull/505))
+
+
+
 ### v0.8.0
 
 ##### Features
