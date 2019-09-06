@@ -23,9 +23,11 @@
         <div class="main-white-container">
             <h1>
                 <img src="{% static 'managers/images/ico-04.png' %}"> {% trans 'Projects' %}
-                <a href="{% url 'custom-project-create' %}" title="{% trans 'Create a new project' %}">
-                    <img src="{% static 'managers/images/ico-07.png' %}">
-                </a>
+                {% if user.is_admin %}
+                    <a href="{% url 'custom-project-create' %}" title="{% trans 'Create a new project' %}">
+                        <img src="{% static 'managers/images/ico-07.png' %}">
+                    </a>
+                {% endif %}
             </h1>
 
             {% include "managers/partials/display_projects.html" with filtered_list=object_list.filter_active header=active id="active" %}
