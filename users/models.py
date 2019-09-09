@@ -157,7 +157,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.user_type == CustomUser.UserType.EMPLOYEE.name
 
     def get_reports_created(self) -> QuerySet:
-        return self.report_set.select_related("task_activities").order_by("-date", "project__name")
+        return self.report_set.select_related("task_activities").order_by("-date", "project__name", "-creation_date")
 
     def get_projects_work_percentage(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> dict:
         """

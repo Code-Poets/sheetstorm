@@ -1,0 +1,18 @@
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+<div class="row hidden-print double-space-margin-top">
+    <div class="col-xs-6 hidden-print">
+        {% include "employees/partial/month_navigation/month_navigation_bar_with_form.html" %}
+    </div>
+
+    {% if  request.resolver_match.url_name == "custom-report-list" %}
+        <div class="col-xs-12 col-md-6 hidden-print">
+            <button class="hidden-print btn btn-lg btn-default button-without-border margin-create-button" type="button" id="opener_create">
+                <span class="glyphicon glyphicon-edit span-blue-color"></span>
+                <span class="span-blue-color"><strong>{% trans "Add new entry" %}</strong></span>
+            </button>
+        </div>
+        {% include "employees/partial/create_and_join_dialog.html" %}
+    {% endif %}
+</div>

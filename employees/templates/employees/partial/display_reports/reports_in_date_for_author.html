@@ -1,0 +1,38 @@
+{% load data_display_filters %}
+{% load data_structure_element_selectors %}
+
+{% for reports in date %}
+    {% for report in reports.list %}
+        {% if forloop.first %}
+            <tr class="tr-next-day-separator">
+                <td class="date-column" rowspan={{ reports.list|length }}>
+                    <strong>{{ reports.grouper| date:"l, d F Y" }}</strong>
+                </td>
+        {% else %}
+            <tr>
+        {% endif %}
+    <td class="project-column">{{ report.project }}</td>
+    <td class="task-activities-column">{{ report.task_activities }}</td>
+    <td class="description-column">
+        {{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
+    </td>
+    <td class="edit-button-column Invisible hidden-print">
+        {% if report.editable %}
+            <a href="{% if request.user.is_admin %}{% url 'admin-report-detail' pk=report.id %}{% else %}{% url 'custom-report-detail' pk=report.id %}{% endif %}" class="btn btn-light hidden-print">
+                <span class="glyphicon glyphicon-edit span-edit-report hidden-print"></span>
+            </a>
+        {% endif %}
+    </td>
+    <td class="work-hours-column">{{ report.work_hours_str }}</td>
+    </tr>
+    {% endfor %}
+    <tr class="tr-next-day-separator">
+        <td></td>
+        <td><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
+        <td colspan="2"></td>
+        <td class="edit-button-column Invisible hidden-print"></td>
+        <td class="work-hours-column">
+            <strong>{{ daily_hours_sum|get_key_value:reports.grouper|duration_field_to_string }}</strong>
+        </td>
+    </tr>
+{% endfor %}

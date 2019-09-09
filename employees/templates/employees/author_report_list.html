@@ -23,80 +23,14 @@
 {% endblock %}
 
 {% block content %}
-{% include "employees/partial/month_navigation_bar.html" %}
-
-<h1>{{ object.email }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}</h1>
-<a href="{% url 'custom-users-list' %}" class="btn btn-primary hidden-print">
-    {{ UI_text.RETURN_BUTTON_MESSAGE.value }}
-        <a href="{% url 'export-data' pk=object.id year=year month=month %}" class="btn btn-info">
-            Export My Reports
-        </a>
-        <a href="{% url 'export-data' pk=object.id year=year month=month %}?format=csv" class="btn btn-info">
-                Export Reports to CSV
-        </a>
-</a>
-<div class="container">
-    <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-                <th class="author-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                <th class="author-reports-project-header">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-                <th class="author-reports-editable-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
-                <th class="author-reports-work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
-                <th class="author-reports-description-header">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-                <th class="author-reports-creation-date-header hidden-print">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
-                <th class="author-reports-last-update-header hidden-print">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
-                <th class="author-reports-editable-header hidden-print">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
-                <td class="author-reports-edit-button-header hidden-print Invisible"></td>
-            </tr>
-          </thead>
-          <tbody>
-            {% regroup object.get_reports_created by date as reports_created_by_date %}
-            {% for date in reports_created_by_date %}
-            {% for report in date.list %}
-                {% if forloop.first %}
-                <td class="author-reports-date-column" rowspan={{ date.list|length }}>
-                    <strong>{{ date.grouper| date:"l, d F Y" }}</strong>
-                </td>
-                {% else %}
-                <tr>
-                {% endif %}
-                <td class="author-reports-project-column">{{ report.project }}</td>
-                <td class="author-reports-last-update-column">{{ report.task_activities.name }}</td>
-                <td class="author-reports-work-hours-column">{{ report.work_hours_str }}</td>
-                <td class="author-reports-description-column">{{ report.description|safe|urlize|linebreaks|annotate_no_follow_link_with_css_class:"pagelink" }}</td>
-                <td class="author-reports-creation-date-column hidden-print">{{ report.creation_date }}</td>
-                <td class="author-reports-last-update-column hidden-print">{{ report.last_update }}</td>
-                <td class="author-reports-editable-column hidden-print">{{ report.editable|yesno:"False,True" }}</td>
-                <td class="author-reports-edit-button-column hidden-print Invisible">
-                    <a href="{% url 'admin-report-detail' pk=report.id %}" class="btn btn-info">
-                        <span class="glyphicon glyphicon-pencil"></span>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-            <tr>
-                <td colspan="3"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
-                <td class="author-reports-work-hours-column"><strong>{{ daily_hours_sum|get_key_value:date.grouper|duration_field_to_string }}</strong></td>
-                <td colspan ="4"></td>
-                <td class="edit-button-column Invisible hidden-print"></td>
-            </tr>
-            {% endfor %}
-            <tr>
-                {% if not reports_created_by_date|length == 0 %}
-                    <td colspan="3"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
-                    <td class="author-reports-work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:object.pk|duration_field_to_string }}</strong></td>
-                {% endif %}
-            </tr>
-          </tbody>
-        </table>
-        {% if object.get_reports_created.count == 0 %}
-            <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
-        {% endif %}
-        {% include "employees/partial/projects_work_percentage.html" %}
+    <a href="{% url 'custom-users-list' %}" class="btn btn-primary hidden-print">
+        {{ UI_text.RETURN_BUTTON_MESSAGE.value }}
+    </a>
+    <div class="container main-white-container margin-top-space">
+        {% include "employees/partial/month_navigation/report_list_navigation_bar.html" %}
+        {% include "employees/partial/display_reports/display_user_reports.html" with user=object reports=object.get_reports_created %}
+        {% include "employees/partial/export_functionality.html" %}
     </div>
-</div>
 {% endblock %}
 
 {% block extra_script %}
