@@ -13,16 +13,22 @@ postgres_backup_dir:            "{{ home_dir }}/postgresql_backup"
 
 # Nginx configuration of Content Security Policy header
 content_security_policy_header:
+  allow_font_sources:
+    - https://fonts.googleapis.com
+    - https://fonts.gstatic.com
+    - https://maxcdn.bootstrapcdn.com
+    - https://*.fontawesome.com
+  allow_image_sources:
+    - https://code.jquery.com
   allow_script_sources:
     - https://ajax.googleapis.com
     - https://cdnjs.cloudflare.com
     - https://code.jquery.com
     - https://maxcdn.bootstrapcdn.com
+    - https://*.fontawesome.com
   allow_stylesheet_sources:
     - https://cdnjs.cloudflare.com
     - https://code.jquery.com
-    - https://maxcdn.bootstrapcdn.com
-  allow_font_sources:
     - https://fonts.googleapis.com
-    - https://fonts.gstatic.com
     - https://maxcdn.bootstrapcdn.com
+    - https://*.fontawesome.com
