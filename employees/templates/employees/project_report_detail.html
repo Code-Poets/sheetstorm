@@ -21,6 +21,7 @@
     <form action="{% url post_url pk=report.pk %}" method="POST">
         {% csrf_token %}
         {{ form|crispy }}
+        <input type="hidden" name="current-project-pk" value="{{ url_pk }}">
         <button type="submit" class="btn btn-success">
             <span class="glyphicon glyphicon-ok"></span> {{ UI_text.UPDATE_REPORT_BUTTON.value }}
         </button>

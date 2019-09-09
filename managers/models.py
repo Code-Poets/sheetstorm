@@ -13,6 +13,7 @@ from django.db.models.query import QuerySet
 from django.db.models.signals import m2m_changed
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from managers.commons.constants import ProjectConstants
 from users.models import CustomUser
@@ -22,13 +23,13 @@ logger = logging.getLogger(__name__)
 
 class ProjectQuerySet(models.QuerySet):
     def filter_suspended(self) -> QuerySet:
-        return self.filter(suspended=True, stop_date=None)
+        return self.filter(suspended=True)
 
     def filter_active(self) -> QuerySet:
-        return self.filter(suspended=False, stop_date=None)
+        return self.filter((Q(stop_date__gte=timezone.datetime.now()) | Q(stop_date__isnull=True)) & Q(suspended=False))
 
     def filter_completed(self) -> QuerySet:
-        return self.filter(~Q(stop_date=None))
+        return self.filter(stop_date__lt=timezone.datetime.now())
 
     def get_with_prefetched_reports(self, reports: QuerySet) -> QuerySet:
         return self.prefetch_related(Prefetch("report_set", queryset=reports))
@@ -95,5 +96,7 @@ def add_default_task_activities(sender: Project, **kwargs: Any) -> None:
 def change_suspended_if_project_has_stop_date(sender: Project, **kwargs: Any) -> None:
     assert sender == Project
     Project.objects.filter(pk=kwargs["instance"].pk).update(
-        suspended=Case(When(~Q(stop_date=None), then=Value(False)), default=kwargs["instance"].suspended)
+        suspended=Case(
+            When(Q(stop_date__lt=timezone.datetime.now()), then=Value(False)), default=kwargs["instance"].suspended
+        )
     )

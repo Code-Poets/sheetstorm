@@ -24,7 +24,7 @@
 <h1>{{ UI_text.PAGE_TITLE.value }}{{ report.project }} ({{ report.date }})</h1>
 </br>
 <div class="modal-dialog">
-    <form action="{% url 'custom-report-detail' pk=report.pk %}" method="POST">
+    <form action="{% url 'custom-report-detail' pk=report.pk %}" id="reportForm" method="POST" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
        <div class="modal-dialog">
             {% csrf_token %}
             {{ form|crispy }}
@@ -61,4 +61,9 @@
         src="{% static 'employees/scripts/basic_popup_window.js' %}"
         integrity="{% staticinline 'employees/scripts/basic_popup_window.js' encode="sri" %}"
         crossorigin="anonymous"></script>
+    <script
+        src="{% static 'employees/scripts/load_activities_for_project.js' %}"
+        integrity="{% staticinline 'employees/scripts/load_activities_for_project.js' encode='sri' %}"
+        crossorigin="anonymous"
+    ></script>
 {% endblock %}

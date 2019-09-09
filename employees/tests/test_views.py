@@ -103,6 +103,7 @@ class AdminReportViewTests(TestCase):
             "author": self.user.pk,
             "task_activities": self.task_activity.pk,
             "work_hours": "8:00",
+            "current-project-pk": self.report.project.pk,
         }
 
     def test_admin_report_detail_view_should_display_report_details(self):
@@ -276,6 +277,38 @@ class ReportCustomListTests(TestCase):
         )
         self.assertCountEqual(author_reports_before_post, self.user.report_set.all())
 
+    def test_custom_report_list_should_contains_in_form_only_active_projects_related_to_user(self):
+        other_project = ProjectFactory()
+
+        response = self.client.get(self.url)
+        project_choices = response.context["form"].fields["project"].queryset
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.report.project, project_choices)
+        self.assertNotIn(other_project, project_choices)
+        self.assertIn(self.report.project, Project.objects.filter_active())
+
+    def test_custom_report_list_should_have_empty_queryset_for_project_and_task_activities_when_he_is_not_in_any_active_project(
+        self
+    ):
+        self.user.projects.remove(self.report.project)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["form"].fields["project"].queryset), 0)
+        self.assertEqual(len(response.context["form"].fields["task_activities"].queryset), 0)
+
+    def test_custom_report_list_manager_should_have_displayed_projects_to_choose_where_he_is_only_a_manager(self):
+        manager = ManagerUserFactory()
+        self.client.force_login(manager)
+        self.report.project.managers.add(manager)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.report.project, response.context["form"].fields["project"].queryset)
+
 
 class ProjectReportDetailTests(TestCase):
     def setUp(self):
@@ -294,6 +327,7 @@ class ProjectReportDetailTests(TestCase):
             "author": self.report.author.pk,
             "task_activities": self.task_activity.pk,
             "work_hours": self.report.work_hours_str,
+            "current-project-pk": self.report.project.pk,
         }
 
     def test_project_report_detail_view_should_display_report_details(self):
@@ -441,6 +475,23 @@ class ReportDetailViewTests(TestCase):
         response = self.client.get(path=reverse("custom-report-detail", args=(report_1.pk,)))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, report_1.description)
+
+    def test_custom_report_detail_view_should_contains_in_project_field_all_project_related_with_user(self):
+        other_user_project = ProjectFactory()
+        other_user_project.members.add(self.user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertCountEqual(self.user.projects.all(), response.context_data["form"].fields["project"].queryset)
+
+    def test_custom_report_detail_view_should_contains_chosen_project_even_user_is_no_longer_in_project(self):
+        other_user_project = ProjectFactory()
+        other_user_project.members.add(self.user)
+        self.user.projects.remove(self.report.project)
+
+        response = self.client.get(self.url)
+
+        self.assertIn(self.report.project, response.context_data["form"].fields["project"].queryset)
 
 
 class ReportDeleteViewTests(TestCase):
