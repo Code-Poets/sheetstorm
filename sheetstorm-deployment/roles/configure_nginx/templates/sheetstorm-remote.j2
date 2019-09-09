@@ -35,6 +35,20 @@ server {
 
     }
 
+    location /admin/ {
+        allow                {{ allow_ip_to_admin_endpoint }};
+        deny                 all;
+
+        limit_req    zone=ip_req_limit   burst={{ nginx.number_of_requests_stored_in_queue }} nodelay;
+        limit_conn   ip_connection_limit {{ nginx.number_of_open_connections_per_client }};
+
+        set              $sheetstorm_backend  http://127.0.0.1:8000;
+        proxy_set_header x-real-ip            $remote_addr;
+        proxy_set_header x-forwarded-for      $remote_addr;
+        proxy_set_header host                 $http_host;
+        proxy_pass                            $sheetstorm_backend;
+    }
+
     location /postgres-backup/ {
         allow                {{ allow_ip_to_postgres_backup_endpoint }};
         deny                 all;
