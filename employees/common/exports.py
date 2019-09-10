@@ -1,20 +1,19 @@
 import re
+from datetime import timedelta
 from typing import Dict
 from typing import List
 from typing import Optional
 
-from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from openpyxl import Workbook
 from openpyxl.cell import Cell
-from openpyxl.cell.cell import TYPE_FORMULA
 from openpyxl.styles import Alignment
 from openpyxl.styles import Border
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import _writer
 
-from common.convert import convert_string_work_hours_field_to_hour_and_minutes
+from common.convert import timedelta_to_string
 from employees.common.constants import ColumnSettings
 from employees.common.constants import ExcelGeneratorSettingsConstants as constants
 from employees.models import Report
@@ -266,7 +265,6 @@ class ReportExtractor:
 def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_setting: ColumnSettings) -> None:
     sheet = work_book.active
     is_last_row = False
-    total_hours = timezone.timedelta()
 
     for row_number, row in enumerate(sheet.rows, start=1):
         # Check if is last row by comparing first cell value to `TOTAL`.
@@ -278,16 +276,10 @@ def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_set
             if row_number == 1:
                 next_row.append(cell.parent.title)
                 break
-            if isinstance(cell.value, str) and cell.value.lower().startswith("=timevalue"):
-                hours_as_string = cell.value[len('=timevalue("') : -len('")')]  # noqa: E203
-                next_row.append(hours_as_string)
-
-                # If contains valid hours value, add it to total hours.
-                if not is_last_row and row_number > 2 and cell_number == hours_column_setting.position:
-                    hours, minutes = convert_string_work_hours_field_to_hour_and_minutes(hours_as_string)
-                    total_hours += timezone.timedelta(hours=int(hours), minutes=int(minutes))
-            elif is_last_row and cell.data_type is TYPE_FORMULA:
-                next_row.append(str(total_hours)[:-3])
+            if isinstance(cell.value, timedelta) and not is_last_row and cell_number == hours_column_setting.position:
+                next_row.append(cell.value)
+            elif isinstance(cell.value, timedelta) and is_last_row:
+                next_row.append(timedelta_to_string(cell.value))
             else:
                 next_row.append(cell.value)
 
