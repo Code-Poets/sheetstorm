@@ -47,7 +47,7 @@ def set_and_fill_cell(cell: Cell, cell_value: str) -> None:
 
 def set_and_fill_hours_cell(cell: Cell, cell_value: str) -> None:
     if cell_value is not None:
-        cell.value = constants.TIMEVALUE_FORMULA.value.format(cell_value)
+        cell.value = cell_value
     else:
         cell.value = cell_value
     alignment = Alignment(vertical=constants.VERCTICAL_TOP.value, horizontal=constants.CENTER_ALINGMENT.value)
@@ -89,7 +89,7 @@ class ReportExtractor:
         self._description_column_index = -1
         self._hours_column_index = -1
         self._daily_hours_column_index = -1
-        self._formula = ""
+        self._sum_hours = None  # type: datetime.timedelta
         self._last_date = None
         self._active_worksheet = None  # type: Workbook
         self._headers_settings = {}  # type: Dict
@@ -134,7 +134,7 @@ class ReportExtractor:
             constants.DATE_HEADER_STR.value: report_date,
             constants.PROJECT_HEADER_STR.value: report.project.name,
             constants.TASK_ACTIVITY_HEADER_STR.value: report.task_activities.name,
-            constants.HOURS_HEADER_STR.value: report.work_hours_str,
+            constants.HOURS_HEADER_STR.value: report.work_hours,
             constants.DESCRIPTION_HEADER_STR.value: report_description,
         }
         self._fill_current_report_data(storage_data)
@@ -149,14 +149,13 @@ class ReportExtractor:
     def _reset_per_sheet_settings(self) -> None:
         self._current_row = constants.FIRST_ROW_FOR_DATA.value
         self._last_date = None
+        self._sum_hours = None
 
     def _set_xlsx_settings_for_project_report(self) -> None:
-        self._formula = constants.TOTAL_HOURS_FORMULA_REPORTS_IN_PROJECT.value
         self._headers_settings = dict(constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value)
         self._headers = [k for k, v in self._headers_settings.items() if v is not None]
 
     def _set_xlsx_settings_for_user_report(self) -> None:
-        self._formula = constants.TOTAL_HOURS_FORMULA_FOR_SINGLE_USER.value
         self._headers_settings = dict(constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value)
         self._headers = [k for k, v in self._headers_settings.items() if v is not None]
 
@@ -209,6 +208,7 @@ class ReportExtractor:
                 )
                 if column_name == constants.HOURS_HEADER_STR.value:
                     set_and_fill_hours_cell(cell, cell_value)
+                    self._sum_hours = self._sum_hours + cell_value if self._sum_hours is not None else cell_value
                 else:
                     set_and_fill_cell(cell, cell_value)
 
@@ -226,7 +226,7 @@ class ReportExtractor:
         total_hours_cell = self._active_worksheet.cell(
             row=self._current_row, column=self._headers_settings[constants.HOURS_HEADER_STR.value].position
         )
-        total_hours_cell.value = self._formula.format(self._current_row - 1)
+        total_hours_cell.value = self._sum_hours
         total_hours_cell.number_format = constants.TOTAL_HOURS_FORMAT.value
         set_format_styles_for_main_cells(total_hours_cell, is_header=False)
 
