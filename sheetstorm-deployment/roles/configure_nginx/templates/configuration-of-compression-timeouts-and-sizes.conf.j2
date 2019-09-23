@@ -1,0 +1,15 @@
+gzip             on;
+gzip_comp_level  2;
+gzip_min_length  1000;
+gzip_proxied     expired no-cache no-store private expired auth;
+gzip_types       text/plain application/x-javascript text/xml text/css application/xml;
+
+client_body_timeout         {{ nginx.client_body_timeout }};
+client_header_timeout       {{ nginx.client_header_timeout }};
+keepalive_timeout           {{ nginx.keepalive_timeout }};
+send_timeout                {{ nginx.send_timeout }};
+
+client_body_buffer_size     {{ nginx.client_body_buffer_size }};
+client_header_buffer_size   {{ nginx.client_header_buffer_size }};
+client_max_body_size        {{ nginx.client_max_body_size }};
+large_client_header_buffers {{ nginx.large_client_header_buffers }};

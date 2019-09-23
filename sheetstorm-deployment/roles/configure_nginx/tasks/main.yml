@@ -59,3 +59,8 @@
       with_items:
         - sheetstorm
         - maintenance
+
+    - name:  Add nginx configuration snippet for sheetstorm
+      template:
+        src:  configuration-of-compression-timeouts-and-sizes.conf.j2
+        dest: /etc/nginx/snippets/configuration-of-compression-timeouts-and-sizes.conf

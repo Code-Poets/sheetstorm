@@ -10,8 +10,7 @@ server {
     modsecurity            on;
     modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
 
-    client_body_timeout   {{ nginx.client_body_timeout }};
-    client_header_timeout {{ nginx.client_header_timeout }};
+    include /etc/nginx/snippets/configuration-of-compression-timeouts-and-sizes.conf;
 
     location / {
         limit_req  zone=ip_req_limit   burst={{ nginx.number_of_requests_stored_in_queue }} nodelay;
