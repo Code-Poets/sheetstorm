@@ -1,0 +1,14 @@
+# Don't allow the browser to render the page inside an frame
+add_header X-Frame-Options SAMEORIGIN;
+
+# Add X-Content-Type-Options header that disables concent-type sniffing on some browsers
+add_header X-Content-Type-Options nosniff;
+
+# Add X-XSS-Protection header that enables the Cross-site scripting filter in the browsers
+add_header X-XSS-Protection "1; mode=block";
+
+# Enable HSTS header
+add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload";
+
+# Add Content Security Policy header that defines from which sources, browser can download content.
+add_header Content-Security-Policy "base-uri 'self'; form-action 'self'; default-src 'none'; script-src 'self' {% for source in content_security_policy_header.allow_script_sources %}{{ source }} {% endfor %}; connect-src 'self'; img-src 'self' {% for source in content_security_policy_header.allow_image_sources %}{{ source }} {% endfor %}; font-src 'self' {% for source in content_security_policy_header.allow_font_sources %}{{ source }} {% endfor %}; style-src 'self' {% for source in content_security_policy_header.allow_stylesheet_sources %}{{ source }} {% endfor %}; object-src 'none'; frame-ancestors 'none';" always;
