@@ -29,6 +29,7 @@
       with_items:
         - "{{ modsecurity_configs_dir }}"
         - "{{ owasp_modsecurity_dir }}"
+        - "{{ nginx_cache_dir }}"
 
     - name:  Add config with rules to modsecurity module
       copy:
