@@ -60,6 +60,10 @@ server {
     }
 
     location /static/ {
+        valid_referers none blocked server_names *.codepoets.it;
+        if ($invalid_referer) {
+                return   403;
+        }
         alias {{ static_file_dir }};
     }
 
