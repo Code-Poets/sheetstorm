@@ -1,6 +1,7 @@
 home_dir:                       /home/sheetstorm
 modsecurity_configs_dir:        /etc/nginx/modsecurity_configs
 nginx_modules_dir:              ../../nginx-modules
+nginx_cache_dir:                /var/nginx/cache/
 owasp_modsecurity_dir:          /opt/owasp-modsecurity-crs
 sheetstorm_dir:                 "{{ home_dir }}/sheetstorm"
 sheetstorm_repository:          https://github.com/Code-Poets/sheetstorm

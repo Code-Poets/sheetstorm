@@ -29,6 +29,7 @@
       with_items:
         - "{{ modsecurity_configs_dir }}"
         - "{{ owasp_modsecurity_dir }}"
+        - "{{ nginx_cache_dir }}"
 
     - name:  Add config with rules to modsecurity module
       copy:
@@ -59,3 +60,11 @@
       with_items:
         - sheetstorm
         - maintenance
+
+    - name:  Add nginx configuration snippets for sheetstorm
+      template:
+        src:  "{{ item }}.j2"
+        dest: "/etc/nginx/snippets/{{ item }}"
+      with_items:
+        - configuration-of-compression-timeouts-and-sizes.conf
+        - "{{ 'shared-security-headers.conf' if server_configuration == 'remote' }}"

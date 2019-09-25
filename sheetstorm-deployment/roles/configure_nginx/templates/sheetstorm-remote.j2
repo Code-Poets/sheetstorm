@@ -1,17 +1,14 @@
 limit_req_zone $binary_remote_addr zone=ip_req_limit:10m rate={{ nginx.limit_of_requests_per_second }}r/s;
 limit_conn_zone $binary_remote_addr zone=ip_connection_limit:10m;
 
+# Define proxy cache path
+proxy_cache_path {{ nginx_cache_dir }} levels=1:2 keys_zone=cache:10m max_size=1g inactive=60m use_temp_path=off;
+
 # Disable sending the nginx version in error pages and server header
 server_tokens off;
 
-# Don't allow the browser to render the page inside an frame
-add_header X-Frame-Options SAMEORIGIN;
-
-# Add X-Content-Type-Options header that disables concent-type sniffing on some browsers
-add_header X-Content-Type-Options nosniff;
-
-# Add X-XSS-Protection header that enables the Cross-site scripting filter in the browsers
-add_header X-XSS-Protection "1; mode=block";
+# Include shared security headers
+include /etc/nginx/snippets/shared-security-headers.conf;
 
 server {
     server_name sheetstorm.codepoets.it s.codepoets.it;
@@ -32,6 +29,27 @@ server {
         proxy_set_header x-forwarded-for      $remote_addr;
         proxy_set_header host                 $http_host;
         proxy_pass                            $sheetstorm_backend;
+
+
+        # Configuration of proxy cache
+        proxy_cache                   cache;
+        proxy_cache_revalidate        on;
+        proxy_cache_min_uses          3;
+        proxy_cache_use_stale         error timeout updating http_500 http_502 http_503 http_504;
+        proxy_cache_background_update on;
+        proxy_cache_lock              on;
+        proxy_cache_valid             200 302  10m;
+        proxy_cache_valid             404      1m;
+        proxy_cache_valid             any      5m;
+        add_header X-Cache-Status $upstream_cache_status;
+
+        # Include shared security headers
+        include /etc/nginx/snippets/shared-security-headers.conf;
+
+        # Configuration of proxy buffer
+        proxy_buffering        on;
+        proxy_buffer_size      8k;
+        proxy_buffers          8 32k;
 
     }
 
@@ -60,6 +78,15 @@ server {
     }
 
     location /static/ {
+        expires        1y;
+        add_header     Cache-Control "public";
+        # Include shared security headers
+        include /etc/nginx/snippets/shared-security-headers.conf;
+
+        valid_referers none blocked server_names *.codepoets.it;
+        if ($invalid_referer) {
+                return   403;
+        }
         alias {{ static_file_dir }};
     }
 
@@ -70,11 +97,7 @@ server {
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
-    # Enable HSTS header
-    add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload";
-
-    # Add Content Security Policy header that defines from which sources, browser can download content.
-    add_header Content-Security-Policy "base-uri 'self'; form-action 'self'; default-src 'none'; script-src 'self' {% for source in content_security_policy_header.allow_script_sources %}{{ source }} {% endfor %}; connect-src 'self'; img-src 'self' {% for source in content_security_policy_header.allow_image_sources %}{{ source }} {% endfor %}; font-src 'self' {% for source in content_security_policy_header.allow_font_sources %}{{ source }} {% endfor %}; style-src 'self' {% for source in content_security_policy_header.allow_stylesheet_sources %}{{ source }} {% endfor %}; object-src 'none'; frame-ancestors 'none';" always;
+    include /etc/nginx/snippets/configuration-of-compression-timeouts-and-sizes.conf;
 }
 
 server {
@@ -88,9 +111,6 @@ server {
     listen           80 default_server;
     listen      [::]:80 default_server;
     server_name sheetstorm.codepoets.it s.codepoets.it;
-
-    client_body_timeout   {{ nginx.client_body_timeout }};
-    client_header_timeout {{ nginx.client_header_timeout }};
 
     return 404; # managed by Certbot
 
