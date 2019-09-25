@@ -1,3 +1,18 @@
+### v0.10.0
+
+##### Features
+
+- Feature add separate admin endpoint with whitelist of ip addresses ([#534](https://github.com/Code-Poets/sheetstorm/pull/534))
+- Feature refactor author report list view ([#517](https://github.com/Code-Poets/sheetstorm/pull/517))
+- Feature tunning nginx for performance ([#539](https://github.com/Code-Poets/sheetstorm/pull/539))
+
+##### Bugfixes
+
+- Bugfix completed and suspended projects ([#522](https://github.com/Code-Poets/sheetstorm/pull/522))
+- Bugfix hide create project for managers ([#536](https://github.com/Code-Poets/sheetstorm/pull/536))
+
+
+
 ### v0.9.0
 
 ##### Features
