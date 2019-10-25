@@ -713,7 +713,7 @@ class ProjectReportListTests(TestCase):
                 fields_to_check.append(date(getattr(report, date_), settings.DATE_FORMAT))
             for field in other_fields:
                 if field == "author":
-                    fields_to_check.append(getattr(report, field).email)
+                    fields_to_check.append(getattr(report, field).get_full_name())
                 else:
                     fields_to_check.append(getattr(report, field))
             for field in fields_to_check:
