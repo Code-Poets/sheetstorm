@@ -99,6 +99,7 @@ class UserCreate(CreateView):
 class UserUpdate(UpdateView):
     template_name = "user_update.html"
     form_class = SimpleUserChangeForm
+    context_object_name = "user_detail"
     model = CustomUser
 
     def get_object(self, queryset: Optional[QuerySet] = None) -> CustomUser:

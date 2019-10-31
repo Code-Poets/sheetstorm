@@ -37,7 +37,11 @@
 
     <div id="dialog_user_account_update" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
         <p>{% trans 'Do you want to update' %}</p>
-        <p><b>{{ user_detail.email }}</b></p>
+        {% if request.user is not user_detail %}
+          <p><b>{{ user_detail.email }}</b> account?</p>
+        {% else %}
+          <p><b>your</b> account?</p>
+        {% endif %}
     </div>
 {% endblock %}
 
