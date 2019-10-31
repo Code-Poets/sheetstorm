@@ -27,20 +27,20 @@
         {% endif %}
     </div>
 
-    <div id="dialog_user_account" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
+    <div id="dialog_user_account" class="modal_dialog_display" title="{% trans 'Are you sure' %}?" align="center">
         <p>{% trans 'Do you want to delete' %} {{ user_detail.email }}?</p>
     </div>
 
-    <div id="dialog_info" style="display: none" title="{% trans 'No, you not' %}" align="center">
+    <div id="dialog_info" class="modal_dialog_display" title="{% trans 'No, you not' %}" align="center">
         <p>{% trans 'If you want to delete user go to Django Panel Admin' %}</p>
     </div>
 
-    <div id="dialog_user_account_update" style="display: none" title="{% trans 'Are you sure' %}?" align="center">
-        <p>{% trans 'Do you want to update' %}</p>
+    <div id="dialog_user_account_update" class="modal_dialog_display" title="{% trans 'Are you sure' %}?" align="center">
+        <p class="margin margin-first">{% trans 'Do you want to update' %}</p>
         {% if request.user is not user_detail %}
-          <p><b>{{ user_detail.email }}</b> account?</p>
+          <p class="margin"><b>{{ user_detail.email }}</b> account?</p>
         {% else %}
-          <p><b>your</b> account?</p>
+          <p class="margin"><b>your</b> account?</p>
         {% endif %}
     </div>
 {% endblock %}

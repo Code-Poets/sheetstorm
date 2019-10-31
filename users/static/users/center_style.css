@@ -538,7 +538,7 @@ span {
 }
 
 .form-group > label {
-    font-weight: 400; !important;
+    font-weight: 400;
 }
 
 .main-white-container {
@@ -566,10 +566,11 @@ span {
 ul.messages {
     list-style-type: none;
     color: green;
+    padding-inline-start: 0px;
 }
 
 #change-password {
-    width: 100%; !important;
+    width: 100%;
 }
 
 #change-password > span {
@@ -577,11 +578,23 @@ ul.messages {
 }
 
 .discard-button {
-    background-color: #DDDDDD; !important;
+    background-color: #DDDDDD;
 }
 
 .invalid-feedback {
     margin-top: 5px;
     color: red;
     font-size: 70%;
+}
+
+.modal_dialog_display {
+  display: none;
+}
+
+.margin {
+  margin: 0;
+}
+
+.margin-first {
+  margin-top: 10px;
 }
