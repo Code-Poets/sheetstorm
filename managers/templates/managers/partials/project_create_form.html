@@ -33,6 +33,11 @@
             {{ form.members|as_crispy_field }}
         </div>
     </div>
+    <div class="row form-row">
+        <div class="col-xs-12 activities-div">
+            {{ form.activities|as_crispy_field }}
+        </div>
+    </div>
     <div class="row form-group project-buttons">
         <button type="submit" class="btn btn-success">{{ button_text }}</button>
         {% if user.is_admin and object %}
