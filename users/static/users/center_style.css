@@ -580,11 +580,13 @@ span {
 
 ul.messages {
     list-style-type: none;
+    padding-inline-start: 0px;
+    margin: auto;
+    text-align: center;
 }
 
 ul.messages.succes {
     color: green;
-    padding-inline-start: 0px;
 }
 
 #change-password {
