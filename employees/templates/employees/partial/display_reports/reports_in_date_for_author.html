@@ -14,7 +14,7 @@
     <td class="project-column">{{ report.project }}</td>
     <td class="task-activities-column">{{ report.task_activities }}</td>
     <td class="description-column">
-        {{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
+        {{ report.description|linebreaks|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
     </td>
     <td class="edit-button-column Invisible hidden-print">
         {% if report.editable %}

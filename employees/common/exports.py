@@ -1,20 +1,19 @@
 import re
+from datetime import timedelta
 from typing import Dict
 from typing import List
 from typing import Optional
 
-from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from openpyxl import Workbook
 from openpyxl.cell import Cell
-from openpyxl.cell.cell import TYPE_FORMULA
 from openpyxl.styles import Alignment
 from openpyxl.styles import Border
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import _writer
 
-from common.convert import convert_string_work_hours_field_to_hour_and_minutes
+from common.convert import timedelta_to_string
 from employees.common.constants import ColumnSettings
 from employees.common.constants import ExcelGeneratorSettingsConstants as constants
 from employees.models import Report
@@ -47,7 +46,7 @@ def set_and_fill_cell(cell: Cell, cell_value: str) -> None:
 
 def set_and_fill_hours_cell(cell: Cell, cell_value: str) -> None:
     if cell_value is not None:
-        cell.value = constants.TIMEVALUE_FORMULA.value.format(cell_value)
+        cell.value = cell_value
     else:
         cell.value = cell_value
     alignment = Alignment(vertical=constants.VERCTICAL_TOP.value, horizontal=constants.CENTER_ALINGMENT.value)
@@ -89,7 +88,7 @@ class ReportExtractor:
         self._description_column_index = -1
         self._hours_column_index = -1
         self._daily_hours_column_index = -1
-        self._formula = ""
+        self._sum_hours = None  # type: datetime.timedelta
         self._last_date = None
         self._active_worksheet = None  # type: Workbook
         self._headers_settings = {}  # type: Dict
@@ -134,7 +133,7 @@ class ReportExtractor:
             constants.DATE_HEADER_STR.value: report_date,
             constants.PROJECT_HEADER_STR.value: report.project.name,
             constants.TASK_ACTIVITY_HEADER_STR.value: report.task_activities.name,
-            constants.HOURS_HEADER_STR.value: report.work_hours_str,
+            constants.HOURS_HEADER_STR.value: report.work_hours,
             constants.DESCRIPTION_HEADER_STR.value: report_description,
         }
         self._fill_current_report_data(storage_data)
@@ -149,14 +148,13 @@ class ReportExtractor:
     def _reset_per_sheet_settings(self) -> None:
         self._current_row = constants.FIRST_ROW_FOR_DATA.value
         self._last_date = None
+        self._sum_hours = None
 
     def _set_xlsx_settings_for_project_report(self) -> None:
-        self._formula = constants.TOTAL_HOURS_FORMULA_REPORTS_IN_PROJECT.value
         self._headers_settings = dict(constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value)
         self._headers = [k for k, v in self._headers_settings.items() if v is not None]
 
     def _set_xlsx_settings_for_user_report(self) -> None:
-        self._formula = constants.TOTAL_HOURS_FORMULA_FOR_SINGLE_USER.value
         self._headers_settings = dict(constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value)
         self._headers = [k for k, v in self._headers_settings.items() if v is not None]
 
@@ -209,6 +207,7 @@ class ReportExtractor:
                 )
                 if column_name == constants.HOURS_HEADER_STR.value:
                     set_and_fill_hours_cell(cell, cell_value)
+                    self._sum_hours = self._sum_hours + cell_value if self._sum_hours is not None else cell_value
                 else:
                     set_and_fill_cell(cell, cell_value)
 
@@ -226,7 +225,7 @@ class ReportExtractor:
         total_hours_cell = self._active_worksheet.cell(
             row=self._current_row, column=self._headers_settings[constants.HOURS_HEADER_STR.value].position
         )
-        total_hours_cell.value = self._formula.format(self._current_row - 1)
+        total_hours_cell.value = self._sum_hours
         total_hours_cell.number_format = constants.TOTAL_HOURS_FORMAT.value
         set_format_styles_for_main_cells(total_hours_cell, is_header=False)
 
@@ -266,7 +265,6 @@ class ReportExtractor:
 def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_setting: ColumnSettings) -> None:
     sheet = work_book.active
     is_last_row = False
-    total_hours = timezone.timedelta()
 
     for row_number, row in enumerate(sheet.rows, start=1):
         # Check if is last row by comparing first cell value to `TOTAL`.
@@ -278,16 +276,10 @@ def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_set
             if row_number == 1:
                 next_row.append(cell.parent.title)
                 break
-            if isinstance(cell.value, str) and cell.value.lower().startswith("=timevalue"):
-                hours_as_string = cell.value[len('=timevalue("') : -len('")')]  # noqa: E203
-                next_row.append(hours_as_string)
-
-                # If contains valid hours value, add it to total hours.
-                if not is_last_row and row_number > 2 and cell_number == hours_column_setting.position:
-                    hours, minutes = convert_string_work_hours_field_to_hour_and_minutes(hours_as_string)
-                    total_hours += timezone.timedelta(hours=int(hours), minutes=int(minutes))
-            elif is_last_row and cell.data_type is TYPE_FORMULA:
-                next_row.append(str(total_hours)[:-3])
+            if isinstance(cell.value, timedelta) and not is_last_row and cell_number == hours_column_setting.position:
+                next_row.append(cell.value)
+            elif isinstance(cell.value, timedelta) and is_last_row:
+                next_row.append(timedelta_to_string(cell.value))
             else:
                 next_row.append(cell.value)
 

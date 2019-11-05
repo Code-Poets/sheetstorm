@@ -191,9 +191,8 @@ class ExportMethodTestForProject(DataSetUpToTests):
         )
 
     def test_hours_should_be_the_same_in_excel(self):
-        work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
-            excel_constants.TIMEVALUE_FORMULA.value.format(work_hours),
+            self.report.work_hours,
             self.workbook_for_project.active.cell(
                 row=excel_constants.FIRST_ROW_FOR_DATA.value,
                 column=excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_USER_IN_PROJECT.value[
@@ -278,9 +277,8 @@ class ExportMethodTestForSingleUser(DataSetUpToTests):
         )
 
     def test_hours_should_be_the_same_in_excel(self):
-        work_hours = f"{self.report.work_hours_str}"
         self.assertEqual(
-            excel_constants.TIMEVALUE_FORMULA.value.format(work_hours),
+            self.report.work_hours,
             self.workbook_for_user.active.cell(
                 row=excel_constants.FIRST_ROW_FOR_DATA.value,
                 column=excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
@@ -345,24 +343,28 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
 
     def test_task_activity_should_be_the_same_in_excel(self):
         self.assertEqual(
-            self.workbook_for_user.active.cell(
-                row=excel_constants.FIRST_ROW_FOR_DATA.value,
-                column=excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
-                    excel_constants.TASK_ACTIVITY_HEADER_STR.value
-                ].position,
-            ).value,
+            (
+                self.workbook_for_user.active.cell(
+                    row=excel_constants.FIRST_ROW_FOR_DATA.value,
+                    column=excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
+                        excel_constants.TASK_ACTIVITY_HEADER_STR.value
+                    ].position,
+                ).value
+            ),
             self.csv_content[self.second_row][2],
         )
 
     def test_hours_should_be_the_same_in_excel(self):
         self.assertEqual(
-            self.workbook_for_user.active.cell(
-                row=excel_constants.FIRST_ROW_FOR_DATA.value,
-                column=excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
-                    excel_constants.HOURS_HEADER_STR.value
-                ].position,
-            ).value,
-            f'=timevalue("{self.csv_content[self.second_row][3]}")',
+            str(
+                self.workbook_for_user.active.cell(
+                    row=excel_constants.FIRST_ROW_FOR_DATA.value,
+                    column=excel_constants.HEADERS_TO_COLUMNS_SETTINGS_FOR_SINGLE_USER.value[
+                        excel_constants.HOURS_HEADER_STR.value
+                    ].position,
+                ).value
+            ),
+            self.csv_content[self.second_row][3],
         )
 
     def test_description_should_be_the_same_in_excel(self):
