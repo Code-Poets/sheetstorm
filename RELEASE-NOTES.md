@@ -1,3 +1,11 @@
+### v0.10.1
+
+##### Bugfixes
+
+- Bugfix illigal characters from description ([#548](https://github.com/Code-Poets/sheetstorm/pull/548))
+
+
+
 ### v0.10.0
 
 ##### Features
