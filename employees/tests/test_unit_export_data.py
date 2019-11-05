@@ -25,6 +25,8 @@ class DataSetUpToTests(TestCase):
     def setUp(self):
         super().setUp()
         self.user = AdminUserFactory()
+        self.new_user = AdminUserFactory()
+        self.other_project = ProjectFactory()
         self.project_start_date = timezone.now() + timezone.timedelta(days=-1)
         self.project = ProjectFactory(
             name="aaa", start_date=self.project_start_date, stop_date=timezone.now() + timezone.timedelta(days=6)
@@ -210,6 +212,20 @@ class ExportMethodTestForProject(DataSetUpToTests):
                 ].position,
             ).value,
         )
+
+    def test_description_should_be_exported_without_illegal_characters(self):
+        # description text copied from sentry report which raised exception
+        ReportFactory(
+            author=self.new_user,
+            project=self.other_project,
+            description="1h error: core.Service is not suitable for converting to 'apps/v1' 1h Cannot determine the "
+            "module for class AccountSettingsComponent in "
+            "/build/chematica-front-end-app/src/app/account-settings/account-settings.component.ts! "
+            "Add AccountSettingsComponent to the NgModule to fix it. 1h various deployments 1h deployment "
+            "error: checking out frontend to 0.5.0 not working (frontend tag was not ready)",
+        )
+        self.other_project.members.add(self.new_user)
+        generate_xlsx_for_project(self.other_project)
 
     @staticmethod
     def _hours_date_time_to_excel_time_field(hours_delta):

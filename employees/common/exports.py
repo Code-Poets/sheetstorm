@@ -1,3 +1,4 @@
+import re
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -128,12 +129,13 @@ class ReportExtractor:
 
     def _fill_single_report(self, report: Report) -> None:
         report_date = self._get_report_date(report)
+        report_description = self.delete_illigal_characters(report.description)
         storage_data = {
             constants.DATE_HEADER_STR.value: report_date,
             constants.PROJECT_HEADER_STR.value: report.project.name,
             constants.TASK_ACTIVITY_HEADER_STR.value: report.task_activities.name,
             constants.HOURS_HEADER_STR.value: report.work_hours_str,
-            constants.DESCRIPTION_HEADER_STR.value: report.description,
+            constants.DESCRIPTION_HEADER_STR.value: report_description,
         }
         self._fill_current_report_data(storage_data)
         self._set_row_height(str(storage_data[constants.DESCRIPTION_HEADER_STR.value]))
@@ -256,6 +258,9 @@ class ReportExtractor:
         self._active_worksheet.set_printer_settings(paper_size=9, orientation="landscape")
         self._active_worksheet.sheet_properties.pageSetUpPr.fitToPage = True
         self._active_worksheet.page_setup.fitToHeight = False
+
+    def delete_illigal_characters(self, description: str) -> str:  # pylint: disable=no-self-use
+        return re.sub(r"[\000-\010]|[\013-\014]|[\016-\037]", "", description)
 
 
 def save_work_book_as_csv(writer: _writer, work_book: Workbook, hours_column_setting: ColumnSettings) -> None:
