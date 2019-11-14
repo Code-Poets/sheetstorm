@@ -44,7 +44,7 @@ git clone https://github.com/Code-Poets/sheetstorm.git
     sudo apt install postgresql postgresql-contrib
     ```
 
-6. With administrative rights, edit file located in */etc/postgresql/<version>/main/pg_hba.conf*. Change ***\<method\>*** to ***trust*** in the following line:
+6. With administrative rights, edit file located in */etc/postgresql/\<version\>/main/pg_hba.conf*. Change ***\<method\>*** to ***trust*** in the following line:
     ```
     local   all             postgres                                <method>
     ```
@@ -184,7 +184,7 @@ If your database configuration differs from the defaults, you may need to tweak 
 ```
 DATABASES['default']['NAME'] = 'sheetstorm'
 DATABASES['default']['USER'] = 'postgres'
-DATABASES['deafult']['PASSWORD'] = ''
+DATABASES['default']['PASSWORD'] = ''
 ```
 
 ## Edge-to-edge testing
