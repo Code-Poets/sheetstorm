@@ -1,5 +1,6 @@
 {% load data_display_filters %}
 {% load data_structure_element_selectors %}
+{% url 'custom-report-list' year month as custom_report_list_url %}
 
 {% for reports in date %}
     {% for report in reports.list %}
@@ -18,7 +19,11 @@
     </td>
     <td class="edit-button-column Invisible hidden-print">
         {% if report.editable %}
-            <a href="{% if request.user.is_admin %}{% url 'admin-report-detail' pk=report.id %}{% else %}{% url 'custom-report-detail' pk=report.id %}{% endif %}" class="btn btn-light hidden-print">
+            {% if request.user == report.author %}
+                <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-light hidden-print">
+            {% else %}
+                <a href="{% url 'admin-report-detail' pk=report.id %}" class="btn btn-light hidden-print">
+            {% endif %}
                 <span class="glyphicon glyphicon-edit span-edit-report hidden-print"></span>
             </a>
         {% endif %}

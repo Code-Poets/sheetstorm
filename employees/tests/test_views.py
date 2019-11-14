@@ -33,9 +33,10 @@ class AuthorReportViewTests(TestCase):
         super().setUp()
         self.user = AdminUserFactory()
         self.client.force_login(self.user)
-        current_time = timezone.now()
+        self.current_time = timezone.now()
         self.url = reverse(
-            "author-report-list", kwargs={"pk": self.user.pk, "year": current_time.year, "month": current_time.month}
+            "author-report-list",
+            kwargs={"pk": self.user.pk, "year": self.current_time.year, "month": self.current_time.month},
         )
 
     def test_author_reports_view_should_display_users_report_list_on_get(self):
@@ -83,6 +84,25 @@ class AuthorReportViewTests(TestCase):
                 kwargs={"pk": self.user.pk, "year": current_date.year, "month": current_date.month},
             ),
         )
+
+    def test_author_report_list_view_should_link_to_custom_report_detail_if_user_is_author(self):
+        report = ReportFactory(author=self.user, date=timezone.now().date())
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, AuthorReportView.template_name)
+        self.assertContains(response, reverse("custom-report-detail", kwargs={"pk": report.pk}))
+
+    def test_author_report_list_view_should_link_to_admin_report_detail_if_user_is_author(self):
+        report = ReportFactory(date=self.current_time)
+        response = self.client.get(
+            reverse(
+                "author-report-list",
+                kwargs={"pk": report.author.pk, "year": self.current_time.year, "month": self.current_time.month},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, AuthorReportView.template_name)
+        self.assertContains(response, reverse("admin-report-detail", kwargs={"pk": report.pk}))
 
 
 class AdminReportViewTests(TestCase):
