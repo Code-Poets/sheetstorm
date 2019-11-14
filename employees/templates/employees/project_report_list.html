@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-{% load i18n %}
 {% load static %}
 
 {% load data_display_filters %}
@@ -23,84 +22,19 @@
 {% endblock %}
 
 {% block content %}
-{% include "employees/partial/month_navigation/month_navigation_bar.html" %}
-<h1>
-    <small>
-        <a href="{% url 'custom-project-detail' pk=project.pk %}">
-          <span class="glyphicon glyphicon-chevron-left"></span>
-        </a>
-    </small>
-    {{ object.name }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}
-</h1>
-{% if not only_one_author_reports %}
-    <a href="{% url 'export-project-reports' pk=object.id year=year month=month %}" class="btn btn-info">
-        Export Reports to XLSX
-    </a>
-    <a href="{% url 'export-project-reports' pk=object.id year=year month=month %}?format=csv" class="btn btn-info">
-        Export Reports to CSV
-    </a>
-{% else %}
-    <a href="{% url 'export-project-author-reports' pk=object.id user_pk=user_pk year=year month=month %}" class="btn btn-info">
-        Export Reports to XLSX
-    </a>
-    <a href="{% url 'export-project-author-reports' pk=object.id user_pk=user_pk year=year month=month %}?format=csv" class="btn btn-info">
-        Export Reports to CSV
-    </a>
-{% endif %}
-<div class="container">
-    <div class="table-responsive">
-        {% regroup object.get_report_ordered by author as reports_by_author %}
-        {% for author in reports_by_author %}
-        <h4><strong>{{ author.grouper }}</strong></h4>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th class="project-reports-date-header">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-task-activity-header">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
-                    <th class="project-reports-work-hours-header">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-description-header">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-creation-date-header hidden-print">{{ UI_text.CREATION_DATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-last-update-header hidden-print">{{ UI_text.LAST_UPDATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-reports-editable-header hidden-print">{{ UI_text.EDITED_COLUMN_HEADER.value }}</th>
-                    <td class="project-reports-edit-button-header hidden-print Invisible"></td>
-                </tr>
-            </thead>
-            <tbody>
-                {% regroup author.list by date as reports_by_date %}
-                {% for date in reports_by_date %}
-                {% for report in date.list %}
-                    {% if forloop.first %}
-                    <td class="project-reports-date-column" rowspan={{ date.list|length }}>
-                        <strong>{{ report.date }}</strong>
-                    </td>
-                    {% else %}
-                    <tr>
-                    {% endif %}
-                    <td class="project-reports-task-activity-column">{{ report.task_activities }}</td>
-                    <td class="project-reports-work-hours-column">{{ report.work_hours_str }}</td>
-                    <td class="project-reports-description-column">{{ report.description|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}</td>
-                    <td class="project-reports-creation-date-column hidden-print">{{ report.creation_date }}</td>
-                    <td class="project-reports-last-update-column hidden-print">{{ report.last_update }}</td>
-                    <td class="project-reports-editable-column hidden-print">{{ report.editable|yesno:"False,True" }}</td>
-                    <td class="project-reports-edit-button-column hidden-print Invisible">
-                        <a href="{% url 'project-report-detail' pk=report.id %}" class="btn btn-info">
-                            <span class="glyphicon glyphicon-pencil"></span>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endfor %}
-                <tr>
-                    <td colspan="2"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
-                    <td class="project-reports-work-hours-column"><strong>{{ monthly_hours_sum|get_key_value:author.grouper.pk|duration_field_to_string }}</strong></td>
-                </tr>
-            </tbody>
-        </table>
-        {% empty %}
-            <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
-        {% endfor %}
+    <div class="container main-white-container margin-top-space">
+        {% include "employees/partial/month_navigation/report_list_navigation_bar.html" %}
+        <h1>
+            <small>
+                <a href="{% url 'custom-project-detail' pk=project.pk %}">
+                    <span class="glyphicon glyphicon-chevron-left"></span>
+                </a>
+            </small>
+            {{ object.name }} {{ title_date }}{{ UI_text.PAGE_TITLE.value }}
+        </h1>
+            {% include "employees/partial/display_reports/display_project_reports.html" %}
+            {% include "employees/partial/export_functionality/export_functionality_for_project.html" %}
     </div>
-</div>
 {% endblock %}
 
 {% block extra_script %}

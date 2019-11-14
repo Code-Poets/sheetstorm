@@ -1,0 +1,48 @@
+{% load data_display_filters %}
+{% load data_structure_element_selectors %}
+
+{% regroup object.get_report_ordered by author as reports_by_author %}
+<div class="container narrower-container">
+    <div class="table-responsive">
+        {% for author in reports_by_author %}
+            <table class="table table-responsive-sm">
+                <thead>
+                    <tr>
+                        <td class="td-text-align-left-name" colspan="1">
+                            <h4 title="{{ author.grouper.get_full_name  }}">
+                                <b>{{ author.grouper.get_full_name }}</b>
+                            </h4>
+                        </td>
+                        <td class="hidden-print-line" colspan="4">
+                            <hr class="hr-blue-line">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="date-header th-blue-border-first-cell">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
+                        <th class="activities-header th-blue-border">{{ UI_text.TASK_ACTIVITY_HEADER.value }}</th>
+                        <th class="th-blue-border">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
+                        <td class="edit-button-header Invisible hidden-print"></td>
+                        <th class="work-hours-header th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% include "employees/partial/display_reports/reports_in_date_for_project_author.html" %}
+                    <tr class="tr-next-day-separator">
+                        <td colspan="td-text-align-left"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+                        <td colspan="2"></td>
+                        <td class="hidden-print"></td>
+                        <td class="work-hours-column">
+                            <strong>
+                                {{ monthly_hours_sum|get_key_value:author.grouper.pk|duration_field_to_string }}
+                            </strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        {% empty %}
+            <div class="no-reports-message">
+                <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
+            </div>
+        {% endfor %}
+    </div>
+</div>
