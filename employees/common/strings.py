@@ -23,8 +23,10 @@ class ReportListStrings(NotCallableMixin, Enum):
     HOURS_PER_MONTH_LABEL = _("Monthly hours")
     EDIT_REPORT_BUTTON = _("Edit")
     NO_PROJECTS_TO_JOIN = _("There are no other projects available.")
-    PROJECTS_WORK_PERCENTAGE_HEADER = _("Projects work percentage")
-    NO_REPORTS_MESSAGE = _("There is no reports to display")
+    NO_REPORTS_MESSAGE = _("There are no reports to display")
+    PROJECTS_WORK_PERCENTAGE_HEADER = _("Monthly work stats per project")
+    HOURS_SUM_HEADER = _("Total hours")
+    HOURS_PERCENTAGE_HEADER = _("Percentage")
 
 
 class ReportDetailStrings(NotCallableMixin, Enum):
@@ -72,7 +74,9 @@ class AuthorReportListStrings(NotCallableMixin, Enum):
     HOURS_PER_MONTH_LABEL = _("Monthly hours")
     NO_REPORTS_MESSAGE = _("This employee has no reports to display.")
     RETURN_BUTTON_MESSAGE = _("Back to employee list")
-    PROJECTS_WORK_PERCENTAGE_HEADER = _("Projects work percentage")
+    PROJECTS_WORK_PERCENTAGE_HEADER = _("Monthly work stats per project")
+    HOURS_SUM_HEADER = _("Total hours")
+    HOURS_PERCENTAGE_HEADER = _("Percentage")
 
 
 class ProjectReportListStrings(NotCallableMixin, Enum):
