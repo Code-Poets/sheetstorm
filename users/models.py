@@ -162,7 +162,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def get_reports_created(self) -> QuerySet:
         return self.report_set.select_related("task_activities").order_by("-date", "project__name", "-creation_date")
 
-    def get_projects_work_percentage(self, from_date: Optional[date] = None, to_date: Optional[date] = None) -> dict:
+    def get_projects_work_hours_and_percentage(
+        self, from_date: Optional[date] = None, to_date: Optional[date] = None
+    ) -> dict:
         """
         Returns dict where keys are Project objects and values are percentage amount of work
         by this user between given dates.
@@ -178,11 +180,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         work_hours_sum = work_hours_per_project.aggregate(
             sum_work_hours_sum=Coalesce(Sum("work_hours_sum"), timezone.timedelta())
         )["sum_work_hours_sum"]
-
-        return {
-            project: ((project.work_hours_sum / work_hours_sum) * 100 if work_hours_sum.total_seconds() > 0 else 0)
-            for project in work_hours_per_project
-        }
+        return self._parse_work_hours_and_percentage_from_queryset_to_a_dict(work_hours_per_project, work_hours_sum)
 
     def get_project_ordered_by_last_report_creation_date(self) -> QuerySet:
         return self.projects.annotate(
@@ -190,6 +188,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 Max("report__creation_date", filter=Q(report__author=self)), Value("1970-01-01 00:00:00")
             )
         ).order_by("-last_report_creation_date")
+
+    @staticmethod
+    def _parse_work_hours_and_percentage_from_queryset_to_a_dict(
+        queryset: QuerySet, work_hours_sum: timezone.timedelta
+    ) -> dict:
+        return {
+            project: (
+                [str(project.work_hours_sum)[:-3], (project.work_hours_sum / work_hours_sum) * 100]
+                if work_hours_sum.total_seconds() > 0
+                else 0
+            )
+            for project in queryset
+        }
 
 
 @receiver(post_save, sender=CustomUser)
