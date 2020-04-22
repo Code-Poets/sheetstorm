@@ -284,7 +284,7 @@ class TestGetProjectsWorkPercentage(TestCase):
         self.project_2 = ProjectFactory()
         self.user.projects.add(self.project_1, self.project_2)
 
-    def test_get_projects_work_percentage_should_return_projects_with_work_time_percent(self):
+    def test_get_projects_work_hours_and_percentage_should_return_projects_with_work_time_percent(self):
         ReportFactory(
             author=self.user, project=self.project_1, work_hours=timezone.timedelta(hours=8), date=timezone.now().date()
         )
@@ -295,12 +295,12 @@ class TestGetProjectsWorkPercentage(TestCase):
             author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=8), date=timezone.now().date()
         )
 
-        result = self.user.get_projects_work_percentage()
+        result = self.user.get_projects_work_hours_and_percentage()
 
         self.assertEqual(len(result), 2)
-        self.assertEqual(result, {self.project_1: 40.0, self.project_2: 60.0})
+        self.assertEqual(result, {self.project_1: ["8:00", 40.0], self.project_2: ["12:00", 60.0]})
 
-    def test_get_projects_work_percentage_should_return_data_from_current_month_start_to_now_if_no_params_provided(
+    def test_get_projects_work_hours_and_percentage_should_return_data_from_current_month_start_to_now_if_no_params_provided(
         self
     ):
         previous_month = timezone.now().date() - timezone.timedelta(days=31)
@@ -312,12 +312,12 @@ class TestGetProjectsWorkPercentage(TestCase):
         )
         self.user.projects.add(self.project_1, self.project_2)
 
-        result = self.user.get_projects_work_percentage()
+        result = self.user.get_projects_work_hours_and_percentage()
 
         self.assertEqual(len(result), 1)
-        self.assertEqual(result, {self.project_1: 100.0})
+        self.assertEqual(result, {self.project_1: ["8:00", 100.0]})
 
-    def test_get_projects_work_percentage_should_return_data_from_given_time_range_if_params_provided(self):
+    def test_get_projects_work_hours_and_percentage_should_return_data_from_given_time_range_if_params_provided(self):
         ReportFactory(
             author=self.user,
             project=self.project_1,
@@ -328,13 +328,13 @@ class TestGetProjectsWorkPercentage(TestCase):
             author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=4), date=timezone.now().date()
         )
 
-        result = self.user.get_projects_work_percentage(
+        result = self.user.get_projects_work_hours_and_percentage(
             from_date=timezone.now().date() - timezone.timedelta(days=3),
             to_date=timezone.now().date() - timezone.timedelta(days=1),
         )
 
         self.assertEqual(len(result), 1)
-        self.assertEqual(result, {self.project_1: 100.0})
+        self.assertEqual(result, {self.project_1: ["8:00", 100.0]})
 
 
 class TestGetProjectOrderedByLastReportCreationDate(TestCase):

@@ -167,20 +167,24 @@ class ProjectsWorkPercentageMixinTestCase(TestCase):
         self.request.user = UserFactory()
 
     def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_none_parameters(self):
-        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+        with patch(
+            "users.models.CustomUser.get_projects_work_hours_and_percentage"
+        ) as get_projects_work_hours_and_percentage:
             response = self.view(self.request)
 
         self.assertEqual(response.status_code, 200)
-        get_projects_work_percentage.assert_called_once_with(None, None)
+        get_projects_work_hours_and_percentage.assert_called_once_with(None, None)
 
     def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_parameters_if_provided_to_view(
         self
     ):
-        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+        with patch(
+            "users.models.CustomUser.get_projects_work_hours_and_percentage"
+        ) as get_projects_work_hours_and_percentage:
             response = self.view(self.request, year=2000, month=11)
 
         self.assertEqual(response.status_code, 200)
-        get_projects_work_percentage.assert_called_once_with(
+        get_projects_work_hours_and_percentage.assert_called_once_with(
             timezone.now().date().replace(year=2000, month=11, day=1),
             timezone.now().date().replace(year=2000, month=11, day=30),
         )
@@ -190,20 +194,26 @@ class ProjectsWorkPercentageMixinTestCase(TestCase):
     ):
         current_date = timezone.now().date()
 
-        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+        with patch(
+            "users.models.CustomUser.get_projects_work_hours_and_percentage"
+        ) as get_projects_work_hours_and_percentage:
             response = self.view(self.request, year=current_date.year, month=current_date.month)
 
         self.assertEqual(response.status_code, 200)
-        get_projects_work_percentage.assert_called_once_with(current_date - timezone.timedelta(days=30), current_date)
+        get_projects_work_hours_and_percentage.assert_called_once_with(
+            timezone.datetime(year=current_date.year, month=current_date.month, day=1).date(), current_date
+        )
 
     @freeze_time("2019-07-31 14:23")
     def test_setting_previous_month_works_with_shorter_months(self):
         june = 6
-        with patch("users.models.CustomUser.get_projects_work_percentage") as get_projects_work_percentage:
+        with patch(
+            "users.models.CustomUser.get_projects_work_hours_and_percentage"
+        ) as get_projects_work_hours_and_percentage:
             response = self.view(self.request, year=2019, month=june)
 
         self.assertEqual(response.status_code, 200)
-        get_projects_work_percentage.assert_called_once_with(
+        get_projects_work_hours_and_percentage.assert_called_once_with(
             timezone.now().date().replace(year=2019, month=june, day=1),
             timezone.now().date().replace(year=2019, month=june, day=30),
         )
