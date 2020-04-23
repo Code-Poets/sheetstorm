@@ -34,6 +34,9 @@ class CustomUserQuerySet(models.QuerySet):
     def get_with_prefetched_reports(self, reports: QuerySet) -> QuerySet:
         return self.prefetch_related(Prefetch("report_set", queryset=reports))
 
+    def active(self) -> QuerySet:
+        return self.filter(is_active=True)
+
 
 class CustomUserManager(BaseUserManager):
     def _create_user(
@@ -195,7 +198,15 @@ def update_from_manager_to_employee(sender: "CustomUser", **kwargs: Any) -> None
     logger.debug(f"Update user: {user.pk} from manager to employee")
     assert sender == CustomUser
     if user.user_type == CustomUser.UserType.EMPLOYEE.name:
-        logger.debug(f"User: {user.pk} has been deleted from all projects")
         user.manager_projects.clear()
-    else:
-        return
+        logger.debug(f"User: {user.pk} has been removed from all projects as a manager")
+
+
+@receiver(post_save, sender=CustomUser)
+def update_remove_inactive_user_from_projects(sender: "CustomUser", **kwargs: Any) -> None:
+    user = kwargs["instance"]
+    logger.debug(f"Update user: {user.pk} from active to inactive")
+    assert sender == CustomUser
+    if not user.is_active:
+        user.projects.clear()
+        logger.debug(f"User: {user.pk} has been removed from all projects")
