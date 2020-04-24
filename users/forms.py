@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Dict
+
 from captcha.fields import CaptchaField
 from captcha.fields import CaptchaTextInput
 from django import forms
@@ -51,6 +54,16 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = "__all__"
+
+    def clean(self) -> Dict[str, Any]:
+        cleaned_data = super().clean()
+        cleaned_is_active = cleaned_data.get("is_active")
+        if self.instance.is_active and not cleaned_is_active:
+            cleaned_data["user_type"] = CustomUser.UserType.EMPLOYEE.name
+            cleaned_data["is_staff"] = False
+            cleaned_data["is_superuser"] = False
+
+        return cleaned_data
 
 
 class CustomUserSignUpForm(UserCreationForm):
