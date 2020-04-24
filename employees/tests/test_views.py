@@ -703,6 +703,40 @@ class ProjectReportListTests(TestCase):
             ),
         )
 
+    def test_project_report_list_view_should_display_inactive_members_reports(self):
+        current_date = datetime.datetime.now().date()
+        previous_date = current_date - datetime.timedelta(days=30)
+        inactive_user = UserFactory(is_active=False)
+
+        project_report = ReportFactory(
+            author=inactive_user, date=current_date, project=self.project, description="This is for current project."
+        )
+        other_project_report = ReportFactory(
+            author=inactive_user, date=current_date, description="This is for other project."
+        )
+        project_report_from_other_month = ReportFactory(
+            author=inactive_user, date=previous_date, project=self.project, description="This is for another month."
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, project_report.description)
+        self.assertNotContains(response, other_project_report.description)
+        self.assertNotContains(response, project_report_from_other_month.description)
+
+        response = self.client.get(
+            reverse(
+                "project-report-list",
+                kwargs={"pk": self.project.pk, "year": previous_date.year, "month": previous_date.month},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, project_report.description)
+        self.assertNotContains(response, other_project_report.description)
+        self.assertContains(response, project_report_from_other_month.description)
+
     def _assert_response_contain_report(self, response, reports):
         for report in reports:
             dates = ["creation_date", "last_update"]

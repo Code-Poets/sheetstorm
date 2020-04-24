@@ -98,6 +98,12 @@ class UserListTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
+    def test_inactive_user_should_not_be_lister(self):
+        inactive_user = UserFactory(is_active=False)
+        self.client.force_login(self.user_admin)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, inactive_user.email)
+
 
 class UserCreateTests(TestCase):
     def setUp(self):
@@ -324,6 +330,16 @@ class NotificationsTests(TestCase):
 
         with freeze_time("2019-07-08"):
             ReportFactory(author=self.employee, project=self.project, date="2019-07-08")
+
+        self.client.force_login(self.manager)
+        with freeze_time("2019-07-15"):
+            response = self.client.get(self.url)
+        self._check_response(response, 200, [UserNotificationsText.NO_MORE_NOTIFICATIONS.value])
+
+    def test_manager_should_not_get_get_notifications_about_inactive_employees(self):
+        inactive_user = UserFactory(is_active=False)
+        with freeze_time("2019-07-08"):
+            ReportFactory(author=inactive_user, project=self.project, date="2019-07-08")
 
         self.client.force_login(self.manager)
         with freeze_time("2019-07-15"):

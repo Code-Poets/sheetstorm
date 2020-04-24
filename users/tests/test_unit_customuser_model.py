@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from users.common.constants import UserConstants
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.strings import ValidationErrorText
+from users.factories import UserFactory
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase
 
@@ -55,6 +56,13 @@ class TestCustomUserModel(TestCase):
                 "testuser@codepoets.it", "", "a" * (UserConstants.LAST_NAME_MAX_LENGTH.value + 1), "newuserpasswd"
             )
         self.assertTrue(str(MaxLengthValidator.message) in str(exception.exception))
+
+    def test_user_queryset_active_method_should_return_queryset_of_only_active_users(self):
+        active_user = UserFactory()
+        inactive_user = UserFactory(is_active=False)
+        queryset = CustomUser.objects.active()
+        self.assertTrue(active_user in queryset)
+        self.assertFalse(inactive_user in queryset)
 
 
 class TestCustomUserModelMethods(TestCase):
