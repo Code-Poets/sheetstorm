@@ -308,7 +308,7 @@ class SaveWorkBookAsCSVTesCase(DataSetUpToTests):
             excel_constants.HOURS_HEADER_STR.value
         ]
         save_work_book_as_csv(writer, self.workbook_for_user, hours_column_setting)
-        self.csv_content = [line for line in csv.reader(self.csv_file.getvalue().split("\n"))]
+        self.csv_content = list(csv.reader(self.csv_file.getvalue().split("\n")))
         self.second_row = 2
 
     def test_employee_name_should_be_the_same_in_excel(self):

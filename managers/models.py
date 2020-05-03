@@ -83,7 +83,7 @@ def change_user_type_to_employee(pk_set: Set) -> None:
 
 @receiver(post_save, sender=Project)
 def add_default_task_activities(sender: Project, **kwargs: Any) -> None:
-    from employees.models import TaskActivityType
+    from employees.models import TaskActivityType  # pylint: disable=import-outside-toplevel
 
     assert sender == Project
     if kwargs["created"]:
