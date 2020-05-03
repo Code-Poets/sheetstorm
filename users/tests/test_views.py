@@ -52,9 +52,11 @@ class ChangePasswordTests(TestCase):
         response = self.client.post(reverse("password_change"), data)
         self.user.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(
-            ValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE
-            in response.context["form"].errors.get("new_password2")
+        # Replacement between "’" and "'" it is caused because in response
+        # we got "’" but from strings hardcoded in `strings.py` we got "'"
+        self.assertEqual(
+            response.context["form"].errors.get("new_password2")[0].replace("’", "'"),
+            ValidationErrorText.VALIDATION_ERROR_SIGNUP_PASSWORD_MESSAGE,
         )
         self.assertFalse(self.user.check_password(data["new_password1"]))
         self.assertTrue(self.user.check_password(data["old_password"]))
