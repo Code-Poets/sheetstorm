@@ -25,7 +25,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic import CreateView
 from django.views.generic import FormView
@@ -197,7 +197,7 @@ class ActivateAccountView(TemplateView):
 
     def activate(self) -> bool:
         try:
-            user_id = force_text(urlsafe_base64_decode(self.kwargs["encoded_user_id"]))
+            user_id = force_str(urlsafe_base64_decode(self.kwargs["encoded_user_id"]))
             user = CustomUser.objects.get(pk=user_id)
             is_token_correct = account_activation_token.check_token(user, self.kwargs["token"])
             if is_token_correct:

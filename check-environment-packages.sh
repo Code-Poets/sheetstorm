@@ -13,4 +13,3 @@ pipenv uninstall --all
 
 pipenv install --dev --clear
 
-pipenv check

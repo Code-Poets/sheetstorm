@@ -5,4 +5,4 @@ class SheetstormConfig(AppConfig):
     name = "sheetstorm"
 
     def ready(self) -> None:
-        from sheetstorm import system_check  # noqa, flake8 F401 issue  # pylint: disable=unused-import
+        from sheetstorm import system_check  # noqa: F401  # pylint: disable=unused-import, import-outside-toplevel

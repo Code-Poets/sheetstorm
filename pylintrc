@@ -166,6 +166,7 @@ disable=print-statement,
         abstract-method,
         arguments-differ,
         cyclic-import,
+        invalid-str-returned,
 
 
 # Enable the message, report, category or checker with the given id(s). You can

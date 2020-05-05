@@ -42,7 +42,7 @@ class UserIsAuthorOfCurrentReportMixin:
 
 class ProjectsWorkPercentageMixin(ContextMixin):
     def get_context_data(self, **kwargs: Any) -> dict:
-        from users.models import CustomUser
+        from users.models import CustomUser  # pylint: disable=import-outside-toplevel
 
         context_data = super().get_context_data(**kwargs)
 

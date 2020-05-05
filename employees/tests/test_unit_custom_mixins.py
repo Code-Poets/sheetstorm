@@ -36,7 +36,7 @@ class MonthNavigationMixinCustomMethodsTests(TestCase):
     def test_get_title_date_should_return_five_character_string_containing_month_number_separator_and_two_last_digits_of_year_number(
         self
     ):
-        self.assertEqual(self.mixin._get_title_date(year=2019, month=12), f"12/19")
+        self.assertEqual(self.mixin._get_title_date(year=2019, month=12), "12/19")
 
     def test_get_next_month_url_should_generate_url_for_next_month_for_given_path(self):
         request = self.factory.get(
