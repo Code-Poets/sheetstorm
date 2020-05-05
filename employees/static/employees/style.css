@@ -17,6 +17,7 @@
 
 .table {
     table-layout: fixed;
+    text-align: left;
 }
 
 .modal-dialog {
@@ -43,25 +44,8 @@
     width: 8.77%;
 }
 
-.date-column {
-    text-align: left;
-}
-
-.project-column {
-    text-align: left;
-}
-
-.task-activities-column {
-    text-align: left;
-}
-
 .description-column {
-    text-align: left;
     word-wrap: break-word;
-}
-
-.work-hours-column {
-    text-align: left;
 }
 
 .edit-button-column {

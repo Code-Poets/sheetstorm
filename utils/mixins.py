@@ -53,11 +53,10 @@ class ProjectsWorkPercentageMixin(ContextMixin):
             year = int(self.kwargs["year"])
             month = int(self.kwargs["month"])
             current_date = timezone.now().date()
+            from_date = timezone.datetime(year=year, month=month, day=1).date()
             if current_date.year == year and current_date.month == month:
-                from_date = current_date - timezone.timedelta(days=30)
                 to_date = current_date
             else:
-                from_date = timezone.now().date().replace(year=year, month=month, day=1)
                 to_date = self._set_last_day_of_month_on_date(year=year, month=month)
 
         if self.model == CustomUser:
@@ -65,7 +64,7 @@ class ProjectsWorkPercentageMixin(ContextMixin):
         else:
             user = self.request.user
 
-        context_data["projects_work_percentage"] = user.get_projects_work_percentage(from_date, to_date)
+        context_data["projects_work_percentage"] = user.get_projects_work_hours_and_percentage(from_date, to_date)
         return context_data
 
     @staticmethod
