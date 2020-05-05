@@ -115,7 +115,7 @@ class ProjectCreateView(CreateView):
             assert not self.request.user.is_employee
             managers_pk_list = [manager.pk for manager in form.cleaned_data["managers"]]
             managers_pk_list.append(self.request.user.pk)
-            managers_queryset = CustomUser.objects.filter(pk__in=managers_pk_list)
+            managers_queryset = CustomUser.objects.active().filter(pk__in=managers_pk_list)
             form.cleaned_data["managers"] = managers_queryset
         project = form.save()
         logger.info(f"New project with id: {project.pk} has been created")

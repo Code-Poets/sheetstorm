@@ -148,6 +148,12 @@ class ProjectCreateViewTests(ProjectBaseTests):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, ProjectCreateView.template_name)
 
+    def test_project_create_view_should_exclude_inactive_users_from_members_field(self):
+        inactive_user = UserFactory(is_active=False)
+        response = self.client.get(self.url)
+        form = response.context_data["form"]
+        self.assertTrue(inactive_user not in form.fields["members"].queryset)
+
     def test_project_create_view_should_add_new_project_on_post_and_add_user_of_request_to_managers(self):
         response = self.client.post(self.url, self.data)
         self.assertEqual(response.status_code, 302)
@@ -188,6 +194,12 @@ class ProjectUpdateViewTestCase(ProjectBaseTests):
     def test_project_update_view_should_return_404_status_code_on_get_if_project_does_not_exist(self):
         response = self.client.get(reverse("custom-project-update", kwargs={"pk": self.project.pk + 1}))
         self.assertEqual(response.status_code, 404)
+
+    def test_project_create_view_should_exclude_inactive_users_from_members_field(self):
+        inactive_user = UserFactory(is_active=False)
+        response = self.client.get(self.url)
+        form = response.context_data["form"]
+        self.assertTrue(inactive_user not in form.fields["members"].queryset)
 
     def test_project_update_view_should_update_project_on_post(self):
         response = self.client.post(self.url, self.data)
