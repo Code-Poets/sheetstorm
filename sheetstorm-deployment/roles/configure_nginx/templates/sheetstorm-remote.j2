@@ -54,9 +54,6 @@ server {
     }
 
     location /admin/ {
-        allow                {{ allow_ip_to_admin_endpoint }};
-        deny                 all;
-
         limit_req    zone=ip_req_limit   burst={{ nginx.number_of_requests_stored_in_queue }} nodelay;
         limit_conn   ip_connection_limit {{ nginx.number_of_open_connections_per_client }};
 
