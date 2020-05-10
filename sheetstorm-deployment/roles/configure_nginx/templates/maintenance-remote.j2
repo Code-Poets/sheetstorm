@@ -4,18 +4,11 @@ limit_conn_zone $binary_remote_addr zone=ip_connection_limit:10m;
 # Disable sending the nginx version in error pages and server header
 server_tokens off;
 
-# Include shared security headers
-include /etc/nginx/snippets/shared-security-headers.conf;
-
 server {
-    server_name sheetstorm.codepoets.it s.codepoets.it;
-    if ($host = s.codepoets.it) {
-        return 301 https://sheetstorm.codepoets.it$request_uri;
-    }
+    listen           80 default_server;
+    listen      [::]:80 default_server;
 
     # Activate modsecurity module
-    modsecurity            on;
-    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
 
     error_page 503 /503.html;
 
@@ -30,28 +23,5 @@ server {
         return 503;
     }
 
-    listen [::]:443 ssl ipv6only=on; # managed by Certbot
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/sheetstorm.codepoets.it/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/sheetstorm.codepoets.it/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
     include /etc/nginx/snippets/configuration-of-compression-timeouts-and-sizes.conf;
-}
-
-server {
-    if ($host = sheetstorm.codepoets.it) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-    if ($host = s.codepoets.it) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-    listen           80 default_server;
-    listen      [::]:80 default_server;
-    server_name sheetstorm.codepoets.it;
-
-    return 404; # managed by Certbot
-
 }

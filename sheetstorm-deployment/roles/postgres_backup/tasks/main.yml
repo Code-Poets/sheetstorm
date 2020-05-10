@@ -30,44 +30,44 @@
       become:      yes
       become_user: sheetstorm
 
-    - name:  Copy scripts for sheetstorm
-      template:
-        src:   pg_backup.sh.j2
-        dest:  "{{ home_dir }}/bin/pg_backup.sh"
-        owner: sheetstorm
-        group: sheetstorm
-        mode:  0555
-
-    - name:  Create a directory for openssl public key
-      file:
-        path:  "{{ postgres_backup_public_key_dir }}"
-        state: directory
-        owner: sheetstorm
-        group: sheetstorm
-        mode:  0700
-      when: server_configuration == 'remote'
-
-    - name:   Upload openssl public key
-      template:
-        src:   "{{ sheetstorm_secret_dir }}/postgres_backup_key.pem.pub"
-        dest:  "{{ postgres_backup_public_key_dir }}/postgres_backup_key.pem.pub"
-        owner: sheetstorm
-        group: sheetstorm
-        mode:  0444
-      when: server_configuration == 'remote'
-
-    - name:  Copy cronjob that runs postgresql backup
-      template:
-        src:   crontab.txt.j2
-        dest:  "{{ home_dir }}/crontab.txt"
-        owner: sheetstorm
-        group: sheetstorm
-        mode:  0444
-      register: result
-
-- become:      yes
-  become_user: sheetstorm
-  block:
-    - name:    Ensure crontab file is active.
-      command: crontab "{{ home_dir }}/crontab.txt"
-      when: result|changed
+#    - name:  Copy scripts for sheetstorm
+#      template:
+#        src:   pg_backup.sh.j2
+#        dest:  "{{ home_dir }}/bin/pg_backup.sh"
+#        owner: sheetstorm
+#        group: sheetstorm
+#        mode:  0555
+#
+#    - name:  Create a directory for openssl public key
+#      file:
+#        path:  "{{ postgres_backup_public_key_dir }}"
+#        state: directory
+#        owner: sheetstorm
+#        group: sheetstorm
+#        mode:  0700
+#      when: server_configuration == 'remote'
+#
+#    - name:   Upload openssl public key
+#      template:
+#        src:   "{{ sheetstorm_secret_dir }}/postgres_backup_key.pem.pub"
+#        dest:  "{{ postgres_backup_public_key_dir }}/postgres_backup_key.pem.pub"
+#        owner: sheetstorm
+#        group: sheetstorm
+#        mode:  0444
+#      when: server_configuration == 'remote'
+#
+#    - name:  Copy cronjob that runs postgresql backup
+#      template:
+#        src:   crontab.txt.j2
+#        dest:  "{{ home_dir }}/crontab.txt"
+#        owner: sheetstorm
+#        group: sheetstorm
+#        mode:  0444
+#      register: result
+#
+#- become:      yes
+#  become_user: sheetstorm
+#  block:
+#    - name:    Ensure crontab file is active.
+#      command: crontab "{{ home_dir }}/crontab.txt"
+#      when: result|changed

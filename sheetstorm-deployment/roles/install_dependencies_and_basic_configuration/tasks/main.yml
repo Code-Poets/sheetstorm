@@ -37,7 +37,7 @@
       apt:
         default_release: testing
         name:
-          - nginx={{ nginx_version }}
+          - nginx
           - libmodsecurity-dev
           - libgeoip-dev
           - libgd-dev

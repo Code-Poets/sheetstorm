@@ -11,52 +11,52 @@
         src:  503.html
         dest: /var/www/html/503.html
 
-    - name:  Add modsecurity module to nginx
-      copy:
-        src:  "{{ nginx_modules_dir if server_configuration == 'remote' else '../' + nginx_modules_dir }}/ngx_http_modsecurity_{{ nginx_version }}_module.so"
-        dest: /usr/share/nginx/modules/
-
-    - name:  Load modsecurity module to nginx.conf file
-      lineinfile:
-        dest:        /etc/nginx/nginx.conf
-        line:        "load_module modules/ngx_http_modsecurity_{{ nginx_version }}_module.so;"
-        insertafter: pid
-
-    - name:  Create dirs for modsecurity configuration
-      file:
-        path:  "{{ item }}"
-        state: directory
-      with_items:
-        - "{{ modsecurity_configs_dir }}"
-        - "{{ owasp_modsecurity_dir }}"
-        - "{{ nginx_cache_dir }}"
-
-    - name:  Add config with rules to modsecurity module
-      copy:
-        src:  "modsecurity_configs/modsecurity.conf"
-        dest: "{{ modsecurity_configs_dir }}/modsecurity.conf"
-
-    - name: Download OWASP core rules set for modsecurity module
-      unarchive:
-        src:        "https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/{{ owasp_modsecurity_version }}.tar.gz"
-        dest:       "{{ owasp_modsecurity_dir }}/"
-        remote_src: yes
-
-    - name: Rename default OWASP config
-      command: >
-          mv
-            {{ owasp_modsecurity_dir }}/owasp-modsecurity-crs-{{ owasp_modsecurity_version[1:] }}/crs-setup.conf.example
-            {{ owasp_modsecurity_dir }}/owasp-modsecurity-crs-{{ owasp_modsecurity_version[1:] }}/crs-setup.conf
-
-    - name:  Add main config to modsecurity module
-      template:
-        src:  "modsecurity_configs/main.conf.j2"
-        dest: "{{ modsecurity_configs_dir }}/main.conf"
+#    - name:  Add modsecurity module to nginx
+#      copy:
+#        src:  "{{ nginx_modules_dir if server_configuration == 'remote' else '../' + nginx_modules_dir }}/ngx_http_modsecurity_{{ nginx_version }}_module.so"
+#        dest: /usr/share/nginx/modules/
+#
+#    - name:  Load modsecurity module to nginx.conf file
+#      lineinfile:
+#        dest:        /etc/nginx/nginx.conf
+#        line:        "load_module modules/ngx_http_modsecurity_{{ nginx_version }}_module.so;"
+#        insertafter: pid
+#
+#    - name:  Create dirs for modsecurity configuration
+#      file:
+#        path:  "{{ item }}"
+#        state: directory
+#      with_items:
+#        - "{{ modsecurity_configs_dir }}"
+#        - "{{ owasp_modsecurity_dir }}"
+#        - "{{ nginx_cache_dir }}"
+#
+#    - name:  Add config with rules to modsecurity module
+#      copy:
+#        src:  "modsecurity_configs/modsecurity.conf"
+#        dest: "{{ modsecurity_configs_dir }}/modsecurity.conf"
+#
+#    - name: Download OWASP core rules set for modsecurity module
+#      unarchive:
+#        src:        "https://github.com/SpiderLabs/owasp-modsecurity-crs/archive/{{ owasp_modsecurity_version }}.tar.gz"
+#        dest:       "{{ owasp_modsecurity_dir }}/"
+#        remote_src: yes
+#
+#    - name: Rename default OWASP config
+#      command: >
+#          mv
+#            {{ owasp_modsecurity_dir }}/owasp-modsecurity-crs-{{ owasp_modsecurity_version[1:] }}/crs-setup.conf.example
+#            {{ owasp_modsecurity_dir }}/owasp-modsecurity-crs-{{ owasp_modsecurity_version[1:] }}/crs-setup.conf
+#
+#    - name:  Add main config to modsecurity module
+#      template:
+#        src:  "modsecurity_configs/main.conf.j2"
+#        dest: "{{ modsecurity_configs_dir }}/main.conf"
 
     - name:  Add nginx configs for sheetstorm
       template:
-        src:  "{{ item }}-{{ server_configuration | default('remote') }}.j2"
-        dest: /etc/nginx/sites-available/{{ item }}
+        src:  "{{ item }}-remote.j2"
+        dest: "/etc/nginx/sites-available/{{ item }}"
       with_items:
         - sheetstorm
         - maintenance

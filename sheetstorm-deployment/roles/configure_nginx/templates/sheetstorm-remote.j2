@@ -11,14 +11,8 @@ server_tokens off;
 include /etc/nginx/snippets/shared-security-headers.conf;
 
 server {
-    server_name sheetstorm.codepoets.it s.codepoets.it;
-    if ($host = s.codepoets.it) {
-        return 301 https://sheetstorm.codepoets.it$request_uri;
-    }
-
-    # Activate modsecurity module
-    modsecurity            on;
-    modsecurity_rules_file /etc/nginx/modsecurity_configs/main.conf;
+    listen           80 default_server;
+    listen      [::]:80 default_server;
 
     location / {
         limit_req  zone=ip_req_limit   burst={{ nginx.number_of_requests_stored_in_queue }} nodelay;
@@ -64,51 +58,13 @@ server {
         proxy_pass                            $sheetstorm_backend;
     }
 
-    location /postgres-backup/ {
-        allow                {{ allow_ip_to_postgres_backup_endpoint }};
-        deny                 all;
-        auth_basic           "closed site";
-        auth_basic_user_file htpasswd;
-
-        limit_except GET { deny all; }
-        alias        {{ postgres_backup_dir }}/;
-    }
-
     location /static/ {
         expires        1y;
         add_header     Cache-Control "public";
         # Include shared security headers
-        include /etc/nginx/snippets/shared-security-headers.conf;
 
-        valid_referers none blocked server_names *.codepoets.it;
-        if ($invalid_referer) {
-                return   403;
-        }
         alias {{ static_file_dir }};
     }
 
-    listen [::]:443 ssl ipv6only=on; # managed by Certbot
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/sheetstorm.codepoets.it/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/sheetstorm.codepoets.it/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
     include /etc/nginx/snippets/configuration-of-compression-timeouts-and-sizes.conf;
-}
-
-server {
-    if ($host = sheetstorm.codepoets.it) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-    if ($host = s.codepoets.it) {
-        return 301 https://$host$request_uri;
-    } # managed by Certbot
-
-    listen           80 default_server;
-    listen      [::]:80 default_server;
-    server_name sheetstorm.codepoets.it s.codepoets.it;
-
-    return 404; # managed by Certbot
-
 }
