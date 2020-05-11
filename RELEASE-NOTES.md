@@ -1,3 +1,25 @@
+### v0.11.0
+
+##### Features
+
+- Feature refactor project create view ([#513](https://github.com/Code-Poets/sheetstorm/pull/513))
+- Feature improve sidebar responsiveness ([#515](https://github.com/Code-Poets/sheetstorm/pull/515))
+- Feature rebuild notifications interface ([#541](https://github.com/Code-Poets/sheetstorm/pull/541))
+- Feature improve monthly hours stats ([#552](https://github.com/Code-Poets/sheetstorm/pull/552))
+- Feature delete whitelisting admin panel ([#555](https://github.com/Code-Poets/sheetstorm/pull/555))
+- Feature refactor project reports list view ([#520](https://github.com/Code-Poets/sheetstorm/pull/520))
+- Feature tunning nginx for performance ([#539](https://github.com/Code-Poets/sheetstorm/pull/539))
+
+##### Bugfixes
+
+- Bugfix inactive users are displayed in app ([#553](https://github.com/Code-Poets/sheetstorm/pull/553))
+- Bugfix readme typo "deafult" ([#554](https://github.com/Code-Poets/sheetstorm/pull/554))
+- Bugfix redirect admin to his own report edition ([#543](https://github.com/Code-Poets/sheetstorm/pull/543))
+- Bugfix add linebreaks filter to reports description ([#542](https://github.com/Code-Poets/sheetstorm/pull/542))
+- Bugfix remove formulas from hours fields ([#537](https://github.com/Code-Poets/sheetstorm/pull/537))
+
+
+
 ### v0.10.1
 
 ##### Bugfixes
