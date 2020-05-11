@@ -1,0 +1,72 @@
+:root {
+    --cp-blue-color: rgb(44, 119, 188);
+}
+
+.table {
+    table-layout: fixed;
+}
+@media only screen and (max-width: 788px) {
+    .table {
+        width: auto;
+    }
+}
+
+.no-header {
+    width: 50px;
+    text-align: center;
+}
+
+.email-header {
+    width: 200px;
+    text-align: center;
+}
+
+.days-without-report-header {
+    width: 130px;
+    text-align: center;
+}
+
+.main-white-container{
+    background-color: white;
+    box-shadow: 0 0 10px grey;
+    width: 60%;
+    min-width: 240px;
+}
+
+.narrower-container {
+    width: 95%;
+}
+
+.double-space-margin-top{
+    margin-top: 2em;
+}
+
+.margin-top-space {
+    margin-top: 1.5em;
+}
+
+.table > thead > tr > th, td {
+    vertical-align: top;
+    padding: 0.4vw !important;
+}
+
+.hr-blue-line {
+    border: 1px solid var(--cp-blue-color);
+}
+
+.th-blue-border {
+    border-left-style: solid;
+    border-left-width: 5px;
+    border-left-color: var(--cp-blue-color);
+}
+
+.tr-separator {
+    border-top-style: solid;
+    border-top-width: 3px;
+    border-top-color: rgb(180, 180, 180);
+}
+
+.scalable-padding-container {
+    padding-right: 0.8vw;
+    padding-left: 0.8vw;
+}

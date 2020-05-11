@@ -1,36 +1,58 @@
 {% extends 'base.html' %}
 
 {% load i18n %}
+{% load static %}
 {% load data_structure_element_selectors %}
 
+{% block extra_head %}
+    <link
+        rel="stylesheet"
+        href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css"
+        integrity="sha384-Nlo8b0yiGl7Dn+BgLn4mxhIIBU6We7aeeiulNCjHdUv/eKHx59s3anfSUjExbDxn"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="{% static 'users/style.css' %}"
+        integrity="{% staticinline 'users/style.css' encode="sri" %}"
+        crossorigin="anonymous"
+    />
+{% endblock %}
+
 {% block content %}
-<h1>
-    {% trans 'Notifications' %}
-</h1>
-<div class="container">
-    <div class="table-responsive">
-        {% if users_days_without_report %}
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <td>{% trans 'Id' %}</td>
-                        <td>{% trans 'Email' %}</td>
-                        <td>{% trans 'Days without Report' %}</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users_days_without_report %}
+<div class="container main-white-container margin-top-space scalable-padding-container">
+    <div class="container narrower-container scalable-padding-container">
+        <div class="table">
+            {% if users_days_without_report %}
+                <table class="table double-space-margin-top">
+                    <thead>
                         <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ user }}</td>
-                            <td>{{ users_days_without_report|get_key_value:user }}</td>
+                            <th class="no-header th-blue-border">{% trans 'No' %}</th>
+                            <th class="email-header th-blue-border">{% trans 'Email' %}</th>
+                            <th class="days-without-report-header th-blue-border">{% trans 'Days without Report' %}</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-        {{ UI_text.NO_MORE_NOTIFICATIONS.value }}
-        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for user in users_days_without_report %}
+                            {% if forloop.first %}
+                                <tr class="tr-separator">
+                            {% else %}
+                                <tr>
+                            {% endif %}
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user }}</td>
+                                <td>{{ users_days_without_report|get_key_value:user }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="margin-top-space">
+                    {{ UI_text.NO_MORE_NOTIFICATIONS.value }}
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
