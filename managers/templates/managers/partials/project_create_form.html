@@ -1,0 +1,49 @@
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+<div class="project-form">
+    <div class="row form-row">
+        <div class="col-xs-12 project-name-div">
+            {{ form.name|as_crispy_field }}
+        </div>
+    </div>
+    <div class="row form-row">
+        <div class="col-lg-6 mb-0 form-group">
+            {{ form.start_date|as_crispy_field }}
+        </div>
+        <div class="col-lg-6 mb-0 form-group">
+            {{ form.stop_date|as_crispy_field }}
+        </div>
+    </div>
+    <div class="row form-row">
+        <div class="col-md-6 mb-0 form-group">
+            {{ form.suspended|as_crispy_field }}
+        </div>
+        <div class="col-md-6 mb-0 form-group">
+            {{ form.is_notification_enabled|as_crispy_field }}
+        </div>
+    </div>
+    <div class="row form-row">
+        {% if user.is_admin %}
+            <div class="col-lg-6 form-group">
+                {{ form.managers|as_crispy_field }}
+            </div>
+        {% endif %}
+        <div class="{% if user.is_admin %}col-lg-6{% else %}col-12{% endif %} form-group">
+            {{ form.members|as_crispy_field }}
+        </div>
+    </div>
+    <div class="row form-row">
+        <div class="col-xs-12 activities-div">
+            {{ form.activities|as_crispy_field }}
+        </div>
+    </div>
+    <div class="row form-group project-buttons">
+        <button type="submit" class="btn btn-success">{{ button_text }}</button>
+        {% if user.is_admin and object %}
+            <button type="button" id="opener" class="btn btn btn-danger">
+                <span class="glyphicon glyphicon-remove"></span> {% trans 'Delete' %}
+            </button>
+        {% endif %}
+    </div>
+</div>

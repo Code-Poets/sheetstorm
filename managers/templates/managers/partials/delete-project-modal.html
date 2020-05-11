@@ -1,0 +1,11 @@
+{% load i18n %}
+
+<div class="delete-project-confimation">
+    <div id="dialog" title="{% trans 'Are you sure' %}?">
+        <p>{% trans 'Do you want to delete' %}</p>
+        <p><b>{{ object.name }}</b> {% trans 'project' %}?</p>
+        <form action="{% url 'custom-project-delete' pk=object.pk %}" method="POST" id="form">
+            {% csrf_token %}
+        </form>
+    </div>
+</div>
