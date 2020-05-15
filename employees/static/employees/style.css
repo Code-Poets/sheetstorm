@@ -192,6 +192,10 @@ table.table {
     font-weight: 700;
 }
 
+.no-reports-message {
+    margin-bottom: 20px;
+}
+
 .export-csv {
     text-align: left;
 }

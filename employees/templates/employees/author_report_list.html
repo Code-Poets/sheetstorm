@@ -29,7 +29,6 @@
     <div class="container main-white-container margin-top-space">
         {% include "employees/partial/month_navigation/report_list_navigation_bar.html" %}
         {% include "employees/partial/display_reports/display_user_reports.html" with user=object reports=object.get_reports_created %}
-        {% include "employees/partial/export_functionality.html" %}
     </div>
 {% endblock %}
 
