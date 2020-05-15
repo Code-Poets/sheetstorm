@@ -1,3 +1,5 @@
+{% load data_display_filters %}
+
 <table class="table">
     <thead>
         <tr>
@@ -18,7 +20,7 @@
         {% for project, work_percentage in projects_work_percentage.items %}
         <tr>
             <td colspan="5"><strong>{{ project }}</strong></td>
-            <td colspan="2">{{ work_percentage.0 }}</td>
+            <td colspan="2">{{ work_percentage.0|duration_field_to_string }}</td>
             <td colspan="2">{{ work_percentage.1|floatformat:2 }} %</td>
         </tr>
         {% endfor %}

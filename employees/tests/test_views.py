@@ -104,6 +104,18 @@ class AuthorReportViewTests(TestCase):
         self.assertTemplateUsed(response, AuthorReportView.template_name)
         self.assertContains(response, reverse("admin-report-detail", kwargs={"pk": report.pk}))
 
+    def test_author_report_list_view_should_display_monthly_hour_sum_in_hour_format(self):
+        report_date = timezone.datetime(year=self.current_time.year, month=self.current_time.month, day=1)
+        for i in range(4):
+            ReportFactory(
+                author=self.user, date=report_date + timezone.timedelta(days=i), work_hours=timezone.timedelta(hours=8)
+            )
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "32:00")
+        self.assertNotContains(response, str(timezone.timedelta(hours=32)))
+
 
 class AdminReportViewTests(TestCase):
     def setUp(self):
@@ -147,7 +159,10 @@ class ReportCustomListTests(TestCase):
         self.client.force_login(self.user)
         self.task_activity = TaskActivityTypeFactory(is_default=True)
         self.report = ReportFactory(
-            author=self.user, date=datetime.datetime.now().date(), task_activities=self.task_activity
+            author=self.user,
+            date=datetime.datetime.now().date(),
+            task_activities=self.task_activity,
+            work_hours=datetime.timedelta(hours=8),
         )
         self.report.project.members.add(self.user)
         self.url = reverse(
@@ -328,6 +343,18 @@ class ReportCustomListTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.report.project, response.context["form"].fields["project"].queryset)
+
+    def test_custom_report_list_view_should_display_monthly_hour_sum_in_hour_format(self):
+        report_date = timezone.datetime(year=timezone.now().year, month=timezone.now().month, day=1)
+        for i in range(3):
+            ReportFactory(
+                author=self.user, date=report_date + timezone.timedelta(days=i), work_hours=timezone.timedelta(hours=8)
+            )
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "32:00")
+        self.assertNotContains(response, str(timezone.timedelta(hours=32)))
 
 
 class ProjectReportDetailTests(TestCase):
@@ -539,7 +566,11 @@ class ProjectReportListTests(TestCase):
         self.client.force_login(self.user)
         current_date = datetime.datetime.now().date()
         self.report = ReportFactory(
-            author=self.user, project=self.project, date=current_date, task_activities=self.task_type
+            author=self.user,
+            project=self.project,
+            date=current_date,
+            task_activities=self.task_type,
+            work_hours=datetime.timedelta(hours=8),
         )
         self.data = {
             "date": timezone.now().date(),
@@ -752,6 +783,21 @@ class ProjectReportListTests(TestCase):
                     fields_to_check.append(getattr(report, field))
             for field in fields_to_check:
                 self.assertContains(response, field)
+
+    def test_project_report_list_view_should_display_monthly_hour_sum_in_hour_format(self):
+        report_date = timezone.datetime(year=self.year, month=self.month, day=1)
+        for i in range(3):
+            ReportFactory(
+                author=self.user,
+                project=self.project,
+                date=report_date + timezone.timedelta(days=i),
+                work_hours=timezone.timedelta(hours=8),
+            )
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "32:00")
+        self.assertNotContains(response, str(timezone.timedelta(hours=32)))
 
 
 class TestAuthorReportProjectView(TestCase):
