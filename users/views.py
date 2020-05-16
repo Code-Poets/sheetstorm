@@ -145,13 +145,27 @@ class UserUpdateByAdmin(UpdateView):
 class UserList(ListView):
     template_name = "users_list.html"
     model = CustomUser
-    queryset = CustomUser.objects.active().prefetch_related("projects")
+    queryset = (
+        CustomUser.objects.active()
+        .order_by("user_type", "last_name", "first_name", "email")
+        .prefetch_related("projects")
+    )
 
     def get_context_data(self, *, _object_list: Any = None, **kwargs: Any) -> dict:
         context_data = super().get_context_data(**kwargs)
         context_data["year"] = datetime.datetime.now().year
         context_data["month"] = datetime.datetime.now().month
+        context_data["ordered_object_list"] = self._get_ordered_list_of_users()
         return context_data
+
+    def _get_users_by_user_type(self, user_type: str) -> QuerySet:
+        return self.queryset.filter(user_type=user_type)
+
+    def _get_ordered_list_of_users(self):
+        admins = self._get_users_by_user_type(CustomUser.UserType.ADMIN.name)
+        managers = self._get_users_by_user_type(CustomUser.UserType.MANAGER.name)
+        employees = self._get_users_by_user_type(CustomUser.UserType.EMPLOYEE.name)
+        return list(admins) + list(managers) + list(employees)
 
 
 class CustomPasswordChangeView(PasswordChangeView):

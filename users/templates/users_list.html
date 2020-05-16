@@ -16,7 +16,7 @@
         <div class="table-responsive">
             <table class="table">
                 <tr>
-                    <th>{% trans 'Id' %}</th>
+                    <th>#</th>
                     <th>{% trans 'Email' %}</th>
                     <th>{% trans 'Type' %}</th>
                     <th>{% trans 'First name' %}</th>
@@ -26,7 +26,7 @@
                     <td class=Invisible></td>
                 </tr>
                 <tr>
-                    {% for user in object_list %}
+                    {% for user in ordered_object_list %}
                     <td>{{ forloop.counter }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.get_user_type_display }}</td>

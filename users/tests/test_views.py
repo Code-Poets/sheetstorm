@@ -17,6 +17,7 @@ from users.models import CustomUser
 from users.tokens import account_activation_token
 from users.views import NotificationUserListView
 from users.views import SignUp
+from users.views import UserList
 
 
 class ChangePasswordTests(TestCase):
@@ -64,20 +65,22 @@ class ChangePasswordTests(TestCase):
 
 class UserListTests(TestCase):
     def setUp(self):
+        self.user_employee = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
+        self.user_employee.full_clean()
+        self.user_employee.save()
         self.user_admin = UserFactory(user_type=CustomUser.UserType.ADMIN.name)
         self.user_admin.full_clean()
         self.user_admin.save()
         self.user_manager = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
         self.user_manager.full_clean()
         self.user_manager.save()
-        self.user_employee = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
-        self.user_employee.full_clean()
-        self.user_employee.save()
         self.url = reverse("custom-users-list")
 
     def test_user_list_view_should_display_users_list_on_get(self):
         self.client.force_login(self.user_admin)
+
         response = self.client.get(self.url)
+
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.user_admin.get_user_type_display())
         self.assertContains(response, self.user_admin.email)
@@ -98,11 +101,29 @@ class UserListTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
 
-    def test_inactive_user_should_not_be_lister(self):
+    def test_inactive_user_should_not_be_listed(self):
         inactive_user = UserFactory(is_active=False)
         self.client.force_login(self.user_admin)
+
         response = self.client.get(self.url)
+
         self.assertNotContains(response, inactive_user.email)
+
+    def test_get_users_by_user_type_method_should_filter_queryset_by_user_type(self):
+        queryset = UserList()._get_users_by_user_type(CustomUser.UserType.EMPLOYEE.name)
+
+        self.assertEqual(len(queryset), 1)
+        self.assertTrue(self.user_employee in queryset)
+        self.assertFalse(self.user_admin in queryset)
+        self.assertFalse(self.user_manager in queryset)
+
+    def test_get_ordered_list_of_users_should_order_users_by_hierarchy(self):
+        ordered_list = UserList()._get_ordered_list_of_users()
+
+        self.assertEqual(len(ordered_list), 3)
+        self.assertEqual(ordered_list[0], self.user_admin)
+        self.assertEqual(ordered_list[1], self.user_manager)
+        self.assertEqual(ordered_list[2], self.user_employee)
 
 
 class UserCreateTests(TestCase):
