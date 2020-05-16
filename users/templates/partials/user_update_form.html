@@ -22,7 +22,7 @@
         </div>
         <form id="update-user-account" action="{{ current_view_url }}" method="POST" name="update-user-form">
             {% csrf_token %}
-            {% if admin_is_in_user_update_view %}
+            {% if user.user_type == admin %}
                 {% include 'partials/admin_user_update_form.html' %}
             {% else %}
                 {% include 'partials/custom_user_update_form.html' %}

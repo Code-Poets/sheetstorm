@@ -2,6 +2,8 @@ import datetime
 import logging
 from typing import Any
 from typing import Optional
+from typing import Type
+from typing import Union
 
 from django.conf import settings
 from django.contrib import messages
@@ -99,11 +101,17 @@ class UserCreate(CreateView):
 class UserUpdate(UpdateView):
     template_name = "user_update.html"
     form_class = SimpleUserChangeForm
+    admins_form_class = AdminUserChangeForm
     context_object_name = "user_detail"
     model = CustomUser
 
     def get_object(self, queryset: Optional[QuerySet] = None) -> CustomUser:
         return self.request.user
+
+    def get_form_class(self) -> Union[Type[SimpleUserChangeForm], Type[AdminUserChangeForm]]:
+        if self.request.user.user_type == CustomUser.UserType.ADMIN.name:
+            return self.admins_form_class
+        return self.form_class
 
     def get_success_url(self) -> str:
         return reverse("custom-user-update")

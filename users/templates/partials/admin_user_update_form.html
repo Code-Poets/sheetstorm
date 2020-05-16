@@ -18,15 +18,29 @@
     </div>
 </div>
 <div class="form-group row">
-    <div class="form-group col-md-4 mb-0">
-        <input type="button" id="opener_user_account_update" class="btn btn-success" name="update"
-           value="{% trans 'Update' %}">
-    </div>
-    <div class="form-group col-md-4 mb-0">
-        <input type="button" class="btn btn-secondary discard-button" name="discard" value="{% trans 'Discard' %}"
-           onclick="location.href='{{ current_view_url }}'">
-    </div>
-    <div class="form-group col-md-4 mb-0">
-        <input type="button" class="btn btn-danger" id="opener_user_account" name="delete" value="{% trans 'Delete' %}">
-    </div>
+    {% if admin_is_in_user_update_view %}
+        <div class="form-group col-md-4 col-md-offset-2 mb-0">
+            <input type="button" id="opener_user_account_update" class="btn btn-success" name="update"
+               value="{% trans 'Update' %}">
+        </div>
+        <div class="form-group col-md-4 mb-0">
+            <input type="button" class="btn btn-secondary discard-button" name="discard" value="{% trans 'Discard' %}"
+               onclick="location.href='{{ current_view_url }}'">
+        </div>
+    {% else %}
+        <div class="form-group col-md-4 mb-0">
+            <input type="button" id="opener_user_account_update" class="btn btn-success" name="update"
+                   value="{% trans 'Update' %}">
+        </div>
+        <div class="form-group col-md-4 mb-0">
+            <input type="button" class="btn btn-secondary discard-button" name="discard" value="{% trans 'Discard' %}"
+                   onclick="location.href='{{ current_view_url }}'">
+        </div>
+        <div class="form-group col-md-4 mb-0">
+            <button id="change-password" type="button" class="btn btn-warning" name="password_change" onclick="location.href='{% url 'password_change' %}'">
+                <span>{% trans 'Change password' %}</span>
+            </button>
+        </div>
+    {% endif %}
 </div>
+
