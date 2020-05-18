@@ -25,7 +25,7 @@ class ReportListStrings(NotCallableMixin, Enum):
     NO_PROJECTS_TO_JOIN = _("There are no other projects available.")
     NO_REPORTS_MESSAGE = _("There are no reports to display")
     PROJECTS_WORK_PERCENTAGE_HEADER = _("Summary")
-    HOURS_SUM_HEADER = _("Total hours")
+    HOURS_SUM_LABEL = _("Total hours")
     HOURS_PERCENTAGE_HEADER = _("Percentage")
 
 
@@ -90,7 +90,7 @@ class ProjectReportListStrings(NotCallableMixin, Enum):
     LAST_UPDATE_COLUMN_HEADER = _("Last update")
     EDITED_COLUMN_HEADER = _("Edited")
     TASK_ACTIVITY_HEADER = _("Task Activity")
-    HOURS_PER_MONTH_LABEL = _("Monthly hours")
+    HOURS_PER_MONTH_LABEL = _("Total hours")
     NO_REPORTS_MESSAGE = _("There are no reports for this project to display.")
     WORK_HOURS_SUMMARY_HEADER = _("Summary")
     NAME_COLUMN_HEADER = _("Name")

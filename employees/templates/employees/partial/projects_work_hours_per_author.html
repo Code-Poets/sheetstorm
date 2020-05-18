@@ -1,5 +1,6 @@
 {% load data_structure_element_selectors %}
 {% load data_display_filters %}
+
 <table class="table table-responsive-sm">
     <thead>
         <tr>
@@ -17,10 +18,14 @@
     </thead>
     <tbody>
         {% for author in reports_by_author %}
-        <tr>
-            <td colspan="2"><strong>{{ author.grouper.get_full_name }}</strong></td>
-            <td>{{ monthly_hours_sum|get_key_value:author.grouper.pk|duration_field_to_string }}</td>
-        </tr>
+            <tr{% if forloop.first %} class="tr-next-day-separator"{% endif %}>
+                <td colspan="2"><strong>{{ author.grouper.get_full_name }}</strong></td>
+                <td>{{ monthly_hours_sum|get_key_value:author.grouper.pk|duration_field_to_string }}</td>
+            </tr>
         {% endfor %}
+        <tr class="tr-next-day-separator">
+            <td colspan="2"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
+            <td><strong>{{ project_work_hours_sum|duration_field_to_string }}</strong></td>
+        </tr>
     </tbody>
 </table>

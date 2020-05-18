@@ -4,10 +4,10 @@
 <table class="table">
     <thead>
         <tr>
-            <td colspan="4">
+            <td class="td-text-align-left-name">
                 <h4><strong>{{ UI_text.PROJECTS_WORK_PERCENTAGE_HEADER.value }}</strong></h4>
             </td>
-            <td colspan="5">
+            <td class="hidden-print-line" colspan="3">
                 <hr class="hr-blue-line"/>
             </td>
         </tr>
@@ -21,7 +21,7 @@
         {% for project, work_percentage in projects_work_percentage.items %}
             <tr{% if forloop.first %} class="tr-next-day-separator"{% endif %}>
                 <td colspan="2"><strong>{{ project }}</strong></td>
-                <td>{{ work_percentage.0 }}</td>
+                <td>{{ work_percentage.0|duration_field_to_string }}</td>
                 <td>{{ work_percentage.1|floatformat:2 }} %</td>
             </tr>
         {% endfor %}
