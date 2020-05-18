@@ -1,3 +1,4 @@
+{% load data_structure_element_selectors %}
 {% load data_display_filters %}
 
 <table class="table">
@@ -11,18 +12,23 @@
             </td>
         </tr>
         <tr>
-            <th class="th-blue-border-first-cell" colspan="5">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-            <th class="th-blue-border" colspan="2">{{ UI_text.HOURS_SUM_HEADER.value }}</th>
-            <th class="th-blue-border" colspan="2">{{ UI_text.HOURS_PERCENTAGE_HEADER.value }}</th>
+            <th class="th-blue-border-first-cell" colspan="2">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
+            <th class="th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+            <th class="th-blue-border">{{ UI_text.HOURS_PERCENTAGE_HEADER.value }}</th>
         </tr>
     </thead>
     <tbody>
         {% for project, work_percentage in projects_work_percentage.items %}
-        <tr>
-            <td colspan="5"><strong>{{ project }}</strong></td>
-            <td colspan="2">{{ work_percentage.0|duration_field_to_string }}</td>
-            <td colspan="2">{{ work_percentage.1|floatformat:2 }} %</td>
-        </tr>
+            <tr{% if forloop.first %} class="tr-next-day-separator"{% endif %}>
+                <td colspan="2"><strong>{{ project }}</strong></td>
+                <td>{{ work_percentage.0 }}</td>
+                <td>{{ work_percentage.1|floatformat:2 }} %</td>
+            </tr>
         {% endfor %}
+        <tr  class="tr-next-day-separator">
+            <td colspan="2"><strong>{{ UI_text.HOURS_SUM_LABEL.value }}</strong></td>
+            <td><strong>{{ monthly_hours_sum|get_key_value:user.pk|duration_field_to_string }}</strong></td>
+            <td></td>
+        </tr>
     </tbody>
 </table>

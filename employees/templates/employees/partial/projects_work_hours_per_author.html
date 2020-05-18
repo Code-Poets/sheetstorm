@@ -1,0 +1,26 @@
+{% load data_structure_element_selectors %}
+{% load data_display_filters %}
+<table class="table table-responsive-sm">
+    <thead>
+        <tr>
+            <td class="td-text-align-left-name" colspan="1">
+                <h4><strong>{{ UI_text.WORK_HOURS_SUMMARY_HEADER.value }}</strong></h4>
+            </td>
+            <td class="hidden-print-line" colspan="2">
+                <hr class="hr-blue-line"/>
+            </td>
+        </tr>
+        <tr>
+            <th class="th-blue-border-first-cell" colspan="2">{{ UI_text.NAME_COLUMN_HEADER.value }}</th>
+            <th class="th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for author in reports_by_author %}
+        <tr>
+            <td colspan="2"><strong>{{ author.grouper.get_full_name }}</strong></td>
+            <td>{{ monthly_hours_sum|get_key_value:author.grouper.pk|duration_field_to_string }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
