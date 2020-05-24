@@ -4,6 +4,9 @@
 {% regroup object.get_report_ordered by author as reports_by_author %}
 <div class="container narrower-container">
     <div class="table-responsive">
+        {% if reports_by_author and reports_by_author|length > 1 %}
+            {% include "employees/partial/display_reports/../projects_work_hours_per_author.html" %}
+        {% endif %}
         {% for author in reports_by_author %}
             <table class="table table-responsive-sm">
                 <thead>

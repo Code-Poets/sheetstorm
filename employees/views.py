@@ -397,6 +397,7 @@ class BaseProjectReportList(UserIsManagerOfCurrentProjectMixin, DetailView, Mont
         context = super().get_context_data(**kwargs)
         context["UI_text"] = ProjectReportListStrings
         context["monthly_hours_sum"] = self.object.report_set.get_work_hours_sum_for_all_authors()
+        context["project_work_hours_sum"] = sum(context["monthly_hours_sum"].values(), datetime.timedelta())
         return context
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> Union[HttpResponse, HttpResponseRedirectBase]:
