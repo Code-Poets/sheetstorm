@@ -1,3 +1,18 @@
+### v0.12.0
+
+##### Features
+
+- Feature change ordering in employees' list ([#557](https://github.com/Code-Poets/sheetstorm/pull/557))
+- Feature add summary to project report list ([#558](https://github.com/Code-Poets/sheetstorm/pull/558))
+- Feature refactor password change view ([#527](https://github.com/Code-Poets/sheetstorm/pull/527))
+- Feature add update view for account details ([#506](https://github.com/Code-Poets/sheetstorm/pull/506))
+
+##### Bugfixes
+
+- Bugfix monthly hour stats display ([#556](https://github.com/Code-Poets/sheetstorm/pull/556))
+
+
+
 ### v0.11.0
 
 ##### Features
