@@ -298,7 +298,10 @@ class TestGetProjectsWorkPercentage(TestCase):
         result = self.user.get_projects_work_hours_and_percentage()
 
         self.assertEqual(len(result), 2)
-        self.assertEqual(result, {self.project_1: ["8:00", 40.0], self.project_2: ["12:00", 60.0]})
+        self.assertEqual(
+            result,
+            {self.project_1: [timezone.timedelta(hours=8), 40.0], self.project_2: [timezone.timedelta(hours=12), 60.0]},
+        )
 
     def test_get_projects_work_hours_and_percentage_should_return_data_from_current_month_start_to_now_if_no_params_provided(
         self
@@ -315,7 +318,7 @@ class TestGetProjectsWorkPercentage(TestCase):
         result = self.user.get_projects_work_hours_and_percentage()
 
         self.assertEqual(len(result), 1)
-        self.assertEqual(result, {self.project_1: ["8:00", 100.0]})
+        self.assertEqual(result, {self.project_1: [timezone.timedelta(hours=8), 100.0]})
 
     def test_get_projects_work_hours_and_percentage_should_return_data_from_given_time_range_if_params_provided(self):
         ReportFactory(
@@ -334,7 +337,7 @@ class TestGetProjectsWorkPercentage(TestCase):
         )
 
         self.assertEqual(len(result), 1)
-        self.assertEqual(result, {self.project_1: ["8:00", 100.0]})
+        self.assertEqual(result, {self.project_1: [timezone.timedelta(hours=8), 100.0]})
 
 
 class TestGetProjectOrderedByLastReportCreationDate(TestCase):

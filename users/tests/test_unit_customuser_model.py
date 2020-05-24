@@ -5,9 +5,11 @@ from django.core.validators import MaxLengthValidator
 from django.test import TestCase
 from freezegun import freeze_time
 
+from managers.factories import ProjectFactory
 from users.common.constants import UserConstants
 from users.common.model_helpers import create_user_using_full_clean_and_save
 from users.common.strings import ValidationErrorText
+from users.factories import ManagerUserFactory
 from users.factories import UserFactory
 from users.models import CustomUser
 from utils.base_tests import BaseModelTestCase
@@ -96,6 +98,48 @@ class TestCustomUserModelMethods(TestCase):
         self.assertTrue(mocked_method.called)
         self.assertEqual(mocked_method.call_count, 1)
         self.assertEqual(mocked_method(), "Email has been sent successfully")
+
+    def test_user_all_projects_property_should_return_queryset_with_all_assigned_projects(self):
+        manager_user = ManagerUserFactory()
+        member_project = ProjectFactory()
+        manager_project = ProjectFactory()
+
+        member_project.members.add(manager_user)
+        manager_project.managers.add(manager_user)
+
+        queryset = manager_user.all_projects
+
+        self.assertEqual(len(queryset), 2)
+        self.assertTrue(member_project in queryset)
+        self.assertTrue(manager_project in queryset)
+
+    def test_user_all_projects_property_should_return_proper_queryset_if_manager_projects_relation_is_empty(self):
+        manager_user = ManagerUserFactory()
+        member_project = ProjectFactory()
+        manager_project = ProjectFactory()
+
+        member_project.members.add(manager_user)
+        manager_project.members.add(manager_user)
+
+        queryset = manager_user.all_projects
+
+        self.assertEqual(len(queryset), 2)
+        self.assertTrue(member_project in queryset)
+        self.assertTrue(manager_project in queryset)
+
+    def test_user_all_projects_property_should_return_proper_queryset_if_projects_relation_is_empty(self):
+        manager_user = ManagerUserFactory()
+        member_project = ProjectFactory()
+        manager_project = ProjectFactory()
+
+        member_project.managers.add(manager_user)
+        manager_project.managers.add(manager_user)
+
+        queryset = manager_user.all_projects
+
+        self.assertEqual(len(queryset), 2)
+        self.assertTrue(member_project in queryset)
+        self.assertTrue(manager_project in queryset)
 
 
 @freeze_time("2019-05-27")

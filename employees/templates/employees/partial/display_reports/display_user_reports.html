@@ -41,8 +41,12 @@
             </tbody>
         </table>
         {% if not reports %}
-            <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
+            <span class="no-reports-message">
+                <strong>{{ UI_text.NO_REPORTS_MESSAGE.value }}</strong>
+            </span>
+        {% else %}
+            {% include "employees/partial/display_reports/../projects_work_percentage.html" %}
+            {% include "employees/partial/export_functionality.html" with object=request.user %}
         {% endif %}
-        {% include "employees/partial/display_reports/../projects_work_percentage.html" %}
     </div>
 </div>

@@ -159,6 +159,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def is_employee(self) -> bool:
         return self.user_type == CustomUser.UserType.EMPLOYEE.name
 
+    @property
+    def all_projects(self) -> QuerySet:
+        return (self.projects.all() | self.manager_projects.all()).distinct()
+
     def get_reports_created(self) -> QuerySet:
         return self.report_set.select_related("task_activities").order_by("-date", "project__name", "-creation_date")
 
@@ -173,9 +177,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             from_date = timezone.now().date().replace(day=1)
         if to_date is None:
             to_date = timezone.now().date()
-
-        work_hours_per_project = self.projects.filter(report__date__range=[from_date, to_date]).annotate(
-            work_hours_sum=Coalesce(Sum("report__work_hours", filter=Q(report__author=self)), timezone.timedelta())
+        work_hours_per_project = (
+            self.all_projects.filter(report__date__range=[from_date, to_date])
+            .annotate(
+                work_hours_sum=Coalesce(
+                    Sum("report__work_hours", filter=Q(report__author=self), distinct=True), timezone.timedelta()
+                )
+            )
+            .exclude(work_hours_sum=timezone.timedelta(0))
         )
         work_hours_sum = work_hours_per_project.aggregate(
             sum_work_hours_sum=Coalesce(Sum("work_hours_sum"), timezone.timedelta())
@@ -195,7 +204,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     ) -> dict:
         return {
             project: (
-                [str(project.work_hours_sum)[:-3], (project.work_hours_sum / work_hours_sum) * 100]
+                [project.work_hours_sum, (project.work_hours_sum / work_hours_sum) * 100]
                 if work_hours_sum.total_seconds() > 0
                 else 0
             )
