@@ -1,9 +1,9 @@
 from django.test import RequestFactory
 from django.test import TestCase
 from django.utils import timezone
+from django.views.generic import DetailView
 from django.views.generic import ListView
 from freezegun import freeze_time
-from mock import patch
 
 from employees.factories import ReportFactory
 from employees.models import Report
@@ -157,63 +157,66 @@ class UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixinTestCase(Te
 class ProjectsWorkPercentageMixinTestCase(TestCase):
     def setUp(self):
         super().setUp()
-
-        class TestView(ProjectsWorkPercentageMixin, ListView):
-            model = Report
-
-        self.view = TestView.as_view()
         self.request_factory = RequestFactory()
         self.request = self.request_factory.get("anything")
         self.request.user = UserFactory()
 
-    def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_none_parameters(self):
-        with patch(
-            "users.models.CustomUser.get_projects_work_hours_and_percentage"
-        ) as get_projects_work_hours_and_percentage:
-            response = self.view(self.request)
+    def test_project_work_percentage_mixin_should_pass_work_hours_summary_to_report_list_view(self):
+        class TestView(ProjectsWorkPercentageMixin, ListView):
+            model = Report
+
+        report_1 = ReportFactory()
+        report_2 = ReportFactory()
+
+        response = TestView.as_view()(self.request)
 
         self.assertEqual(response.status_code, 200)
-        get_projects_work_hours_and_percentage.assert_called_once_with(None, None)
+        self.assertTrue("projects_work_percentage" in response.context_data.keys())
+        projects_work_percentage = response.context_data["projects_work_percentage"]
+        self.assertTrue(report_1.project.name in projects_work_percentage)
+        self.assertTrue(report_2.project.name in projects_work_percentage)
 
-    def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_parameters_if_provided_to_view(
+    def test_project_work_percentage_mixin_should_pass_work_hours_summary_to_user_detail_view(self):
+        class TestView(ProjectsWorkPercentageMixin, DetailView):
+            model = CustomUser
+
+        user = UserFactory()
+        report_1 = ReportFactory(author=user)
+        report_2 = ReportFactory(author=user)
+        report_3 = ReportFactory()
+
+        response = TestView.as_view()(self.request, pk=user.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue("projects_work_percentage" in response.context_data.keys())
+        projects_work_percentage = response.context_data["projects_work_percentage"]
+        self.assertTrue(report_1.project.name in projects_work_percentage.keys())
+        self.assertTrue(report_2.project.name in projects_work_percentage.keys())
+        self.assertFalse(report_3.project.name in projects_work_percentage.keys())
+
+
+class TestGetProjectsWorkPercentage(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = UserFactory()
+        self.project_1 = ProjectFactory()
+        self.project_2 = ProjectFactory()
+
+    def test_get_projects_work_hours_and_percentage_should_return_dictionary_containing_with_work_time_and_time_percent_per_project(
         self
     ):
-        with patch(
-            "users.models.CustomUser.get_projects_work_hours_and_percentage"
-        ) as get_projects_work_hours_and_percentage:
-            response = self.view(self.request, year=2000, month=11)
+        ReportFactory(author=self.user, project=self.project_1, work_hours=timezone.timedelta(hours=8))
+        ReportFactory(author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=4))
+        ReportFactory(author=self.user, project=self.project_2, work_hours=timezone.timedelta(hours=8))
+        ReportFactory(project=self.project_1, work_hours=timezone.timedelta(hours=4))
 
-        self.assertEqual(response.status_code, 200)
-        get_projects_work_hours_and_percentage.assert_called_once_with(
-            timezone.now().date().replace(year=2000, month=11, day=1),
-            timezone.now().date().replace(year=2000, month=11, day=30),
-        )
+        result = ProjectsWorkPercentageMixin()._get_projects_work_hours_and_percentage(self.user.report_set.all())
 
-    def test_project_work_percentage_mixin_should_call_get_projects_work_percentage_with_last_30_days_paramemeters_if_current_month_and_year(
-        self
-    ):
-        current_date = timezone.now().date()
-
-        with patch(
-            "users.models.CustomUser.get_projects_work_hours_and_percentage"
-        ) as get_projects_work_hours_and_percentage:
-            response = self.view(self.request, year=current_date.year, month=current_date.month)
-
-        self.assertEqual(response.status_code, 200)
-        get_projects_work_hours_and_percentage.assert_called_once_with(
-            timezone.datetime(year=current_date.year, month=current_date.month, day=1).date(), current_date
-        )
-
-    @freeze_time("2019-07-31 14:23")
-    def test_setting_previous_month_works_with_shorter_months(self):
-        june = 6
-        with patch(
-            "users.models.CustomUser.get_projects_work_hours_and_percentage"
-        ) as get_projects_work_hours_and_percentage:
-            response = self.view(self.request, year=2019, month=june)
-
-        self.assertEqual(response.status_code, 200)
-        get_projects_work_hours_and_percentage.assert_called_once_with(
-            timezone.now().date().replace(year=2019, month=june, day=1),
-            timezone.now().date().replace(year=2019, month=june, day=30),
+        self.assertEqual(len(result), 2)
+        self.assertEqual(
+            result,
+            {
+                self.project_1.name: (timezone.timedelta(hours=8), 40.0),
+                self.project_2.name: (timezone.timedelta(hours=12), 60.0),
+            },
         )
