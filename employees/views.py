@@ -202,13 +202,12 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
             super()
             .get_queryset()
             .get_reports_from_a_particular_month(self.kwargs["year"], self.kwargs["month"], self.request.user)
-            .order_by("-date", "project__name", "-creation_date")
         )
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context_data = super().get_context_data(**kwargs)
         context_data["UI_text"] = ReportListStrings
-        context_data["object_list"] = self.get_queryset()
+        context_data["object_list"] = self.get_queryset().order_by("-date", "project__name", "-creation_date")
         context_data["daily_hours_sum"] = context_data["object_list"].order_by().get_work_hours_sum_for_all_dates()
         context_data["monthly_hours_sum"] = context_data["object_list"].order_by().get_work_hours_sum_for_all_authors()
         project_form_queryset = (

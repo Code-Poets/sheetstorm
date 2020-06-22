@@ -736,7 +736,7 @@ class ProjectReportListTests(TestCase):
 
     def test_project_report_list_view_should_display_inactive_members_reports(self):
         current_date = datetime.datetime.now().date()
-        previous_date = current_date - datetime.timedelta(days=30)
+        previous_date = current_date + relativedelta(months=-1)
         inactive_user = UserFactory(is_active=False)
 
         project_report = ReportFactory(
@@ -862,3 +862,104 @@ class TestAuthorReportProjectView(TestCase):
         self.assertNotContains(response, report_from_other_project.description)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, AuthorReportProjectView.template_name)
+
+
+class ReportSummaryTests(TestCase):
+    def setUp(self):
+        self.user = ManagerUserFactory()
+        project_1 = ProjectFactory()
+        project_1.members.add(self.user)
+        project_2 = ProjectFactory()
+        project_2.managers.add(self.user)
+        self.projects = [project_1, project_2]
+        self.current_time = timezone.now()
+        self.hours_per_report = 4
+        self.total_hours = 160
+        self._generate_user_reports_for_current_and_previous_month_with_uneven_total_hours()
+        self.expected_work_hours_stats = self._get_total_hours_per_project_and_percentage_from_month()
+
+    def test_report_list_should_accurately_evaluate_work_hours_statistics(self):
+        self.client.force_login(self.user)
+        url = reverse("custom-report-list", kwargs={"year": self.current_time.year, "month": self.current_time.month})
+
+        context_data = self.client.get(url).context_data
+        self._assert_projects_work_percentage_is_evaluated_accurately(context_data)
+
+    def test_author_report_list_should_accurately_evaluate_work_hours_statistics(self):
+        admin_user = AdminUserFactory()
+        self.client.force_login(admin_user)
+        url = reverse(
+            "author-report-list",
+            kwargs={"pk": self.user.pk, "year": self.current_time.year, "month": self.current_time.month},
+        )
+
+        context_data = self.client.get(url).context_data
+
+        self._assert_projects_work_percentage_is_evaluated_accurately(context_data)
+
+    def _assert_projects_work_percentage_is_evaluated_accurately(self, context_data):
+        self.assertTrue("projects_work_percentage" in context_data.keys())
+
+        projects_work_percentage = context_data["projects_work_percentage"]
+
+        self.assertEqual(self.expected_work_hours_stats, projects_work_percentage)
+
+    def _generate_user_reports_for_current_and_previous_month_with_uneven_total_hours(self):
+        reports_per_project, remaining_hours = self._strip_hours_between_projects()
+
+        months_and_reported_days = self._get_number_of_reported_days_for_each_month(reports_per_project)
+
+        for start_date, total_reported_days in months_and_reported_days.items():
+            total_reported_days = reports_per_project
+            report_date = start_date
+            for _ in range(total_reported_days):
+                work_hours = timezone.timedelta(hours=self.hours_per_report)
+                for project in self.projects:
+                    ReportFactory(project=project, author=self.user, work_hours=work_hours, date=report_date)
+                report_date += relativedelta(days=1)
+            if remaining_hours != 0:
+                ReportFactory(
+                    project=self.projects[0],
+                    author=self.user,
+                    work_hours=timezone.timedelta(hours=remaining_hours),
+                    date=report_date,
+                )
+
+    def _get_number_of_reported_days_for_each_month(self, reports_per_project, difference_ratio=2):
+        current_month_start_date = self.current_time.replace(day=1)
+        previous_month_start_date = current_month_start_date + relativedelta(months=-1)
+        return {
+            previous_month_start_date: reports_per_project // difference_ratio,
+            current_month_start_date: reports_per_project,
+        }
+
+    def _strip_hours_between_projects(self):
+        hours_per_project = self.total_hours // len(self.projects)
+        remaining_hours = self.total_hours % len(self.projects)
+        reports_per_project = hours_per_project // self.hours_per_report
+        remaining_hours += hours_per_project % self.hours_per_report
+        return reports_per_project, remaining_hours
+
+    def _get_total_hours_per_project_and_percentage_from_month(self):
+        reports_per_project, remaining_hours = self._strip_hours_between_projects()
+        first_project_total_hours = timezone.timedelta(
+            hours=reports_per_project * self.hours_per_report + remaining_hours
+        )
+        other_projects_total_hours = timezone.timedelta(hours=reports_per_project * self.hours_per_report)
+        hours_and_percentage_per_project = {}
+        total_hours_timedelta = timezone.timedelta(hours=self.total_hours)
+        for project in self.projects:
+            if project is self.projects[0]:
+                hours_and_percentage_per_project.update(
+                    {project.name: (first_project_total_hours, first_project_total_hours / total_hours_timedelta * 100)}
+                )
+            else:
+                hours_and_percentage_per_project.update(
+                    {
+                        project.name: (
+                            other_projects_total_hours,
+                            other_projects_total_hours / total_hours_timedelta * 100,
+                        )
+                    }
+                )
+        return dict(sorted(hours_and_percentage_per_project.items()))

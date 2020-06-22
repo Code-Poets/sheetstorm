@@ -1,7 +1,5 @@
 import logging
-from datetime import date
 from typing import Any
-from typing import Optional
 
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import BaseUserManager
@@ -12,12 +10,10 @@ from django.db.models import Max
 from django.db.models import Prefetch
 from django.db.models import Q
 from django.db.models import QuerySet
-from django.db.models import Sum
 from django.db.models import Value
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils import timezone
 
 from users.common.constants import UserConstants
 from users.common.fields import ChoiceEnum
@@ -159,37 +155,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def is_employee(self) -> bool:
         return self.user_type == CustomUser.UserType.EMPLOYEE.name
 
-    @property
-    def all_projects(self) -> QuerySet:
-        return (self.projects.all() | self.manager_projects.all()).distinct()
-
     def get_reports_created(self) -> QuerySet:
         return self.report_set.select_related("task_activities").order_by("-date", "project__name", "-creation_date")
-
-    def get_projects_work_hours_and_percentage(
-        self, from_date: Optional[date] = None, to_date: Optional[date] = None
-    ) -> dict:
-        """
-        Returns dict where keys are Project objects and values are percentage amount of work
-        by this user between given dates.
-        """
-        if from_date is None:
-            from_date = timezone.now().date().replace(day=1)
-        if to_date is None:
-            to_date = timezone.now().date()
-        work_hours_per_project = (
-            self.all_projects.filter(report__date__range=[from_date, to_date])
-            .annotate(
-                work_hours_sum=Coalesce(
-                    Sum("report__work_hours", filter=Q(report__author=self), distinct=True), timezone.timedelta()
-                )
-            )
-            .exclude(work_hours_sum=timezone.timedelta(0))
-        )
-        work_hours_sum = work_hours_per_project.aggregate(
-            sum_work_hours_sum=Coalesce(Sum("work_hours_sum"), timezone.timedelta())
-        )["sum_work_hours_sum"]
-        return self._parse_work_hours_and_percentage_from_queryset_to_a_dict(work_hours_per_project, work_hours_sum)
 
     def get_project_ordered_by_last_report_creation_date(self) -> QuerySet:
         return self.projects.annotate(
@@ -197,19 +164,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 Max("report__creation_date", filter=Q(report__author=self)), Value("1970-01-01 00:00:00")
             )
         ).order_by("-last_report_creation_date")
-
-    @staticmethod
-    def _parse_work_hours_and_percentage_from_queryset_to_a_dict(
-        queryset: QuerySet, work_hours_sum: timezone.timedelta
-    ) -> dict:
-        return {
-            project: (
-                [project.work_hours_sum, (project.work_hours_sum / work_hours_sum) * 100]
-                if work_hours_sum.total_seconds() > 0
-                else 0
-            )
-            for project in queryset
-        }
 
 
 @receiver(post_save, sender=CustomUser)

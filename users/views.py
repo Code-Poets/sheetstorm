@@ -1,6 +1,7 @@
 import datetime
 import logging
 from typing import Any
+from typing import List
 from typing import Optional
 from typing import Type
 from typing import Union
@@ -161,7 +162,7 @@ class UserList(ListView):
     def _get_users_by_user_type(self, user_type: str) -> QuerySet:
         return self.queryset.filter(user_type=user_type)
 
-    def _get_ordered_list_of_users(self):
+    def _get_ordered_list_of_users(self) -> List[CustomUser]:
         admins = self._get_users_by_user_type(CustomUser.UserType.ADMIN.name)
         managers = self._get_users_by_user_type(CustomUser.UserType.MANAGER.name)
         employees = self._get_users_by_user_type(CustomUser.UserType.EMPLOYEE.name)
