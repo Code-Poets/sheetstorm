@@ -1,3 +1,10 @@
+### v0.12.2
+
+##### Bugfixes
+
+- Bugfix default date on report creation ([#563](https://github.com/Code-Poets/sheetstorm/pull/563))
+
+
 ### v0.12.1
 
 ##### Bugfixes
