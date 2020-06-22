@@ -7,6 +7,7 @@ from django.template.defaultfilters import date
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
+from parameterized import parameterized
 
 from employees.common.strings import AuthorReportListStrings
 from employees.common.strings import ProjectReportListStrings
@@ -253,38 +254,13 @@ class ReportCustomListTests(TestCase):
         self.assertEqual(response.context_data["form"].initial["task_activities"].pk, latest_activity.pk)
         self.assertEqual(response.context_data["form"].initial["project"].pk, latest_report.project.pk)
 
-    def test_default_date_should_be_first_day_of_the_month_if_there_are_no_reports(self):
-        response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
-        self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=1))
-
-    def test_default_date_should_be_monday_when_the_last_report_was_created_on_friday_of_the_same_month(self):
-        # Friday
-        with freeze_time("2019-05-03"):
-            ReportFactory(date=datetime.date(year=2019, month=5, day=3), author=self.user)
-        # Monday
-        with freeze_time("2019-5-06"):
-            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
-        self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=6))
-
-    def test_default_date_should_be_day_later_than_last_report_if_it_wasnt_created_today(self):
-        with freeze_time("2019-05-01"):
-            ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)
-        with freeze_time("2019-05-03"):
-            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
-        self.assertEqual(response.context_data["form"].initial["date"], datetime.date(year=2019, month=5, day=2))
-
-    def test_default_date_should_be_last_day_of_the_month_if_thats_the_date_of_last_report(self):
-        with freeze_time("2019-05-31"):
-            report = ReportFactory(date=datetime.date(year=2019, month=5, day=31), author=self.user)
-        with freeze_time("2019-06-01"):
-            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
-        self.assertEqual(response.context_data["form"].initial["date"], report.date)
-
-    def test_default_date_should_be_date_of_the_last_report_if_it_was_created_today(self):
-        with freeze_time("2019-05-01"):
-            report = ReportFactory(date=datetime.date(year=2019, month=5, day=1), author=self.user)
-            response = self.client.get(reverse("custom-report-list", kwargs={"year": 2019, "month": 5}))
-        self.assertEqual(response.context_data["form"].initial["date"], report.date)
+    @parameterized.expand([(2019, 5, 1), (2019, 12, 31), (2020, 2, 29)])
+    def test_report_create_form_default_date_should_be_today(self, year, month, day):
+        with freeze_time("{:d}-{:02d}-{:02d}".format(year, month, day)):
+            response = self.client.get(reverse("custom-report-list", kwargs={"year": year, "month": month}))
+        self.assertEqual(
+            response.context_data["form"].initial["date"], timezone.datetime(year=year, month=month, day=day)
+        )
 
     def test_custom_report_list_view_task_activities_should_contain_only_task_activities_related_to_project(self):
         not_default_task_activity = TaskActivityTypeFactory()

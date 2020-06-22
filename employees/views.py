@@ -176,25 +176,9 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
     url_name = "custom-report-list"
     object = None
 
-    def _get_default_date(self) -> datetime.date:
-        year = int(self.kwargs["year"])
-        month = int(self.kwargs["month"])
-        queryset = self.get_queryset()
-        if not queryset.exists():
-            return datetime.date(year=year, month=month, day=1)
-        last_report = queryset.first()
-        if last_report.creation_date.date() == timezone.now().date():
-            return last_report.date
-        date = last_report.date + timezone.timedelta(days=1)
-        if date.month != month:
-            return last_report.date
-        while date.isoweekday() in [6, 7]:
-            date += timezone.timedelta(days=1)
-        return date
-
     def get_initial(self) -> dict:
         initial = super().get_initial()
-        initial.update({"date": self._get_default_date(), "author": self.request.user})
+        initial.update({"date": timezone.now().date(), "author": self.request.user})
         return initial
 
     def get_queryset(self) -> QuerySet:
