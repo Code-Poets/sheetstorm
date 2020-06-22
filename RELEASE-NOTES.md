@@ -1,3 +1,12 @@
+### v0.12.1
+
+##### Bugfixes
+
+- Bugfix incorrect hours stats ([#559](https://github.com/Code-Poets/sheetstorm/pull/559))
+- Bugfix add process limit for pipenv ([#560](https://github.com/Code-Poets/sheetstorm/pull/560))
+
+
+
 ### v0.12.0
 
 ##### Features
