@@ -22,7 +22,7 @@
         update:  yes
 
     - name:   Install requirements for sheetstorm
-      shell:  source ~/virtualenv/bin/activate && pipenv --bare install
+      shell:  source ~/virtualenv/bin/activate && PIPENV_MAX_SUBPROCESS=2 pipenv --bare install
       args:
         executable: /bin/bash
         chdir:      "{{ sheetstorm_dir }}"
