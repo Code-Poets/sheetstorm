@@ -19,7 +19,7 @@ class UserFactory(factory.DjangoModelFactory):
     def set_password(  # type: ignore
         self, create, extracted, **kwargs
     ):  # pylint: disable=unused-argument, no-value-for-parameter
-        self.set_password("userpasswd")
+        self.set_password("password")
         if create:
             self.save()
 
