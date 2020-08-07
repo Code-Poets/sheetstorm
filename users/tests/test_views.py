@@ -22,7 +22,7 @@ from users.views import UserList
 
 class ChangePasswordTests(TestCase):
     def setUp(self):
-        self.user_password = "userpasswd"
+        self.user_password = "password"
         self.user = UserFactory()
 
     def test_change_user_password_view_should_change_user_password_on_post(self):
