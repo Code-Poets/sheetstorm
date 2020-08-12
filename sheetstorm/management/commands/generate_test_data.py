@@ -1,9 +1,14 @@
 import logging
+from enum import Enum
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 
+from managers.factories import ProjectFactory
+from managers.models import Project
 from users.factories import UserFactory
 
 CustomUser = get_user_model()
@@ -11,8 +16,21 @@ CustomUser = get_user_model()
 superuser_user_type = "SUPERUSER"
 
 
+class ProjectType(Enum):
+    SUSPENDED = "suspended"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+
+
+class UnsupportedProjectTypeException(Exception):
+    pass
+
+
 class Command(BaseCommand):
     help = "Create initial sample data for SheetStorm application testing."
+
+    PROJECT_START_DATE_TIME_DELTA = relativedelta(months=1, day=1)
+    PROJECT_STOP_DATE_TIME_DELTA = relativedelta(days=14)
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -26,7 +44,10 @@ class Command(BaseCommand):
         if is_need_to_create_superuser:
             self.create_user(superuser_user_type)
 
+        self.execute_creating_project(options)
+
         logging.info(f"Total number of users in the database: {CustomUser.objects.count()}")
+        logging.info(f"Total number of projects in the database: {Project.objects.count()}")
 
     @staticmethod
     def _get_user_options(options):
@@ -61,6 +82,54 @@ class Command(BaseCommand):
             "is_superuser": user_type == superuser_user_type,
         }
 
+    def execute_creating_project(self, options):
+        projects_to_create = self._set_number_of_projects_to_create(options)
+
+        for (project_type, number_of_projects) in projects_to_create.items():
+            self.create_project(project_type, number_of_projects)
+
+    def _set_number_of_projects_to_create(self, options):
+        return {
+            ProjectType.SUSPENDED.name: self._compute_number_of_projects_to_create(options, ProjectType.SUSPENDED.name),
+            ProjectType.ACTIVE.name: self._compute_number_of_projects_to_create(options, ProjectType.ACTIVE.name),
+            ProjectType.COMPLETED.name: self._compute_number_of_projects_to_create(options, ProjectType.COMPLETED.name),
+        }
+
+    @staticmethod
+    def _compute_number_of_projects_to_create(options, project_type):
+        if project_type == ProjectType.SUSPENDED.name:
+            number_of_projects_in_database = Project.objects.filter_suspended().count()
+        elif project_type == ProjectType.ACTIVE.name:
+            number_of_projects_in_database = Project.objects.filter_active().count()
+        elif project_type == ProjectType.COMPLETED.name:
+            number_of_projects_in_database = Project.objects.filter_completed().count()
+        else:
+            raise UnsupportedProjectTypeException(f"{project_type} project type do not exist")
+
+        return options[project_type] - number_of_projects_in_database if options[project_type] is not None else 0
+
+    def create_project(self, project_type, number_of_projects_to_create):
+        factory_parameters = self._set_project_factory_parameters(project_type)
+
+        for project_number in range(number_of_projects_to_create):
+            logging.info(f"{number_of_projects_to_create - project_number} {project_type} project(s) left to create")
+            ProjectFactory(**factory_parameters)
+
+    def _set_project_factory_parameters(self, project_type):
+        return {
+            "start_date": self._create_start_date(),
+            "suspended": project_type == ProjectType.SUSPENDED.name,
+            "stop_date": self._create_stop_date() if project_type == ProjectType.COMPLETED.name else None,
+        }
+
+    @staticmethod
+    def _create_start_date(time_delta=PROJECT_START_DATE_TIME_DELTA):
+        return timezone.now() - time_delta
+
+    @staticmethod
+    def _create_stop_date(time_delta=PROJECT_STOP_DATE_TIME_DELTA):
+        return timezone.now() - time_delta
+
     def add_arguments(self, parser):
         parser.add_argument(
             "-a",
@@ -89,4 +158,25 @@ class Command(BaseCommand):
             dest=superuser_user_type,
             action="store_true",
             help="Create and add superuser to the database if not exist",
+        )
+        parser.add_argument(
+            "-su",
+            "--suspended",
+            dest=ProjectType.SUSPENDED.name,
+            type=int,
+            help="Indicates the maximum number of suspended projects to be in the database",
+        )
+        parser.add_argument(
+            "-ac",
+            "--active",
+            dest=ProjectType.ACTIVE.name,
+            type=int,
+            help="Indicates the maximum number of active projects to be in the database",
+        )
+        parser.add_argument(
+            "-co",
+            "--completed",
+            dest=ProjectType.COMPLETED.name,
+            type=int,
+            help="Indicates the maximum number of completed projects to be in the database",
         )
