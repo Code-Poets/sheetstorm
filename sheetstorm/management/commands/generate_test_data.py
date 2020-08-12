@@ -1,5 +1,9 @@
 import logging
 from enum import Enum
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Union
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
@@ -29,11 +33,13 @@ class UnsupportedProjectTypeException(Exception):
 class Command(BaseCommand):
     help = "Create initial sample data for SheetStorm application testing."
 
+    OptionsDictType = Dict[str, Union[bool, int, None]]
+
     PROJECT_START_DATE_TIME_DELTA = relativedelta(months=1, day=1)
     PROJECT_STOP_DATE_TIME_DELTA = relativedelta(days=14)
 
     @transaction.atomic
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Union[bool, int, None]) -> None:
         user_options = self._get_user_options(options)
         is_need_to_create_superuser = self._get_superuser_request(options)
 
@@ -50,7 +56,7 @@ class Command(BaseCommand):
         logging.info(f"Total number of projects in the database: {Project.objects.count()}")
 
     @staticmethod
-    def _get_user_options(options):
+    def _get_user_options(options: OptionsDictType) -> Dict[str, Optional[int]]:
         return {
             CustomUser.UserType.ADMIN.name: options[CustomUser.UserType.ADMIN.name],
             CustomUser.UserType.EMPLOYEE.name: options[CustomUser.UserType.EMPLOYEE.name],
@@ -58,13 +64,13 @@ class Command(BaseCommand):
         }
 
     @staticmethod
-    def _get_superuser_request(options):
+    def _get_superuser_request(options: Dict[str, Any]) -> bool:
         is_superuser_create_request = options[superuser_user_type]
         is_superuser_in_database = CustomUser.objects.filter(is_superuser=True).exists()
 
         return is_superuser_create_request and not is_superuser_in_database
 
-    def create_user(self, user_type, number_of_users_to_create=1):
+    def create_user(self, user_type: str, number_of_users_to_create: int = 1) -> None:
         factory_parameters = self._set_user_factory_parameters(user_type)
 
         for user_number in range(number_of_users_to_create):
@@ -75,20 +81,20 @@ class Command(BaseCommand):
                 UserFactory(**factory_parameters, email=user_email)
 
     @staticmethod
-    def _set_user_factory_parameters(user_type):
+    def _set_user_factory_parameters(user_type: str) -> Dict[str, Union[str, bool]]:
         return {
             "user_type": CustomUser.UserType.ADMIN.name if user_type == superuser_user_type else user_type,
             "is_staff": user_type in (CustomUser.UserType.ADMIN.name, superuser_user_type),
             "is_superuser": user_type == superuser_user_type,
         }
 
-    def execute_creating_project(self, options):
+    def execute_creating_project(self, options: OptionsDictType) -> None:
         projects_to_create = self._set_number_of_projects_to_create(options)
 
         for (project_type, number_of_projects) in projects_to_create.items():
             self.create_project(project_type, number_of_projects)
 
-    def _set_number_of_projects_to_create(self, options):
+    def _set_number_of_projects_to_create(self, options: OptionsDictType) -> Dict[str, int]:
         return {
             ProjectType.SUSPENDED.name: self._compute_number_of_projects_to_create(options, ProjectType.SUSPENDED.name),
             ProjectType.ACTIVE.name: self._compute_number_of_projects_to_create(options, ProjectType.ACTIVE.name),
@@ -96,7 +102,7 @@ class Command(BaseCommand):
         }
 
     @staticmethod
-    def _compute_number_of_projects_to_create(options, project_type):
+    def _compute_number_of_projects_to_create(options: OptionsDictType, project_type: str) -> int:
         if project_type == ProjectType.SUSPENDED.name:
             number_of_projects_in_database = Project.objects.filter_suspended().count()
         elif project_type == ProjectType.ACTIVE.name:
@@ -108,14 +114,14 @@ class Command(BaseCommand):
 
         return options[project_type] - number_of_projects_in_database if options[project_type] is not None else 0
 
-    def create_project(self, project_type, number_of_projects_to_create):
+    def create_project(self, project_type: str, number_of_projects_to_create: int) -> None:
         factory_parameters = self._set_project_factory_parameters(project_type)
 
         for project_number in range(number_of_projects_to_create):
             logging.info(f"{number_of_projects_to_create - project_number} {project_type} project(s) left to create")
             ProjectFactory(**factory_parameters)
 
-    def _set_project_factory_parameters(self, project_type):
+    def _set_project_factory_parameters(self, project_type: str) -> Dict[str, Union[timezone.datetime, bool]]:
         return {
             "start_date": self._create_start_date(),
             "suspended": project_type == ProjectType.SUSPENDED.name,
@@ -123,14 +129,14 @@ class Command(BaseCommand):
         }
 
     @staticmethod
-    def _create_start_date(time_delta=PROJECT_START_DATE_TIME_DELTA):
+    def _create_start_date(time_delta: Any = PROJECT_START_DATE_TIME_DELTA) -> timezone.datetime:
         return timezone.now() - time_delta
 
     @staticmethod
-    def _create_stop_date(time_delta=PROJECT_STOP_DATE_TIME_DELTA):
+    def _create_stop_date(time_delta: Any = PROJECT_STOP_DATE_TIME_DELTA) -> timezone.datetime:
         return timezone.now() - time_delta
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
             "-a",
             "--admin",
