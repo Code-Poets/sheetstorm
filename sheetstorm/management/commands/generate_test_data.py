@@ -1,32 +1,32 @@
 import logging
-from enum import Enum
 from typing import Any
 from typing import Dict
 from typing import Optional
 from typing import Union
 
 from dateutil.relativedelta import relativedelta
-from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
 from managers.factories import ProjectFactory
 from managers.models import Project
-from users.factories import UserFactory
 
-CustomUser = get_user_model()
+from sheetstorm.management.commands.constants import DATA_SETS
+from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
+from sheetstorm.management.commands.constants import DataSize
+from sheetstorm.management.commands.constants import ProjectType
+from users.factories import UserFactory
+from users.models import CustomUser
 
 superuser_user_type = "SUPERUSER"
 
 
-class ProjectType(Enum):
-    SUSPENDED = "suspended"
-    ACTIVE = "active"
-    COMPLETED = "completed"
-
-
 class UnsupportedProjectTypeException(Exception):
+    pass
+
+
+class NoDataSetRequestedException(Exception):
     pass
 
 
@@ -38,8 +38,68 @@ class Command(BaseCommand):
     PROJECT_START_DATE_TIME_DELTA = relativedelta(months=1, day=1)
     PROJECT_STOP_DATE_TIME_DELTA = relativedelta(days=14)
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.number_of_admins: int
+        self.number_of_employees: int
+        self.number_of_managers: int
+        self.number_of_suspended_projects: int
+        self.number_of_active_projects: int
+        self.number_of_completed_projects: int
+        self.is_superuser_request: bool
+        self.is_small_set_request: bool
+        self.is_medium_set_request: bool
+        self.is_large_set_request: bool
+        self.is_extra_large_set_request: bool
+
     @transaction.atomic
     def handle(self, *args: Any, **options: Union[bool, int, None]) -> None:
+        is_request_to_use_prepared_set = self._get_request_to_create_data_using_prepared_set(options)
+
+        if is_request_to_use_prepared_set:
+            self.create_data_using_prepared_set(options)
+        else:
+            self.execute_creating_users(options)
+            self.execute_creating_project(options)
+
+        logging.info(f"Total number of users in the database: {CustomUser.objects.count()}")
+        logging.info(f"Total number of projects in the database: {Project.objects.count()}")
+
+    def _get_request_to_create_data_using_prepared_set(self, options: OptionsDictType) -> Any:
+        self._init_parser_parameters(options)
+
+        return any(
+            [
+                self.is_small_set_request,
+                self.is_medium_set_request,
+                self.is_large_set_request,
+                self.is_extra_large_set_request,
+            ]
+        )
+
+    def create_data_using_prepared_set(self, options: OptionsDictType) -> None:
+        requested_set = self._pick_dataset_to_create(options)
+
+        self.execute_creating_users(requested_set)
+        self.execute_creating_project(requested_set)
+
+    def _pick_dataset_to_create(self, options: OptionsDictType) -> Any:
+        self._init_parser_parameters(options)
+
+        if self.is_small_set_request:
+            requested_set = DATA_SETS[DataSize.SMALL.name]
+        elif self.is_medium_set_request:
+            requested_set = DATA_SETS[DataSize.MEDIUM.name]
+        elif self.is_large_set_request:
+            requested_set = DATA_SETS[DataSize.LARGE.name]
+        elif self.is_extra_large_set_request:
+            requested_set = DATA_SETS[DataSize.EXTRA_LARGE.name]
+        else:
+            raise NoDataSetRequestedException("No data set requested")
+
+        return requested_set
+
+    def execute_creating_users(self, options: OptionsDictType) -> None:
         user_options = self._get_user_options(options)
         is_need_to_create_superuser = self._get_superuser_request(options)
 
@@ -49,11 +109,6 @@ class Command(BaseCommand):
 
         if is_need_to_create_superuser:
             self.create_user(superuser_user_type)
-
-        self.execute_creating_project(options)
-
-        logging.info(f"Total number of users in the database: {CustomUser.objects.count()}")
-        logging.info(f"Total number of projects in the database: {Project.objects.count()}")
 
     @staticmethod
     def _get_user_options(options: OptionsDictType) -> Dict[str, Optional[int]]:
@@ -137,6 +192,8 @@ class Command(BaseCommand):
         return timezone.now() - time_delta
 
     def add_arguments(self, parser: Any) -> None:
+        data_size_arguments = parser.add_mutually_exclusive_group()
+
         parser.add_argument(
             "-a",
             "--admin",
@@ -163,7 +220,7 @@ class Command(BaseCommand):
             "--superuser",
             dest=superuser_user_type,
             action="store_true",
-            help="Create and add superuser to the database if not exist",
+            help="Create and add superuser to the database if there isn't one",
         )
         parser.add_argument(
             "-su",
@@ -186,3 +243,40 @@ class Command(BaseCommand):
             type=int,
             help="Indicates the maximum number of completed projects to be in the database",
         )
+        data_size_arguments.add_argument(
+            "--small",
+            dest=DataSize.SMALL.name,
+            action="store_true",
+            help="Use prepared small set to generate test data",
+        )
+        data_size_arguments.add_argument(
+            "--medium",
+            dest=DataSize.MEDIUM.name,
+            action="store_true",
+            help="Use prepared medium set to generate test data",
+        )
+        data_size_arguments.add_argument(
+            "--large",
+            dest=DataSize.LARGE.name,
+            action="store_true",
+            help="Use prepared large set to generate test data",
+        )
+        data_size_arguments.add_argument(
+            "--extra-large",
+            dest=DataSize.EXTRA_LARGE.name,
+            action="store_true",
+            help="Use prepared extra large set to generate test data",
+        )
+
+    def _init_parser_parameters(self, options: Any) -> None:
+        self.number_of_admins = options[CustomUser.UserType.ADMIN.name]
+        self.number_of_employees = options[CustomUser.UserType.EMPLOYEE.name]
+        self.number_of_managers = options[CustomUser.UserType.MANAGER.name]
+        self.number_of_suspended_projects = options[ProjectType.SUSPENDED.name]
+        self.number_of_active_projects = options[ProjectType.ACTIVE.name]
+        self.number_of_completed_projects = options[ProjectType.COMPLETED.name]
+        self.is_superuser_request = options[SUPERUSER_USER_TYPE]
+        self.is_small_set_request = options[DataSize.SMALL.name]
+        self.is_medium_set_request = options[DataSize.MEDIUM.name]
+        self.is_large_set_request = options[DataSize.LARGE.name]
+        self.is_extra_large_set_request = options[DataSize.EXTRA_LARGE.name]
