@@ -11,15 +11,12 @@ from django.utils import timezone
 
 from managers.factories import ProjectFactory
 from managers.models import Project
-
 from sheetstorm.management.commands.constants import DATA_SETS
 from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.constants import ProjectType
 from users.factories import UserFactory
 from users.models import CustomUser
-
-superuser_user_type = "SUPERUSER"
 
 
 class UnsupportedProjectTypeException(Exception):
@@ -108,7 +105,7 @@ class Command(BaseCommand):
                 self.create_user(user_type, number_of_users)
 
         if is_need_to_create_superuser:
-            self.create_user(superuser_user_type)
+            self.create_user(SUPERUSER_USER_TYPE)
 
     @staticmethod
     def _get_user_options(options: OptionsDictType) -> Dict[str, Optional[int]]:
@@ -120,7 +117,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _get_superuser_request(options: Dict[str, Any]) -> bool:
-        is_superuser_create_request = options[superuser_user_type]
+        is_superuser_create_request = options[SUPERUSER_USER_TYPE]
         is_superuser_in_database = CustomUser.objects.filter(is_superuser=True).exists()
 
         return is_superuser_create_request and not is_superuser_in_database
@@ -138,9 +135,9 @@ class Command(BaseCommand):
     @staticmethod
     def _set_user_factory_parameters(user_type: str) -> Dict[str, Union[str, bool]]:
         return {
-            "user_type": CustomUser.UserType.ADMIN.name if user_type == superuser_user_type else user_type,
-            "is_staff": user_type in (CustomUser.UserType.ADMIN.name, superuser_user_type),
-            "is_superuser": user_type == superuser_user_type,
+            "user_type": CustomUser.UserType.ADMIN.name if user_type == SUPERUSER_USER_TYPE else user_type,
+            "is_staff": user_type in (CustomUser.UserType.ADMIN.name, SUPERUSER_USER_TYPE),
+            "is_superuser": user_type == SUPERUSER_USER_TYPE,
         }
 
     def execute_creating_project(self, options: OptionsDictType) -> None:
@@ -218,7 +215,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "-s",
             "--superuser",
-            dest=superuser_user_type,
+            dest=SUPERUSER_USER_TYPE,
             action="store_true",
             help="Create and add superuser to the database if there isn't one",
         )
