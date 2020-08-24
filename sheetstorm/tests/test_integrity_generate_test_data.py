@@ -4,6 +4,8 @@ from django.test import TestCase
 from parameterized import parameterized
 
 from managers.models import Project
+from sheetstorm.management.commands.constants import SMALL_SET
+from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.generate_test_data import ProjectType
 from users.factories import UserFactory
 from users.models import CustomUser
@@ -248,3 +250,61 @@ class PassIncorrectArgumentsTests(TestCase):
     def test_that_passing_any_value_for_positional_superuser_argument_should_raise_error(self, test_value):
         with self.assertRaises(CommandError):
             management.call_command("generate_test_data", f"--superuser={test_value}")
+
+    @parameterized.expand([(1,), ("test_text",)])
+    def test_that_passing_any_value_for_positional_set_size_argument_should_raise_error(self, test_value):
+        with self.assertRaises(CommandError):
+            management.call_command("generate_test_data", f"--small={test_value}")
+            management.call_command("generate_test_data", f"--medium={test_value}")
+            management.call_command("generate_test_data", f"--large={test_value}")
+            management.call_command("generate_test_data", f"--extra_large={test_value}")
+
+    def test_that_passing_more_than_one_set_size_positional_argument_should_raise_error(self):
+        with self.assertRaises(CommandError):
+            management.call_command("generate_test_data", "--small", "--large")
+
+
+class CreateDataFromPreparedSetTests(TestCase):
+    SUPERUSER = "SUPERUSER"
+
+    def test_that_command_should_create_specified_set_when_there_is_request(self):
+        management.call_command("generate_test_data", "--small")
+
+        self.compare_quantity_in_database_with_small_set()
+
+    def test_that_result_of_passing_all_arguments_when_prepared_set_is_requested_should_be_created_specified_set(self):
+        combined_options = {
+            CustomUser.UserType.ADMIN.name: 100,
+            CustomUser.UserType.EMPLOYEE.name: None,
+            CustomUser.UserType.MANAGER.name: None,
+            self.SUPERUSER: False,
+            ProjectType.SUSPENDED.name: 100,
+            ProjectType.ACTIVE.name: None,
+            ProjectType.COMPLETED.name: None,
+            DataSize.SMALL.name: True,
+            DataSize.MEDIUM.name: False,
+            DataSize.LARGE.name: False,
+            DataSize.EXTRA_LARGE.name: False,
+        }
+
+        management.call_command("generate_test_data", **combined_options)
+
+        self.compare_quantity_in_database_with_small_set()
+
+    def compare_quantity_in_database_with_small_set(self):
+        self.assertEqual(
+            CustomUser.objects.filter(user_type=CustomUser.UserType.ADMIN.name, is_superuser=False).count(),
+            SMALL_SET[CustomUser.UserType.ADMIN.name],
+        )
+        self.assertEqual(
+            CustomUser.objects.filter(user_type=CustomUser.UserType.MANAGER.name, is_superuser=False).count(),
+            SMALL_SET[CustomUser.UserType.MANAGER.name],
+        )
+        self.assertEqual(
+            CustomUser.objects.filter(user_type=CustomUser.UserType.EMPLOYEE.name, is_superuser=False).count(),
+            SMALL_SET[CustomUser.UserType.EMPLOYEE.name],
+        )
+
+        self.assertEqual(Project.objects.filter_active().count(), SMALL_SET[ProjectType.ACTIVE.name])
+        self.assertEqual(Project.objects.filter_suspended().count(), SMALL_SET[ProjectType.SUSPENDED.name])
+        self.assertEqual(Project.objects.filter_completed().count(), SMALL_SET[ProjectType.COMPLETED.name])
