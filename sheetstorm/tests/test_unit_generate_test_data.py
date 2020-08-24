@@ -5,7 +5,10 @@ from parameterized import parameterized
 
 from managers.factories import ProjectFactory
 from managers.models import Project
+from sheetstorm.management.commands.constants import DATA_SETS
+from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.generate_test_data import Command as GenerateTestDataCommand
+from sheetstorm.management.commands.generate_test_data import NotAnySetRequestedException
 from sheetstorm.management.commands.generate_test_data import ProjectType
 from sheetstorm.management.commands.generate_test_data import UnsupportedProjectTypeException
 from users.factories import UserFactory
@@ -120,6 +123,44 @@ class CreateUserMethodsTests(TestCase):
         GenerateTestDataCommand().create_user(user_type, len(users) - number_of_users_to_subtract_from_existing)
 
         self.assertEqual(CustomUser.objects.filter(user_type=user_type).count(), mock_number_of_users_to_create)
+
+    def test_result_of_execute_creating_users_function_should_be_specified_number_of_users_in_database(self):
+        mock_options = {
+            CustomUser.UserType.ADMIN.name: 1,
+            CustomUser.UserType.EMPLOYEE.name: 2,
+            CustomUser.UserType.MANAGER.name: None,
+            self.superuser: True,
+            "test_unrelated_options": True,
+        }
+        GenerateTestDataCommand().execute_creating_users(mock_options)
+
+        self.assertEqual(
+            CustomUser.objects.filter(user_type=CustomUser.UserType.ADMIN.name, is_superuser=False).count(), 1
+        )
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.EMPLOYEE.name).count(), 2)
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.MANAGER.name).count(), 0)
+        self.assertEqual(CustomUser.objects.filter(is_superuser=True).count(), 1)
+
+    def test_despite_filled_database_result_of_execute_function_should_be_specified_number_of_users_in_database(self):
+        mock_number_of_users_to_create = 1
+        self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.ADMIN.name)
+        self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.EMPLOYEE.name)
+        self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.MANAGER.name)
+
+        mock_options = {
+            CustomUser.UserType.ADMIN.name: 2,
+            CustomUser.UserType.EMPLOYEE.name: 2,
+            CustomUser.UserType.MANAGER.name: 2,
+            self.superuser: True,
+            "test_unrelated_argument": True,
+        }
+        GenerateTestDataCommand().execute_creating_users(mock_options)
+
+        self.assertEqual(
+            CustomUser.objects.filter(user_type=CustomUser.UserType.ADMIN.name, is_superuser=False).count(), 2
+        )
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.EMPLOYEE.name).count(), 2)
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.MANAGER.name).count(), 2)
 
     @staticmethod
     def _generate_test_users(number_of_users_to_fill_database, user_type):
@@ -327,3 +368,86 @@ class CreateProjectMethodsTests(TestCase):
             raise UnsupportedProjectTypeException
 
         return number_of_projects_to_create
+
+
+class CreateDataFromPreparedSetTests(TestCase):
+    SUPERUSER_USER_TYPE = "SUPERUSER"
+
+    def setUp(self) -> None:
+        self.unrelated_options = {
+            CustomUser.UserType.ADMIN.name: 1,
+            CustomUser.UserType.EMPLOYEE.name: 1,
+            CustomUser.UserType.MANAGER.name: 1,
+            self.SUPERUSER_USER_TYPE: True,
+            ProjectType.SUSPENDED.name: 1,
+            ProjectType.ACTIVE.name: 1,
+            ProjectType.COMPLETED.name: 1,
+        }
+
+    def test_get_request_to_create_data_using_prepared_set_function_should_return_true_if_any_set_requested(self):
+        options = {
+            **self.unrelated_options,
+            DataSize.SMALL.name: True,
+            DataSize.MEDIUM.name: False,
+            DataSize.LARGE.name: False,
+            DataSize.EXTRA_LARGE.name: True,
+        }
+
+        self.assertTrue(GenerateTestDataCommand()._get_request_to_create_data_using_prepared_set(options))
+
+    def test_get_request_to_create_data_using_prepared_set_function_should_return_false_if_parameters_are_not_provided(
+        self
+    ):
+        options = {
+            **self.unrelated_options,
+            DataSize.SMALL.name: False,
+            DataSize.MEDIUM.name: False,
+            DataSize.LARGE.name: False,
+            DataSize.EXTRA_LARGE.name: False,
+        }
+
+        self.assertFalse(GenerateTestDataCommand()._get_request_to_create_data_using_prepared_set(options))
+
+    @parameterized.expand(
+        [
+            (True, False, False, False, DataSize.SMALL.name),
+            (False, True, False, False, DataSize.MEDIUM.name),
+            (False, False, True, False, DataSize.LARGE.name),
+            (False, False, False, True, DataSize.EXTRA_LARGE.name),
+        ]
+    )
+    def test_pick_dataset_to_create_function_should_return_one_specified_set_if_there_is_request(
+        self, small_requested, medium_requested, large_requested, extra_large_requested, set_name
+    ):
+        options = {
+            **self.unrelated_options,
+            DataSize.SMALL.name: small_requested,
+            DataSize.MEDIUM.name: medium_requested,
+            DataSize.LARGE.name: large_requested,
+            DataSize.EXTRA_LARGE.name: extra_large_requested,
+        }
+
+        self.assertEqual(GenerateTestDataCommand()._pick_dataset_to_create(options), DATA_SETS[set_name])
+
+    def test_pick_dataset_to_create_function_should_create_smaller_set_in_case_of_allow_to_specify_more_than_one(self):
+        options = {
+            **self.unrelated_options,
+            DataSize.SMALL.name: True,
+            DataSize.MEDIUM.name: False,
+            DataSize.LARGE.name: True,
+            DataSize.EXTRA_LARGE.name: True,
+        }
+
+        self.assertEqual(GenerateTestDataCommand()._pick_dataset_to_create(options), DATA_SETS[DataSize.SMALL.name])
+
+    def test_pick_dataset_to_create_function_should_raise_error_if_there_is_no_request_for_any(self):
+        options = {
+            **self.unrelated_options,
+            DataSize.SMALL.name: False,
+            DataSize.MEDIUM.name: False,
+            DataSize.LARGE.name: False,
+            DataSize.EXTRA_LARGE.name: False,
+        }
+
+        with self.assertRaises(NotAnySetRequestedException):
+            GenerateTestDataCommand()._pick_dataset_to_create(options)
