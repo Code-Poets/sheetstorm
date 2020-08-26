@@ -30,8 +30,6 @@ class NoDataSetRequestedException(Exception):
 class Command(BaseCommand):
     help = "Create initial sample data for SheetStorm application testing."
 
-    OptionsDictType = Dict[str, Union[bool, int, None]]
-
     PROJECT_START_DATE_TIME_DELTA = relativedelta(months=1, day=1)
     PROJECT_STOP_DATE_TIME_DELTA = relativedelta(days=14)
 
@@ -51,20 +49,32 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args: Any, **options: Union[bool, int, None]) -> None:
-        is_request_to_use_prepared_set = self._get_request_to_create_data_using_prepared_set(options)
+        self._init_values_from_given_options(options)
 
-        if is_request_to_use_prepared_set:
-            self.create_data_using_prepared_set(options)
-        else:
-            self.execute_creating_users(options)
-            self.execute_creating_project(options)
+        self.execute_creating_users()
+        self.execute_creating_project()
 
         logging.info(f"Total number of users in the database: {CustomUser.objects.count()}")
         logging.info(f"Total number of projects in the database: {Project.objects.count()}")
 
-    def _get_request_to_create_data_using_prepared_set(self, options: OptionsDictType) -> Any:
-        self._init_parser_parameters(options)
+    def _init_values_from_given_options(self, options: Dict[str, Any]) -> None:
+        self.is_small_set_request = options[DataSize.SMALL.name]
+        self.is_medium_set_request = options[DataSize.MEDIUM.name]
+        self.is_large_set_request = options[DataSize.LARGE.name]
+        self.is_extra_large_set_request = options[DataSize.EXTRA_LARGE.name]
 
+        if self._get_request_to_create_data_using_prepared_set():
+            options = self._pick_dataset_to_create()
+
+        self.number_of_admins = options[CustomUser.UserType.ADMIN.name]
+        self.number_of_employees = options[CustomUser.UserType.EMPLOYEE.name]
+        self.number_of_managers = options[CustomUser.UserType.MANAGER.name]
+        self.number_of_suspended_projects = options[ProjectType.SUSPENDED.name]
+        self.number_of_active_projects = options[ProjectType.ACTIVE.name]
+        self.number_of_completed_projects = options[ProjectType.COMPLETED.name]
+        self.is_superuser_request = options[SUPERUSER_USER_TYPE]
+
+    def _get_request_to_create_data_using_prepared_set(self) -> bool:
         return any(
             [
                 self.is_small_set_request,
@@ -74,15 +84,7 @@ class Command(BaseCommand):
             ]
         )
 
-    def create_data_using_prepared_set(self, options: OptionsDictType) -> None:
-        requested_set = self._pick_dataset_to_create(options)
-
-        self.execute_creating_users(requested_set)
-        self.execute_creating_project(requested_set)
-
-    def _pick_dataset_to_create(self, options: OptionsDictType) -> Any:
-        self._init_parser_parameters(options)
-
+    def _pick_dataset_to_create(self) -> Any:
         if self.is_small_set_request:
             requested_set = DATA_SETS[DataSize.SMALL.name]
         elif self.is_medium_set_request:
@@ -96,9 +98,9 @@ class Command(BaseCommand):
 
         return requested_set
 
-    def execute_creating_users(self, options: OptionsDictType) -> None:
-        user_options = self._get_user_options(options)
-        is_need_to_create_superuser = self._get_superuser_request(options)
+    def execute_creating_users(self) -> None:
+        user_options = self._get_user_options()
+        is_need_to_create_superuser = self._get_superuser_request()
 
         for (user_type, number_of_users) in user_options.items():
             if number_of_users is not None:
@@ -107,20 +109,17 @@ class Command(BaseCommand):
         if is_need_to_create_superuser:
             self.create_user(SUPERUSER_USER_TYPE)
 
-    @staticmethod
-    def _get_user_options(options: OptionsDictType) -> Dict[str, Optional[int]]:
+    def _get_user_options(self) -> Dict[str, Optional[int]]:
         return {
-            CustomUser.UserType.ADMIN.name: options[CustomUser.UserType.ADMIN.name],
-            CustomUser.UserType.EMPLOYEE.name: options[CustomUser.UserType.EMPLOYEE.name],
-            CustomUser.UserType.MANAGER.name: options[CustomUser.UserType.MANAGER.name],
+            CustomUser.UserType.ADMIN.name: self.number_of_admins,
+            CustomUser.UserType.EMPLOYEE.name: self.number_of_employees,
+            CustomUser.UserType.MANAGER.name: self.number_of_managers,
         }
 
-    @staticmethod
-    def _get_superuser_request(options: Dict[str, Any]) -> bool:
-        is_superuser_create_request = options[SUPERUSER_USER_TYPE]
+    def _get_superuser_request(self) -> bool:
         is_superuser_in_database = CustomUser.objects.filter(is_superuser=True).exists()
 
-        return is_superuser_create_request and not is_superuser_in_database
+        return self.is_superuser_request and not is_superuser_in_database
 
     def create_user(self, user_type: str, number_of_users_to_create: int = 1) -> None:
         factory_parameters = self._set_user_factory_parameters(user_type)
@@ -140,31 +139,37 @@ class Command(BaseCommand):
             "is_superuser": user_type == SUPERUSER_USER_TYPE,
         }
 
-    def execute_creating_project(self, options: OptionsDictType) -> None:
-        projects_to_create = self._set_number_of_projects_to_create(options)
+    def execute_creating_project(self) -> None:
+        projects_to_create = self._set_number_of_projects_to_create()
 
         for (project_type, number_of_projects) in projects_to_create.items():
             self.create_project(project_type, number_of_projects)
 
-    def _set_number_of_projects_to_create(self, options: OptionsDictType) -> Dict[str, int]:
+    def _set_number_of_projects_to_create(self) -> Dict[str, int]:
         return {
-            ProjectType.SUSPENDED.name: self._compute_number_of_projects_to_create(options, ProjectType.SUSPENDED.name),
-            ProjectType.ACTIVE.name: self._compute_number_of_projects_to_create(options, ProjectType.ACTIVE.name),
-            ProjectType.COMPLETED.name: self._compute_number_of_projects_to_create(options, ProjectType.COMPLETED.name),
+            ProjectType.SUSPENDED.name: self._compute_number_of_projects_to_create(ProjectType.SUSPENDED.name),
+            ProjectType.ACTIVE.name: self._compute_number_of_projects_to_create(ProjectType.ACTIVE.name),
+            ProjectType.COMPLETED.name: self._compute_number_of_projects_to_create(ProjectType.COMPLETED.name),
         }
 
-    @staticmethod
-    def _compute_number_of_projects_to_create(options: OptionsDictType, project_type: str) -> int:
+    def _compute_number_of_projects_to_create(self, project_type: str) -> int:
         if project_type == ProjectType.SUSPENDED.name:
             number_of_projects_in_database = Project.objects.filter_suspended().count()
+            requested_number_of_projects = self.number_of_suspended_projects
         elif project_type == ProjectType.ACTIVE.name:
             number_of_projects_in_database = Project.objects.filter_active().count()
+            requested_number_of_projects = self.number_of_active_projects
         elif project_type == ProjectType.COMPLETED.name:
             number_of_projects_in_database = Project.objects.filter_completed().count()
+            requested_number_of_projects = self.number_of_completed_projects
         else:
             raise UnsupportedProjectTypeException(f"{project_type} project type do not exist")
 
-        return options[project_type] - number_of_projects_in_database if options[project_type] is not None else 0
+        return (
+            requested_number_of_projects - number_of_projects_in_database
+            if requested_number_of_projects is not None
+            else 0
+        )
 
     def create_project(self, project_type: str, number_of_projects_to_create: int) -> None:
         factory_parameters = self._set_project_factory_parameters(project_type)
@@ -264,16 +269,3 @@ class Command(BaseCommand):
             action="store_true",
             help="Use prepared extra large set to generate test data",
         )
-
-    def _init_parser_parameters(self, options: Any) -> None:
-        self.number_of_admins = options[CustomUser.UserType.ADMIN.name]
-        self.number_of_employees = options[CustomUser.UserType.EMPLOYEE.name]
-        self.number_of_managers = options[CustomUser.UserType.MANAGER.name]
-        self.number_of_suspended_projects = options[ProjectType.SUSPENDED.name]
-        self.number_of_active_projects = options[ProjectType.ACTIVE.name]
-        self.number_of_completed_projects = options[ProjectType.COMPLETED.name]
-        self.is_superuser_request = options[SUPERUSER_USER_TYPE]
-        self.is_small_set_request = options[DataSize.SMALL.name]
-        self.is_medium_set_request = options[DataSize.MEDIUM.name]
-        self.is_large_set_request = options[DataSize.LARGE.name]
-        self.is_extra_large_set_request = options[DataSize.EXTRA_LARGE.name]
