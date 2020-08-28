@@ -9,7 +9,6 @@ from sheetstorm.management.commands.constants import DATA_SETS
 from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.generate_test_data import Command as GenerateTestDataCommand
-from sheetstorm.management.commands.generate_test_data import NoDataSetRequestedException
 from sheetstorm.management.commands.generate_test_data import ProjectType
 from sheetstorm.management.commands.generate_test_data import UnsupportedProjectTypeException
 from users.factories import UserFactory
@@ -30,24 +29,24 @@ class CreateUserMethodsTests(TestCase):
             CustomUser.UserType.MANAGER.name: 2,
         }
 
-        GenerateTestDataCommand.is_superuser_request = True
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
 
         self.assertEqual(GenerateTestDataCommand()._get_user_options(), expected_options)
 
     def test_get_superuser_request_function_should_return_true_if_there_is_superuser_request(self):
-        GenerateTestDataCommand.is_superuser_request = True
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
 
         self.assertTrue(GenerateTestDataCommand()._get_superuser_request())
 
     def test_get_superuser_request_function_should_return_false_if_there_is_no_superuser_request(self):
-        GenerateTestDataCommand.is_superuser_request = False
+        setattr(GenerateTestDataCommand, "is_superuser_request", False)
 
         self.assertFalse(GenerateTestDataCommand()._get_superuser_request())
 
     def test_get_superuser_request_function_should_return_false_if_superuser_already_exists(self):
         UserFactory(is_superuser=True)
 
-        GenerateTestDataCommand.is_superuser_request = True
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
 
         self.assertFalse(GenerateTestDataCommand()._get_superuser_request())
 
@@ -131,10 +130,10 @@ class CreateUserMethodsTests(TestCase):
         self.assertEqual(CustomUser.objects.filter(user_type=user_type).count(), mock_number_of_users_to_create)
 
     def test_result_of_execute_creating_users_function_should_be_specified_number_of_users_in_database(self):
-        GenerateTestDataCommand.number_of_admins = 1
-        GenerateTestDataCommand.number_of_managers = None
-        GenerateTestDataCommand.number_of_employees = 2
-        GenerateTestDataCommand.is_superuser_request = True
+        setattr(GenerateTestDataCommand, "number_of_admins", 1)
+        setattr(GenerateTestDataCommand, "number_of_managers", None)
+        setattr(GenerateTestDataCommand, "number_of_employees", 2)
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
         GenerateTestDataCommand().execute_creating_users()
 
         self.assertEqual(
@@ -150,10 +149,10 @@ class CreateUserMethodsTests(TestCase):
         self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.EMPLOYEE.name)
         self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.MANAGER.name)
 
-        GenerateTestDataCommand.number_of_admins = 2
-        GenerateTestDataCommand.number_of_managers = 2
-        GenerateTestDataCommand.number_of_employees = 2
-        GenerateTestDataCommand.is_superuser_request = False
+        setattr(GenerateTestDataCommand, "number_of_admins", 2)
+        setattr(GenerateTestDataCommand, "number_of_managers", 2)
+        setattr(GenerateTestDataCommand, "number_of_employees", 2)
+        setattr(GenerateTestDataCommand, "is_superuser_request", False)
 
         GenerateTestDataCommand().execute_creating_users()
 
@@ -186,10 +185,13 @@ class CreateProjectMethodsTests(TestCase):
             ProjectType.ACTIVE.name: self.mock_number_of_active_projects_to_create,
             ProjectType.COMPLETED.name: self.mock_number_of_completed_projects_to_create,
         }
-
-        GenerateTestDataCommand.number_of_suspended_projects = self.mock_number_of_suspended_projects_to_create
-        GenerateTestDataCommand.number_of_active_projects = self.mock_number_of_active_projects_to_create
-        GenerateTestDataCommand.number_of_completed_projects = self.mock_number_of_completed_projects_to_create
+        setattr(
+            GenerateTestDataCommand, "number_of_suspended_projects", self.mock_number_of_suspended_projects_to_create
+        )
+        setattr(GenerateTestDataCommand, "number_of_active_projects", self.mock_number_of_active_projects_to_create)
+        setattr(
+            GenerateTestDataCommand, "number_of_completed_projects", self.mock_number_of_completed_projects_to_create
+        )
 
     @parameterized.expand(
         [(ProjectType.SUSPENDED.name, 2), (ProjectType.ACTIVE.name, 3), (ProjectType.COMPLETED.name, 5)]
@@ -209,9 +211,9 @@ class CreateProjectMethodsTests(TestCase):
     def test_compute_number_of_projects_to_create_function_should_return_0_if_number_of_projects_is_not_specified(
         self, project_type
     ):
-        GenerateTestDataCommand.number_of_suspended_projects = None
-        GenerateTestDataCommand.number_of_active_projects = None
-        GenerateTestDataCommand.number_of_completed_projects = None
+        setattr(GenerateTestDataCommand, "number_of_suspended_projects", None)
+        setattr(GenerateTestDataCommand, "number_of_active_projects", None)
+        setattr(GenerateTestDataCommand, "number_of_completed_projects", None)
 
         self.assertEqual(GenerateTestDataCommand()._compute_number_of_projects_to_create(project_type), 0)
 
@@ -332,14 +334,20 @@ class CreateProjectMethodsTests(TestCase):
             number_of_projects_to_fill_database=2, project_type=ProjectType.COMPLETED.name
         )
 
-        GenerateTestDataCommand.number_of_suspended_projects = (
-            len(suspended_projects) - number_of_projects_to_subtract_from_existing
+        setattr(
+            GenerateTestDataCommand,
+            "number_of_suspended_projects",
+            len(suspended_projects) - number_of_projects_to_subtract_from_existing,
         )
-        GenerateTestDataCommand.number_of_active_projects = (
-            len(active_projects) - number_of_projects_to_subtract_from_existing
+        setattr(
+            GenerateTestDataCommand,
+            "number_of_active_projects",
+            len(active_projects) - number_of_projects_to_subtract_from_existing,
         )
-        GenerateTestDataCommand.number_of_completed_projects = (
-            len(completed_projects) - number_of_projects_to_subtract_from_existing
+        setattr(
+            GenerateTestDataCommand,
+            "number_of_completed_projects",
+            len(completed_projects) - number_of_projects_to_subtract_from_existing,
         )
 
         GenerateTestDataCommand().execute_creating_project()
@@ -381,13 +389,10 @@ class CreateProjectMethodsTests(TestCase):
 
 class CreateDataFromPreparedSetTests(TestCase):
     def setUp(self) -> None:
-        GenerateTestDataCommand.is_small_set_request = False
-        GenerateTestDataCommand.is_medium_set_request = False
-        GenerateTestDataCommand.is_large_set_request = False
-        GenerateTestDataCommand.is_extra_large_set_request = False
+        setattr(GenerateTestDataCommand, "data_set_size", None)
 
     def test_get_request_to_create_data_using_prepared_set_function_should_return_true_if_any_set_requested(self):
-        GenerateTestDataCommand.is_small_set_request = True
+        setattr(GenerateTestDataCommand, "data_set_size", DataSize.SMALL.value)
 
         self.assertTrue(GenerateTestDataCommand()._get_request_to_create_data_using_prepared_set())
 
@@ -397,23 +402,12 @@ class CreateDataFromPreparedSetTests(TestCase):
         self.assertFalse(GenerateTestDataCommand()._get_request_to_create_data_using_prepared_set())
 
     @parameterized.expand(
-        [
-            (True, False, False, False, DataSize.SMALL.name),
-            (False, True, False, False, DataSize.MEDIUM.name),
-            (False, False, True, False, DataSize.LARGE.name),
-            (False, False, False, True, DataSize.EXTRA_LARGE.name),
-        ]
+        [(DataSize.SMALL.value,), (DataSize.MEDIUM.value,), (DataSize.LARGE.value,), (DataSize.EXTRA_LARGE.value,)]
     )
-    def test_pick_dataset_to_create_function_should_return_one_specified_set_if_there_is_request(
-        self, small_requested, medium_requested, large_requested, extra_large_requested, set_name
-    ):
-        GenerateTestDataCommand.is_small_set_request = small_requested
-        GenerateTestDataCommand.is_medium_set_request = medium_requested
-        GenerateTestDataCommand.is_large_set_request = large_requested
-        GenerateTestDataCommand.is_extra_large_set_request = extra_large_requested
+    def test_pick_dataset_to_create_function_should_return_one_specified_set_if_there_is_request(self, requested_set):
+        setattr(GenerateTestDataCommand, "data_set_size", requested_set)
 
-        self.assertEqual(GenerateTestDataCommand()._pick_dataset_to_create(), DATA_SETS[set_name])
+        self.assertEqual(GenerateTestDataCommand()._pick_dataset_to_create(), DATA_SETS[requested_set])
 
-    def test_pick_dataset_to_create_function_should_raise_error_if_there_is_no_request_for_any(self):
-        with self.assertRaises(NoDataSetRequestedException):
-            GenerateTestDataCommand()._pick_dataset_to_create()
+    def test_pick_dataset_to_create_function_should_return_None_if_there_is_no_request_for_any(self):
+        self.assertIsNone(GenerateTestDataCommand()._pick_dataset_to_create())

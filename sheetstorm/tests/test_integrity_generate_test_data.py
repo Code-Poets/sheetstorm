@@ -4,7 +4,9 @@ from django.test import TestCase
 from parameterized import parameterized
 
 from managers.models import Project
+from sheetstorm.management.commands.constants import DATA_SIZE_PARAMETER
 from sheetstorm.management.commands.constants import SMALL_SET
+from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.generate_test_data import ProjectType
 from users.factories import UserFactory
@@ -174,8 +176,6 @@ class CreateProjectsTests(TestCase):
 
 
 class CombinedOptionsTests(TestCase):
-    SUPERUSER = "SUPERUSER"
-
     def setUp(self):
         self.number_of_admins_to_create = 1
         self.number_of_employees_to_create = 2
@@ -189,7 +189,7 @@ class CombinedOptionsTests(TestCase):
             CustomUser.UserType.ADMIN.name: self.number_of_admins_to_create,
             CustomUser.UserType.EMPLOYEE.name: self.number_of_employees_to_create,
             CustomUser.UserType.MANAGER.name: self.number_of_managers_to_create,
-            self.SUPERUSER: True,
+            SUPERUSER_USER_TYPE: True,
             ProjectType.SUSPENDED.name: self.number_of_suspended_projects_to_create,
             ProjectType.ACTIVE.name: self.number_of_active_projects_to_create,
             ProjectType.COMPLETED.name: self.number_of_completed_projects_to_create,
@@ -252,39 +252,29 @@ class PassIncorrectArgumentsTests(TestCase):
             management.call_command("generate_test_data", f"--superuser={test_value}")
 
     @parameterized.expand([(1,), ("test_text",)])
-    def test_that_passing_any_value_for_positional_set_size_argument_should_raise_error(self, test_value):
+    def test_that_passing_any_value_for_data_size_parameter_other_than_defined_sizes_should_raise_error(
+        self, test_value
+    ):
         with self.assertRaises(CommandError):
-            management.call_command("generate_test_data", f"--small={test_value}")
-            management.call_command("generate_test_data", f"--medium={test_value}")
-            management.call_command("generate_test_data", f"--large={test_value}")
-            management.call_command("generate_test_data", f"--extra_large={test_value}")
-
-    def test_that_passing_more_than_one_set_size_positional_argument_should_raise_error(self):
-        with self.assertRaises(CommandError):
-            management.call_command("generate_test_data", "--small", "--large")
+            management.call_command("generate_test_data", f"--data-size={test_value}")
 
 
 class CreateDataFromPreparedSetTests(TestCase):
-    SUPERUSER = "SUPERUSER"
-
     def test_that_command_should_create_specified_set_when_there_is_request(self):
-        management.call_command("generate_test_data", "--small")
+        management.call_command("generate_test_data", "--data-size=small")
 
         self.compare_quantity_in_database_with_small_set()
 
     def test_that_result_of_passing_all_arguments_when_prepared_set_is_requested_should_be_created_specified_set(self):
         combined_options = {
             CustomUser.UserType.ADMIN.name: 100,
-            CustomUser.UserType.EMPLOYEE.name: None,
+            CustomUser.UserType.EMPLOYEE.name: 2,
             CustomUser.UserType.MANAGER.name: None,
-            self.SUPERUSER: False,
+            SUPERUSER_USER_TYPE: False,
             ProjectType.SUSPENDED.name: 100,
-            ProjectType.ACTIVE.name: None,
+            ProjectType.ACTIVE.name: 1,
             ProjectType.COMPLETED.name: None,
-            DataSize.SMALL.name: True,
-            DataSize.MEDIUM.name: False,
-            DataSize.LARGE.name: False,
-            DataSize.EXTRA_LARGE.name: False,
+            DATA_SIZE_PARAMETER: DataSize.SMALL.value,
         }
 
         management.call_command("generate_test_data", **combined_options)

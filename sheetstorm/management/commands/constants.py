@@ -4,6 +4,8 @@ from users.models import CustomUser
 
 SUPERUSER_USER_TYPE = "SUPERUSER"
 
+DATA_SIZE_PARAMETER = "data_size"
+
 
 class DataSize(Enum):
     SMALL = "small"
@@ -59,8 +61,8 @@ EXTRA_LARGE_SET = {
 }
 
 DATA_SETS = {
-    DataSize.SMALL.name: SMALL_SET,
-    DataSize.MEDIUM.name: MEDIUM_SET,
-    DataSize.LARGE.name: LARGE_SET,
-    DataSize.EXTRA_LARGE.name: EXTRA_LARGE_SET,
+    DataSize.SMALL.value: SMALL_SET,
+    DataSize.MEDIUM.value: MEDIUM_SET,
+    DataSize.LARGE.value: LARGE_SET,
+    DataSize.EXTRA_LARGE.value: EXTRA_LARGE_SET,
 }

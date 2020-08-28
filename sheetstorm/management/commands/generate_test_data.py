@@ -12,6 +12,7 @@ from django.utils import timezone
 from managers.factories import ProjectFactory
 from managers.models import Project
 from sheetstorm.management.commands.constants import DATA_SETS
+from sheetstorm.management.commands.constants import DATA_SIZE_PARAMETER
 from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.constants import ProjectType
@@ -42,10 +43,7 @@ class Command(BaseCommand):
         self.number_of_active_projects: int
         self.number_of_completed_projects: int
         self.is_superuser_request: bool
-        self.is_small_set_request: bool
-        self.is_medium_set_request: bool
-        self.is_large_set_request: bool
-        self.is_extra_large_set_request: bool
+        self.data_set_size: Any
 
     @transaction.atomic
     def handle(self, *args: Any, **options: Union[bool, int, None]) -> None:
@@ -58,10 +56,7 @@ class Command(BaseCommand):
         logging.info(f"Total number of projects in the database: {Project.objects.count()}")
 
     def _init_values_from_given_options(self, options: Dict[str, Any]) -> None:
-        self.is_small_set_request = options[DataSize.SMALL.name]
-        self.is_medium_set_request = options[DataSize.MEDIUM.name]
-        self.is_large_set_request = options[DataSize.LARGE.name]
-        self.is_extra_large_set_request = options[DataSize.EXTRA_LARGE.name]
+        self.data_set_size = options[DATA_SIZE_PARAMETER]
 
         if self._get_request_to_create_data_using_prepared_set():
             options = self._pick_dataset_to_create()
@@ -75,28 +70,10 @@ class Command(BaseCommand):
         self.is_superuser_request = options[SUPERUSER_USER_TYPE]
 
     def _get_request_to_create_data_using_prepared_set(self) -> bool:
-        return any(
-            [
-                self.is_small_set_request,
-                self.is_medium_set_request,
-                self.is_large_set_request,
-                self.is_extra_large_set_request,
-            ]
-        )
+        return isinstance(self.data_set_size, str)
 
     def _pick_dataset_to_create(self) -> Any:
-        if self.is_small_set_request:
-            requested_set = DATA_SETS[DataSize.SMALL.name]
-        elif self.is_medium_set_request:
-            requested_set = DATA_SETS[DataSize.MEDIUM.name]
-        elif self.is_large_set_request:
-            requested_set = DATA_SETS[DataSize.LARGE.name]
-        elif self.is_extra_large_set_request:
-            requested_set = DATA_SETS[DataSize.EXTRA_LARGE.name]
-        else:
-            raise NoDataSetRequestedException("No data set requested")
-
-        return requested_set
+        return DATA_SETS.get(self.data_set_size)
 
     def execute_creating_users(self) -> None:
         user_options = self._get_user_options()
@@ -194,8 +171,6 @@ class Command(BaseCommand):
         return timezone.now() - time_delta
 
     def add_arguments(self, parser: Any) -> None:
-        data_size_arguments = parser.add_mutually_exclusive_group()
-
         parser.add_argument(
             "-a",
             "--admin",
@@ -245,27 +220,10 @@ class Command(BaseCommand):
             type=int,
             help="Indicates the maximum number of completed projects to be in the database",
         )
-        data_size_arguments.add_argument(
-            "--small",
-            dest=DataSize.SMALL.name,
-            action="store_true",
-            help="Use prepared small set to generate test data",
-        )
-        data_size_arguments.add_argument(
-            "--medium",
-            dest=DataSize.MEDIUM.name,
-            action="store_true",
-            help="Use prepared medium set to generate test data",
-        )
-        data_size_arguments.add_argument(
-            "--large",
-            dest=DataSize.LARGE.name,
-            action="store_true",
-            help="Use prepared large set to generate test data",
-        )
-        data_size_arguments.add_argument(
-            "--extra-large",
-            dest=DataSize.EXTRA_LARGE.name,
-            action="store_true",
-            help="Use prepared extra large set to generate test data",
+        parser.add_argument(
+            "--data-size",
+            dest=DATA_SIZE_PARAMETER,
+            metavar="size",
+            choices=[DataSize.SMALL.value, DataSize.MEDIUM.value, DataSize.LARGE.value, DataSize.EXTRA_LARGE.value],
+            help="Use prepared data set of given size to generate test data",
         )
