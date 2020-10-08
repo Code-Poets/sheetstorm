@@ -1,6 +1,8 @@
 import logging
+import random
 from typing import Any
 from typing import Dict
+from typing import List
 from typing import Optional
 from typing import Union
 
@@ -16,6 +18,7 @@ from sheetstorm.management.commands.constants import DATA_SIZE_PARAMETER
 from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.constants import ProjectType
+from sheetstorm.management.commands.constants import UsersInProjects
 from users.factories import UserFactory
 from users.models import CustomUser
 
@@ -45,12 +48,38 @@ class Command(BaseCommand):
         self.is_superuser_request: bool
         self.data_set_size: Any
 
+        self.max_number_of_admins_in_suspended_project: int
+        self.max_number_of_employees_in_suspended_project: int
+        self.max_number_of_managers_in_suspended_project: int
+        self.max_number_of_admins_in_active_project: int
+        self.max_number_of_employees_in_active_project: int
+        self.max_number_of_managers_in_active_project: int
+        self.max_number_of_admins_in_completed_project: int
+        self.max_number_of_employees_in_completed_project: int
+        self.max_number_of_managers_in_completed_project: int
+
+        self.employees_list: List
+        self.admins_list: List
+        self.managers_list: List
+        self.active_projects_list: List
+        self.suspended_projects_list: List
+        self.completed_projects_list: List
+
     @transaction.atomic
     def handle(self, *args: Any, **options: Union[bool, int, None]) -> None:
         self._init_values_from_given_options(options)
 
         self.execute_creating_users()
         self.execute_creating_project()
+
+        self._get_list_of_created_users_and_projects()
+
+        is_adding_users_to_projects_possible = self._get_request_to_create_data_using_prepared_set()
+
+        if is_adding_users_to_projects_possible:
+            self.execute_adding_users_to_projects()
+        else:
+            logging.info("Adding users to projects not supported")
 
         logging.info(f"Total number of users in the database: {CustomUser.objects.count()}")
         logging.info(f"Total number of projects in the database: {Project.objects.count()}")
@@ -61,6 +90,16 @@ class Command(BaseCommand):
         if self._get_request_to_create_data_using_prepared_set():
             options = self._pick_dataset_to_create()
 
+            self.max_number_of_admins_in_suspended_project = options[UsersInProjects.ADMIN_SUSPENDED.name]
+            self.max_number_of_employees_in_suspended_project = options[UsersInProjects.EMPLOYEE_SUSPENDED.name]
+            self.max_number_of_managers_in_suspended_project = options[UsersInProjects.MANAGER_SUSPENDED.name]
+            self.max_number_of_admins_in_active_project = options[UsersInProjects.ADMIN_ACTIVE.name]
+            self.max_number_of_employees_in_active_project = options[UsersInProjects.EMPLOYEE_ACTIVE.name]
+            self.max_number_of_managers_in_active_project = options[UsersInProjects.MANAGER_ACTIVE.name]
+            self.max_number_of_admins_in_completed_project = options[UsersInProjects.ADMIN_COMPLETED.name]
+            self.max_number_of_employees_in_completed_project = options[UsersInProjects.EMPLOYEE_COMPLETED.name]
+            self.max_number_of_managers_in_completed_project = options[UsersInProjects.MANAGER_COMPLETED.name]
+
         self.number_of_admins = options[CustomUser.UserType.ADMIN.name]
         self.number_of_employees = options[CustomUser.UserType.EMPLOYEE.name]
         self.number_of_managers = options[CustomUser.UserType.MANAGER.name]
@@ -68,6 +107,15 @@ class Command(BaseCommand):
         self.number_of_active_projects = options[ProjectType.ACTIVE.name]
         self.number_of_completed_projects = options[ProjectType.COMPLETED.name]
         self.is_superuser_request = options[SUPERUSER_USER_TYPE]
+
+    def _get_list_of_created_users_and_projects(self) -> None:
+        self.employees_list = self._get_list_of_users(CustomUser.UserType.EMPLOYEE.name)
+        self.admins_list = self._get_list_of_users(CustomUser.UserType.ADMIN.name)
+        self.managers_list = self._get_list_of_users(CustomUser.UserType.MANAGER.name)
+
+        self.active_projects_list = self._get_list_of_projects(ProjectType.ACTIVE.name)
+        self.suspended_projects_list = self._get_list_of_projects(ProjectType.SUSPENDED.name)
+        self.completed_projects_list = self._get_list_of_projects(ProjectType.COMPLETED.name)
 
     def _get_request_to_create_data_using_prepared_set(self) -> bool:
         return isinstance(self.data_set_size, str)
@@ -140,7 +188,7 @@ class Command(BaseCommand):
             number_of_projects_in_database = Project.objects.filter_completed().count()
             requested_number_of_projects = self.number_of_completed_projects
         else:
-            raise UnsupportedProjectTypeException(f"{project_type} project type do not exist")
+            raise UnsupportedProjectTypeException("Unsupported project type")
 
         return (
             requested_number_of_projects - number_of_projects_in_database
@@ -169,6 +217,142 @@ class Command(BaseCommand):
     @staticmethod
     def _create_stop_date(time_delta: Any = PROJECT_STOP_DATE_TIME_DELTA) -> timezone.datetime:
         return timezone.now() - time_delta
+
+    def execute_adding_users_to_projects(self) -> None:
+        self.add_users_to_projects(
+            self.employees_list,
+            self.suspended_projects_list,
+            CustomUser.UserType.EMPLOYEE.name,
+            ProjectType.SUSPENDED.name,
+            self.max_number_of_employees_in_suspended_project,
+        )
+        self.add_users_to_projects(
+            self.employees_list,
+            self.active_projects_list,
+            CustomUser.UserType.EMPLOYEE.name,
+            ProjectType.ACTIVE.name,
+            self.max_number_of_employees_in_active_project,
+        )
+        self.add_users_to_projects(
+            self.employees_list,
+            self.completed_projects_list,
+            CustomUser.UserType.EMPLOYEE.name,
+            ProjectType.COMPLETED.name,
+            self.max_number_of_employees_in_completed_project,
+        )
+
+        self.add_users_to_projects(
+            self.admins_list,
+            self.suspended_projects_list,
+            CustomUser.UserType.ADMIN.name,
+            ProjectType.SUSPENDED.name,
+            self.max_number_of_admins_in_suspended_project,
+        )
+        self.add_users_to_projects(
+            self.admins_list,
+            self.active_projects_list,
+            CustomUser.UserType.ADMIN.name,
+            ProjectType.ACTIVE.name,
+            self.max_number_of_admins_in_active_project,
+        )
+        self.add_users_to_projects(
+            self.admins_list,
+            self.completed_projects_list,
+            CustomUser.UserType.ADMIN.name,
+            ProjectType.COMPLETED.name,
+            self.max_number_of_admins_in_completed_project,
+        )
+
+        self.add_users_to_projects(
+            self.managers_list,
+            self.suspended_projects_list,
+            CustomUser.UserType.MANAGER.name,
+            ProjectType.SUSPENDED.name,
+            self.max_number_of_managers_in_suspended_project,
+            as_manager=True,
+        )
+        self.add_users_to_projects(
+            self.managers_list,
+            self.active_projects_list,
+            CustomUser.UserType.MANAGER.name,
+            ProjectType.ACTIVE.name,
+            self.max_number_of_managers_in_active_project,
+            as_manager=True,
+        )
+        self.add_users_to_projects(
+            self.managers_list,
+            self.completed_projects_list,
+            CustomUser.UserType.MANAGER.name,
+            ProjectType.COMPLETED.name,
+            self.max_number_of_managers_in_completed_project,
+            as_manager=True,
+        )
+
+        self.remove_all_random_user_projects(CustomUser.UserType.EMPLOYEE.name)
+        self.remove_all_random_user_projects(CustomUser.UserType.ADMIN.name)
+        self.remove_all_random_user_projects(CustomUser.UserType.MANAGER.name)
+
+    def add_users_to_projects(
+        self,
+        users_list: List,
+        projects_list: List,
+        user_type: str,
+        project_type: str,
+        max_number_of_users_in_projects: int,
+        as_manager: bool = False,
+    ) -> None:
+
+        for project in projects_list:
+            number_of_users_to_pick = random.randint(0, max_number_of_users_in_projects)
+            users_to_add_to_project = random.sample(users_list, number_of_users_to_pick)
+
+            self.add_specified_users_to_project(project, users_to_add_to_project, as_manager)
+
+    @staticmethod
+    def _get_list_of_users(user_type: str, is_superuser: bool = False) -> List[Any]:
+        return list(CustomUser.objects.filter(user_type=user_type, is_superuser=is_superuser).all())
+
+    @staticmethod
+    def _get_list_of_projects(project_type: str) -> List[Any]:
+        if project_type == ProjectType.ACTIVE.name:
+            projects_list = list(Project.objects.filter_active().all())
+        elif project_type == ProjectType.SUSPENDED.name:
+            projects_list = list(Project.objects.filter_suspended().all())
+        elif project_type == ProjectType.COMPLETED.name:
+            projects_list = list(Project.objects.filter_completed().all())
+        else:
+            raise UnsupportedProjectTypeException("Unsupported project type")
+
+        return projects_list
+
+    def add_specified_users_to_project(
+        self, project: Any, users_to_add_to_project: List[Any], as_manager: bool
+    ) -> None:
+        for user in users_to_add_to_project:
+            if as_manager:
+                self._add_manager_to_project_if_not_added_yet(project, user)
+                self._add_member_to_project_if_not_added_yet(project, user)
+            else:
+                self._add_member_to_project_if_not_added_yet(project, user)
+
+    @staticmethod
+    def _add_manager_to_project_if_not_added_yet(project: Any, manager: Any) -> None:
+        if not project.managers.filter(pk=manager.pk).exists():
+            project.managers.add(manager)
+
+    @staticmethod
+    def _add_member_to_project_if_not_added_yet(project: Any, member: Any) -> None:
+        if not project.members.filter(pk=member.pk).exists():
+            project.members.add(member)
+
+    def remove_all_random_user_projects(self, user_type: str) -> None:
+        random_user = random.choice(self._get_list_of_users(user_type))
+
+        if user_type == CustomUser.UserType.MANAGER.name:
+            random_user.manager_projects.clear()
+            random_user.projects.clear()
+        else:
+            random_user.projects.clear()
 
     def add_arguments(self, parser: Any) -> None:
         parser.add_argument(

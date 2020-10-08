@@ -8,8 +8,8 @@ from managers.models import Project
 from sheetstorm.management.commands.constants import DATA_SETS
 from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
+from sheetstorm.management.commands.constants import ProjectType
 from sheetstorm.management.commands.generate_test_data import Command as GenerateTestDataCommand
-from sheetstorm.management.commands.generate_test_data import ProjectType
 from sheetstorm.management.commands.generate_test_data import UnsupportedProjectTypeException
 from users.factories import UserFactory
 from users.models import CustomUser
@@ -411,3 +411,146 @@ class CreateDataFromPreparedSetTests(TestCase):
 
     def test_pick_dataset_to_create_function_should_return_None_if_there_is_no_request_for_any(self):
         self.assertIsNone(GenerateTestDataCommand()._pick_dataset_to_create())
+
+
+class AddUsersToProjectsTests(TestCase):
+    def setUp(self) -> None:
+        ProjectFactory(start_date=timezone.now(), suspended=True)
+        ProjectFactory(
+            start_date=timezone.now() - timezone.timedelta(days=2),
+            stop_date=timezone.now() - timezone.timedelta(days=1),
+        )
+        ProjectFactory(start_date=timezone.now())
+
+    @parameterized.expand(
+        [CustomUser.UserType.ADMIN.name, CustomUser.UserType.EMPLOYEE.name, CustomUser.UserType.MANAGER.name]
+    )
+    def test_that_get_list_of_users_function_should_return_list_of_users_of_specified_type(self, user_type):
+        UserFactory(user_type=CustomUser.UserType.ADMIN.name)
+        UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
+        UserFactory(user_type=CustomUser.UserType.MANAGER.name)
+        UserFactory(user_type=CustomUser.UserType.ADMIN.name, is_superuser=True)
+
+        returned_user_type = GenerateTestDataCommand._get_list_of_users(user_type)[0].user_type
+
+        self.assertEqual(returned_user_type, user_type)
+
+    def test_that_get_list_of_projects_function_should_return_list_of_only_suspended_projects_if_specified(self):
+        number_of_suspended_projects = Project.objects.filter_suspended().count()
+
+        expected_number_of_suspended_projects = 1
+
+        self.assertEqual(number_of_suspended_projects, expected_number_of_suspended_projects)
+
+    def test_that_get_list_of_projects_function_should_return_list_of_only_completed_projects_if_specified(self):
+        number_of_completed_projects = Project.objects.filter_completed().count()
+
+        expected_number_of_completed_projects = 1
+
+        self.assertEqual(number_of_completed_projects, expected_number_of_completed_projects)
+
+    def test_that_get_list_of_projects_function_should_return_list_of_only_active_projects_if_specified(self):
+        number_of_active_projects = Project.objects.filter_active().count()
+
+        expected_number_of_active_projects = 1
+
+        self.assertEqual(number_of_active_projects, expected_number_of_active_projects)
+
+    def test_that_get_list_of_projects_function_should_raise_error_when_project_type_is_not_valid(self):
+        with self.assertRaises(UnsupportedProjectTypeException):
+            GenerateTestDataCommand._get_list_of_projects("error")
+
+    def test_that_add_specified_users_to_project_function_should_add_specified_users_as_members_to_specified_project(
+        self
+    ):
+        project = Project.objects.filter_suspended().get()
+
+        users = [UserFactory(user_type=CustomUser.UserType.ADMIN.name) for _user in range(5)]
+
+        GenerateTestDataCommand().add_specified_users_to_project(project, users, as_manager=False)
+
+        self.assertEqual(project.members.count(), 5)
+
+    def test_that_add_specified_users_to_project_function_should_add_users_as_managers_and_members_to_specified_project(
+        self
+    ):
+        project = Project.objects.filter_suspended().get()
+
+        users = [UserFactory(user_type=CustomUser.UserType.ADMIN.name) for _user in range(3)]
+
+        GenerateTestDataCommand().add_specified_users_to_project(project, users, as_manager=True)
+
+        self.assertEqual(project.managers.count(), 3)
+        self.assertEqual(project.members.count(), 3)
+
+    def test_that_add_member_to_project_if_not_added_yet_function_should_add_specified_user_as_member_to_project(self):
+        project = Project.objects.filter_suspended().get()
+
+        user = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
+
+        GenerateTestDataCommand._add_member_to_project_if_not_added_yet(project, user)
+
+        self.assertIn(user, project.members.all())
+        self.assertNotIn(user, project.managers.all())
+
+    def test_that_add_manager_to_project_if_not_added_yet_function_should_add_specified_user_as_manager_to_project(
+        self
+    ):
+        project = Project.objects.filter_suspended().get()
+
+        user = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
+
+        GenerateTestDataCommand._add_manager_to_project_if_not_added_yet(project, user)
+
+        self.assertIn(user, project.managers.all())
+        self.assertNotIn(user, project.members.all())
+
+    def test_that_add_users_to_projects_function_should_add_number_of_users_to_projects_from_specified_range(self):
+        projects_list = []
+        users_list = []
+
+        for _project_number in range(3):
+            projects_list.append(ProjectFactory(start_date=timezone.now(), suspended=True))
+
+        for _user_number in range(15):
+            users_list.append(UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name))
+
+        max_number_of_users_to_add = 6
+
+        GenerateTestDataCommand().add_users_to_projects(
+            users_list,
+            projects_list,
+            CustomUser.UserType.EMPLOYEE.name,
+            ProjectType.SUSPENDED.name,
+            max_number_of_users_to_add,
+        )
+
+        self.assertTrue(Project.objects.all()[0].members.count() in range(0, max_number_of_users_to_add + 1))
+        self.assertTrue(Project.objects.all()[1].members.count() in range(0, max_number_of_users_to_add + 1))
+        self.assertTrue(Project.objects.all()[2].members.count() in range(0, max_number_of_users_to_add + 1))
+
+    @parameterized.expand([CustomUser.UserType.ADMIN.name, CustomUser.UserType.EMPLOYEE.name])
+    def test_that_remove_all_random_user_projects_function_should_remove_all_user_projects(self, user_type):
+        projects = [ProjectFactory(start_date=timezone.now()) for _project in range(3)]
+        user = UserFactory(user_type=user_type)
+
+        for project in projects:
+            project.members.add(user)
+
+        GenerateTestDataCommand().remove_all_random_user_projects(user_type)
+
+        self.assertEqual(user.projects.count(), 0)
+
+    def test_that_remove_all_random_user_projects_function_should_remove_all_manager_projects(self):
+        projects = [ProjectFactory(start_date=timezone.now()) for _project in range(3)]
+
+        user = UserFactory(user_type=CustomUser.UserType.MANAGER.name)
+
+        for project in projects:
+            project.managers.add(user)
+            project.members.add(user)
+
+        GenerateTestDataCommand().remove_all_random_user_projects(CustomUser.UserType.MANAGER.name)
+
+        self.assertEqual(user.manager_projects.count(), 0)
+        self.assertEqual(user.projects.count(), 0)
