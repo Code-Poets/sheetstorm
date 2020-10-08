@@ -8,7 +8,8 @@ from sheetstorm.management.commands.constants import DATA_SIZE_PARAMETER
 from sheetstorm.management.commands.constants import SMALL_SET
 from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
-from sheetstorm.management.commands.generate_test_data import ProjectType
+from sheetstorm.management.commands.constants import ProjectType
+from sheetstorm.management.commands.constants import UsersInProjects
 from users.factories import UserFactory
 from users.models import CustomUser
 
@@ -298,3 +299,48 @@ class CreateDataFromPreparedSetTests(TestCase):
         self.assertEqual(Project.objects.filter_active().count(), SMALL_SET[ProjectType.ACTIVE.name])
         self.assertEqual(Project.objects.filter_suspended().count(), SMALL_SET[ProjectType.SUSPENDED.name])
         self.assertEqual(Project.objects.filter_completed().count(), SMALL_SET[ProjectType.COMPLETED.name])
+
+
+class AddUsersToProjectsTests(TestCase):
+    def setUp(self) -> None:
+        management.call_command("generate_test_data", "--data-size=small")
+
+    def test_that_number_of_added_users_to_project_should_be_less_or_equal_to_specified_max_number_in_prepared_set(
+        self
+    ):
+        test_project_suspended = Project.objects.filter_suspended().first()
+        test_project_completed = Project.objects.filter_completed().first()
+        test_project_active = Project.objects.filter_active().first()
+
+        max_number_of_users_in_suspended = (
+            SMALL_SET[UsersInProjects.EMPLOYEE_SUSPENDED.name]
+            + SMALL_SET[UsersInProjects.ADMIN_SUSPENDED.name]
+            + SMALL_SET[UsersInProjects.MANAGER_SUSPENDED.name]
+        )
+
+        max_number_of_users_in_completed = (
+            SMALL_SET[UsersInProjects.EMPLOYEE_COMPLETED.name]
+            + SMALL_SET[UsersInProjects.ADMIN_COMPLETED.name]
+            + SMALL_SET[UsersInProjects.MANAGER_COMPLETED.name]
+        )
+
+        max_number_of_users_in_active = (
+            SMALL_SET[UsersInProjects.EMPLOYEE_ACTIVE.name]
+            + SMALL_SET[UsersInProjects.ADMIN_ACTIVE.name]
+            + SMALL_SET[UsersInProjects.MANAGER_ACTIVE.name]
+        )
+
+        self.assertLessEqual(test_project_suspended.members.count(), max_number_of_users_in_suspended)
+        self.assertLessEqual(test_project_completed.members.count(), max_number_of_users_in_completed)
+        self.assertLessEqual(test_project_active.members.count(), max_number_of_users_in_active)
+
+    def test_that_number_of_added_managers_to_project_should_be_less_or_equal_to_specified_max_number_in_prepared_set(
+        self
+    ):
+        test_project_suspended = Project.objects.filter_suspended().first()
+        test_project_completed = Project.objects.filter_completed().first()
+        test_project_active = Project.objects.filter_active().first()
+
+        self.assertLessEqual(test_project_suspended.managers.count(), SMALL_SET[UsersInProjects.MANAGER_SUSPENDED.name])
+        self.assertLessEqual(test_project_completed.managers.count(), SMALL_SET[UsersInProjects.MANAGER_COMPLETED.name])
+        self.assertLessEqual(test_project_active.managers.count(), SMALL_SET[UsersInProjects.MANAGER_ACTIVE.name])
