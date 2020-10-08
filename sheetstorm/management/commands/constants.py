@@ -20,6 +20,18 @@ class ProjectType(Enum):
     COMPLETED = "completed"
 
 
+class UsersInProjects(Enum):
+    EMPLOYEE_SUSPENDED = "employee_suspended"
+    EMPLOYEE_ACTIVE = "employee_active"
+    EMPLOYEE_COMPLETED = "employee_completed"
+    MANAGER_SUSPENDED = "manager_suspended"
+    MANAGER_ACTIVE = "manager_active"
+    MANAGER_COMPLETED = "manager_completed"
+    ADMIN_SUSPENDED = "admin_suspended"
+    ADMIN_ACTIVE = "admin_active"
+    ADMIN_COMPLETED = "admin_completed"
+
+
 SMALL_SET = {
     SUPERUSER_USER_TYPE: True,
     CustomUser.UserType.ADMIN.name: 2,
@@ -27,37 +39,73 @@ SMALL_SET = {
     CustomUser.UserType.MANAGER.name: 3,
     ProjectType.SUSPENDED.name: 1,
     ProjectType.ACTIVE.name: 5,
-    ProjectType.COMPLETED.name: 2,
+    ProjectType.COMPLETED.name: 3,
+    UsersInProjects.EMPLOYEE_SUSPENDED.name: 5,
+    UsersInProjects.EMPLOYEE_ACTIVE.name: 10,
+    UsersInProjects.EMPLOYEE_COMPLETED.name: 5,
+    UsersInProjects.MANAGER_SUSPENDED.name: 2,
+    UsersInProjects.MANAGER_ACTIVE.name: 2,
+    UsersInProjects.MANAGER_COMPLETED.name: 2,
+    UsersInProjects.ADMIN_SUSPENDED.name: 2,
+    UsersInProjects.ADMIN_ACTIVE.name: 2,
+    UsersInProjects.ADMIN_COMPLETED.name: 2,
 }
 
 MEDIUM_SET = {
     SUPERUSER_USER_TYPE: True,
-    CustomUser.UserType.ADMIN.name: 10,
-    CustomUser.UserType.EMPLOYEE.name: 70,
-    CustomUser.UserType.MANAGER.name: 20,
-    ProjectType.SUSPENDED.name: 7,
+    CustomUser.UserType.ADMIN.name: 20,
+    CustomUser.UserType.EMPLOYEE.name: 150,
+    CustomUser.UserType.MANAGER.name: 30,
+    ProjectType.SUSPENDED.name: 5,
     ProjectType.ACTIVE.name: 25,
-    ProjectType.COMPLETED.name: 10,
+    ProjectType.COMPLETED.name: 15,
+    UsersInProjects.EMPLOYEE_SUSPENDED.name: 50,
+    UsersInProjects.EMPLOYEE_ACTIVE.name: 80,
+    UsersInProjects.EMPLOYEE_COMPLETED.name: 50,
+    UsersInProjects.MANAGER_SUSPENDED.name: 15,
+    UsersInProjects.MANAGER_ACTIVE.name: 15,
+    UsersInProjects.MANAGER_COMPLETED.name: 15,
+    UsersInProjects.ADMIN_SUSPENDED.name: 20,
+    UsersInProjects.ADMIN_ACTIVE.name: 20,
+    UsersInProjects.ADMIN_COMPLETED.name: 20,
 }
 
 LARGE_SET = {
     SUPERUSER_USER_TYPE: True,
-    CustomUser.UserType.ADMIN.name: 70,
-    CustomUser.UserType.EMPLOYEE.name: 300,
-    CustomUser.UserType.MANAGER.name: 100,
-    ProjectType.SUSPENDED.name: 50,
-    ProjectType.ACTIVE.name: 150,
-    ProjectType.COMPLETED.name: 70,
+    CustomUser.UserType.ADMIN.name: 90,
+    CustomUser.UserType.EMPLOYEE.name: 350,
+    CustomUser.UserType.MANAGER.name: 120,
+    ProjectType.SUSPENDED.name: 20,
+    ProjectType.ACTIVE.name: 60,
+    ProjectType.COMPLETED.name: 30,
+    UsersInProjects.EMPLOYEE_SUSPENDED.name: 130,
+    UsersInProjects.EMPLOYEE_ACTIVE.name: 200,
+    UsersInProjects.EMPLOYEE_COMPLETED.name: 100,
+    UsersInProjects.MANAGER_SUSPENDED.name: 50,
+    UsersInProjects.MANAGER_ACTIVE.name: 50,
+    UsersInProjects.MANAGER_COMPLETED.name: 50,
+    UsersInProjects.ADMIN_SUSPENDED.name: 70,
+    UsersInProjects.ADMIN_ACTIVE.name: 70,
+    UsersInProjects.ADMIN_COMPLETED.name: 70,
 }
 
 EXTRA_LARGE_SET = {
     SUPERUSER_USER_TYPE: True,
-    CustomUser.UserType.ADMIN.name: 250,
-    CustomUser.UserType.EMPLOYEE.name: 1000,
-    CustomUser.UserType.MANAGER.name: 400,
-    ProjectType.SUSPENDED.name: 150,
-    ProjectType.ACTIVE.name: 450,
-    ProjectType.COMPLETED.name: 250,
+    CustomUser.UserType.ADMIN.name: 120,
+    CustomUser.UserType.EMPLOYEE.name: 600,
+    CustomUser.UserType.MANAGER.name: 200,
+    ProjectType.SUSPENDED.name: 30,
+    ProjectType.ACTIVE.name: 90,
+    ProjectType.COMPLETED.name: 60,
+    UsersInProjects.EMPLOYEE_SUSPENDED.name: 200,
+    UsersInProjects.EMPLOYEE_ACTIVE.name: 400,
+    UsersInProjects.EMPLOYEE_COMPLETED.name: 200,
+    UsersInProjects.MANAGER_SUSPENDED.name: 80,
+    UsersInProjects.MANAGER_ACTIVE.name: 80,
+    UsersInProjects.MANAGER_COMPLETED.name: 80,
+    UsersInProjects.ADMIN_SUSPENDED.name: 100,
+    UsersInProjects.ADMIN_ACTIVE.name: 100,
+    UsersInProjects.ADMIN_COMPLETED.name: 100,
 }
 
 DATA_SETS = {
