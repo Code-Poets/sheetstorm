@@ -308,6 +308,8 @@ class Command(BaseCommand):
 
             self.add_specified_users_to_project(project, users_to_add_to_project, as_manager)
 
+        logging.info(f"Successfully added {user_type.lower()}s to {project_type.lower()} projects")
+
     @staticmethod
     def _get_list_of_users(user_type: str, is_superuser: bool = False) -> List[Any]:
         return list(CustomUser.objects.filter(user_type=user_type, is_superuser=is_superuser).all())
