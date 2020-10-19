@@ -32,6 +32,12 @@ class UsersInProjects(Enum):
     ADMIN_COMPLETED = "admin_completed"
 
 
+class UserReportsPerDay(Enum):
+    EMPLOYEE_REPORTS = "employee_reports"
+    MANAGER_REPORTS = "manager_reports"
+    ADMIN_REPORTS = "admin_reports"
+
+
 SMALL_SET = {
     SUPERUSER_USER_TYPE: True,
     CustomUser.UserType.ADMIN.name: 2,
@@ -49,6 +55,9 @@ SMALL_SET = {
     UsersInProjects.ADMIN_SUSPENDED.name: 2,
     UsersInProjects.ADMIN_ACTIVE.name: 2,
     UsersInProjects.ADMIN_COMPLETED.name: 2,
+    UserReportsPerDay.EMPLOYEE_REPORTS.name: 3,
+    UserReportsPerDay.MANAGER_REPORTS.name: 3,
+    UserReportsPerDay.ADMIN_REPORTS.name: 3,
 }
 
 MEDIUM_SET = {
@@ -68,6 +77,9 @@ MEDIUM_SET = {
     UsersInProjects.ADMIN_SUSPENDED.name: 20,
     UsersInProjects.ADMIN_ACTIVE.name: 20,
     UsersInProjects.ADMIN_COMPLETED.name: 20,
+    UserReportsPerDay.EMPLOYEE_REPORTS.name: 6,
+    UserReportsPerDay.MANAGER_REPORTS.name: 6,
+    UserReportsPerDay.ADMIN_REPORTS.name: 6,
 }
 
 LARGE_SET = {
@@ -87,6 +99,9 @@ LARGE_SET = {
     UsersInProjects.ADMIN_SUSPENDED.name: 70,
     UsersInProjects.ADMIN_ACTIVE.name: 70,
     UsersInProjects.ADMIN_COMPLETED.name: 70,
+    UserReportsPerDay.EMPLOYEE_REPORTS.name: 9,
+    UserReportsPerDay.MANAGER_REPORTS.name: 9,
+    UserReportsPerDay.ADMIN_REPORTS.name: 9,
 }
 
 EXTRA_LARGE_SET = {
@@ -106,6 +121,9 @@ EXTRA_LARGE_SET = {
     UsersInProjects.ADMIN_SUSPENDED.name: 100,
     UsersInProjects.ADMIN_ACTIVE.name: 100,
     UsersInProjects.ADMIN_COMPLETED.name: 100,
+    UserReportsPerDay.EMPLOYEE_REPORTS.name: 12,
+    UserReportsPerDay.MANAGER_REPORTS.name: 12,
+    UserReportsPerDay.ADMIN_REPORTS.name: 12,
 }
 
 DATA_SETS = {
