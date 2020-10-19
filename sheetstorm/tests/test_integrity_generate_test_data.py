@@ -1,8 +1,10 @@
 from django.core import management
 from django.core.management.base import CommandError
 from django.test import TestCase
+from django.utils import timezone
 from parameterized import parameterized
 
+from employees.models import Report
 from managers.models import Project
 from sheetstorm.management.commands.constants import DATA_SIZE_PARAMETER
 from sheetstorm.management.commands.constants import SMALL_SET
@@ -10,6 +12,7 @@ from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.constants import ProjectType
 from sheetstorm.management.commands.constants import UsersInProjects
+from sheetstorm.management.commands.generate_test_data import Command as GenerateTestDataCommand
 from users.factories import UserFactory
 from users.models import CustomUser
 
@@ -344,3 +347,41 @@ class AddUsersToProjectsTests(TestCase):
         self.assertLessEqual(test_project_suspended.managers.count(), SMALL_SET[UsersInProjects.MANAGER_SUSPENDED.name])
         self.assertLessEqual(test_project_completed.managers.count(), SMALL_SET[UsersInProjects.MANAGER_COMPLETED.name])
         self.assertLessEqual(test_project_active.managers.count(), SMALL_SET[UsersInProjects.MANAGER_ACTIVE.name])
+
+
+class CreateUserReportsTests(TestCase):
+    def setUp(self) -> None:
+        management.call_command("generate_test_data", "--data-size=small")
+
+    def test_that_user_should_have_at_least_number_of_reports_equal_to_number_of_days_project_lasts_minus_one_day(self):
+        management.call_command("generate_test_data", "--data-size=small")
+
+        number_of_possible_days_with_reports = self.get_number_of_possible_days_with_reports()
+
+        user = self.get_user_that_is_member_of_any_project()
+
+        self.assertGreaterEqual(Report.objects.filter(author=user).count(), number_of_possible_days_with_reports)
+
+    def test_that_command_should_not_create_new_reports_if_the_database_already_contains_reports(self):
+        expected_number_of_reports_in_database = Report.objects.count()
+
+        management.call_command("generate_test_data", "--data-size=small")
+
+        self.assertEqual(Report.objects.count(), expected_number_of_reports_in_database)
+
+    @staticmethod
+    def get_user_that_is_member_of_any_project():
+        for user in CustomUser.objects.all():
+            if user.projects.count() > 0:
+                return user
+
+        return None
+
+    @staticmethod
+    def get_number_of_possible_days_with_reports():
+        project_start_date = timezone.now() - GenerateTestDataCommand.PROJECT_START_DATE_TIME_DELTA
+        project_stop_date = timezone.now() - GenerateTestDataCommand.PROJECT_STOP_DATE_TIME_DELTA
+
+        number_of_days_of_project_duration = (project_stop_date - project_start_date).days
+
+        return number_of_days_of_project_duration - 1

@@ -10,7 +10,12 @@ from dateutil.relativedelta import relativedelta
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
+from factory.fuzzy import FuzzyText
 
+from employees.common.strings import TaskActivitiesStrings
+from employees.factories import ReportFactory
+from employees.models import Report
+from employees.models import TaskActivityType
 from managers.factories import ProjectFactory
 from managers.models import Project
 from sheetstorm.management.commands.constants import DATA_SETS
@@ -18,6 +23,7 @@ from sheetstorm.management.commands.constants import DATA_SIZE_PARAMETER
 from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
 from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.constants import ProjectType
+from sheetstorm.management.commands.constants import UserReportsPerDay
 from sheetstorm.management.commands.constants import UsersInProjects
 from users.factories import UserFactory
 from users.models import CustomUser
@@ -36,6 +42,7 @@ class Command(BaseCommand):
 
     PROJECT_START_DATE_TIME_DELTA = relativedelta(months=1, day=1)
     PROJECT_STOP_DATE_TIME_DELTA = relativedelta(days=14)
+    MAX_WORK_HOURS_PER_DAY = 12
 
     def __init__(self) -> None:
         super().__init__()
@@ -65,6 +72,12 @@ class Command(BaseCommand):
         self.suspended_projects_list: List
         self.completed_projects_list: List
 
+        self.max_number_of_employees_reports_per_day: int
+        self.max_number_of_managers_reports_per_day: int
+        self.max_number_of_admins_reports_per_day: int
+
+        self.task_activities_list: List
+
     @transaction.atomic
     def handle(self, *args: Any, **options: Union[bool, int, None]) -> None:
         self._init_values_from_given_options(options)
@@ -74,15 +87,18 @@ class Command(BaseCommand):
 
         self._get_list_of_created_users_and_projects()
 
-        is_adding_users_to_projects_possible = self._get_request_to_create_data_using_prepared_set()
+        self._create_list_of_task_activities()
 
-        if is_adding_users_to_projects_possible:
+        if self._get_request_to_create_data_using_prepared_set() and Report.objects.count() == 0:
             self.execute_adding_users_to_projects()
+            self.execute_creating_reports()
         else:
             logging.info("Adding users to projects not supported")
+            logging.info("Creating user's reports not supported")
 
         logging.info(f"Total number of users in the database: {CustomUser.objects.count()}")
         logging.info(f"Total number of projects in the database: {Project.objects.count()}")
+        logging.info(f"Total number of reports in the database: {Report.objects.count()}")
 
     def _init_values_from_given_options(self, options: Dict[str, Any]) -> None:
         self.data_set_size = options[DATA_SIZE_PARAMETER]
@@ -100,6 +116,10 @@ class Command(BaseCommand):
             self.max_number_of_employees_in_completed_project = options[UsersInProjects.EMPLOYEE_COMPLETED.name]
             self.max_number_of_managers_in_completed_project = options[UsersInProjects.MANAGER_COMPLETED.name]
 
+            self.max_number_of_employees_reports_per_day = options[UserReportsPerDay.EMPLOYEE_REPORTS.name]
+            self.max_number_of_managers_reports_per_day = options[UserReportsPerDay.MANAGER_REPORTS.name]
+            self.max_number_of_admins_reports_per_day = options[UserReportsPerDay.ADMIN_REPORTS.name]
+
         self.number_of_admins = options[CustomUser.UserType.ADMIN.name]
         self.number_of_employees = options[CustomUser.UserType.EMPLOYEE.name]
         self.number_of_managers = options[CustomUser.UserType.MANAGER.name]
@@ -116,6 +136,11 @@ class Command(BaseCommand):
         self.active_projects_list = self._get_list_of_projects(ProjectType.ACTIVE.name)
         self.suspended_projects_list = self._get_list_of_projects(ProjectType.SUSPENDED.name)
         self.completed_projects_list = self._get_list_of_projects(ProjectType.COMPLETED.name)
+
+    def _create_list_of_task_activities(self) -> None:
+        self.create_task_activities()
+
+        self.task_activities_list = list(TaskActivityType.objects.all())
 
     def _get_request_to_create_data_using_prepared_set(self) -> bool:
         return isinstance(self.data_set_size, str)
@@ -355,6 +380,78 @@ class Command(BaseCommand):
             random_user.projects.clear()
         else:
             random_user.projects.clear()
+
+    def execute_creating_reports(self) -> None:
+        self.create_users_reports(CustomUser.UserType.EMPLOYEE.name, self.max_number_of_employees_reports_per_day)
+        self.create_users_reports(CustomUser.UserType.ADMIN.name, self.max_number_of_admins_reports_per_day)
+        self.create_users_reports(CustomUser.UserType.MANAGER.name, self.max_number_of_managers_reports_per_day)
+
+    @staticmethod
+    def create_task_activities() -> None:
+        for task_activity in TaskActivitiesStrings:
+            TaskActivityType.objects.get_or_create(name=task_activity.value)
+
+    def create_users_reports(self, user_type: str, maximum_number_of_reports_per_day: int) -> None:
+        users_list = self._get_list_of_users(user_type)
+
+        for user in users_list:
+            is_user_member_of_any_project = self.check_that_user_is_member_of_any_project(user)
+
+            if is_user_member_of_any_project:
+                self.create_specified_number_of_reports_per_day(user, maximum_number_of_reports_per_day)
+
+        logging.info(f"{user_type.capitalize()}s' reports created successfully")
+
+    @staticmethod
+    def check_that_user_is_member_of_any_project(user: Any) -> bool:
+        return user.projects.count() > 0
+
+    def create_specified_number_of_reports_per_day(self, user: Any, maximum_number_of_reports_per_day: int) -> None:
+        project_dates = self.get_dates_from_range_of_project_duration()
+
+        for report_publication_date in project_dates:
+            number_of_reports_per_day = random.randint(1, maximum_number_of_reports_per_day)
+
+            for _report_number in range(number_of_reports_per_day):
+                self.create_report(user, report_publication_date, number_of_reports_per_day)
+
+    def get_dates_from_range_of_project_duration(self) -> List[Any]:
+        project_start_date = self._create_start_date()
+        project_stop_date = self._create_stop_date()
+
+        days_between_dates = (project_stop_date - project_start_date).days
+
+        return [project_start_date + relativedelta(days=day_number) for day_number in range(1, days_between_dates)]
+
+    def create_report(self, user: Any, report_publication_date: timezone.datetime, number_of_reports: int) -> None:
+        ReportFactory(
+            date=report_publication_date,
+            description=FuzzyText(length=random.randrange(20, 100)),
+            author=user,
+            project=self._pick_random_user_project(user),
+            work_hours=self._get_random_work_hours(number_of_reports),
+            task_activities=self.pick_random_task_activity(),
+        )
+
+    @staticmethod
+    def _pick_random_user_project(user: Any) -> Any:
+        user_projects_list = list(user.projects.all())
+
+        return random.choice(user_projects_list)
+
+    @staticmethod
+    def _get_random_work_hours(
+        number_of_reports: int, max_work_hours_per_day: int = MAX_WORK_HOURS_PER_DAY
+    ) -> timezone.timedelta:
+        max_hours_per_report = max_work_hours_per_day // number_of_reports
+
+        hours = random.randrange(0, max_hours_per_report) if max_hours_per_report >= 1 else 0
+        minutes = random.choice([0, 15, 30, 45]) if hours > 0 else random.choice([15, 30, 45])
+
+        return timezone.timedelta(hours=hours, minutes=minutes)
+
+    def pick_random_task_activity(self) -> Any:
+        return random.choice(self.task_activities_list)
 
     def add_arguments(self, parser: Any) -> None:
         parser.add_argument(

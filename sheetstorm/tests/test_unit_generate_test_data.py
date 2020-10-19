@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.utils import timezone
 from parameterized import parameterized
 
+from employees.models import TaskActivityType
 from managers.factories import ProjectFactory
 from managers.models import Project
 from sheetstorm.management.commands.constants import DATA_SETS
@@ -554,3 +555,60 @@ class AddUsersToProjectsTests(TestCase):
 
         self.assertEqual(user.manager_projects.count(), 0)
         self.assertEqual(user.projects.count(), 0)
+
+
+class CreateUserReportsTests(TestCase):
+    def setUp(self) -> None:
+        self.user = UserFactory(user_type=CustomUser.UserType.EMPLOYEE.name)
+
+        for _project_number in range(2):
+            ProjectFactory(start_date=timezone.now(), suspended=True)
+
+    def test_that_create_task_activities_function_should_create_tasks_activities(self):
+        GenerateTestDataCommand.create_task_activities()
+
+        self.assertEqual(TaskActivityType.objects.count(), 17)
+
+    def test_that_pick_random_task_activity_function_should_return_one_of_the_specified_task_activities(self):
+        task_activities_list = ["Review", "Backend Development", "Frontend Development", "Meeting"]
+
+        setattr(GenerateTestDataCommand, "task_activities_list", task_activities_list)
+
+        random_task_activity_result = GenerateTestDataCommand().pick_random_task_activity()
+
+        self.assertIn(random_task_activity_result, task_activities_list)
+
+    @parameterized.expand([(1,), (2,), (6,), (12,)])
+    def test_that_get_random_work_hours_function_should_return_timedelta_object_of_seconds_less_than_max_hours_per_day(
+        self, number_of_reports
+    ):
+        work_hours_result = GenerateTestDataCommand._get_random_work_hours(
+            number_of_reports, max_work_hours_per_day=GenerateTestDataCommand.MAX_WORK_HOURS_PER_DAY
+        )
+
+        self.assertLess(
+            work_hours_result,
+            timezone.timedelta(hours=GenerateTestDataCommand.MAX_WORK_HOURS_PER_DAY / number_of_reports),
+        )
+
+    def test_that_pick_random_user_project_function_should_return_one_of_projects_that_user_is_member_of(self):
+        for project in Project.objects.all():
+            project.members.add(self.user)
+
+        returned_project = GenerateTestDataCommand._pick_random_user_project(self.user)
+
+        self.assertIn(returned_project, self.user.projects.all())
+
+    def test_that_check_that_user_is_member_of_any_project_function_should_return_true_if_user_is_member_of_any_project(
+        self
+    ):
+        project = Project.objects.first()
+
+        project.members.add(self.user)
+
+        self.assertTrue(GenerateTestDataCommand.check_that_user_is_member_of_any_project(self.user))
+
+    def test_that_check_that_user_is_member_of_any_project_function_should_return_false_if_user_is_not_in_any_project(
+        self
+    ):
+        self.assertFalse(GenerateTestDataCommand.check_that_user_is_member_of_any_project(self.user))
