@@ -1,3 +1,12 @@
+### v0.12.4
+
+##### Bugfixes
+
+- Bugfix failing users views tests ([#568](https://github.com/Code-Poets/sheetstorm/pull/568))
+- Bugfix delete integrity keys in non tags scripts ([#575](https://github.com/Code-Poets/sheetstorm/pull/575))
+
+
+
 ### v0.12.3
 
 ##### Bugfixes
