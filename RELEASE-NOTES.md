@@ -1,3 +1,11 @@
+### v0.12.5
+
+##### Bugfixes
+
+- Bugfix failing users views tests ([#568](https://github.com/Code-Poets/sheetstorm/pull/568))
+
+
+
 ### v0.12.4
 
 ##### Bugfixes
