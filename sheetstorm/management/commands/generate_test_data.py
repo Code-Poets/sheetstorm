@@ -4,6 +4,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 from dateutil.relativedelta import relativedelta
@@ -74,9 +75,7 @@ class Command(BaseCommand):
 
         self._get_list_of_created_users_and_projects()
 
-        is_adding_users_to_projects_possible = self._get_request_to_create_data_using_prepared_set()
-
-        if is_adding_users_to_projects_possible:
+        if self._get_request_to_create_data_using_prepared_set():
             self.execute_adding_users_to_projects()
         else:
             logging.info("Adding users to projects not supported")
@@ -219,78 +218,51 @@ class Command(BaseCommand):
         return timezone.now() - time_delta
 
     def execute_adding_users_to_projects(self) -> None:
-        self.add_users_to_projects(
-            self.employees_list,
-            self.suspended_projects_list,
-            CustomUser.UserType.EMPLOYEE.name,
-            ProjectType.SUSPENDED.name,
-            self.max_number_of_employees_in_suspended_project,
-        )
-        self.add_users_to_projects(
-            self.employees_list,
-            self.active_projects_list,
-            CustomUser.UserType.EMPLOYEE.name,
-            ProjectType.ACTIVE.name,
-            self.max_number_of_employees_in_active_project,
-        )
-        self.add_users_to_projects(
-            self.employees_list,
-            self.completed_projects_list,
-            CustomUser.UserType.EMPLOYEE.name,
-            ProjectType.COMPLETED.name,
-            self.max_number_of_employees_in_completed_project,
-        )
+        (amount_of_users_map, user_lists_map, project_lists_map) = self._parse_data_to_add_users_to_projects()
 
-        self.add_users_to_projects(
-            self.admins_list,
-            self.suspended_projects_list,
-            CustomUser.UserType.ADMIN.name,
-            ProjectType.SUSPENDED.name,
-            self.max_number_of_admins_in_suspended_project,
-        )
-        self.add_users_to_projects(
-            self.admins_list,
-            self.active_projects_list,
-            CustomUser.UserType.ADMIN.name,
-            ProjectType.ACTIVE.name,
-            self.max_number_of_admins_in_active_project,
-        )
-        self.add_users_to_projects(
-            self.admins_list,
-            self.completed_projects_list,
-            CustomUser.UserType.ADMIN.name,
-            ProjectType.COMPLETED.name,
-            self.max_number_of_admins_in_completed_project,
-        )
+        for user_type in user_lists_map:
+            for project_type in project_lists_map:
+                self.add_users_to_projects(
+                    user_lists_map[user_type],
+                    project_lists_map[project_type],
+                    user_type,
+                    project_type,
+                    amount_of_users_map[user_type][project_type],
+                )
 
-        self.add_users_to_projects(
-            self.managers_list,
-            self.suspended_projects_list,
-            CustomUser.UserType.MANAGER.name,
-            ProjectType.SUSPENDED.name,
-            self.max_number_of_managers_in_suspended_project,
-            as_manager=True,
-        )
-        self.add_users_to_projects(
-            self.managers_list,
-            self.active_projects_list,
-            CustomUser.UserType.MANAGER.name,
-            ProjectType.ACTIVE.name,
-            self.max_number_of_managers_in_active_project,
-            as_manager=True,
-        )
-        self.add_users_to_projects(
-            self.managers_list,
-            self.completed_projects_list,
-            CustomUser.UserType.MANAGER.name,
-            ProjectType.COMPLETED.name,
-            self.max_number_of_managers_in_completed_project,
-            as_manager=True,
-        )
+        for user_type in user_lists_map:
+            self.remove_all_random_user_projects(user_type)
 
-        self.remove_all_random_user_projects(CustomUser.UserType.EMPLOYEE.name)
-        self.remove_all_random_user_projects(CustomUser.UserType.ADMIN.name)
-        self.remove_all_random_user_projects(CustomUser.UserType.MANAGER.name)
+    def _parse_data_to_add_users_to_projects(self) -> Tuple[Dict, Dict, Dict]:
+        amount_of_users_map = {
+            CustomUser.UserType.EMPLOYEE.name: {
+                ProjectType.SUSPENDED.name: self.max_number_of_employees_in_suspended_project,
+                ProjectType.ACTIVE.name: self.max_number_of_employees_in_active_project,
+                ProjectType.COMPLETED.name: self.max_number_of_employees_in_completed_project,
+            },
+            CustomUser.UserType.ADMIN.name: {
+                ProjectType.SUSPENDED.name: self.max_number_of_admins_in_suspended_project,
+                ProjectType.ACTIVE.name: self.max_number_of_admins_in_active_project,
+                ProjectType.COMPLETED.name: self.max_number_of_admins_in_completed_project,
+            },
+            CustomUser.UserType.MANAGER.name: {
+                ProjectType.SUSPENDED.name: self.max_number_of_managers_in_suspended_project,
+                ProjectType.ACTIVE.name: self.max_number_of_managers_in_active_project,
+                ProjectType.COMPLETED.name: self.max_number_of_managers_in_completed_project,
+            },
+        }
+        user_lists_map = {
+            CustomUser.UserType.EMPLOYEE.name: self.employees_list,
+            CustomUser.UserType.ADMIN.name: self.admins_list,
+            CustomUser.UserType.MANAGER.name: self.managers_list,
+        }
+        project_lists_map = {
+            ProjectType.SUSPENDED.name: self.suspended_projects_list,
+            ProjectType.ACTIVE.name: self.active_projects_list,
+            ProjectType.COMPLETED.name: self.completed_projects_list,
+        }
+
+        return (amount_of_users_map, user_lists_map, project_lists_map)
 
     def add_users_to_projects(
         self,
@@ -299,8 +271,8 @@ class Command(BaseCommand):
         user_type: str,
         project_type: str,
         max_number_of_users_in_projects: int,
-        as_manager: bool = False,
     ) -> None:
+        as_manager = user_type == CustomUser.UserType.MANAGER.name
 
         for project in projects_list:
             number_of_users_to_pick = random.randint(0, max_number_of_users_in_projects)
