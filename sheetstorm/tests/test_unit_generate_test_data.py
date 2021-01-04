@@ -5,6 +5,9 @@ from parameterized import parameterized
 
 from managers.factories import ProjectFactory
 from managers.models import Project
+from sheetstorm.management.commands.constants import DATA_SETS
+from sheetstorm.management.commands.constants import SUPERUSER_USER_TYPE
+from sheetstorm.management.commands.constants import DataSize
 from sheetstorm.management.commands.generate_test_data import Command as GenerateTestDataCommand
 from sheetstorm.management.commands.generate_test_data import ProjectType
 from sheetstorm.management.commands.generate_test_data import UnsupportedProjectTypeException
@@ -13,15 +16,12 @@ from users.models import CustomUser
 
 
 class CreateUserMethodsTests(TestCase):
-    superuser = "SUPERUSER"
-
     def test_get_users_options_function_should_return_only_users_options(self):
-        mock_options = {
-            CustomUser.UserType.ADMIN.name: 2,
-            CustomUser.UserType.EMPLOYEE.name: None,
-            CustomUser.UserType.MANAGER.name: 2,
-            self.superuser: False,
-        }
+        GenerateTestDataCommand.number_of_active_projects = 2
+        GenerateTestDataCommand.some_test_parameter = None
+        GenerateTestDataCommand.number_of_admins = 2
+        GenerateTestDataCommand.number_of_employees = None
+        GenerateTestDataCommand.number_of_managers = 2
 
         expected_options = {
             CustomUser.UserType.ADMIN.name: 2,
@@ -29,20 +29,28 @@ class CreateUserMethodsTests(TestCase):
             CustomUser.UserType.MANAGER.name: 2,
         }
 
-        self.assertEqual(GenerateTestDataCommand._get_user_options(mock_options), expected_options)
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
+
+        self.assertEqual(GenerateTestDataCommand()._get_user_options(), expected_options)
 
     def test_get_superuser_request_function_should_return_true_if_there_is_superuser_request(self):
-        self.assertTrue(GenerateTestDataCommand._get_superuser_request({self.superuser: True}))
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
+
+        self.assertTrue(GenerateTestDataCommand()._get_superuser_request())
 
     def test_get_superuser_request_function_should_return_false_if_there_is_no_superuser_request(self):
-        self.assertFalse(GenerateTestDataCommand._get_superuser_request({self.superuser: False}))
+        setattr(GenerateTestDataCommand, "is_superuser_request", False)
+
+        self.assertFalse(GenerateTestDataCommand()._get_superuser_request())
 
     def test_get_superuser_request_function_should_return_false_if_superuser_already_exists(self):
         UserFactory(is_superuser=True)
 
-        self.assertFalse(GenerateTestDataCommand._get_superuser_request({self.superuser: True}))
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
 
-    @parameterized.expand([CustomUser.UserType.ADMIN.name, superuser])
+        self.assertFalse(GenerateTestDataCommand()._get_superuser_request())
+
+    @parameterized.expand([CustomUser.UserType.ADMIN.name, SUPERUSER_USER_TYPE])
     def test_admin_and_superuser_should_have_staff_property(self, user_type):
         self.assertTrue(GenerateTestDataCommand._set_user_factory_parameters(user_type).get("is_staff"))
 
@@ -57,9 +65,9 @@ class CreateUserMethodsTests(TestCase):
         self.assertFalse(GenerateTestDataCommand._set_user_factory_parameters(user_type).get("is_superuser"))
 
     def test_superuser_should_have_superuser_property(self):
-        self.assertTrue(GenerateTestDataCommand._set_user_factory_parameters(self.superuser).get("is_superuser"))
+        self.assertTrue(GenerateTestDataCommand._set_user_factory_parameters(SUPERUSER_USER_TYPE).get("is_superuser"))
 
-    @parameterized.expand([CustomUser.UserType.ADMIN.name, superuser])
+    @parameterized.expand([CustomUser.UserType.ADMIN.name, SUPERUSER_USER_TYPE])
     def test_admin_and_superuser_should_have_user_type_coded_as_admin(self, user_type):
         self.assertEqual(
             GenerateTestDataCommand._set_user_factory_parameters(user_type).get("user_type"),
@@ -121,6 +129,39 @@ class CreateUserMethodsTests(TestCase):
 
         self.assertEqual(CustomUser.objects.filter(user_type=user_type).count(), mock_number_of_users_to_create)
 
+    def test_result_of_execute_creating_users_function_should_be_specified_number_of_users_in_database(self):
+        setattr(GenerateTestDataCommand, "number_of_admins", 1)
+        setattr(GenerateTestDataCommand, "number_of_managers", None)
+        setattr(GenerateTestDataCommand, "number_of_employees", 2)
+        setattr(GenerateTestDataCommand, "is_superuser_request", True)
+        GenerateTestDataCommand().execute_creating_users()
+
+        self.assertEqual(
+            CustomUser.objects.filter(user_type=CustomUser.UserType.ADMIN.name, is_superuser=False).count(), 1
+        )
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.EMPLOYEE.name).count(), 2)
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.MANAGER.name).count(), 0)
+        self.assertEqual(CustomUser.objects.filter(is_superuser=True).count(), 1)
+
+    def test_despite_filled_database_result_of_execute_function_should_be_specified_number_of_users_in_database(self):
+        mock_number_of_users_to_create = 1
+        self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.ADMIN.name)
+        self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.EMPLOYEE.name)
+        self._generate_test_users(mock_number_of_users_to_create, CustomUser.UserType.MANAGER.name)
+
+        setattr(GenerateTestDataCommand, "number_of_admins", 2)
+        setattr(GenerateTestDataCommand, "number_of_managers", 2)
+        setattr(GenerateTestDataCommand, "number_of_employees", 2)
+        setattr(GenerateTestDataCommand, "is_superuser_request", False)
+
+        GenerateTestDataCommand().execute_creating_users()
+
+        self.assertEqual(
+            CustomUser.objects.filter(user_type=CustomUser.UserType.ADMIN.name, is_superuser=False).count(), 2
+        )
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.EMPLOYEE.name).count(), 2)
+        self.assertEqual(CustomUser.objects.filter(user_type=CustomUser.UserType.MANAGER.name).count(), 2)
+
     @staticmethod
     def _generate_test_users(number_of_users_to_fill_database, user_type):
         user_list = []
@@ -144,6 +185,13 @@ class CreateProjectMethodsTests(TestCase):
             ProjectType.ACTIVE.name: self.mock_number_of_active_projects_to_create,
             ProjectType.COMPLETED.name: self.mock_number_of_completed_projects_to_create,
         }
+        setattr(
+            GenerateTestDataCommand, "number_of_suspended_projects", self.mock_number_of_suspended_projects_to_create
+        )
+        setattr(GenerateTestDataCommand, "number_of_active_projects", self.mock_number_of_active_projects_to_create)
+        setattr(
+            GenerateTestDataCommand, "number_of_completed_projects", self.mock_number_of_completed_projects_to_create
+        )
 
     @parameterized.expand(
         [(ProjectType.SUSPENDED.name, 2), (ProjectType.ACTIVE.name, 3), (ProjectType.COMPLETED.name, 5)]
@@ -153,21 +201,21 @@ class CreateProjectMethodsTests(TestCase):
     ):
         self._generate_test_projects(number_of_projects_to_fill_database=2, project_type=project_type)
 
-        self.assertEqual(
-            GenerateTestDataCommand._compute_number_of_projects_to_create(self.options, project_type), expected_result
-        )
+        self.assertEqual(GenerateTestDataCommand()._compute_number_of_projects_to_create(project_type), expected_result)
 
     def test_compute_number_of_projects_to_create_function_should_raise_error_if_project_type_does_not_exist(self):
         with self.assertRaises(UnsupportedProjectTypeException):
-            GenerateTestDataCommand._compute_number_of_projects_to_create(self.options, "error")
+            GenerateTestDataCommand()._compute_number_of_projects_to_create("error")
 
     @parameterized.expand([ProjectType.SUSPENDED.name, ProjectType.ACTIVE.name, ProjectType.COMPLETED.name])
     def test_compute_number_of_projects_to_create_function_should_return_0_if_number_of_projects_is_not_specified(
         self, project_type
     ):
-        self.assertEqual(
-            GenerateTestDataCommand._compute_number_of_projects_to_create({project_type: None}, project_type), 0
-        )
+        setattr(GenerateTestDataCommand, "number_of_suspended_projects", None)
+        setattr(GenerateTestDataCommand, "number_of_active_projects", None)
+        setattr(GenerateTestDataCommand, "number_of_completed_projects", None)
+
+        self.assertEqual(GenerateTestDataCommand()._compute_number_of_projects_to_create(project_type), 0)
 
     def test_number_of_projects_to_create_should_be_set_and_equal_to_computed_number(self):
         suspended_projects = self._generate_test_projects(
@@ -181,18 +229,18 @@ class CreateProjectMethodsTests(TestCase):
         )
 
         expected_options = {
-            ProjectType.ACTIVE.name: self._compute_number_of_projects_to_create(
+            ProjectType.ACTIVE.name: self._compute_number_of_projects(
                 self.options, active_projects, ProjectType.ACTIVE.name
             ),
-            ProjectType.SUSPENDED.name: self._compute_number_of_projects_to_create(
+            ProjectType.SUSPENDED.name: self._compute_number_of_projects(
                 self.options, suspended_projects, ProjectType.SUSPENDED.name
             ),
-            ProjectType.COMPLETED.name: self._compute_number_of_projects_to_create(
+            ProjectType.COMPLETED.name: self._compute_number_of_projects(
                 self.options, completed_projects, ProjectType.COMPLETED.name
             ),
         }
 
-        self.assertEqual(GenerateTestDataCommand()._set_number_of_projects_to_create(self.options), expected_options)
+        self.assertEqual(GenerateTestDataCommand()._set_number_of_projects_to_create(), expected_options)
 
     def test_start_date_should_be_of_datetime_type_and_set_in_past(self):
         start_date_returned_by_function = GenerateTestDataCommand._create_start_date()
@@ -229,16 +277,16 @@ class CreateProjectMethodsTests(TestCase):
         self.assertIsNotNone(GenerateTestDataCommand()._set_project_factory_parameters(project_type).get("start_date"))
 
     def test_result_of_execute_function_should_be_specified_number_of_projects_in_database(self):
-        GenerateTestDataCommand().execute_creating_project(self.options)
+        GenerateTestDataCommand().execute_creating_project()
 
-        self.assertEqual(Project.objects.filter_completed().count(), self.options.get(ProjectType.COMPLETED.name))
-        self.assertEqual(Project.objects.filter_active().count(), self.options.get(ProjectType.ACTIVE.name))
-        self.assertEqual(Project.objects.filter_suspended().count(), self.options.get(ProjectType.SUSPENDED.name))
+        self.assertEqual(Project.objects.filter_completed().count(), self.mock_number_of_completed_projects_to_create)
+        self.assertEqual(Project.objects.filter_active().count(), self.mock_number_of_active_projects_to_create)
+        self.assertEqual(Project.objects.filter_suspended().count(), self.mock_number_of_suspended_projects_to_create)
 
     def test_create_project_function_should_create_computed_number_of_suspended_projects(self):
         suspended_projects = self._generate_test_projects(2, ProjectType.SUSPENDED.name)
 
-        number_of_projects_to_create = self._compute_number_of_projects_to_create(
+        number_of_projects_to_create = self._compute_number_of_projects(
             self.options, suspended_projects, ProjectType.SUSPENDED.name
         )
 
@@ -251,7 +299,7 @@ class CreateProjectMethodsTests(TestCase):
     def test_create_project_function_should_create_computed_number_of_active_projects(self):
         active_projects = self._generate_test_projects(2, ProjectType.ACTIVE.name)
 
-        number_of_projects_to_create = self._compute_number_of_projects_to_create(
+        number_of_projects_to_create = self._compute_number_of_projects(
             self.options, active_projects, ProjectType.ACTIVE.name
         )
 
@@ -262,7 +310,7 @@ class CreateProjectMethodsTests(TestCase):
     def test_create_project_function_should_create_computed_number_of_completed_projects(self):
         completed_projects = self._generate_test_projects(2, ProjectType.COMPLETED.name)
 
-        number_of_projects_to_create = self._compute_number_of_projects_to_create(
+        number_of_projects_to_create = self._compute_number_of_projects(
             self.options, completed_projects, ProjectType.COMPLETED.name
         )
 
@@ -286,13 +334,23 @@ class CreateProjectMethodsTests(TestCase):
             number_of_projects_to_fill_database=2, project_type=ProjectType.COMPLETED.name
         )
 
-        mock_options = {
-            ProjectType.SUSPENDED.name: len(suspended_projects) - number_of_projects_to_subtract_from_existing,
-            ProjectType.ACTIVE.name: len(active_projects) - number_of_projects_to_subtract_from_existing,
-            ProjectType.COMPLETED.name: len(completed_projects) - number_of_projects_to_subtract_from_existing,
-        }
+        setattr(
+            GenerateTestDataCommand,
+            "number_of_suspended_projects",
+            len(suspended_projects) - number_of_projects_to_subtract_from_existing,
+        )
+        setattr(
+            GenerateTestDataCommand,
+            "number_of_active_projects",
+            len(active_projects) - number_of_projects_to_subtract_from_existing,
+        )
+        setattr(
+            GenerateTestDataCommand,
+            "number_of_completed_projects",
+            len(completed_projects) - number_of_projects_to_subtract_from_existing,
+        )
 
-        GenerateTestDataCommand().execute_creating_project(mock_options)
+        GenerateTestDataCommand().execute_creating_project()
 
         self.assertEqual(Project.objects.filter_suspended().count(), len(suspended_projects))
         self.assertEqual(Project.objects.filter_active().count(), len(active_projects))
@@ -316,7 +374,7 @@ class CreateProjectMethodsTests(TestCase):
         return project_list
 
     @staticmethod
-    def _compute_number_of_projects_to_create(options, projects_in_database, project_type):
+    def _compute_number_of_projects(options, projects_in_database, project_type):
         if project_type == ProjectType.SUSPENDED.name:
             number_of_projects_to_create = options[ProjectType.SUSPENDED.name] - len(projects_in_database)
         elif project_type == ProjectType.ACTIVE.name:
@@ -327,3 +385,29 @@ class CreateProjectMethodsTests(TestCase):
             raise UnsupportedProjectTypeException
 
         return number_of_projects_to_create
+
+
+class CreateDataFromPreparedSetTests(TestCase):
+    def setUp(self) -> None:
+        setattr(GenerateTestDataCommand, "data_set_size", None)
+
+    def test_get_request_to_create_data_using_prepared_set_function_should_return_true_if_any_set_requested(self):
+        setattr(GenerateTestDataCommand, "data_set_size", DataSize.SMALL.value)
+
+        self.assertTrue(GenerateTestDataCommand()._get_request_to_create_data_using_prepared_set())
+
+    def test_get_request_to_create_data_using_prepared_set_function_should_return_false_if_parameters_are_not_provided(
+        self
+    ):
+        self.assertFalse(GenerateTestDataCommand()._get_request_to_create_data_using_prepared_set())
+
+    @parameterized.expand(
+        [(DataSize.SMALL.value,), (DataSize.MEDIUM.value,), (DataSize.LARGE.value,), (DataSize.EXTRA_LARGE.value,)]
+    )
+    def test_pick_dataset_to_create_function_should_return_one_specified_set_if_there_is_request(self, requested_set):
+        setattr(GenerateTestDataCommand, "data_set_size", requested_set)
+
+        self.assertEqual(GenerateTestDataCommand()._pick_dataset_to_create(), DATA_SETS[requested_set])
+
+    def test_pick_dataset_to_create_function_should_return_None_if_there_is_no_request_for_any(self):
+        self.assertIsNone(GenerateTestDataCommand()._pick_dataset_to_create())
