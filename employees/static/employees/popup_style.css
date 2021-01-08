@@ -1,18 +1,19 @@
 .ui-dialog.ui-widget {
     top: 0;
     left: 0;
-    border: 2px solid black;
+    box-shadow: 0 0 10px black;
 }
 
 .ui-dialog .ui-dialog-titlebar {
-    background: var(--cp-blue-color);
+    background: transparent;
+    border: none;
 }
 
 .ui-dialog .ui-dialog-title {
     width: 100%;
-    text-align: center;
-    font-weight: bold;
-    color: white;
+    font-weight: normal;
+    height:4px;
+    color: black;
 }
 
 .ui-dialog .ui-dialog-titlebar-close {
@@ -20,10 +21,5 @@
     height: 30px;
     top: 35%;
     background:white;
-    border: 2px solid rgb(230, 230, 230);
-}
-
-.ui-dialog .ui-dialog-titlebar-close:hover {
-    background-color: rgb(230, 230, 230);
-    border: 2px solid rgb(173, 173, 173);
+    border: none
 }

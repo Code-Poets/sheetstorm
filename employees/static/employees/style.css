@@ -18,44 +18,50 @@
 #reportForm .form-control {
     padding: 6px;
 }
-
+#opener_join {
+    float: left;
+}
 .table {
-    table-layout: fixed;
+    table-layout: auto;
     text-align: left;
+    width: 100%;
 }
 
 .modal-dialog {
     margin-bottom: 0;
 }
 
-.date-header {
-    width: 16.23%;
+th.expand-report-list-header{
+    width: 60px;
 }
 
-.project-header {
-    width: 10.18%;
+th.work-hours-header {
+    width: 10%;
 }
 
-.task-activities-header {
-    width: 10.18%;
+th.description-header {
+    width: 30%;
 }
 
-.work-hours-header {
-    width: 8.16%;
-}
-
-.edit-button-header {
-    width: 8.77%;
+.header-text{
+    text-align: left;
+    margin-left: 10px;
+    font-size: 16px;
+    display: inline-block;
 }
 
 .description-column {
     word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100px;
 }
 
 .edit-button-column {
     text-align: right;
 }
-
+.hours-summary {
+    text-align: center;
+}
 textarea.form-control, #id_description {
     height: 200px;
     resize: none;
@@ -84,12 +90,12 @@ a.pagelink:hover {
 .main-white-container {
     background-color: white;
     box-shadow: 0 0 10px grey;
-    width: 80%;
+    width: 90%;
     min-width: 400px;
 }
 
 .narrower-container {
-    width: 95%;
+    width: 100%;
 }
 
 .double-space-margin-bottom {
@@ -135,48 +141,126 @@ table.table {
     min-width: 500px;
 }
 
+.table-responsive {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
 .table-responsive > .table > tbody > tr > td {
     white-space: normal;
+    padding-left: 13px;
 !important;
     overflow: hidden;
+    border-color: rgb(180, 180, 180);
 }
 
 .table > thead > tr > th, td {
     vertical-align: top;
     overflow: hidden;
+    border-top: 0;
+    border-bottom: 0;
+    padding-bottom: 1vw;
+    border-left: 0;
+    padding-left: 0;
+}
+
+.hidden-report-row {
+    visibility: collapse;
+}
+
+.visible-hidden-report {
+    visibility: visible;
 }
 
 .td-text-align-left {
     text-align: left;
 }
 
+.custom-tip:before {
+    content: "\2039";
+    font-size: 26px;
+    color: var(--cp-blue-color);
+    font-weight: normal;
+}
+
+.custom-tip-hr {
+    float: left;
+    position: relative;
+    top: -24.17px;
+    margin-left: -8px;
+}
+
+.blue-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--cp-blue-color);
+    border-radius: 50%;
+}
+
+.blue-dot-hr{
+    float: left;
+    position: relative;
+    top: -25px;
+    margin-left: -1px;
+}
+
 .hr-blue-line {
     border: 1px solid var(--cp-blue-color);
+    width: 100%;
+    margin-right: -8px;
 }
 
 .th-blue-border {
     border-left-style: solid;
-    border-left-width: 5px;
+    border-left-width: 3px;
     border-left-color: var(--cp-blue-color);
+    height: 60px;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .th-blue-border-first-cell {
     border-left-style: solid;
-    border-left-width: 10px;
+    border-left-width: 3px;
     border-left-color: var(--cp-blue-color);
 }
 
 .tr-next-day-separator {
     border-top-style: solid;
-    border-top-width: 3px;
+    border-top-width: 2px;
     border-top-color: rgb(180, 180, 180);
 }
 
 .bottom-separator {
     border-bottom-style: solid;
-    border-bottom-width: 3px;
+    border-bottom-width: 2px;
     border-bottom-color: rgb(180, 180, 180);
 }
+
+.expand-reports-icon {
+    cursor: pointer;
+}
+
+.rotated-tip {
+    transform: rotate(-90deg);
+    margin-left: -1px;
+    margin-top: -13px;
+    float: left;
+}
+
+.roll-reports-icon {
+    transform: rotate(-270deg);
+    margin-left: 2px;
+    transition: 0.1s;
+}
+
+.report-list-vl{
+    border-left: 1px solid var(--cp-blue-color);
+    height: 0;
+    margin-left: 3px;
+}
+
 
 .no-padding {
     padding: 0;
@@ -208,6 +292,92 @@ table.table {
     text-align: right;
 }
 
+.td-text-align-left-name {
+    width: 20%;
+}
+
+.hidden-print-line {
+    width: 100%;
+}
+
+.roboto-text{
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+}
+.add-report-form-field-label {
+    text-align: left;
+    font-size: 17px;
+    margin-top: -15px;
+    margin-left: 45px;
+}
+
+.add-report-form-title {
+    margin-top: -15px;
+    font-size: 24px;
+}
+
+.join-project-form-title {
+    margin-top: -5px;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.add-report-form-header-icon {
+    margin-top: -10px;
+}
+
+.header-label-row {
+    margin-top: 30px;
+}
+.float-left {
+    float: left;
+}
+
+.float-right {
+    float: right;
+}
+
+.hr-blue-pointer {
+    border: 2px solid var(--cp-blue-color);
+    width: 50px;
+    height: 1px;
+}
+
+.pointer-left {
+    margin-left: -19px;
+}
+.pointer-right {
+    margin-right: -20px;
+    float: right;
+}
+.add-report-form-button {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.work-hours-add-report-field-label {
+    font-size: 17px;
+    margin-top: -12px;
+    margin-right: 14px;
+}
+
+.add-report-form-field-left {
+    margin-left: 45px;
+}
+
+.add-report-form-field-right {
+    margin-right: 45px;
+}
+
+.add-report-form-description-field {
+    margin: auto;
+    float: none;
+}
+
+.add-report-form-join-project-field {
+        margin-left: 20px;
+    }
+
 @media (max-width: 995px) {
     .export-csv, .export-xlsx {
         text-align: center;
@@ -218,13 +388,42 @@ table.table {
     .table-responsive > .table > tbody > tr > td, .table-responsive > .table > thead > tr > td, .table-responsive > .table > thead > tr > th {
         white-space: normal;
         overflow: hidden;
+        padding-right: 0;
     }
-}
 
-.td-text-align-left-name {
-    width: 20%;
-}
+    .table-responsive {
+        overflow-x: auto;
+    }
 
-.hidden-print-line {
-    width: calc(99% - 20%);
+    th.expand-report-list-header{
+        width: 60px;
+        min-width: 60px;
+    }
+
+    .rotated-tip {
+        float: left;
+        margin-left: -1px;
+    }
+
+    .roll-reports-icon {
+        float: left;
+        margin-left: 1px;
+    }
+
+    .pointer-left {
+        margin-left: -29px;
+    }
+
+    .pointer-right {
+        margin-right: -29px;
+    }
+
+    .work-hours-add-report-field-label {
+        margin-right: 24px;
+    }
+
+    .add-report-form-join-project-field {
+        margin-left: 45px;
+
+    }
 }
