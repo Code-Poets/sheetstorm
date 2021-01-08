@@ -1,84 +1,123 @@
 {% load crispy_forms_tags %}
+{% load static %}
 
-<div class="modal-dialog hidden-print div-text-for-popup" id="dialog_create" title="Create report" align="center" style="overflow: visible;">
-  {% for error in form.non_field_errors %}
-    <div class="alert alert-danger" role="alert">
-      <p class="p-non-field-errors"><small>{{ error }}</small></p>
-    </div>
-  {% endfor %}
-  <form action="{{ path }}" method="POST" id="reportForm" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
-    {% csrf_token %}
-    <div class="row">
-      <div class="col-md-8">
-        <div class="col-md-10">
-          {{ form.project|as_crispy_field }}
+<div class="modal-dialog hidden-print div-text-for-popup" id="dialog_create" style="overflow: visible;">
+    <img class="add-report-form-header-icon" alt="report icon" src="{% static 'users/images/grey/ico-05.png' %}"/>
+    <span class="add-report-form-title roboto-text">New report</span>
+
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+            <p class="p-non-field-errors"><small>{{ error }}</small></p>
         </div>
-        <div class="col-md-2 div-without-padding-align-left margin-top-space">
-          <button class="hidden-print btn btn-sm btn-default" type="button" id="opener_join">
-            <i class="fa fa-user-plus span-blue-color"></i>
-          </button>
+    {% endfor %}
+
+    <form action="{{ path }}" method="POST" id="reportForm"
+          data-task-activities-url="{% url 'ajax-load-task-activities' %}">
+        {% csrf_token %}
+        <div class="row header-label-row roboto-text">
+            <div class="col-md-12">
+                <div class="hr-blue-pointer pointer-left"></div>
+                <p class="add-report-form-field-label">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</p>
+            </div>
         </div>
-      </div>
-      <div class="col-md-4">
-        {{ form.date|as_crispy_field }}
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-8">
-        <div class="col-md-10">
-          {{ form.task_activities|as_crispy_field }}
+        <div class="row">
+            <div class="col-md-8 col-xs-10 add-report-form-field-left">
+                {{ form.project|as_crispy_field }}
+            </div>
+            <div class="col-md-2 add-report-form-join-project-field">
+                <button class="hidden-print btn btn-sm btn-default" type="button" id="opener_join">
+                    <i class="fa fa-user-plus span-blue-color"></i>
+                </button>
+            </div>
         </div>
-      </div>
-      <div class="col-md-4">
-        {{ form.work_hours|as_crispy_field }}
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="col-md-12">
-        {{ form.description|as_crispy_field }}
-      </div>
-    </div>
+        <div class="row header-label-row roboto-text">
+            <div class="col-md-12">
+                <div class="hr-blue-pointer pointer-left"></div>
+                <p class="add-report-form-field-label ">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8 col-xs-10 add-report-form-field-left">
+                {{ form.task_activities|as_crispy_field }}
+            </div>
+        </div>
 
-    <div class="row">
-      <div class="col-md-12">
-        {{ form.author|as_crispy_field }}
-      </div>
-    </div>
+        <div class="row header-label-row roboto-text">
+            <div class="col-md-6 col-xs-6">
+                <div class="hr-blue-pointer pointer-left"></div>
+                <p class="add-report-form-field-label float-left">{{ UI_text.DATE_COLUMN_HEADER.value }}</p>
+            </div>
+            <div class="col-md-6 col-xs-6">
+                <div class="hr-blue-pointer pointer-right"></div>
+                <p class="work-hours-add-report-field-label float-right">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-xs-4 float-left add-report-form-field-left">
+                {{ form.date|as_crispy_field }}
+            </div>
+            <div class="col-md-4 col-xs-4 float-right add-report-form-field-right">
+                {{ form.work_hours|as_crispy_field }}
+            </div>
+        </div>
 
-    <div class="row">
-      <div class="col-md-6">
-        <input type="submit" class="btn btn-primary" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
-      </div>
-      <div class="col-md-6">
-        <input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_create').dialog('close');">
-      </div>
-    </div>
-  </form>
+        <div class="row header-label-row roboto-text">
+             <div class="col-md-12">
+                <div class="hr-blue-pointer pointer-left"></div>
+                    <p class="add-report-form-field-label">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</p>
+             </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10 col-xs-10 add-report-form-description-field">
+                {{ form.description|as_crispy_field }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                {{ form.author|as_crispy_field }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 add-report-form-button">
+                <input type="submit" class="btn btn-primary" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+            </div>
+            <div class="col-md-6 add-report-form-button">
+                <input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}"
+                       onClick="this.form.reset();$('#dialog_create').dialog('close');">
+            </div>
+        </div>
+
+    </form>
 </div>
 
 
-<div class="hidden-print" id="dialog_join" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}" align="center">
-  <form action="{{ path }}" id="join_form" method="POST">
-    {% csrf_token %}
-    <div class="row">
-      <div class="col-md-12">
-        {{ project_form.projects|as_crispy_field }}
-      </div>
-    </div>
+<div class="hidden-print" id="dialog_join" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}">
+    <div class="join-project-form-title roboto-text">Join Project</div>
+    <form action="{{ path }}" id="join_form" method="POST">
+        {% csrf_token %}
+        <div class="row header-label-row roboto-text"></div>
+        <div class="row">
+            <div class="col-md-12">
+                {{ project_form.projects|as_crispy_field }}
+            </div>
+        </div>
 
-    <div class="row">
-      <div class="col-md-6">
-        <input type="submit" name="join" class="btn btn-primary" value="{{ UI_text.JOIN_POPUP_YES.value }}">
-      </div>
-      <div class="col-md-6">
-        <input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="this.form.reset();$('#dialog_join').dialog('close');">
-      </div>
-    </div>
-  </form>
-  {% if hide_join %}
-    {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
-    <p><input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}" onClick="$('#dialog_join').dialog('close');"></p>
-  {% endif %}
+        <div class="row">
+            <div class="col-md-6">
+                <input type="submit" name="join" class="btn btn-primary add-report-form-button" value="{{ UI_text.JOIN_POPUP_YES.value }}">
+            </div>
+            <div class="col-md-6">
+                <input type="button" class="btn btn-secondary add-report-form-button" value="{{ UI_text.JOIN_POPUP_NO.value }}"
+                       onClick="this.form.reset();$('#dialog_join').dialog('close');">
+            </div>
+        </div>
+    </form>
+    {% if hide_join %}
+        {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
+        <p><input type="button" class="btn btn-secondary add-report-form-button" value="{{ UI_text.JOIN_POPUP_NO.value }}"
+                  onClick="$('#dialog_join').dialog('close');"></p>
+    {% endif %}
 </div>

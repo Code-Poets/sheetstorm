@@ -25,7 +25,7 @@ from users.models import CustomUser
 
 class ProjectJoinForm(forms.Form):
 
-    projects = forms.ChoiceField(choices=[])
+    projects = forms.ChoiceField(choices=[], label="")
 
     def __init__(self, queryset: QuerySet, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -57,13 +57,21 @@ class DurationFieldForm(forms.DurationField):
 
 
 class ReportForm(forms.ModelForm):
-    work_hours = DurationFieldForm()
-    project = forms.ModelChoiceField(queryset=Project.objects, empty_label=None)
+    work_hours = DurationFieldForm(label="")
+    project = forms.ModelChoiceField(queryset=Project.objects, empty_label=None, label="")
 
     class Meta:
         model = Report
         fields = ("date", "author", "description", "project", "task_activities", "work_hours")
         widgets = {"date": DatePickerInput(format="%Y-%m-%d"), "author": HiddenInput}
+        labels = {
+            "date": "",
+            "author": "",
+            "description": "",
+            "project": "",
+            "task_activities": "",
+            "work_hours": "",
+        }
 
     def __init__(self, *args: Any, **kwargs: Any):
         super(ReportForm, self).__init__(*args, **kwargs)

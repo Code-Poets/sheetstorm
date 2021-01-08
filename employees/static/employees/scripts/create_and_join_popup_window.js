@@ -13,7 +13,7 @@ $(function () {
       autoOpen: false,
       resizable: false,
       width: 550,
-      height: 970,
+      height: 1300,
       close: function(event, ui){ $('#opener_create').attr('disabled', false); },
 	})
 
