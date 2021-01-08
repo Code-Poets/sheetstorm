@@ -6,14 +6,28 @@
     {% for report in reports.list %}
         {% if forloop.first %}
             <tr class="tr-next-day-separator">
-                <td class="date-column" rowspan={{ reports.list|length }}>
+                <td class="date-column" rowspan={{ reports.list|length|add:1 }}>
                     <strong>{{ reports.grouper| date:"l, d F Y" }}</strong>
                 </td>
+                <td class="expand-report-list-column" rowspan={{ reports.list|length|add:1 }}>
+                    {% if not forloop.last %}
+                        <div class="expand-reports-icon" onclick="expandReportList(this, {{ reports.list|length }})" title="Expand report list">
+                            <div class="blue-dot-expand-icon">
+                                <div class="blue-dot"></div>
+                                <div class="report-list-vl"></div>
+                            </div>
+                            <div class="rotated-tip">
+                                <div class="custom-tip"></div>
+                            </div>
+                        </div>
+                    {%  endif %}
+                </td>
         {% else %}
-            <tr>
+            <tr class="hidden-report-row">
         {% endif %}
     <td class="project-column">{{ report.project }}</td>
-    <td class="task-activities-column">{{ report.task_activities }}</td>
+    <td class="task-activities-column" >{{ report.task_activities }}</td>
+    <td class="work-hours-column">{{ report.work_hours_str }}</td>
     <td class="description-column">
         {{ report.description|linebreaks|safe|urlize|annotate_no_follow_link_with_css_class:"pagelink" }}
     </td>
@@ -28,16 +42,16 @@
             </a>
         {% endif %}
     </td>
-    <td class="work-hours-column">{{ report.work_hours_str }}</td>
     </tr>
+        {% if forloop.last %}
+            <tr class="day-summary-row">
+                <td class="hours-summary"><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
+                <td colspan="1"></td>
+                <td class="work-hours-column">
+                    <strong>{{ daily_hours_sum|get_key_value:reports.grouper|duration_field_to_string }}</strong>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+        {% endif %}
     {% endfor %}
-    <tr class="tr-next-day-separator">
-        <td></td>
-        <td><strong>{{ UI_text.HOURS_PER_DAY_LABEL.value }}</strong></td>
-        <td colspan="2"></td>
-        <td class="edit-button-column Invisible hidden-print"></td>
-        <td class="work-hours-column">
-            <strong>{{ daily_hours_sum|get_key_value:reports.grouper|duration_field_to_string }}</strong>
-        </td>
-    </tr>
 {% endfor %}

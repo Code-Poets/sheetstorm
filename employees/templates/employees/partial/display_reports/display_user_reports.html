@@ -9,22 +9,34 @@
         <table class="table table-responsive-sm">
             <thead>
                 <tr>
-                    <td class="td-text-align-left-name" colspan="1">
+                    <td class="td-text-align-left-name">
                         <h4 title="{{ user.get_full_name }}">
                             <b>{{ user.get_full_name }}</b>
                         </h4>
                     </td>
-                    <td class="hidden-print-line" colspan="5">
+                    <td class="hidden-print-line" colspan="6">
                         <hr class="hr-blue-line">
+                            <div class="blue-dot-hr">
+                                <div class="blue-dot"></div>
+                                <div class="custom-tip-hr">
+                                    <div class="custom-tip"></div>
+                                </div>
+                            </div>
+                        </hr>
                     </td>
                 </tr>
+            </thead>
+        </table>
+        <table class="table table-responsive-sm">
+            <thead>
                 <tr class="bottom-separator">
-                    <th class="date-header th-blue-border-first-cell">{{ UI_text.DATE_COLUMN_HEADER.value }}</th>
-                    <th class="project-header th-blue-border">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-                    <th class="task-activities-header th-blue-border">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</th>
-                    <th class="th-blue-border">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</th>
-                    <td class="edit-button-header Invisible hidden-print"></td>
-                    <th class="work-hours-header th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+                    <th class="date-header"><div class="th-blue-border"><div class="header-text">{{ UI_text.DATE_COLUMN_HEADER.value }}</div></div></th>
+                    <th class="expand-report-list-header Invisible hidden-print"></th>
+                    <th class="project-header "><div class="th-blue-border"><div class="header-text">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</div></div></th>
+                    <th class="task-activities-header "><div class="th-blue-border"><div class="header-text">{{ UI_text.TASK_ACTIVITIES_COLUMN_HEADER.value }}</div></div></th>
+                    <th class="work-hours-header "><div class="th-blue-border"><div class="header-text">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</div></div></th>
+                    <th class="description-header "><div class="th-blue-border"><div class="header-text">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</div></div></th>
+                    <th class="edit-button-header Invisible hidden-print"></th>
                 </tr>
             </thead>
             <tbody>
@@ -33,12 +45,13 @@
 
             <tr class="tr-next-day-separator">
                 {% if not date|length == 0 %}
-                    <td class="td-text-align-left"><strong>{{ UI_text.HOURS_PER_MONTH_LABEL.value }}</strong></td>
-                    <td colspan="3"></td>
+                    <td colspan="2"></td>
+                    <td class="hours-summary"><strong>{{ UI_text.HOURS_SUM_LABEL.value }}</strong></td>
                     <td class="hidden-print"></td>
                     <td class="work-hours-column">
                         <strong>{{ monthly_hours_sum|get_key_value:user.pk|duration_field_to_string }}</strong>
                     </td>
+                    <td colspan="4"></td>
                 {% endif %}
             </tr>
             </tbody>

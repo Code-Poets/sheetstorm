@@ -8,13 +8,20 @@
                 <h4><strong>{{ UI_text.PROJECTS_WORK_PERCENTAGE_HEADER.value }}</strong></h4>
             </td>
             <td class="hidden-print-line" colspan="3">
-                <hr class="hr-blue-line"/>
+                <hr class="hr-blue-line">
+                    <div class="blue-dot-hr">
+                        <div class="blue-dot"></div>
+                        <div class="custom-tip-hr">
+                            <div class="custom-tip"></div>
+                        </div>
+                    </div>
+                </hr>
             </td>
         </tr>
         <tr>
-            <th class="th-blue-border-first-cell" colspan="2">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</th>
-            <th class="th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
-            <th class="th-blue-border">{{ UI_text.HOURS_PERCENTAGE_HEADER.value }}</th>
+            <th colspan="2"><div class="th-blue-border"><div class="header-text">{{ UI_text.PROJECT_COLUMN_HEADER.value }}</div></div></th>
+            <th><div class="th-blue-border"><div class="header-text">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</div></div></th>
+            <th><div class="th-blue-border"><div class="header-text">{{ UI_text.HOURS_PERCENTAGE_HEADER.value }}</div></div></th>
         </tr>
     </thead>
     <tbody>
