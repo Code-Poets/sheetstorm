@@ -7,13 +7,20 @@
             <td class="td-text-align-left-name" colspan="1">
                 <h4><strong>{{ UI_text.WORK_HOURS_SUMMARY_HEADER.value }}</strong></h4>
             </td>
-            <td class="hidden-print-line" colspan="2">
-                <hr class="hr-blue-line"/>
+            <td class="hidden-print-line" colspan="7">
+                <hr class="hr-blue-line">
+                <div class="blue-dot-hr">
+                    <div class="blue-dot"></div>
+                    <div class="custom-tip-hr">
+                        <div class="custom-tip"></div>
+                    </div>
+                </div>
+                </hr>
             </td>
         </tr>
         <tr>
-            <th class="th-blue-border-first-cell" colspan="2">{{ UI_text.NAME_COLUMN_HEADER.value }}</th>
-            <th class="th-blue-border">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</th>
+            <th colspan="2"><div class="th-blue-border"><div class="header-text">{{ UI_text.NAME_COLUMN_HEADER.value }}</div></div></th>
+            <th><div class="th-blue-border"><div class="header-text">{{ UI_text.WORK_HOURS_COLUMN_HEADER.value }}</div></div></th>
         </tr>
     </thead>
     <tbody>
