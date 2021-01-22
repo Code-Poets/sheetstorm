@@ -5,8 +5,18 @@ from employees import views
 urlpatterns = [
     url(
         r"^reports/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/$",
-        views.ReportListCreateProjectJoinView.as_view(),
+        views.ReportList.as_view(),
         name="custom-report-list",
+    ),
+    url(
+        r"^reports/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/create/$",
+        views.CreateReport.as_view(),
+        name="create-report",
+    ),
+    url(
+        r"^reports/(?P<year>[0-9]{4})/(?P<month>[0-9]{1,2})/join-project/$",
+        views.JoinProject.as_view(),
+        name="join-project",
     ),
     url(r"^reports/(?P<pk>[0-9]+)/$", views.ReportDetailView.as_view(), name="custom-report-detail"),
     url(r"^reports/(?P<pk>[0-9]+)/delete/$", views.ReportDeleteView.as_view(), name="custom-report-delete"),

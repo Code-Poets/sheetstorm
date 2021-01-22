@@ -1,3 +1,4 @@
+{% load static %}
 {% load data_display_filters %}
 {% load data_structure_element_selectors %}
 {% url 'custom-report-list' year month as custom_report_list_url %}
@@ -34,12 +35,12 @@
     <td class="edit-button-column Invisible hidden-print">
         {% if report.editable %}
             {% if request.user == report.author %}
-                <a href="{% url 'custom-report-detail' pk=report.id %}" class="btn btn-light hidden-print">
+                <button data-form-url="{% url 'custom-report-detail' report.id %}" class="bs-modal  hidden-print no-background">
             {% else %}
-                <a href="{% url 'admin-report-detail' pk=report.id %}" class="btn btn-light hidden-print">
+                <button data-form-url="{% url 'admin-report-detail' pk=report.id %}" class="bs-modal hidden-print no-background">
             {% endif %}
                 <span class="glyphicon glyphicon-edit span-edit-report hidden-print"></span>
-            </a>
+            </button>
         {% endif %}
     </td>
     </tr>
@@ -55,3 +56,14 @@
         {% endif %}
     {% endfor %}
 {% endfor %}
+
+<script type="text/javascript">
+    $(function () {
+        $(".bs-modal").each(function () {
+            $(this).modalForm({
+                formURL: $(this).data('form-url')
+            });
+        });
+    });
+</script>
+

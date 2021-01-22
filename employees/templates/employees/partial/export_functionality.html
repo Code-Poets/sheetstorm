@@ -5,13 +5,13 @@
 
 <div class="row double-space-margin-bottom">
     <div class="col-md-6 export-xlsx">
-        <a href="{% url 'export-data' pk=object.pk year=year month=month %}" class="btn btn-success">
-            <span>{% trans 'Export ' %} {{ month | convert_to_month_name }} {{ year }} {% trans ' Reports to XLSX' %}</span>
+{#        <a href="{% url 'export-data' pk=object.pk year=year month=month %}" class="btn btn-success">#}
+{#            <span>{% trans 'Export ' %} {{ month | convert_to_month_name }} {{ year }} {% trans ' Reports to XLSX' %}</span>#}
         </a>
     </div>
     <div class="col-md-6 export-csv">
-        <a href="{% url 'export-data' pk=object.pk year=year month=month %}?format=csv" class="btn btn-success">
-            <span>{% trans 'Export ' %} {{ month| convert_to_month_name }} {{ year }} {% trans ' Reports to CSV' %}</span>
+{#        <a href="{% url 'export-data' pk=object.pk year=year month=month %}?format=csv" class="btn btn-success">#}
+{#            <span>{% trans 'Export ' %} {{ month| convert_to_month_name }} {{ year }} {% trans ' Reports to CSV' %}</span>#}
         </a>
     </div>
 </div>

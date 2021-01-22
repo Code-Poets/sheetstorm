@@ -1,19 +1,33 @@
 {% load crispy_forms_tags %}
 {% load static %}
+<form method="post" action="" data-task-activities-url="{% url 'ajax-load-task-activities' %}">
+    {% csrf_token %}
+    <div class="modal-header margin-top-space">
+        <img class="add-report-form-header-icon modal-title" alt="report icon" src="{% static 'users/images/grey/ico-05.png' %}"/>
+        {% if is_create_report_form %}
+            <span class="add-report-form-title roboto-text modal-title">New report</span>
+        {% else %}
+            <span class="add-report-form-title roboto-text modal-title">Update report</span>
+        {% endif %}
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
 
-<div class="modal-dialog hidden-print div-text-for-popup" id="dialog_create" style="overflow: visible;">
-    <img class="add-report-form-header-icon" alt="report icon" src="{% static 'users/images/grey/ico-05.png' %}"/>
-    <span class="add-report-form-title roboto-text">New report</span>
-
-    {% for error in form.non_field_errors %}
-        <div class="alert alert-danger" role="alert">
-            <p class="p-non-field-errors"><small>{{ error }}</small></p>
+    <div class="modal-body">
+        <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <p class="p-non-field-errors"> {{ error }}</p>
+                </div>
+            {% endfor %}
         </div>
-    {% endfor %}
 
-    <form action="{{ path }}" method="POST" id="reportForm"
-          data-task-activities-url="{% url 'ajax-load-task-activities' %}">
-        {% csrf_token %}
+        <div class="{% if form.errors %}invalid{% endif %} mb-2">
+            {% for field in form.errors %}
+            {% endfor %}
+        </div>
+
         <div class="row header-label-row roboto-text">
             <div class="col-md-12">
                 <div class="hr-blue-pointer pointer-left"></div>
@@ -25,9 +39,11 @@
                 {{ form.project|as_crispy_field }}
             </div>
             <div class="col-md-2 add-report-form-join-project-field">
-                <button class="hidden-print btn btn-sm btn-default" type="button" id="opener_join">
-                    <i class="fa fa-user-plus span-blue-color"></i>
-                </button>
+                {% if is_create_report_form %}
+                    <button class="hidden-print btn btn-sm btn-default" type="button" id="opener_join">
+                        <i class="fa fa-user-plus span-blue-color"></i>
+                    </button>
+                {% endif %}
             </div>
         </div>
 
@@ -63,15 +79,16 @@
         </div>
 
         <div class="row header-label-row roboto-text">
-             <div class="col-md-12">
+            <div class="col-md-12">
                 <div class="hr-blue-pointer pointer-left"></div>
-                    <p class="add-report-form-field-label">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</p>
-             </div>
+                <p class="add-report-form-field-label">{{ UI_text.DESCRIPTION_COLUMN_HEADER.value }}</p>
+            </div>
         </div>
         <div class="row">
             <div class="col-md-10 col-xs-10 add-report-form-description-field">
                 {{ form.description|as_crispy_field }}
             </div>
+
         </div>
 
         <div class="row">
@@ -80,44 +97,31 @@
             </div>
         </div>
 
+
         <div class="row">
             <div class="col-md-6 add-report-form-button">
-                <input type="submit" class="btn btn-primary" value="{{ UI_text.CREATE_REPORT_BUTTON.value }}">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
             <div class="col-md-6 add-report-form-button">
-                <input type="button" class="btn btn-secondary" value="{{ UI_text.JOIN_POPUP_NO.value }}"
-                       onClick="this.form.reset();$('#dialog_create').dialog('close');">
+                {% if is_create_report_form %}
+                <button type="button" class="submit-btn btn btn-primary">Create</button>
+                {% else %}
+                <button type="button" class="submit-btn btn btn-primary">Update</button>
+                {% endif %}
             </div>
         </div>
+    </div>
 
-    </form>
-</div>
+</form>
 
+{% if is_create_report_form %}
+<script type="text/javascript">
+    $(document).ready(function() {
 
-<div class="hidden-print" id="dialog_join" style="display: none" title="{{ UI_text.JOIN_POPUP_HEADER.value }}">
-    <div class="join-project-form-title roboto-text">Join Project</div>
-    <form action="{{ path }}" id="join_form" method="POST">
-        {% csrf_token %}
-        <div class="row header-label-row roboto-text"></div>
-        <div class="row">
-            <div class="col-md-12">
-                {{ project_form.projects|as_crispy_field }}
-            </div>
-        </div>
+        $("#opener_join").modalForm({
+            formURL: "{% url 'join-project' year month %}"
+        });
 
-        <div class="row">
-            <div class="col-md-6">
-                <input type="submit" name="join" class="btn btn-primary add-report-form-button" value="{{ UI_text.JOIN_POPUP_YES.value }}">
-            </div>
-            <div class="col-md-6">
-                <input type="button" class="btn btn-secondary add-report-form-button" value="{{ UI_text.JOIN_POPUP_NO.value }}"
-                       onClick="this.form.reset();$('#dialog_join').dialog('close');">
-            </div>
-        </div>
-    </form>
-    {% if hide_join %}
-        {{ UI_text.NO_PROJECTS_TO_JOIN.value }}
-        <p><input type="button" class="btn btn-secondary add-report-form-button" value="{{ UI_text.JOIN_POPUP_NO.value }}"
-                  onClick="$('#dialog_join').dialog('close');"></p>
-    {% endif %}
-</div>
+    });
+</script>
+{% endif %}

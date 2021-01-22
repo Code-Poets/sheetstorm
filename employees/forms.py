@@ -22,14 +22,18 @@ from employees.models import TaskActivityType
 from managers.models import Project
 from users.models import CustomUser
 
+from bootstrap_modal_forms.forms import BSModalModelForm, BSModalForm
 
-class ProjectJoinForm(forms.Form):
+
+class ProjectJoinForm(BSModalForm):
 
     projects = forms.ChoiceField(choices=[], label="")
 
-    def __init__(self, queryset: QuerySet, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        assert isinstance(queryset, QuerySet)
+        author = kwargs["initial"]["author"]
+        queryset = Project.objects.filter_active().exclude(members__id=author.id).order_by("name")
+
         self.fields["projects"].choices = [(project.id, project.name) for project in queryset]
 
 
@@ -56,7 +60,7 @@ class DurationFieldForm(forms.DurationField):
             return f"{value}:00"
 
 
-class ReportForm(forms.ModelForm):
+class ReportForm(BSModalModelForm):
     work_hours = DurationFieldForm(label="")
     project = forms.ModelChoiceField(queryset=Project.objects, empty_label=None, label="")
 

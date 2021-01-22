@@ -14,13 +14,14 @@ from django.http.response import HttpResponseRedirectBase
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import reverse
-from django.urls import resolve
+from django.urls import resolve, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import DetailView
 from django.views.generic import UpdateView
+from django.views.generic import ListView
 from django.views.generic.base import ContextMixin
 from django.views.generic.base import TemplateView
 
@@ -49,7 +50,13 @@ from utils.mixins import ProjectsWorkPercentageMixin
 from utils.mixins import UserIsAuthorOfCurrentReportMixin
 from utils.mixins import UserIsManagerOfCurrentProjectMixin
 from utils.mixins import UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin
-
+from bootstrap_modal_forms.generic import (
+    BSModalCreateView,
+    BSModalUpdateView,
+    BSModalReadView,
+    BSModalDeleteView,
+    BSModalFormView,
+)
 logger = logging.getLogger(__name__)
 
 
@@ -157,22 +164,9 @@ class MonthNavigationMixin(ContextMixin):
         return redirect(self._get_current_month_url(pk))
 
 
-@method_decorator(login_required, name="dispatch")
-@method_decorator(
-    check_permissions(
-        allowed_user_types=[
-            CustomUser.UserType.EMPLOYEE.name,
-            CustomUser.UserType.MANAGER.name,
-            CustomUser.UserType.ADMIN.name,
-        ]
-    ),
-    name="dispatch",
-)
-class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercentageMixin, CreateView):
+class ReportList(ListView, MonthNavigationMixin, ProjectsWorkPercentageMixin):
     template_name = "employees/report_list.html"
-    project_join_form = ProjectJoinForm
     model = Report
-    form_class = ReportForm
     url_name = "custom-report-list"
     object = None
 
@@ -190,6 +184,8 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context_data = super().get_context_data(**kwargs)
+        context_data["month"] = self.kwargs["month"]
+        context_data["year"] = self.kwargs["year"]
         context_data["UI_text"] = ReportListStrings
         context_data["object_list"] = self.get_queryset().order_by("-date", "project__name", "-creation_date")
         context_data["daily_hours_sum"] = context_data["object_list"].order_by().get_work_hours_sum_for_all_dates()
@@ -197,36 +193,112 @@ class ReportListCreateProjectJoinView(MonthNavigationMixin, ProjectsWorkPercenta
         project_form_queryset = (
             Project.objects.filter_active().exclude(members__id=self.request.user.id).order_by("name")
         )
-        context_data["hide_join"] = not project_form_queryset.exists()
-        context_data["project_form"] = ProjectJoinForm(queryset=project_form_queryset)
+        # context_data["hide_join"] = not project_form_queryset.exists()
+        # context_data["project_form"] = ProjectJoinForm(queryset=project_form_queryset)
+        return context_data
+    #
+    # def get_success_url(self) -> str:
+    #     return reverse("custom-report-list", kwargs={"year": self.kwargs["year"], "month": self.kwargs["month"]})
+    #
+    # def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+    #     if "join" in request.POST:
+    #         return self._handle_join_request(request)
+    #     elif "month-switch" in request.POST:
+    #         return self.redirect_to_another_month(request)
+    #     return super().post(request, *args, **kwargs)
+    #
+    # def _handle_join_request(self, request: HttpRequest) -> HttpResponse:
+    #     form = ProjectJoinForm(
+    #         queryset=Project.objects.filter_active().exclude(members__id=self.request.user.id).order_by("name"),
+    #         data=request.POST,
+    #     )
+    #     if form.is_valid():
+    #         project = Project.objects.get(id=int(self.request.POST["projects"]))
+    #         project.members.add(request.user)
+    #         project.full_clean()
+    #         project.save()
+    #         logger.debug(f"User with id: {request.user.pk} join to the project with id: {project.pk}")
+    #         return redirect(self.get_success_url())
+    #     else:
+    #         context = self.get_context_data()
+    #         context["project_form"] = form
+    #         return self.render_to_response(context=context)
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.EMPLOYEE.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.ADMIN.name,
+        ]
+    ),
+    name="dispatch",
+)
+class CreateReport(BSModalCreateView):
+    template_name = 'employees/partial/create_and_join_dialog.html'
+    form_class = ReportForm
+    success_url = reverse_lazy('custom-report-list')
+
+    def get_initial(self) -> dict:
+        initial = super().get_initial()
+        initial.update({"date": timezone.now().date(), "author": self.request.user})
+        return initial
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = ReportListStrings
+        context_data["is_create_report_form"] = True
+        context_data["month"] = self.kwargs["month"]
+        context_data["year"] = self.kwargs["year"]
+
         return context_data
 
     def get_success_url(self) -> str:
         return reverse("custom-report-list", kwargs={"year": self.kwargs["year"], "month": self.kwargs["month"]})
 
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if "join" in request.POST:
-            return self._handle_join_request(request)
-        elif "month-switch" in request.POST:
-            return self.redirect_to_another_month(request)
-        return super().post(request, *args, **kwargs)
 
-    def _handle_join_request(self, request: HttpRequest) -> HttpResponse:
-        form = ProjectJoinForm(
-            queryset=Project.objects.filter_active().exclude(members__id=self.request.user.id).order_by("name"),
-            data=request.POST,
-        )
-        if form.is_valid():
-            project = Project.objects.get(id=int(self.request.POST["projects"]))
-            project.members.add(request.user)
-            project.full_clean()
-            project.save()
-            logger.debug(f"User with id: {request.user.pk} join to the project with id: {project.pk}")
-            return redirect(self.get_success_url())
-        else:
-            context = self.get_context_data()
-            context["project_form"] = form
-            return self.render_to_response(context=context)
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    check_permissions(
+        allowed_user_types=[
+            CustomUser.UserType.EMPLOYEE.name,
+            CustomUser.UserType.MANAGER.name,
+            CustomUser.UserType.ADMIN.name,
+        ]
+    ),
+    name="dispatch",
+)
+class JoinProject(BSModalFormView):
+    template_name = 'employees/partial/join_project.html'
+    form_class = ProjectJoinForm
+    success_url = reverse_lazy('custom-report-list')
+
+    def get_initial(self) -> dict:
+        initial = super().get_initial()
+        initial.update({"date": timezone.now().date(), "author": self.request.user})
+        return initial
+
+    def get_context_data(self, **kwargs: Any) -> dict:
+        context_data = super().get_context_data(**kwargs)
+        context_data["UI_text"] = ReportListStrings
+        context_data["month"] = self.kwargs["month"]
+        context_data["year"] = self.kwargs["year"]
+
+        return context_data
+
+    def get_success_url(self) -> str:
+        return reverse("custom-report-list", kwargs={"year": self.kwargs["year"], "month": self.kwargs["month"]})
+
+    def form_valid(self, form):
+        project = Project.objects.get(id=int(self.request.POST["projects"]))
+        logger.debug(f"Project id: {self.request.POST['projects']} ")
+        project.members.add(self.request.user)
+        # project.full_clean()
+        project.save()
+        logger.debug(f"User with id: {self.request.user.pk} join to the project with id: {project.pk}")
+        return super().form_valid(form)
 
 
 class ReportDetailBase(UpdateView):
@@ -279,11 +351,12 @@ class ReportDetailBase(UpdateView):
     name="dispatch",
 )
 class ReportDetailView(
-    UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin, UserIsAuthorOfCurrentReportMixin, UpdateView
+    UserIsManagerOfCurrentReportProjectOrAuthorOfCurrentReportMixin, UserIsAuthorOfCurrentReportMixin, BSModalUpdateView
 ):
-    template_name = "employees/report_detail.html"
+    template_name = 'employees/partial/create_and_join_dialog.html'
     form_class = ReportForm
     model = Report
+    success_url = reverse_lazy('custom-report-list')
 
     def get_initial(self) -> dict:
         initial = super().get_initial()
@@ -292,17 +365,12 @@ class ReportDetailView(
 
     def get_context_data(self, **kwargs: Any) -> dict:
         context_data = super().get_context_data(**kwargs)
-        context_data["UI_text"] = ReportDetailStrings
+        context_data["UI_text"] = ReportListStrings
+        context_data["is_create_report_form"] = False
         return context_data
 
     def get_success_url(self) -> str:
         return reverse("custom-report-list", kwargs={"year": self.object.date.year, "month": self.object.date.month})
-
-    def form_valid(self, form: ReportForm) -> HttpResponseRedirectBase:
-        instance = form.save(commit=False)
-        instance.editable = True
-        instance.save()
-        return super().form_valid(form)
 
 
 @method_decorator(login_required, name="dispatch")

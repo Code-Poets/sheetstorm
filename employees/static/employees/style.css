@@ -378,6 +378,11 @@ table.table {
         margin-left: 20px;
     }
 
+.no-background {
+    background:none;
+    border: none;
+}
+
 @media (max-width: 995px) {
     .export-csv, .export-xlsx {
         text-align: center;
